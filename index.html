@@ -11,7 +11,6 @@
 <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.4.0/exceljs.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.4.0/exceljs.min.js"></script>
 <style>
 :root{
   --bg:#f4f4f2; --card:#ffffff; --ink:#1c1917; --mut:#78716c; --mut2:#a8a29e; --line:#e7e5e4;
@@ -76,43 +75,53 @@ select.chip{appearance:auto}
 .botbar{position:fixed;bottom:0;left:0;right:0;z-index:20;pointer-events:none}
 .botin{max-width:480px;margin:0 auto;padding:0 16px 16px;pointer-events:auto}
 .botin .btn{box-shadow:0 8px 24px rgba(0,0,0,.18)}
-.ovl{position:fixed;inset:0;z-index:40;background:rgba(15,23,42,.55);display:flex;align-items:flex-end;justify-content:center}
-.sheet{width:100%;max-width:480px;background:#fff;border-radius:24px 24px 0 0;max-height:92vh;overflow-y:auto;box-shadow:0 -8px 40px rgba(0,0,0,.25)}
-.shead{position:sticky;top:0;background:#fff;z-index:5;display:flex;align-items:flex-start;gap:12px;padding:16px 20px 12px;border-bottom:1px solid #f5f5f4}
-.sx{flex:0 0 auto;width:32px;height:32px;border:none;border-radius:50%;background:#f5f5f4;color:#78716c;cursor:pointer;font-size:14px}
-.sgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;padding:16px 20px 0}
-.scell{background:#f5f5f4;border-radius:12px;padding:8px 4px;text-align:center}
-.scell .l{font-size:11px;color:var(--mut)}
-.scell .v{font-size:14px;font-weight:600;margin-top:2px}
-.scell-hl{background:var(--teal-bg);border:1px solid var(--teal-ln)}
-.scell-hl .l{color:var(--teal);font-weight:600}
-.scell-hl .v{color:var(--teal-d);font-weight:800}
-.qtyrow{display:flex;align-items:center;gap:10px;margin-top:6px}
-.qtydisp{flex:1;min-width:0;background:#fff;border:2px solid #d6d3d1;border-radius:16px;padding:12px;font-size:34px;font-weight:800;text-align:center;font-variant-numeric:tabular-nums;color:#1c1917;user-select:none}
-.qtydisp-empty{color:#c7c2bd}
-.nudge{flex:0 0 auto;width:52px;height:52px;border-radius:16px;border:1px solid #d6d3d1;background:#f5f5f4;font:inherit;font-weight:800;font-size:16px;color:#57534e;cursor:pointer}
-.nudge:active{background:#e7e5e4}
-.matchbtn{display:block;width:100%;margin-top:10px;border:1px solid var(--teal-ln);background:var(--teal-bg);color:var(--teal-d);font:inherit;font-weight:700;font-size:14px;border-radius:14px;padding:10px;text-align:center;cursor:pointer}
-.matchbtn:active{background:#ccfbf1}
-.keypad{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:12px}
-.kkey{border:none;background:#f5f5f4;border-radius:14px;padding:14px 0;font:inherit;font-size:22px;font-weight:700;color:#1c1917;cursor:pointer}
-.kkey:active{background:#e7e5e4}
-.ban{border-radius:12px;border:1px solid;padding:10px 12px;font-size:14px;font-weight:700}
-.ban-ok{background:var(--green-bg);border-color:var(--green-ln);color:var(--green)}
-.ban-plus{background:var(--amber-bg);border-color:var(--amber-ln);color:var(--amber)}
-.ban-minus{background:var(--red-bg);border-color:var(--red-ln);color:var(--red)}
-.hint-red{font-size:12px;color:var(--red);font-weight:600;margin-top:5px}
+.ovl{position:fixed;inset:0;z-index:40;background:rgba(5,5,15,.82);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);display:flex;align-items:flex-end;justify-content:center}
+.sheet{width:100%;max-width:480px;background:#0f1117;border-radius:28px 28px 0 0;max-height:94vh;overflow-y:auto;box-shadow:0 -24px 80px rgba(0,0,0,.7)}
+.shead{position:sticky;top:0;background:#0f1117;z-index:5;display:flex;align-items:flex-start;gap:12px;padding:20px 20px 14px;border-bottom:1px solid rgba(255,255,255,.06)}
+.sx{flex:0 0 auto;width:32px;height:32px;border:none;border-radius:50%;background:rgba(255,255,255,.08);color:#9ca3af;cursor:pointer;font-size:13px}
+.sgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;padding:14px 20px 0}
+.scell{background:rgba(255,255,255,.05);border-radius:12px;padding:8px 4px;text-align:center;border:1px solid rgba(255,255,255,.06)}
+.scell .l{font-size:10px;color:#6b7280;font-weight:600;text-transform:uppercase;letter-spacing:.04em}
+.scell .v{font-size:13px;font-weight:700;margin-top:3px;color:#d1d5db}
+.scell-hl{background:rgba(0,212,170,.08);border:1px solid rgba(0,212,170,.25)}
+.scell-hl .l{color:#00d4aa;font-weight:700}
+.scell-hl .v{color:#00d4aa;font-size:15px;font-weight:800}
+.qtyrow{display:flex;align-items:center;gap:10px;margin-top:8px}
+.qtydisp{flex:1;min-width:0;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.12);border-radius:20px;padding:14px 12px;font-size:46px;font-weight:800;text-align:center;font-variant-numeric:tabular-nums;color:#fff;user-select:none;letter-spacing:-.02em}
+.qtydisp-empty{color:rgba(255,255,255,.18)}
+.nudge{flex:0 0 auto;width:52px;height:52px;border-radius:16px;border:1px solid rgba(255,255,255,.1);background:rgba(255,255,255,.06);font:inherit;font-weight:800;font-size:18px;color:#9ca3af;cursor:pointer}
+.nudge:active{background:rgba(255,255,255,.13)}
+.matchbtn{display:block;width:100%;margin-top:10px;border:1px solid rgba(0,212,170,.3);background:rgba(0,212,170,.07);color:#00d4aa;font:inherit;font-weight:700;font-size:14px;border-radius:16px;padding:12px;text-align:center;cursor:pointer}
+.matchbtn:active{background:rgba(0,212,170,.15)}
+.keypad{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-top:10px}
+.kkey{border:1px solid rgba(255,255,255,.07);background:rgba(255,255,255,.06);border-radius:16px;padding:16px 0;font:inherit;font-size:24px;font-weight:700;color:#e5e7eb;cursor:pointer}
+.kkey:active{background:rgba(255,255,255,.14)}
+.ban{border-radius:14px;border:1px solid;padding:11px 14px;font-size:14px;font-weight:700;margin-top:12px}
+.ban-ok{background:rgba(4,120,87,.15);border-color:rgba(4,120,87,.35);color:#34d399}
+.ban-plus{background:rgba(180,83,9,.15);border-color:rgba(180,83,9,.35);color:#fbbf24}
+.ban-minus{background:rgba(220,38,38,.15);border-color:rgba(220,38,38,.35);color:#f87171}
+.sbtns-top{display:grid;grid-template-columns:1fr 2fr;gap:8px;padding:14px 20px 0}
+.btn-dk{border:1px solid rgba(255,255,255,.14);background:rgba(255,255,255,.06);color:#d1d5db;border-radius:16px;padding:14px;font:inherit;font-weight:700;cursor:pointer;text-align:center}
+.btn-dk:active{background:rgba(255,255,255,.12)}
+.btn-dk:disabled{opacity:.28;cursor:default}
+.btn-nxt{background:#00d4aa;color:#0a0f0d;border:none;border-radius:16px;padding:14px;font:inherit;font-weight:800;cursor:pointer;text-align:center;font-size:15px;letter-spacing:-.01em}
+.btn-nxt:active{opacity:.85}
+.btn-nxt:disabled{opacity:.28;cursor:default}
+.sdivider{height:1px;background:rgba(255,255,255,.06);margin:18px 20px 0}
+.slbl{display:block;font-size:10px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:#6b7280;margin-bottom:6px}
+.sinp{width:100%;border:1px solid rgba(255,255,255,.1);border-radius:12px;padding:11px 12px;font:inherit;background:rgba(255,255,255,.05);color:#e5e7eb;outline:none}
+.sinp:focus{border-color:rgba(0,212,170,.5)}
+.hint-red{font-size:12px;color:#f87171;font-weight:600;margin-top:5px}
 .qchips{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0}
-.qchip{border:1px solid #d6d3d1;background:#fff;color:#57534e;border-radius:999px;padding:6px 12px;font:inherit;font-size:12.5px;font-weight:600;cursor:pointer}
-.qchip:active{background:#f5f5f4}
+.qchip{border:1px solid rgba(255,255,255,.1);background:rgba(255,255,255,.05);color:#9ca3af;border-radius:999px;padding:5px 12px;font:inherit;font-size:12px;font-weight:600;cursor:pointer}
+.qchip:active{background:rgba(255,255,255,.1)}
 .batrow{display:flex;gap:8px;align-items:center;margin-bottom:8px}
 .batqty{width:64px;text-align:center;font-variant-numeric:tabular-nums}
 .batdate{flex:1;min-width:0}
 .batd{flex:0 0 auto;font-size:11px;font-weight:700;font-variant-numeric:tabular-nums}
-.batx{flex:0 0 auto;border:none;background:none;color:#a8a29e;font-size:15px;cursor:pointer;padding:4px}
+.batx{flex:0 0 auto;border:none;background:none;color:#6b7280;font-size:15px;cursor:pointer;padding:4px}
 .addbat{border:none;background:none;color:var(--teal);font:inherit;font-size:14px;font-weight:700;cursor:pointer;padding:0}
-.sbtns{display:flex;gap:8px;padding:20px 20px 24px}
-.reset{display:block;width:100%;border:none;background:none;color:#a8a29e;font:inherit;font-size:13px;text-decoration:underline;cursor:pointer;margin:-12px 0 20px}
+.reset{display:block;width:100%;border:none;background:none;color:#4b5563;font:inherit;font-size:13px;text-decoration:underline;cursor:pointer;padding:10px 0 24px}
 .note-warn{background:var(--amber-bg);border:1px solid var(--amber-ln);color:var(--amber);font-size:12px;border-radius:12px;padding:9px 12px}
 .hsdgrid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
 .hsdcard{border:1px solid;border-radius:16px;padding:12px;cursor:pointer}
@@ -618,6 +627,15 @@ function baseList(p){
     return true;
   });
 }
+function filteredList(p){
+  return baseList(p).filter(function(i){
+    if(P.flt==="todo")return !i.counted;
+    if(P.flt==="done")return i.counted;
+    if(P.flt==="diff")return i.counted&&diffOf(i)!==0;
+    if(P.flt==="stock")return i.close>0;
+    return true;
+  });
+}
 function renderPeriod(){
   var p=per(P.id);
   if(!p){route={view:"home"};render();return;}
@@ -672,11 +690,13 @@ function renderList(){
   var done=p.items.filter(function(i){return i.counted;}).length;
   var ndiff=p.items.filter(function(i){return i.counted&&diffOf(i)!==0;}).length;
   var pct=total?Math.round(done/total*100):0;
-  var allDone=total>0&&done===total;
+  var flist=filteredList(p);
+  var fTodo=flist.filter(function(i){return !i.counted;}).length;
+  var allDone=flist.length>0&&fTodo===0;
   document.getElementById("pfill").style.width=pct+"%";
   document.getElementById("pdone").innerHTML='Đã kiểm <b class="tnum" style="color:#1c1917">'+done+"/"+total+"</b> · "+pct+"%";
   document.getElementById("pdiff").innerHTML=ndiff>0?'<b style="color:var(--red)">'+ndiff+" mã chênh lệch</b>":"Chưa có chênh lệch";
-  document.getElementById("seqbtn").textContent=allDone?"✓ Hoàn tất — Xuất báo cáo Excel":"▶ Kiểm tuần tự · còn "+(total-done)+" mã";
+  document.getElementById("seqbtn").textContent=allDone?"✓ Hoàn tất — Xuất báo cáo Excel":"▶ Kiểm tuần tự · còn "+fTodo+" mã";
   renderChips(p,base);
 
   var branchesMulti=false;
@@ -774,33 +794,36 @@ function openSheet(itemId,seq){
   var total=p.items.length;
   var h='<div class="ovl" id="ovl"><div class="sheet" onclick="event.stopPropagation()">'+
     '<div class="shead"><div style="flex:1;min-width:0">'+
-    (seq?'<div style="font-size:11px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--teal);margin-bottom:4px">Kiểm tuần tự · đã kiểm '+done+"/"+total+'</div>':"")+
-    '<div style="font-weight:700;font-size:17px;line-height:1.35">'+esc(it.name)+'</div>'+
-    '<div style="font-size:12px;color:var(--mut);margin-top:4px">'+[it.code,it.unit,it.branch].filter(function(x){return x;}).map(esc).join(" · ")+'</div></div>'+
+    (seq?'<div style="font-size:10px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:#00d4aa;margin-bottom:6px">Kiểm tuần tự · '+done+'/'+total+'</div>':"")+
+    '<div style="font-weight:700;font-size:18px;line-height:1.3;color:#f0f0f0">'+esc(it.name)+'</div>'+
+    '<div style="font-size:12px;color:#6b7280;margin-top:4px">'+[it.code,it.unit,it.branch].filter(function(x){return x;}).map(esc).join(" · ")+'</div></div>'+
     '<button class="sx" onclick="A.closeSheet()">✕</button></div>'+
     '<div class="sgrid">'+
     '<div class="scell"><div class="l">Tồn đầu</div><div class="v tnum">'+fmt(it.open)+'</div></div>'+
     '<div class="scell"><div class="l">Nhập</div><div class="v tnum">'+fmt(it["in"])+'</div></div>'+
     '<div class="scell"><div class="l">Xuất</div><div class="v tnum">'+fmt(it.out)+'</div></div>'+
     '<div class="scell scell-hl"><div class="l">Tồn cuối</div><div class="v tnum">'+fmt(it.close)+'</div></div></div>'+
-    '<div style="padding:16px 20px 0"><label class="lbl">Số lượng kiểm kê thực tế</label>'+
+    '<div style="padding:14px 20px 0">'+
     '<div class="qtyrow"><button class="nudge" onclick="A.key(\'-1\')">−1</button>'+
     '<div class="qtydisp" id="sqtydisp">0</div>'+
     '<button class="nudge" onclick="A.key(\'+1\')">+1</button></div>'+
     '<button class="matchbtn" onclick="A.key(\'match\')">✓ Bằng tồn cuối · '+fmt(it.close)+' '+esc(it.unit||"")+'</button>'+
     '<div class="keypad">'+keypadHtml()+'</div></div>'+
-    '<div style="padding:12px 20px 0" id="sban"></div>'+
-    '<div style="padding:16px 20px 0"><label class="lbl" id="snotelbl">Ghi chú / giải trình</label>'+
+    '<div style="padding:0 20px" id="sban"></div>'+
+    '<div class="sbtns-top">'+
+    '<button class="btn-dk" id="ssave" onclick="A.sheetSave(false)">Lưu</button>'+
+    '<button class="btn-nxt" id="snext" onclick="A.sheetSave(true)">Lưu &amp; kiểm tiếp →</button></div>'+
+    '<div class="sdivider"></div>'+
+    '<div style="padding:16px 20px 0"><label class="slbl" id="snotelbl">Ghi chú / giải trình</label>'+
     '<div class="qchips">'+quickNoteChipsHtml()+'</div>'+
-    '<textarea class="inp" id="snote" rows="2" oninput="A.calc()">'+esc(it.note||"")+'</textarea>'+
+    '<textarea class="sinp" id="snote" rows="2" oninput="A.calc()">'+esc(it.note||"")+'</textarea>'+
     '<div id="snotehint"></div></div>'+
-    '<div style="padding:16px 20px 0"><label class="lbl">Hạn sử dụng (theo lô)</label>'+
+    '<div style="padding:16px 20px 0"><label class="slbl">Hạn sử dụng (theo lô)</label>'+
     '<div id="sbat"></div>'+
-    '<button class="addbat" onclick="A.batAdd()">+ Thêm lô / hạn sử dụng</button>'+
-    '<div style="font-size:12px;color:#a8a29e;margin-top:4px">HSD được lưu và tự kế thừa sang kỳ kiểm kê sau.</div></div>'+
-    '<div class="sbtns"><button class="btn btn-outline" id="ssave" onclick="A.sheetSave(false)">Lưu</button>'+
-    '<button class="btn btn-primary" id="snext" onclick="A.sheetSave(true)">Lưu &amp; kiểm tiếp →</button></div>'+
-    (it.counted?'<button class="reset" onclick="A.sheetReset()">Xóa kết quả, đưa về "chưa kiểm"</button>':"")+
+    '<button class="addbat" style="color:#00d4aa" onclick="A.batAdd()">+ Thêm lô / hạn sử dụng</button>'+
+    '<div style="font-size:12px;color:#4b5563;margin-top:4px">HSD được lưu và tự kế thừa sang kỳ sau.</div></div>'+
+    (it.counted?'<button class="reset" onclick="A.sheetReset()">Xóa kết quả, đưa về "chưa kiểm"</button>':
+    '<div style="height:24px"></div>')+
     '</div></div>';
   document.getElementById("modal").innerHTML=h;
   document.getElementById("ovl").addEventListener("click",function(e){if(e.target===this)A.closeSheet();});
@@ -824,8 +847,8 @@ function renderBatches(){
     var dTxt=d===null?"":(d<0?"quá "+Math.abs(d)+"d":d+"d");
     var dCol=d===null?"#a8a29e":(d<0?"var(--red)":d<=30?"var(--orange)":d<=90?"var(--amber)":"#a8a29e");
     h+='<div class="batrow">'+
-      '<input class="inp batqty" inputmode="decimal" placeholder="SL" value="'+esc(b.qty)+'" oninput="A.bat('+i+',\'qty\',this.value)">'+
-      '<input class="inp batdate" type="date" value="'+esc(b.exp)+'" onchange="A.bat('+i+',\'exp\',this.value)">'+
+      '<input class="sinp batqty" inputmode="decimal" placeholder="SL" value="'+esc(b.qty)+'" oninput="A.bat('+i+',\'qty\',this.value)">'+
+      '<input class="sinp batdate" type="date" value="'+esc(b.exp)+'" onchange="A.bat('+i+',\'exp\',this.value)">'+
       '<span class="batd" style="color:'+dCol+'">'+dTxt+'</span>'+
       '<button class="batx" onclick="A.batDel('+i+')">✕</button></div>';
   });
@@ -954,11 +977,11 @@ var A={
   closeSheet:function(){document.getElementById("modal").innerHTML="";SB=null;},
   seqStart:function(){
     var p=per(P.id);if(!p)return;
-    var done=p.items.filter(function(i){return i.counted;}).length;
-    if(p.items.length>0&&done===p.items.length){A.exportCur();return;}
-    var base=baseList(p);
-    for(var i=0;i<base.length;i++){
-      if(!base[i].counted){openSheet(base[i].id,true);return;}
+    var flist=filteredList(p);
+    var allDone=flist.length>0&&flist.filter(function(i){return !i.counted;}).length===0;
+    if(allDone){A.exportCur();return;}
+    for(var i=0;i<flist.length;i++){
+      if(!flist[i].counted){openSheet(flist[i].id,true);return;}
     }
     toast("Không còn mã nào chưa kiểm trong bộ lọc hiện tại");
   },
@@ -1002,7 +1025,7 @@ var A={
     else{ban.innerHTML='<div class="ban ban-minus">▼ THIẾU '+fmt(Math.abs(diff))+" "+esc(SB._unit||"")+' so với sổ sách</div>';}
     var needNote=diff!==null&&diff!==0&&!note;
     lbl.textContent="Ghi chú / giải trình"+(diff!==null&&diff!==0?" (bắt buộc)":"");
-    lbl.style.color=needNote?"var(--red)":"";
+    lbl.style.color=needNote?"#f87171":"";
     hint.innerHTML=needNote?'<div class="hint-red">Có chênh lệch — bắt buộc nhập nguyên nhân trước khi lưu.</div>':"";
     var can=qn!==null&&!needNote;
     document.getElementById("ssave").disabled=!can;
@@ -1042,12 +1065,12 @@ var A={
     var wasSeq=SB.seq,savedId=SB.itemId;
     applyItem(updated);
     if(advance){
-      var base=baseList(p);
+      var flist=filteredList(p);
       var idx=-1;
-      for(var j=0;j<base.length;j++)if(base[j].id===savedId){idx=j;break;}
+      for(var j=0;j<flist.length;j++)if(flist[j].id===savedId){idx=j;break;}
       var next=null;
-      for(var k2=1;k2<=base.length;k2++){
-        var cand=base[(idx+k2)%base.length];
+      for(var k2=1;k2<=flist.length;k2++){
+        var cand=flist[(idx+k2)%flist.length];
         if(!cand.counted&&cand.id!==savedId){next=cand;break;}
       }
       if(next){openSheet(next.id,true);}
