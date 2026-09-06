@@ -13,13 +13,13 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.4.0/exceljs.min.js"></script>
 <style>
 :root{
-  --bg:#f4f4f2; --card:#ffffff; --ink:#1c1917; --mut:#78716c; --mut2:#a8a29e; --line:#e7e5e4;
-  --teal:#0f766e; --teal-d:#115e59; --teal-bg:#f0fdfa; --teal-ln:#99f6e4;
-  --red:#dc2626; --red-bg:#fef2f2; --red-ln:#fecaca;
-  --amber:#b45309; --amber-bg:#fffbeb; --amber-ln:#fde68a;
-  --orange:#c2410c; --orange-bg:#fff7ed; --orange-ln:#fed7aa;
-  --sky:#0369a1; --sky-bg:#f0f9ff; --sky-ln:#bae6fd;
-  --green:#047857; --green-bg:#ecfdf5; --green-ln:#a7f3d0;
+  --bg:#0c1130; --card:#131c42; --card2:#1a2558; --ink:#e8eeff; --mut:rgba(180,196,255,0.55); --mut2:rgba(180,196,255,0.35); --line:rgba(255,255,255,0.09);
+  --teal:#00d4aa; --teal-d:#00b894; --teal-bg:rgba(0,212,170,0.1); --teal-ln:rgba(0,212,170,0.28);
+  --red:#ff7875; --red-bg:rgba(255,120,117,0.12); --red-ln:rgba(255,120,117,0.28);
+  --amber:#ffc07a; --amber-bg:rgba(255,180,100,0.12); --amber-ln:rgba(255,180,100,0.28);
+  --orange:#ff9a6c; --orange-bg:rgba(255,150,100,0.12); --orange-ln:rgba(255,150,100,0.28);
+  --sky:#74b9ff; --sky-bg:rgba(116,185,255,0.12); --sky-ln:rgba(116,185,255,0.28);
+  --green:#00d4aa; --green-bg:rgba(0,212,170,0.12); --green-ln:rgba(0,212,170,0.28);
 }
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 html,body{margin:0;padding:0}
@@ -28,53 +28,53 @@ body{background:var(--bg);color:var(--ink);font-family:'Be Vietnam Pro',system-u
 .wrap{padding-left:16px;padding-right:16px}
 .tnum{font-variant-numeric:tabular-nums}
 .eyebrow{font-size:11px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:var(--teal)}
-.h1{font-size:24px;font-weight:800;margin:4px 0 0}
-.sec{font-size:14px;font-weight:700;margin-bottom:8px}
-.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:16px}
+.h1{font-size:24px;font-weight:800;margin:4px 0 0;color:var(--ink)}
+.sec{font-size:14px;font-weight:700;margin-bottom:8px;color:var(--ink)}
+.card{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:16px}
 .btn{display:block;width:100%;border:none;border-radius:16px;padding:14px;font:inherit;font-weight:700;cursor:pointer;text-align:center}
 .btn:active{opacity:.85}
-.btn-primary{background:var(--teal);color:#fff;box-shadow:0 1px 2px rgba(0,0,0,.08)}
-.btn-outline{background:#fff;color:var(--teal);border:1px solid var(--teal)}
-.btn:disabled{background:#e7e5e4;color:#a8a29e;border-color:#e7e5e4;cursor:default}
-.inp{width:100%;border:1px solid #d6d3d1;border-radius:12px;padding:11px 12px;font:inherit;background:#fff;outline:none}
-.inp:focus{border-color:var(--teal)}
+.btn-primary{background:var(--teal);color:#071a14;box-shadow:0 4px 20px rgba(0,212,170,.25)}
+.btn-outline{background:rgba(0,212,170,.08);color:var(--teal);border:1px solid var(--teal-ln)}
+.btn:disabled{background:rgba(255,255,255,.06);color:rgba(255,255,255,.25);border-color:rgba(255,255,255,.06);cursor:default}
+.inp{width:100%;border:1px solid var(--line);border-radius:12px;padding:11px 12px;font:inherit;background:rgba(255,255,255,.05);color:var(--ink);outline:none}
+.inp:focus{border-color:var(--teal-ln)}
 .lbl{display:block;font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--mut);margin-bottom:6px}
-.topbar{position:sticky;top:0;z-index:20;background:#fff;border-bottom:1px solid var(--line)}
+.topbar{position:sticky;top:0;z-index:20;background:var(--bg);border-bottom:1px solid var(--line)}
 .trow{display:flex;align-items:center;gap:12px;padding-top:12px;padding-bottom:2px}
-.back{flex:0 0 auto;width:32px;height:32px;border:none;border-radius:50%;background:#f5f5f4;color:#57534e;font-size:18px;font-weight:700;cursor:pointer;line-height:1}
-.ttl{flex:1;min-width:0;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.back{flex:0 0 auto;width:32px;height:32px;border:none;border-radius:50%;background:rgba(255,255,255,.08);color:var(--mut);font-size:18px;font-weight:700;cursor:pointer;line-height:1}
+.ttl{flex:1;min-width:0;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:var(--ink)}
 .pill{flex:0 0 auto;border:1px solid var(--teal-ln);background:var(--teal-bg);color:var(--teal);border-radius:999px;padding:7px 12px;font:inherit;font-size:13px;font-weight:700;cursor:pointer}
-.bar{height:6px;background:#e7e5e4;border-radius:999px;overflow:hidden}
+.bar{height:5px;background:rgba(255,255,255,.08);border-radius:999px;overflow:hidden}
 .fill{height:100%;background:var(--teal);border-radius:999px;transition:width .2s}
 .prow{display:flex;justify-content:space-between;font-size:12px;margin-top:6px;padding-bottom:4px;color:var(--mut)}
 .stklink{display:block;width:100%;text-align:left;border:none;background:none;padding:6px 0 0;font:inherit;font-size:13px;font-weight:700;color:var(--teal);cursor:pointer}
-.stkwrap{overflow-x:auto;-webkit-overflow-scrolling:touch;border:1px solid var(--line);border-radius:12px;background:#fff}
+.stkwrap{overflow-x:auto;-webkit-overflow-scrolling:touch;border:1px solid var(--line);border-radius:12px;background:var(--card)}
 .stktable{width:100%;border-collapse:collapse;font-size:12.5px;table-layout:fixed}
-.stktable th{text-align:left;font-weight:700;color:var(--mut);padding:8px 6px;border-bottom:2px solid var(--line);font-size:10.5px;text-transform:uppercase;letter-spacing:.03em;background:#fafaf9}
-.stktable td{padding:8px 6px;border-bottom:1px solid #f5f5f4;vertical-align:top}
+.stktable th{text-align:left;font-weight:700;color:var(--mut);padding:8px 6px;border-bottom:1px solid var(--line);font-size:10.5px;text-transform:uppercase;letter-spacing:.03em;background:rgba(255,255,255,.03)}
+.stktable td{padding:8px 6px;border-bottom:1px solid var(--line);vertical-align:top;color:var(--ink)}
 .stktable td.r,.stktable th.r{text-align:right}
-.stkname{font-weight:600;color:#1c1917;word-break:break-word}
+.stkname{font-weight:600;color:var(--ink);word-break:break-word}
 .chips{display:flex;gap:8px;overflow-x:auto;padding:0 16px 10px;scrollbar-width:none}
 .chips::-webkit-scrollbar{display:none}
-.chip{flex:0 0 auto;border:1px solid #d6d3d1;background:#fff;color:#57534e;border-radius:999px;padding:7px 12px;font:inherit;font-size:13px;font-weight:600;white-space:nowrap;cursor:pointer}
-.chip-on{background:#1c1917;border-color:#1c1917;color:#fff}
-select.chip{appearance:auto}
-.item{background:#fff;border:1px solid var(--line);border-radius:16px;padding:12px 16px;margin-bottom:8px;display:flex;align-items:center;gap:12px;cursor:pointer}
-.item:active{background:#fafaf9}
-.iname{font-weight:600;line-height:1.35}
+.chip{flex:0 0 auto;border:1px solid var(--line);background:rgba(255,255,255,.06);color:var(--mut);border-radius:999px;padding:7px 12px;font:inherit;font-size:13px;font-weight:600;white-space:nowrap;cursor:pointer}
+.chip-on{background:var(--teal);border-color:var(--teal);color:#071a14;font-weight:700}
+select.chip{appearance:auto;color:var(--ink)}
+.item{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:12px 16px;margin-bottom:8px;display:flex;align-items:center;gap:12px;cursor:pointer}
+.item:active{background:var(--card2)}
+.iname{font-weight:600;line-height:1.35;color:var(--ink)}
 .isub{font-size:12px;color:var(--mut);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .ibadges{margin-top:6px;display:flex;gap:6px;flex-wrap:wrap}
-.bdg{font-size:11px;font-weight:600;border-radius:999px;padding:2px 8px;border:1px solid var(--line);background:#f5f5f4;color:var(--mut)}
+.bdg{font-size:11px;font-weight:600;border-radius:999px;padding:2px 8px;border:1px solid var(--line);background:rgba(255,255,255,.05);color:var(--mut)}
 .bdg-ok{background:var(--green-bg);border-color:var(--green-ln);color:var(--green)}
 .bdg-plus{background:var(--amber-bg);border-color:var(--amber-ln);color:var(--amber);font-weight:700}
 .bdg-minus{background:var(--red-bg);border-color:var(--red-ln);color:var(--red);font-weight:700}
 .bdg-org{background:var(--orange-bg);border-color:var(--orange-ln);color:var(--orange)}
 .iright{text-align:right;flex:0 0 auto}
-.iqty{font-size:18px;font-weight:700}
+.iqty{font-size:18px;font-weight:700;color:var(--ink)}
 .ilab{font-size:11px;color:var(--mut2)}
 .botbar{position:fixed;bottom:0;left:0;right:0;z-index:20;pointer-events:none}
 .botin{max-width:480px;margin:0 auto;padding:0 16px 16px;pointer-events:auto}
-.botin .btn{box-shadow:0 8px 24px rgba(0,0,0,.18)}
+.botin .btn{box-shadow:0 8px 32px rgba(0,0,0,.5)}
 .ovl{position:fixed;inset:0;z-index:40;background:rgba(5,5,15,.82);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);display:flex;align-items:flex-end;justify-content:center}
 .sheet{width:100%;max-width:480px;background:#0f1117;border-radius:28px 28px 0 0;max-height:94vh;overflow-y:auto;box-shadow:0 -24px 80px rgba(0,0,0,.7)}
 .shead{position:sticky;top:0;background:#0f1117;z-index:5;display:flex;align-items:flex-start;gap:12px;padding:14px 20px 10px;border-bottom:1px solid rgba(255,255,255,.06)}
@@ -132,19 +132,24 @@ select.chip{appearance:auto}
 .c-amb{background:var(--amber-bg);border-color:var(--amber-ln);color:var(--amber)}
 .c-sky{background:var(--sky-bg);border-color:var(--sky-ln);color:var(--sky)}
 .per{cursor:pointer;margin-bottom:8px}
-.per:active{background:#fafaf9}
-.perx{border:none;background:none;color:#d6d3d1;font-size:16px;cursor:pointer;padding:2px 4px}
-.prev{overflow-x:auto;border:1px solid var(--line);border-radius:12px;background:#fff}
+.per:active{background:var(--card2)}
+.perx{border:none;background:none;color:rgba(255,255,255,.18);font-size:16px;cursor:pointer;padding:2px 4px}
+.prev{overflow-x:auto;border:1px solid var(--line);border-radius:12px;background:var(--card)}
 .prev table{border-collapse:collapse;font-size:12px;white-space:nowrap}
 .prev th{text-align:left;font-weight:600;color:var(--mut);padding:6px 8px;border-bottom:1px solid var(--line)}
-.prev td{padding:6px 8px;border-bottom:1px solid #f5f5f4}
+.prev td{padding:6px 8px;border-bottom:1px solid var(--line);color:var(--ink)}
 .prev .r{text-align:right;font-variant-numeric:tabular-nums}
 .maprow{display:flex;align-items:center;gap:8px;margin-bottom:8px}
-.maplbl{flex:0 0 112px;font-size:13px;color:#57534e}
-.maprow select{flex:1;min-width:0;border:1px solid #d6d3d1;border-radius:12px;padding:8px;font:inherit;font-size:13px;background:#fff;outline:none}
-.drop{width:100%;border:2px dashed #5eead4;background:var(--teal-bg);border-radius:24px;padding:44px 16px;text-align:center;cursor:pointer;font:inherit}
-.drop:active{background:#ccfbf1}
-.empty{text-align:center;color:#a8a29e;font-size:14px;padding:48px 0}
+.maplbl{flex:0 0 112px;font-size:13px;color:var(--mut)}
+.maprow select{flex:1;min-width:0;border:1px solid var(--line);border-radius:12px;padding:8px;font:inherit;font-size:13px;background:rgba(255,255,255,.05);color:var(--ink);outline:none}
+.drop{width:100%;border:2px dashed var(--teal-ln);background:var(--teal-bg);border-radius:24px;padding:44px 16px;text-align:center;cursor:pointer;font:inherit}
+.drop:active{background:rgba(0,212,170,.15)}
+.empty{text-align:center;color:var(--mut);font-size:14px;padding:48px 0}
+#toast{position:fixed;bottom:96px;left:0;right:0;z-index:60;display:flex;justify-content:center;padding:0 16px;pointer-events:none}
+#toast .in{background:rgba(255,255,255,.12);backdrop-filter:blur(12px);color:var(--ink);font-size:14px;font-weight:500;border-radius:999px;padding:8px 16px;box-shadow:0 4px 20px rgba(0,0,0,.4);border:1px solid var(--line);opacity:0;transition:opacity .2s}
+#toast .in.show{opacity:1}
+.hsditem{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:10px 12px;margin-bottom:6px;display:flex;align-items:center;gap:12px}
+.empty{text-align:center;color:var(--mut2);font-size:14px;padding:48px 0}
 #toast{position:fixed;bottom:96px;left:0;right:0;z-index:60;display:flex;justify-content:center;padding:0 16px;pointer-events:none}
 #toast .in{background:#1c1917;color:#fff;font-size:14px;font-weight:500;border-radius:999px;padding:8px 16px;box-shadow:0 4px 16px rgba(0,0,0,.25);opacity:0;transition:opacity .2s}
 #toast .in.show{opacity:1}
@@ -546,7 +551,7 @@ function renderHome(){
   h+='<div class="wrap mt24" style="padding-bottom:40px"><div class="sec">Kỳ kiểm kê</div>';
   h+='<button class="btn btn-primary" style="margin-bottom:12px" onclick="A.go(\'upload\')">+ Tạo kỳ mới · Upload file tồn kho</button>';
   if(!db.periods.length){
-    h+='<div class="card" style="font-size:14px;color:#57534e"><div style="font-weight:700;color:#1c1917;margin-bottom:8px">Quy trình 3 bước:</div>'+
+    h+='<div class="card" style="font-size:14px;color:var(--mut)"><div style="font-weight:700;color:var(--ink);margin-bottom:8px">Quy trình 3 bước:</div>'+
       '<div style="margin-bottom:6px"><b style="color:var(--teal)">1.</b> Xuất báo cáo tồn kho từ MISA ra Excel, upload lên đây.</div>'+
       '<div style="margin-bottom:6px"><b style="color:var(--teal)">2.</b> Xuống kho, kiểm bằng điện thoại: tìm kiếm hoặc kiểm tuần tự. Lệch tồn là bắt buộc giải trình.</div>'+
       '<div><b style="color:var(--teal)">3.</b> Xuất Excel làm biên bản. Hạn sử dụng tự kế thừa sang kỳ sau.</div></div>';
@@ -557,14 +562,14 @@ function renderHome(){
     var diff=p.items.filter(function(i){return i.counted&&diffOf(i)!==0;}).length;
     var pct=total?Math.round(done/total*100):0;
     var right=diff>0?'<span style="font-weight:700;color:var(--red)">'+diff+' mã chênh lệch</span>':
-      (total>0&&done===total?'<span style="font-weight:700;color:var(--green)">✓ Hoàn tất</span>':'<span style="color:#a8a29e">Đang kiểm</span>');
+      (total>0&&done===total?'<span style="font-weight:700;color:var(--green)">✓ Hoàn tất</span>':'<span style="color:var(--mut2)">Đang kiểm</span>');
     h+='<div class="card per" onclick="A.openPeriod(\''+p.id+'\')">'+
       '<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px">'+
       '<div style="min-width:0"><div style="font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+esc(p.name)+'</div>'+
       '<div style="font-size:12px;color:var(--mut);margin-top:2px">Tạo '+new Date(p.createdAt).toLocaleDateString("vi-VN")+' · '+total+' mã VT</div></div>'+
       '<button class="perx" onclick="event.stopPropagation();A.delPeriod(\''+p.id+'\')" title="Xóa kỳ">✕</button></div>'+
       '<div class="bar" style="margin-top:12px"><div class="fill" style="width:'+pct+'%"></div></div>'+
-      '<div style="display:flex;justify-content:space-between;font-size:12px;margin-top:6px"><span style="color:var(--mut)">Đã kiểm <b class="tnum" style="color:#1c1917">'+done+'/'+total+'</b></span>'+right+'</div></div>';
+      '<div style="display:flex;justify-content:space-between;font-size:12px;margin-top:6px"><span style="color:var(--mut)">Đã kiểm <b class="tnum" style="color:var(--ink)">'+done+'/'+total+'</b></span>'+right+'</div></div>';
   });
   h+='</div>';
   document.getElementById("app").innerHTML=h;
@@ -579,7 +584,7 @@ function renderUpload(){
       '<button class="drop" onclick="document.getElementById(\'file\').click()">'+
       '<div style="font-size:36px">📄</div><div style="font-weight:800;color:var(--teal-d);margin-top:8px">Chọn file tồn kho</div>'+
       '<div style="font-size:14px;color:var(--teal);margin-top:4px">Excel xuất từ MISA (.xlsx, .xls, .csv)</div></button>'+
-      '<div class="card mt16" style="font-size:14px;color:#57534e"><div style="font-weight:700;color:#1c1917;margin-bottom:4px">File cần có các cột:</div>'+
+      '<div class="card mt16" style="font-size:14px;color:var(--mut)"><div style="font-weight:700;color:var(--ink);margin-bottom:4px">File cần có các cột:</div>'+
       'Chi nhánh/Kho · Mã VT · Tên VT · ĐVT · Tồn đầu · Nhập · Xuất · Tồn cuối. Hệ thống tự nhận diện cột, chỉnh tay được ở bước sau.</div></div>';
     document.getElementById("app").innerHTML=h;
     return;
@@ -603,7 +608,7 @@ function renderUpload(){
 
   h+='<div class="card mt16"><div class="lbl">Khớp cột dữ liệu</div>';
   FIELDS.forEach(function(f){
-    h+='<div class="maprow"><div class="maplbl"'+(f.k==="name"?' style="font-weight:700;color:#1c1917"':'')+'>'+f.label+(f.k==="name"?" *":"")+'</div>'+
+    h+='<div class="maprow"><div class="maplbl"'+(f.k==="name"?' style="font-weight:700;color:var(--ink)"':'')+'>'+f.label+(f.k==="name"?" *":"")+'</div>'+
       '<select onchange="A.upMap(\''+f.k+'\',this.value)"><option value="">— bỏ qua —</option>';
     headers.forEach(function(hd,i){
       h+='<option value="'+i+'"'+(UP.map[f.k]===i?" selected":"")+'>'+colName(i)+' · '+esc(String(hd).trim()||"(trống)")+'</option>';
@@ -615,11 +620,11 @@ function renderUpload(){
       '<input class="inp" placeholder="VD: Cát Linh" value="'+esc(UP.branchManual)+'" onchange="A.upBranch(this.value)">';
   }
   if(UP.map.close===undefined){
-    h+='<div style="font-size:12px;color:#a8a29e;margin-top:6px">Chưa chọn cột Tồn cuối → tự tính = Đầu + Nhập − Xuất.</div>';
+    h+='<div style="font-size:12px;color:var(--mut2);margin-top:6px">Chưa chọn cột Tồn cuối → tự tính = Đầu + Nhập − Xuất.</div>';
   }
   h+='</div>';
 
-  h+='<div class="lbl" style="margin-top:16px">Xem trước · đọc được <b class="tnum" style="color:#1c1917">'+built.length+'</b> mã vật tư'+
+  h+='<div class="lbl" style="margin-top:16px">Xem trước · đọc được <b class="tnum" style="color:var(--ink)">'+built.length+'</b> mã vật tư'+
     (inherited>0?' · kế thừa HSD '+inherited+' mã từ kỳ trước':'')+'</div>';
   h+='<div class="prev"><table><thead><tr>';
   ["Kho","Mã","Tên vật tư","ĐVT","Đầu","Nhập","Xuất","Cuối"].forEach(function(x){h+="<th>"+x+"</th>";});
@@ -664,7 +669,7 @@ function renderPeriod(){
     '<div class="wrap" style="padding-top:10px"><div class="bar"><div class="fill" id="pfill"></div></div>'+
     '<div class="prow"><span id="pdone"></span><span id="pdiff"></span></div>'+
     '<button class="stklink" onclick="A.openStock(\''+p.id+'\')">📋 Bảng tồn kho (chỉ mã còn tồn) ›</button></div>'+
-    '<div class="wrap" style="padding-bottom:8px"><input class="inp" style="background:#fafaf9" id="q" placeholder="Tìm tên hoặc mã vật tư (không dấu vẫn ra)…" oninput="A.qInput(this.value)"></div>'+
+    '<div class="wrap" style="padding-bottom:8px"><input class="inp" style="background:var(--card)" id="q" placeholder="Tìm tên hoặc mã vật tư (không dấu vẫn ra)…" oninput="A.qInput(this.value)"></div>'+
     '<div class="chips" id="chips"></div></div>'+
     '<div class="wrap" id="list" style="padding-top:12px;padding-bottom:110px"></div>'+
     '<div class="botbar"><div class="botin"><button class="btn btn-primary" id="seqbtn" onclick="A.seqStart()"></button></div></div>';
@@ -712,7 +717,7 @@ function renderList(){
   var fTodo=flist.filter(function(i){return !i.counted;}).length;
   var allDone=flist.length>0&&fTodo===0;
   document.getElementById("pfill").style.width=pct+"%";
-  document.getElementById("pdone").innerHTML='Đã kiểm <b class="tnum" style="color:#1c1917">'+done+"/"+total+"</b> · "+pct+"%";
+  document.getElementById("pdone").innerHTML='Đã kiểm <b class="tnum" style="color:var(--ink)">'+done+"/"+total+"</b> · "+pct+"%";
   document.getElementById("pdiff").innerHTML=ndiff>0?'<b style="color:var(--red)">'+ndiff+" mã chênh lệch</b>":"Chưa có chênh lệch";
   document.getElementById("seqbtn").textContent=allDone?"✓ Hoàn tất — Xuất báo cáo Excel":"▶ Kiểm tuần tự · còn "+fTodo+" mã";
   renderChips(p,base);
@@ -759,7 +764,7 @@ function renderStock(){
     '<button class="back" onclick="A.go(\'period\')">‹</button>'+
     '<div class="ttl">Bảng tồn kho</div></div>'+
     '<div class="wrap" style="padding-bottom:6px"><div style="font-size:12px;color:var(--mut)">'+esc(p.name)+' · chỉ hiện mã còn tồn kho</div></div>'+
-    '<div class="wrap" style="padding-bottom:8px"><input class="inp" style="background:#fafaf9" id="stq" placeholder="Tìm tên hoặc mã vật tư…" oninput="A.stQ(this.value)"></div>'+
+    '<div class="wrap" style="padding-bottom:8px"><input class="inp" style="background:var(--card)" id="stq" placeholder="Tìm tên hoặc mã vật tư…" oninput="A.stQ(this.value)"></div>'+
     (multi?'<div class="chips"><select class="chip" onchange="A.stBr(this.value)"><option value="all"'+(ST.br==="all"?" selected":"")+'>Tất cả kho</option>'+
       branches.map(function(b){return '<option value="'+esc(b)+'"'+(ST.br===b?" selected":"")+'>'+esc(b)+'</option>';}).join("")+
       '</select></div>':'')+
@@ -795,7 +800,7 @@ function renderStockRows(){
         '<td class="stkname">'+esc(it.name)+'</td>'+
         '<td>'+esc(it.unit)+'</td>'+
         '<td class="r tnum" style="font-weight:700">'+fmt(it.close)+'</td></tr>';
-    }).join(""):'<tr><td colspan="'+(multi?5:4)+'" style="text-align:center;color:#a8a29e;padding:24px 0">Không có mã nào khớp.</td></tr>')+
+    }).join(""):'<tr><td colspan="'+(multi?5:4)+'" style="text-align:center;color:var(--mut2);padding:24px 0">Không có mã nào khớp.</td></tr>')+
     '</tbody></table></div>'+
     (rows.length>ST.limit?'<button class="addbat" style="display:block;width:100%;text-align:center;padding:12px 0" onclick="A.stMore()">Xem thêm ('+(rows.length-ST.limit)+' mã còn lại)</button>':'');
   document.getElementById("stkarea").innerHTML=h;
@@ -894,7 +899,7 @@ function renderHsd(){
   BUCKETS.forEach(function(b){
     var rows=entries.filter(function(e){return b.test(e.days);});
     h+='<div style="margin-bottom:20px"><div style="font-size:14px;font-weight:700;color:'+b.strong+';margin-bottom:8px">'+b.label+' · '+rows.length+'</div>';
-    if(!rows.length)h+='<div style="font-size:12px;color:#a8a29e">Không có.</div>';
+    if(!rows.length)h+='<div style="font-size:12px;color:var(--mut2)">Không có.</div>';
     rows.forEach(function(e){
       h+='<div class="hsditem"><div style="flex:1;min-width:0">'+
         '<div style="font-weight:600;font-size:14px;line-height:1.35">'+esc(e.name)+'</div>'+
