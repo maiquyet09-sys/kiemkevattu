@@ -389,7 +389,7 @@ function buildBienBan(p){
     used[sname.toLowerCase()]=1;
     var ws=wb.addWorksheet(sname,{views:[{state:"frozen",ySplit:4}]});
     if(wmId!==null)try{ws.addBackgroundImage(wmId);}catch(e){}
-    [4.43,14.57,52,12.29,14.57,14.57,14.57,14.57,11.43,11.43,49.29].forEach(function(w,i){ws.getColumn(i+1).width=w;});
+    [4.43,14.57,52,12.29,14.57,14.57,14.57,14.57,11.43,11.43,49.29,13].forEach(function(w,i){ws.getColumn(i+1).width=w;});
     var last=4+items.length;
     ws.mergeCells(1,1,1,11);
     var c=ws.getCell(1,1);
@@ -411,7 +411,7 @@ function buildBienBan(p){
       cc.numFmt="#,##0";
     });
     ws.getRow(3).height=20.25;
-    ["STT","Mã hàng","Tên hàng","ĐVT","Đầu kỳ","Nhập kho","Xuất kho","Cuối kỳ","Kiểm kê","Chênh","Ghi chú"].forEach(function(t,i){
+    ["STT","Mã hàng","Tên hàng","ĐVT","Đầu kỳ","Nhập kho","Xuất kho","Cuối kỳ","Kiểm kê","Chênh","Ghi chú","Ảnh"].forEach(function(t,i){
       var cc=ws.getCell(4,i+1);
       cc.value=t;
       cc.font={name:"Arial",size:10,bold:true};
@@ -446,6 +446,21 @@ function buildBienBan(p){
       }
       ws.getCell(r,11).value=it.note||"";
       ws.getCell(r,11).alignment={wrapText:true};
+      /* Cột 12: Ảnh */
+      if(it.photo){
+        try{
+          var b64=it.photo.split(",")[1];
+          if(b64){
+            var imgId=wb.addImage({base64:b64,extension:"jpeg"});
+            ws.addImage(imgId,{
+              tl:{col:11,row:r-1},
+              br:{col:12,row:r},
+              editAs:"oneCell"
+            });
+            ws.getRow(r).height=72;
+          }
+        }catch(imgErr){ws.getCell(r,12).value="(ảnh)";}
+      }
     });
     var sr=last+2;
     var s1=ws.getCell(sr,3);
@@ -536,13 +551,119 @@ function toast(m){
 }
 
 /* ================= Trang chủ ================= */
+/* ================= Gửi email cảnh báo HSD ================= */
+function exportHsdAlert(){
+  var entries=hsdEntries();
+  var critical=entries.filter(function(e){return e.days<90;});
+  if(!critical.length){toast("Không có vật tư nào cần cảnh báo (tất cả HSD còn > 3 tháng)");return;}
+  var now=new Date();
+  var dateStr=String(now.getDate()).padStart(2,"0")+"/"+String(now.getMonth()+1).padStart(2,"0")+"/"+now.getFullYear();
+  /* Nội dung email */
+  var lines=["Kính gửi,","","Danh sách vật tư cần xử lý theo hạn sử dụng tính đến ngày "+dateStr+":",""];
+  BUCKETS.slice(0,3).forEach(function(b){
+    var rows=critical.filter(function(e){return b.test(e.days);});
+    if(!rows.length)return;
+    lines.push("■ "+b.label.toUpperCase()+" ("+rows.length+" mã):");
+    rows.forEach(function(e){
+      lines.push("  • "+e.name+(e.branch?" ["+e.branch+"]":"")+
+        " – HSD: "+fmtDate(e.exp)+
+        (e.days<0?" (QUÁ HẠN "+Math.abs(e.days)+" ngày)":" (còn "+e.days+" ngày)"));
+    });
+    lines.push("");
+  });
+  lines.push("Đề nghị xử lý theo quy trình kiểm soát hạn sử dụng.");
+  lines.push(""); lines.push("Trân trọng,");
+  lines.push("Phòng Hành chính Hậu cần – MedDental");
+  var subject="CẢNH BÁO Hạn sử dụng vật tư – MedDental – "+dateStr;
+  var body=lines.join("\n");
+  var fname="CanhBao_HSD_"+dateStr.replace(/\//g,"-")+".xlsx";
+  /* Nếu không có ExcelJS thì mở mailto luôn */
+  if(typeof ExcelJS==="undefined"){
+    window.location.href="mailto:?subject="+encodeURIComponent(subject)+"&body="+encodeURIComponent(body);
+    return;
+  }
+  var wb=new ExcelJS.Workbook();
+  var ws=wb.addWorksheet("Cảnh báo HSD");
+  [22,14,45,8,10,14,16,18].forEach(function(w,i){ws.getColumn(i+1).width=w;});
+  var thin={style:"thin"},bAll={top:thin,left:thin,bottom:thin,right:thin};
+  /* Tiêu đề */
+  ws.mergeCells(1,1,1,8);
+  var tc=ws.getCell(1,1);
+  tc.value="CẢNH BÁO HẠN SỬ DỤNG VẬT TƯ – MEDDENTAL";
+  tc.font={name:"Arial",size:13,bold:true,color:{argb:"FFFFE45E"}};
+  tc.alignment={horizontal:"center",vertical:"middle"};
+  tc.fill={type:"pattern",pattern:"solid",fgColor:{argb:"FF0C1130"}};
+  ws.getRow(1).height=22;
+  ws.mergeCells(2,1,2,8);
+  var dc=ws.getCell(2,1);
+  dc.value="Ngày lập: "+dateStr+" · "+critical.length+" mã cần xử lý";
+  dc.font={name:"Arial",size:10,italic:true};dc.alignment={horizontal:"center"};
+  ws.getRow(2).height=15;
+  /* Header */
+  ["Chi nhánh/Kho","Mã hàng","Tên hàng","ĐVT","Số lượng","Hạn sử dụng","Còn lại (ngày)","Cảnh báo"].forEach(function(t,i){
+    var c=ws.getCell(3,i+1);
+    c.value=t;c.font={name:"Arial",size:10,bold:true,color:{argb:"FFFFFFFF"}};
+    c.fill={type:"pattern",pattern:"solid",fgColor:{argb:"FF1A2558"}};
+    c.border=bAll;c.alignment={horizontal:"center",vertical:"middle",wrapText:true};
+  });
+  ws.getRow(3).height=20;
+  /* Màu theo mức cảnh báo */
+  var bgMap={expired:"FFFFD6D6",m1:"FFFFE8CC",m3:"FFFFFACD"};
+  critical.forEach(function(e,i){
+    var r=4+i,bk=null;
+    for(var j=0;j<BUCKETS.length;j++){if(BUCKETS[j].test(e.days)){bk=BUCKETS[j];break;}}
+    var argb=(bk&&bgMap[bk.k])?bgMap[bk.k]:"FFEEEEEE";
+    var fill={type:"pattern",pattern:"solid",fgColor:{argb:argb}};
+    [e.branch,e.code,e.name,e.unit,
+      (e.qty===null||e.qty===undefined||e.qty===""?"":e.qty),
+      fmtDate(e.exp),e.days,(bk?bk.label:"Còn > 3 tháng")].forEach(function(v,ci){
+      var cc=ws.getCell(r,ci+1);
+      cc.value=v;cc.font={name:"Times New Roman",size:11};
+      cc.fill=fill;cc.border=bAll;
+      cc.alignment={wrapText:true,horizontal:ci>=4?"center":"left"};
+    });
+  });
+  /* Dòng chú thích cuối */
+  var lastR=4+critical.length;
+  ws.mergeCells(lastR,1,lastR,8);
+  ws.getCell(lastR,1).value="(*) File tự động tạo từ hệ thống Kiểm kê kho – MedDental";
+  ws.getCell(lastR,1).font={name:"Arial",size:9,italic:true};
+  /* Watermark */
+  try{
+    var wc=document.createElement("canvas");wc.width=380;wc.height=210;
+    var wctx=wc.getContext("2d");wctx.translate(190,105);wctx.rotate(-28*Math.PI/180);
+    wctx.font="13px Arial";wctx.fillStyle="rgba(0,0,0,0.075)";wctx.textAlign="center";wctx.textBaseline="middle";
+    wctx.fillText("Mai Văn Quyết quyetmv",0,0);
+    var wmId=wb.addImage({base64:wc.toDataURL("image/png").split(",")[1],extension:"png"});
+    ws.addBackgroundImage(wmId);
+  }catch(e){}
+  wb.xlsx.writeBuffer().then(function(buf){
+    var blob=new Blob([buf],{type:"application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"});
+    var file=null;
+    try{file=new File([blob],fname,{type:blob.type});}catch(e){}
+    var shared=false;
+    if(file&&navigator.share&&navigator.canShare&&navigator.canShare({files:[file]})){
+      shared=true;
+      navigator.share({files:[file],title:subject,text:body}).catch(function(err){
+        if(err&&err.name==="AbortError")return;
+        dlAnchor(blob,fname);
+        setTimeout(function(){window.location.href="mailto:?subject="+encodeURIComponent(subject)+"&body="+encodeURIComponent(body);},600);
+      });
+    }
+    if(!shared){
+      dlAnchor(blob,fname);
+      setTimeout(function(){window.location.href="mailto:?subject="+encodeURIComponent(subject)+"&body="+encodeURIComponent(body);},900);
+    }
+  }).catch(function(e){console.error(e);toast("Không tạo được file cảnh báo");});
+}
+
 function renderHome(){
   var entries=hsdEntries();
   var h='<div class="wrap" style="padding-top:24px"><div class="eyebrow">MedDental · Vật tư</div><h1 class="h1">Kiểm kê kho</h1><div style="font-size:12px;font-style:italic;color:#c4bfbb;margin-top:4px">Built by Quyet Mai</div></div>';
   if(!store.ok){
     h+='<div class="wrap mt12"><div class="note-warn">Trình duyệt đang chặn bộ nhớ lưu trữ — dữ liệu chỉ tồn tại trong phiên này. Mở file bằng Chrome/Safari hoặc đưa lên hosting để lưu lâu dài. Kiểm xong nhớ Xuất Excel ngay.</div></div>';
   }
-  h+='<div class="wrap mt20"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px"><span class="sec" style="margin:0">Cảnh báo hạn sử dụng</span><button class="addbat" onclick="A.go(\'hsd\')">Xem chi tiết ›</button></div><div class="hsdgrid">';
+  h+='<div class="wrap mt20"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px"><span class="sec" style="margin:0">Cảnh báo hạn sử dụng</span><div style="display:flex;gap:8px;align-items:center"><button class="addbat" style="color:var(--teal)" onclick="exportHsdAlert()">✉ Email</button><button class="addbat" onclick="A.go(\'hsd\')">Xem chi tiết ›</button></div></div><div class="hsdgrid">';
   BUCKETS.forEach(function(b){
     var n=entries.filter(function(e){return b.test(e.days);}).length;
     h+='<div class="hsdcard '+b.cls+'" onclick="A.go(\'hsd\')"><div class="n tnum">'+n+'</div><div class="t">'+b.label+'</div></div>';
@@ -741,6 +862,7 @@ function renderList(){
     if(worst!==null&&worst<=90){
       badges+='<span class="bdg '+(worst<0?"bdg-minus":worst<=30?"bdg-org":"bdg-plus")+'">HSD '+(worst<0?"quá hạn":"còn "+worst+"d")+'</span>';
     }
+    if(it.photo)badges+='<span class="bdg" style="font-size:10px">📷 Có ảnh</span>';
     var sub=[it.code,it.unit,branchesMulti?it.branch:null].filter(function(x){return x;}).map(esc).join(" · ");
     h+='<div class="item" onclick="A.openItem(\''+it.id+'\',false)">'+
       '<div style="flex:1;min-width:0"><div class="iname">'+esc(it.name)+'</div>'+
@@ -807,6 +929,35 @@ function renderStockRows(){
 }
 
 /* ================= Sheet nhập kiểm kê ================= */
+/* ================= Ảnh vật tư ================= */
+function compressImg(file,maxPx,quality,cb){
+  var reader=new FileReader();
+  reader.onload=function(e){
+    var img=new Image();
+    img.onload=function(){
+      var scale=Math.min(1,maxPx/img.width,maxPx/img.height);
+      var w=Math.round(img.width*scale),h=Math.round(img.height*scale);
+      var c=document.createElement('canvas');c.width=w;c.height=h;
+      c.getContext('2d').drawImage(img,0,0,w,h);
+      cb(c.toDataURL('image/jpeg',quality));
+    };
+    img.src=e.target.result;
+  };
+  reader.readAsDataURL(file);
+}
+function renderPhotoSec(){
+  var sec=document.getElementById('sphotosec');if(!sec||!SB)return;
+  if(SB.photo){
+    sec.innerHTML='<label class="slbl">Ảnh vật tư</label>'+
+      '<div style="position:relative;border-radius:14px;overflow:hidden;border:1px solid rgba(255,255,255,.1)">'+
+      '<img src="'+SB.photo+'" style="width:100%;max-height:220px;object-fit:contain;display:block;background:rgba(0,0,0,.3)">'+
+      '<button onclick="A.photoClear()" style="position:absolute;top:8px;right:8px;width:30px;height:30px;border:none;border-radius:50%;background:rgba(0,0,0,.6);color:#fff;font-size:14px;cursor:pointer;line-height:1">✕</button></div>'+
+      '<button onclick="document.getElementById(\'photoin\').click()" style="margin-top:8px;border:none;background:none;color:#00d4aa;font:inherit;font-size:13px;font-weight:700;cursor:pointer;padding:0">🔄 Chụp lại</button>';
+  }else{
+    sec.innerHTML='<label class="slbl">Ảnh vật tư</label>'+
+      '<button onclick="document.getElementById(\'photoin\').click()" style="display:block;width:100%;border:1px dashed rgba(0,212,170,.3);background:rgba(0,212,170,.05);border-radius:14px;padding:16px;color:#00d4aa;font:inherit;font-size:14px;font-weight:700;cursor:pointer;text-align:center">📷 Chụp ảnh vật tư</button>';
+  }
+}
 function openSheet(itemId,seq){
   var p=per(P.id);if(!p)return;
   var it=null;
@@ -845,13 +996,16 @@ function openSheet(itemId,seq){
     '<div id="sbat"></div>'+
     '<button class="addbat" style="color:#00d4aa" onclick="A.batAdd()">+ Thêm lô / hạn sử dụng</button>'+
     '<div style="font-size:12px;color:#4b5563;margin-top:4px">HSD được lưu và tự kế thừa sang kỳ sau.</div></div>'+
+    '<input type="file" id="photoin" accept="image/*" capture="environment" style="display:none" onchange="A.photoTake(this)">'+
+    '<div style="padding:14px 20px 0" id="sphotosec"></div>'+
     (it.counted?'<button class="reset" onclick="A.sheetReset()">Xóa kết quả, đưa về "chưa kiểm"</button>':
     '<div style="height:24px"></div>')+
     '</div></div>';
   document.getElementById("modal").innerHTML=h;
   document.getElementById("ovl").addEventListener("click",function(e){if(e.target===this)A.closeSheet();});
-  SB._close=it.close;SB._unit=it.unit;
+  SB._close=it.close;SB._unit=it.unit;SB.photo=it.photo||null;
   renderBatches();
+  renderPhotoSec();
   A.calc();
 }
 function keypadHtml(){
@@ -891,7 +1045,7 @@ function applyItem(item){
 /* ================= Dashboard HSD ================= */
 function renderHsd(){
   var entries=hsdEntries();
-  var h='<div class="topbar"><div class="trow wrap"><button class="back" onclick="A.go(\'home\')">‹</button><div class="ttl">Cảnh báo hạn sử dụng</div></div><div style="height:10px"></div></div>';
+  var h='<div class="topbar"><div class="trow wrap"><button class="back" onclick="A.go(\'home\')">‹</button><div class="ttl">Cảnh báo hạn sử dụng</div><button class="pill" onclick="exportHsdAlert()">✉ Gửi cảnh báo</button></div><div style="height:10px"></div></div>';
   h+='<div class="wrap" style="padding-top:16px;padding-bottom:40px">';
   if(!entries.length){
     h+='<div class="empty">Chưa có dữ liệu HSD. Nhập hạn sử dụng khi kiểm kê — hệ thống sẽ lưu và cảnh báo tại đây.</div>';
@@ -1067,6 +1221,12 @@ var A={
   },
   batAdd:function(){SB.batches.push({qty:"",exp:""});renderBatches();},
   batDel:function(i){SB.batches.splice(i,1);renderBatches();},
+  photoTake:function(input){
+    var f=input.files&&input.files[0];if(!f)return;
+    input.value="";
+    compressImg(f,160,0.48,function(b64){SB.photo=b64;renderPhotoSec();});
+  },
+  photoClear:function(){SB.photo=null;renderPhotoSec();},
   sheetSave:function(advance){
     if(!SB)return;
     var p=per(P.id);if(!p)return;
@@ -1085,6 +1245,7 @@ var A={
     var updated={};
     Object.keys(it).forEach(function(k){updated[k]=it[k];});
     updated.counted=true;updated.countQty=qn;updated.note=note;updated.batches=batches;
+    updated.photo=SB.photo||null;
     var wasSeq=SB.seq,savedId=SB.itemId;
     applyItem(updated);
     if(advance){
