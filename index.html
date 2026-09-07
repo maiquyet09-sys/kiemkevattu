@@ -559,22 +559,72 @@ function exportHsdAlert(){
   var now=new Date();
   var dateStr=String(now.getDate()).padStart(2,"0")+"/"+String(now.getMonth()+1).padStart(2,"0")+"/"+now.getFullYear();
   /* Nội dung email */
-  var lines=["Kính gửi,","","Danh sách vật tư cần xử lý theo hạn sử dụng tính đến ngày "+dateStr+":",""];
+  /* Đếm theo từng mức */
+  var nExpired=critical.filter(function(e){return e.days<0;}).length;
+  var nM1=critical.filter(function(e){return e.days>=0&&e.days<=30;}).length;
+  var nM3=critical.filter(function(e){return e.days>30&&e.days<=90;}).length;
+  /* Soạn nội dung email */
+  var lines=[];
+  lines.push("Kính gửi: Thủ kho các cơ sở,");
+  lines.push("         Ban Giám đốc cơ sở,");
+  lines.push("         Phòng Kế toán.");
+  lines.push("");
+  lines.push("Đồng kính gửi: Ban Giám đốc Công ty.");
+  lines.push("");
+  lines.push("─────────────────────────────────────────");
+  lines.push("V/v: THÔNG BÁO VẬT TƯ SẮP HẾT HẠN VÀ ĐÃ HẾT HẠN SỬ DỤNG");
+  lines.push("─────────────────────────────────────────");
+  lines.push("");
+  lines.push("Căn cứ kết quả kiểm kê tồn kho kỳ "+String(now.getMonth()+1).padStart(2,"0")+"/"+now.getFullYear()+",");
+  lines.push("Phòng Hành chính Hậu cần trân trọng thông báo đến Quý đơn vị:");
+  lines.push("");
+  lines.push("Tính đến ngày "+dateStr+", hệ thống ghi nhận:");
+  if(nExpired>0) lines.push("  ▪ "+nExpired+" mã vật tư ĐÃ HẾT HẠN SỬ DỤNG — cần xử lý khẩn cấp.");
+  if(nM1>0)      lines.push("  ▪ "+nM1+" mã vật tư còn hạn dưới 1 tháng — cần ưu tiên xuất dùng.");
+  if(nM3>0)      lines.push("  ▪ "+nM3+" mã vật tư còn hạn dưới 3 tháng — cần lên kế hoạch xuất dùng.");
+  lines.push("");
+  lines.push("Chi tiết từng mã vật tư (xem file đính kèm — \""+fname+"\"):");
+  lines.push("");
   BUCKETS.slice(0,3).forEach(function(b){
     var rows=critical.filter(function(e){return b.test(e.days);});
     if(!rows.length)return;
-    lines.push("■ "+b.label.toUpperCase()+" ("+rows.length+" mã):");
-    rows.forEach(function(e){
-      lines.push("  • "+e.name+(e.branch?" ["+e.branch+"]":"")+
-        " – HSD: "+fmtDate(e.exp)+
-        (e.days<0?" (QUÁ HẠN "+Math.abs(e.days)+" ngày)":" (còn "+e.days+" ngày)"));
+    lines.push("【 "+b.label.toUpperCase()+" — "+rows.length+" mã 】");
+    rows.forEach(function(e,idx){
+      var stt=String(idx+1).padStart(2," ");
+      lines.push(stt+". "+e.name);
+      lines.push("    Kho    : "+(e.branch||"—"));
+      lines.push("    Số lượng: "+(e.qty!==null&&e.qty!==undefined&&e.qty!==""?fmt(e.qty)+" "+e.unit:"—"));
+      lines.push("    Hạn SD  : "+fmtDate(e.exp)+(e.days<0?" → ĐÃ QUÁ HẠN "+Math.abs(e.days)+" NGÀY":" → Còn "+e.days+" ngày"));
     });
     lines.push("");
   });
-  lines.push("Đề nghị xử lý theo quy trình kiểm soát hạn sử dụng.");
-  lines.push(""); lines.push("Trân trọng,");
-  lines.push("Phòng Hành chính Hậu cần – MedDental");
-  var subject="CẢNH BÁO Hạn sử dụng vật tư – MedDental – "+dateStr;
+  lines.push("─────────────────────────────────────────");
+  lines.push("ĐỀ NGHỊ XỬ LÝ:");
+  lines.push("");
+  lines.push("1. Đối với vật tư ĐÃ HẾT HẠN:");
+  lines.push("   → Dừng sử dụng ngay lập tức.");
+  lines.push("   → Cách ly, dán nhãn và lập biên bản hủy theo quy trình.");
+  lines.push("   → Báo cáo số lượng hủy về Phòng Hành chính Hậu cần trong vòng 3 ngày làm việc.");
+  lines.push("");
+  lines.push("2. Đối với vật tư SẮP HẾT HẠN (≤ 1 tháng):");
+  lines.push("   → Ưu tiên xuất dùng trước.");
+  lines.push("   → Không nhập thêm khi tồn kho còn đủ sử dụng.");
+  lines.push("   → Kiểm tra khả năng điều chuyển sang cơ sở khác nếu không kịp dùng.");
+  lines.push("");
+  lines.push("3. Đối với vật tư CÒN HẠN DƯỚI 3 THÁNG:");
+  lines.push("   → Ưu tiên xuất dùng, giảm thiểu nhập thêm cùng loại.");
+  lines.push("   → Theo dõi sát trong kỳ kiểm kê tiếp theo.");
+  lines.push("");
+  lines.push("─────────────────────────────────────────");
+  lines.push("Trân trọng kính báo,");
+  lines.push("");
+  lines.push("PHÒNG HÀNH CHÍNH HẬU CẦN");
+  lines.push("Công ty CP Nụ Cười Mới Việt Nam – MedDental");
+  lines.push("Ngày: "+dateStr);
+  lines.push("─────────────────────────────────────────");
+  lines.push("(Email này được tạo tự động từ hệ thống Kiểm kê kho nội bộ MedDental.");
+  lines.push(" File đính kèm: "+fname+")");
+  var subject="[MedDental] CẢNH BÁO hạn sử dụng vật tư – "+String(now.getMonth()+1).padStart(2,"0")+"/"+now.getFullYear()+" – "+critical.length+" mã cần xử lý";
   var body=lines.join("\n");
   var fname="CanhBao_HSD_"+dateStr.replace(/\//g,"-")+".xlsx";
   /* Nếu không có ExcelJS thì mở mailto luôn */
