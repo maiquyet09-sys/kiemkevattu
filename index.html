@@ -743,82 +743,60 @@ function exportKiemKeEmail(p){
   var now=new Date();
   var dateStr=String(now.getDate()).padStart(2,"0")+"/"+String(now.getMonth()+1).padStart(2,"0")+"/"+now.getFullYear();
   var ky=String(now.getMonth()+1).padStart(2,"0")+"/"+now.getFullYear();
-  var total=p.items.length;
-  var done=p.items.filter(function(i){return i.counted;}).length;
-  var matched=p.items.filter(function(i){return i.counted&&diffOf(i)===0;}).length;
+  /* Thống kê */
+  var counted=p.items.filter(function(i){return i.counted;});
   var diffs=p.items.filter(function(i){return i.counted&&diffOf(i)!==0;});
+  var matched=counted.length-diffs.length;
+  var matchPct=counted.length?Math.round(matched/counted.length*100):0;
   var unchecked=p.items.filter(function(i){return !i.counted;});
-  var pct=total?Math.round(done/total*100):0;
-  var pad2=function(n){return String(n).padStart(2,"0");};
-  var fmtQty=function(e){return(e.qty!==null&&e.qty!==undefined&&e.qty!=="")?fmt(e.qty)+" "+(e.unit||""):"—";};
-  /* Tên cơ sở từ danh sách branches */
+  var totalClose=0,totalKK=0,totalDiff=0;
+  counted.forEach(function(i){totalClose+=i.close;totalKK+=i.countQty;});
+  totalDiff=Math.round((totalKK-totalClose)*100)/100;
+  /* Tên cơ sở */
   var branches=[];
   p.items.forEach(function(i){if(i.branch&&branches.indexOf(i.branch)<0)branches.push(i.branch);});
   var branchStr=branches.length?branches.join(", "):"cơ sở";
-  var roman=["I","II","III","IV","V","VI"];
-  var secIdx=0;
   var lines=[];
-  /* ── Kính gửi ── */
-  lines.push("Kính gửi:");
-  lines.push("- Ban Giám đốc cơ sở "+branchStr+";");
-  lines.push("- Thủ kho cơ sở "+branchStr+".");
+  lines.push("Kính gửi: Ban Giám đốc cơ sở "+branchStr+" và Thủ kho,");
   lines.push("");
-  lines.push("V/v: BÁO CÁO KẾT QUẢ KIỂM KÊ KHO – "+p.name.toUpperCase());
+  lines.push("Phòng Hành chính Hậu cần thông báo kết quả kiểm kê kho kỳ "+ky+" như sau:");
+  lines.push("");
+  lines.push("📊 TỔNG KẾT KẾT QUẢ KIỂM KÊ");
   lines.push("─────────────────────────────────────────");
-  lines.push("Căn cứ kế hoạch kiểm kê định kỳ kho tháng "+ky+",");
-  lines.push("Phòng Hành chính Hậu cần trân trọng báo cáo kết quả kiểm kê kho tại cơ sở "+branchStr+" tính đến ngày "+dateStr+", cụ thể:");
+  lines.push("• Tổng số lượng cuối kỳ (sổ sách)  : "+fmt(totalClose));
+  lines.push("• Tổng số lượng kiểm kê thực tế     : "+fmt(totalKK));
+  lines.push("• Chênh lệch                        : "+(totalDiff>0?"+":"")+fmt(totalDiff));
+  lines.push("• Tỷ lệ khớp kiểm kê                : "+matchPct+"% ("+matched+"/"+counted.length+" mã khớp)");
+  if(unchecked.length) lines.push("• Mã chưa kiểm kê                   : "+unchecked.length+" mã");
   lines.push("");
-  lines.push("TỔNG KẾT KIỂM KÊ:");
-  lines.push("* Tổng số mã vật tư trong kỳ : "+pad2(total)+" mã");
-  lines.push("* Đã kiểm kê                 : "+pad2(done)+" mã ("+pct+"%)");
-  lines.push("* Khớp sổ sách               : "+pad2(matched)+" mã");
-  lines.push("* Có chênh lệch              : "+pad2(diffs.length)+" mã");
-  if(unchecked.length) lines.push("* Chưa kiểm kê               : "+pad2(unchecked.length)+" mã");
-  lines.push("");
-  /* ── Mục I: Chênh lệch ── */
   if(diffs.length){
-    lines.push(roman[secIdx++]+". DANH SÁCH VẬT TƯ CÓ CHÊNH LỆCH – "+pad2(diffs.length)+" MÃ");
+    lines.push("⚠️ VẬT TƯ CÓ CHÊNH LỆCH ("+diffs.length+" mã)");
+    lines.push("─────────────────────────────────────────");
+    /* Header bảng */
+    lines.push("STT | Mã VT      | Tên vật tư                        | Tồn cuối | Thực tế | Chênh  | Giải trình");
+    lines.push("----+------------+-----------------------------------+----------+---------+--------+--------------------");
     diffs.forEach(function(it,i){
       var d=diffOf(it);
-      lines.push((i+1)+". "+it.name+(it.code?" ("+it.code+")":""));
-      lines.push("* Kho            : "+(it.branch||"—"));
-      lines.push("* Tồn sổ sách    : "+fmt(it.close)+" "+(it.unit||""));
-      lines.push("* Kiểm thực tế   : "+fmt(it.countQty)+" "+(it.unit||""));
-      lines.push("* Chênh lệch     : "+(d>0?"+ "+fmt(d)+" (THỪA)":"− "+fmt(Math.abs(d))+" (THIẾU)"));
-      lines.push("* Giải trình     : "+(it.note||"Chưa có giải trình"));
-      if(i<diffs.length-1)lines.push("");
+      var dStr=(d>0?"+":"")+fmt(d);
+      var r=String(i+1).padStart(3," ")+
+        " | "+String(it.code||"").padEnd(10," ")+
+        " | "+String(it.name).substring(0,33).padEnd(33," ")+
+        " | "+String(fmt(it.close)).padStart(8," ")+
+        " | "+String(fmt(it.countQty)).padStart(7," ")+
+        " | "+String(dStr).padStart(6," ")+
+        " | "+(it.note||"Chưa có giải trình");
+      lines.push(r);
     });
     lines.push("");
-  }
-  /* ── Mục II: Chưa kiểm (nếu có) ── */
-  if(unchecked.length){
-    lines.push(roman[secIdx++]+". VẬT TƯ CHƯA KIỂM KÊ – "+pad2(unchecked.length)+" MÃ");
-    unchecked.slice(0,10).forEach(function(it,i){
-      lines.push((i+1)+". "+it.name+(it.code?" ("+it.code+")":"")+(it.branch?" – "+it.branch:""));
-    });
-    if(unchecked.length>10)lines.push("... và "+(unchecked.length-10)+" mã khác (xem file đính kèm).");
-    lines.push("");
-  }
-  /* ── Mục cuối: Kiến nghị ── */
-  lines.push(roman[secIdx]+". KIẾN NGHỊ – ĐỀ XUẤT");
-  if(diffs.length){
-    lines.push("1. Đề nghị thủ kho phối hợp với bộ phận liên quan xác minh lại số lượng thực tế đối với "+diffs.length+" mã vật tư có chênh lệch.");
-    lines.push("2. Các mã vật tư chênh lệch có giải trình cần được Phòng Kế toán đối chiếu và điều chỉnh sổ sách trong vòng 05 ngày làm việc.");
-    lines.push("3. Trường hợp chênh lệch do mất mát, hư hỏng, đề nghị lập biên bản và báo cáo về Phòng Hành chính Hậu cần để xử lý theo quy trình.");
+    lines.push("Yêu cầu xử lý: Đề nghị Thủ kho rà soát, xác minh nguyên nhân chênh lệch và hoàn tất điều chỉnh số liệu trong 05 ngày làm việc. Trường hợp xác định có mất mát vật tư, thực hiện lập biên bản và xử lý theo quy định.");
   }else{
-    lines.push("Kết quả kiểm kê ghi nhận không có chênh lệch. Đề nghị thủ kho tiếp tục duy trì công tác quản lý và bảo quản kho theo đúng quy định.");
-  }
-  if(unchecked.length){
-    lines.push((diffs.length?4:1)+". Đề nghị hoàn thành kiểm kê "+unchecked.length+" mã vật tư còn lại và cập nhật kết quả trước kỳ kiểm kê tháng tiếp theo.");
+    lines.push("✅ Kết quả kiểm kê: Toàn bộ vật tư đã kiểm đều KHỚP sổ sách — không có chênh lệch.");
+    lines.push("Đề nghị Thủ kho tiếp tục duy trì công tác quản lý và bảo quản kho theo đúng quy định.");
   }
   lines.push("");
-  lines.push("Kính đề nghị Ban Giám đốc cơ sở xem xét, phê duyệt kết quả kiểm kê và chỉ đạo xử lý các nội dung chênh lệch (nếu có). File biên bản kiểm kê chi tiết đính kèm theo email này.");
-  lines.push("─────────────────────────────────────────");
-  lines.push("Trân trọng kính báo,");
+  lines.push("Chi tiết kết quả kiểm kê: Xem biên bản đính kèm ("+("KiemKe_"+p.name).replace(/[^\w-]+/g,"_")+".xlsx).");
   lines.push("");
-  lines.push("PHÒNG HÀNH CHÍNH HẬU CẦN");
-  lines.push("Công ty Cổ phần Nụ Cười Mới Việt Nam – MedDental");
-  lines.push("Ngày "+dateStr);
+  lines.push("Trân trọng,");
   lines.push("MAI VĂN QUYẾT");
   lines.push("Chuyên viên Hành chính");
   lines.push("CÔNG TY CỔ PHẦN NỤ CƯỜI MỚI VIỆT NAM");
