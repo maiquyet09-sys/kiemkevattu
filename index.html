@@ -552,10 +552,54 @@ function toast(m){
 
 /* ================= Trang chủ ================= */
 /* ================= Gửi email cảnh báo HSD ================= */
-function exportHsdAlert(){
+/* ================= Chọn kho gửi email cảnh báo HSD ================= */
+function showHsdEmailPicker(){
   var entries=hsdEntries();
   var critical=entries.filter(function(e){return e.days<90;});
-  if(!critical.length){toast("Không có vật tư nào cần cảnh báo (tất cả HSD còn > 3 tháng)");return;}
+  if(!critical.length){toast("Không có vật tư nào cần cảnh báo (HSD còn > 3 tháng)");return;}
+  var branchMap={};
+  critical.forEach(function(e){
+    var br=e.branch||"Kho chính";
+    if(!branchMap[br])branchMap[br]=[];
+    branchMap[br].push(e);
+  });
+  var branches=Object.keys(branchMap);
+  if(branches.length===1){exportHsdAlert(branches[0]);return;}
+  var h='<div class="ovl" id="ovl"><div class="sheet" onclick="event.stopPropagation()">'+
+    '<div class="shead"><div style="flex:1;min-width:0">'+
+    '<div style="font-size:10px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:#00d4aa;margin-bottom:4px">GỬI EMAIL CẢNH BÁO HSD</div>'+
+    '<div style="font-weight:700;font-size:16px;color:#f0f0f0">Chọn kho để gửi riêng</div>'+
+    '<div style="font-size:12px;color:#6b7280;margin-top:3px">'+critical.length+' mã cần cảnh báo · '+branches.length+' kho</div>'+
+    '</div><button class="sx" onclick="A.closeSheet()">✕</button></div>'+
+    '<div style="padding:12px 20px 28px">'+
+    '<button onclick="A.closeSheet();exportHsdAlert()" style="display:block;width:100%;border:1px solid rgba(0,212,170,.3);background:rgba(0,212,170,.07);color:#00d4aa;font:inherit;font-size:14px;font-weight:700;border-radius:14px;padding:13px;text-align:left;cursor:pointer;margin-bottom:10px">'+
+    '📧 Tất cả kho — 1 email tổng hợp ('+critical.length+' mã)</button>'+
+    '<div style="font-size:11px;color:#6b7280;text-align:center;margin-bottom:10px">── hoặc gửi riêng từng kho ──</div>';
+  branches.forEach(function(br){
+    var items=branchMap[br];
+    var exp=items.filter(function(e){return e.days<0;}).length;
+    var m1=items.filter(function(e){return e.days>=0&&e.days<=30;}).length;
+    var m3=items.filter(function(e){return e.days>30&&e.days<=90;}).length;
+    var badge='';
+    if(exp>0)badge+=' 🔴 '+exp+' hết hạn';
+    if(m1>0)badge+=' 🟠 '+m1+' <1th';
+    if(m3>0)badge+=' 🟡 '+m3+' <3th';
+    h+='<button onclick="A.closeSheet();exportHsdAlert(\''+esc(br)+'\')" style="display:block;width:100%;border:1px solid rgba(255,255,255,.09);background:rgba(255,255,255,.05);color:#e8eeff;font:inherit;font-size:14px;font-weight:600;border-radius:14px;padding:13px;text-align:left;cursor:pointer;margin-bottom:8px">'+
+      '<div style="font-weight:700">'+esc(br)+'</div>'+
+      '<div style="font-size:12px;color:#6b7280;margin-top:3px">'+items.length+' mã cần cảnh báo ·'+badge+'</div>'+
+      '</button>';
+  });
+  h+='</div></div></div>';
+  document.getElementById("modal").innerHTML=h;
+  document.getElementById("ovl").addEventListener("click",function(e){if(e.target===this)A.closeSheet();});
+}
+
+function exportHsdAlert(filterBranch){
+  var entries=hsdEntries();
+  var critical=entries.filter(function(e){
+    return e.days<90&&(!filterBranch||norm(e.branch)===norm(filterBranch));
+  });
+  if(!critical.length){toast("Không có vật tư nào cần cảnh báo"+(filterBranch?" tại "+filterBranch:""));return;}
   var now=new Date();
   var dateStr=String(now.getDate()).padStart(2,"0")+"/"+String(now.getMonth()+1).padStart(2,"0")+"/"+now.getFullYear();
   /* Nội dung email */
@@ -570,8 +614,13 @@ function exportHsdAlert(){
   var secIdx=0;
   var lines=[];
   lines.push("Kính gửi:");
-  lines.push("- Ban Giám đốc các cơ sở;");
-  lines.push("- Thủ kho các cơ sở.");
+  if(filterBranch){
+    lines.push("- Ban Giám đốc cơ sở "+filterBranch+";");
+    lines.push("- Thủ kho cơ sở "+filterBranch+".");
+  }else{
+    lines.push("- Ban Giám đốc các cơ sở;");
+    lines.push("- Thủ kho các cơ sở.");
+  }
   lines.push("");
   lines.push("V/v: THÔNG BÁO VẬT TƯ ĐÃ HẾT HẠN VÀ SẮP HẾT HẠN SỬ DỤNG");
   lines.push("─────────────────────────────────────────");
@@ -655,9 +704,9 @@ function exportHsdAlert(){
   lines.push("MAI VĂN QUYẾT");
   lines.push("Chuyên viên Hành chính");
   lines.push("CÔNG TY CỔ PHẦN NỤ CƯỜI MỚI VIỆT NAM");
-  var subject="[MedDental] CẢNH BÁO hạn sử dụng vật tư – "+String(now.getMonth()+1).padStart(2,"0")+"/"+now.getFullYear()+" – "+critical.length+" mã cần xử lý";
+  var subject="[MedDental] CẢNH BÁO hạn sử dụng vật tư – "+(filterBranch?filterBranch+" – ":"")+String(now.getMonth()+1).padStart(2,"0")+"/"+now.getFullYear()+" – "+critical.length+" mã cần xử lý";
   var body=lines.join("\n");
-  var fname="CanhBao_HSD_"+dateStr.replace(/\//g,"-")+".xlsx";
+  var fname="CanhBao_HSD_"+(filterBranch?filterBranch.replace(/[^\w]/g,"_")+"_":"")+dateStr.replace(/\//g,"-")+".xlsx";
   /* Nếu không có ExcelJS thì mở mailto luôn */
   if(typeof ExcelJS==="undefined"){
     window.location.href="mailto:?subject="+encodeURIComponent(subject)+"&body="+encodeURIComponent(body);
@@ -828,7 +877,7 @@ function renderHome(){
   if(!store.ok){
     h+='<div class="wrap mt12"><div class="note-warn">Trình duyệt đang chặn bộ nhớ lưu trữ — dữ liệu chỉ tồn tại trong phiên này. Mở file bằng Chrome/Safari hoặc đưa lên hosting để lưu lâu dài. Kiểm xong nhớ Xuất Excel ngay.</div></div>';
   }
-  h+='<div class="wrap mt20"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px"><span class="sec" style="margin:0">Cảnh báo hạn sử dụng</span><div style="display:flex;gap:8px;align-items:center"><button class="addbat" style="color:var(--teal)" onclick="exportHsdAlert()">✉ Email</button><button class="addbat" onclick="A.go(\'hsd\')">Xem chi tiết ›</button></div></div><div class="hsdgrid">';
+  h+='<div class="wrap mt20"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px"><span class="sec" style="margin:0">Cảnh báo hạn sử dụng</span><div style="display:flex;gap:8px;align-items:center"><button class="addbat" style="color:var(--teal)" onclick="showHsdEmailPicker()">✉ Email</button><button class="addbat" onclick="A.go(\'hsd\')">Xem chi tiết ›</button></div></div><div class="hsdgrid">';
   BUCKETS.forEach(function(b){
     var n=entries.filter(function(e){return b.test(e.days);}).length;
     h+='<div class="hsdcard '+b.cls+'" onclick="A.go(\'hsd\')"><div class="n tnum">'+n+'</div><div class="t">'+b.label+'</div></div>';
@@ -1212,7 +1261,7 @@ function applyItem(item){
 /* ================= Dashboard HSD ================= */
 function renderHsd(){
   var entries=hsdEntries();
-  var h='<div class="topbar"><div class="trow wrap"><button class="back" onclick="A.go(\'home\')">‹</button><div class="ttl">Cảnh báo hạn sử dụng</div><button class="pill" onclick="exportHsdAlert()">✉ Gửi cảnh báo</button></div><div style="height:10px"></div></div>';
+  var h='<div class="topbar"><div class="trow wrap"><button class="back" onclick="A.go(\'home\')">‹</button><div class="ttl">Cảnh báo hạn sử dụng</div><button class="pill" onclick="showHsdEmailPicker()">✉ Gửi cảnh báo</button></div><div style="height:10px"></div></div>';
   h+='<div class="wrap" style="padding-top:16px;padding-bottom:40px">';
   if(!entries.length){
     h+='<div class="empty">Chưa có dữ liệu HSD. Nhập hạn sử dụng khi kiểm kê — hệ thống sẽ lưu và cảnh báo tại đây.</div>';
