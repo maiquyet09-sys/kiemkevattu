@@ -753,7 +753,10 @@ function exportHsdAlert(filterBranch){
     var shared=false;
     if(file&&navigator.share&&navigator.canShare&&navigator.canShare({files:[file]})){
       shared=true;
-      navigator.share({files:[file],title:subject,text:body}).catch(function(err){
+      if(navigator.clipboard&&navigator.clipboard.writeText)navigator.clipboard.writeText(body);
+      navigator.share({files:[file],title:subject}).then(function(){
+        toast("✉ File đính kèm xong · Tiêu đề đã điền · Nhấn Dán để thêm nội dung email");
+      }).catch(function(err){
         if(err&&err.name==="AbortError")return;
         dlAnchor(blob,fname);
         setTimeout(function(){openMailtoSafe(subject,body);},600);
@@ -825,7 +828,10 @@ function exportKiemKeEmail(p){
     var shared=false;
     if(file&&navigator.share&&navigator.canShare&&navigator.canShare({files:[file]})){
       shared=true;
-      navigator.share({files:[file],title:subject,text:body}).catch(function(err){
+      if(navigator.clipboard&&navigator.clipboard.writeText)navigator.clipboard.writeText(body);
+      navigator.share({files:[file],title:subject}).then(function(){
+        toast("✉ File đính kèm xong · Tiêu đề đã điền · Nhấn Dán để thêm nội dung email");
+      }).catch(function(err){
         if(err&&err.name==="AbortError")return;
         dlAnchor(blob,fname);
         setTimeout(function(){openMailtoSafe(subject,body);},600);
