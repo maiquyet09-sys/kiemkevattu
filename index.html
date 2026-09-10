@@ -684,7 +684,7 @@ function exportHsdAlert(filterBranch){
   lines.push("");
   lines.push("Trân trọng, MAI VĂN QUYẾT – Chuyên viên Hành chính – CÔNG TY CỔ PHẦN NỤ CƯỜI MỚI VIỆT NAM – Ngày "+dateStr);
   var body=lines.join("\n");
-  var subject="[MedDental] CẢNH BÁO hạn sử dụng vật tư"+(filterBranch?" – "+filterBranch:"")+" – "+String(now.getMonth()+1).padStart(2,"0")+"/"+now.getFullYear()+" ("+critical.length+" mã cần xử lý)";
+  var subject="[MedDental] CẢNH BÁO hạn sử dụng vật tư"+(filterBranch?" – "+filterBranch:"")+" – "+String(now.getMonth()+1).padStart(2,"0")+"/"+now.getFullYear();
   var fname="CanhBao_HSD_"+(filterBranch?filterBranch.replace(/[^\w]/g,"_")+"_":"")+dateStr.replace(/\//g,"-")+".xlsx";
   /* Nếu không có ExcelJS thì mở mailto luôn */
   if(typeof ExcelJS==="undefined"){
