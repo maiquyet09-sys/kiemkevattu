@@ -625,64 +625,39 @@ function exportHsdAlert(filterBranch){
   /* Đếm theo từng mức */
   /* Phân loại theo mức */
   var expired=critical.filter(function(e){return e.days<0;});
-  var m1=critical.filter(function(e){return e.days>=0&&e.days<=30;});
-  var m3=critical.filter(function(e){return e.days>30&&e.days<=90;});
-  var pad2=function(n){return String(n).padStart(2,"0");};
+  var nearExpiry=critical.filter(function(e){return e.days>=0;});
+  var SO_NGAY=90;
+  var hanXuLyDate=new Date(now.getTime()+3*24*60*60*1000);
+  var hanXuLy=String(hanXuLyDate.getDate()).padStart(2,"0")+"/"+String(hanXuLyDate.getMonth()+1).padStart(2,"0")+"/"+hanXuLyDate.getFullYear();
+  var appUrl=(typeof window!=="undefined"&&window.location?window.location.href.split("?")[0]:"");
   var fmtQty=function(e){return(e.qty!==null&&e.qty!==undefined&&e.qty!=="")?fmt(e.qty)+" "+(e.unit||""):"—";};
-  var roman=["I","II","III","IV","V","VI"];
-  var secIdx=0;
-  /* Tóm tắt đầu email – 1 dòng duy nhất tránh paragraph spacing */
-  var sumParts=[];
-  if(expired.length)sumParts.push("🔴 "+pad2(expired.length)+" mã đã hết hạn");
-  if(m1.length)sumParts.push("🟠 "+pad2(m1.length)+" mã còn dưới 01 tháng");
-  if(m3.length)sumParts.push("🟡 "+pad2(m3.length)+" mã còn dưới 03 tháng");
   var lines=[];
-  lines.push("Kính gửi:");
-  if(filterBranch){
-    lines.push("- Ban Giám đốc cơ sở "+filterBranch+";");
-    lines.push("- Thủ kho cơ sở "+filterBranch+".");
-  }else{
-    lines.push("- Ban Giám đốc các cơ sở;");
-    lines.push("- Thủ kho các cơ sở.");
-  }
+  lines.push("Kính gửi: Ban Giám đốc cơ sở "+(filterBranch||"tất cả cơ sở")+" & Thủ kho,");
   lines.push("");
-  lines.push("V/v: THÔNG BÁO VẬT TƯ ĐÃ HẾT HẠN VÀ SẮP HẾT HẠN SỬ DỤNG"+(filterBranch?" – "+filterBranch:""));
+  lines.push("Phòng Hành chính Hậu cần gửi danh sách vật tư cận date và hết hạn cần xử lý gấp:");
   lines.push("");
-  lines.push("Căn cứ kết quả kiểm kê tồn kho kỳ "+String(now.getMonth()+1).padStart(2,"0")+"/"+now.getFullYear()+", Phòng Hành chính Hậu cần thông báo đến Quý Đơn vị tính đến ngày "+dateStr+": "+sumParts.join(" | ")+".");
-  lines.push("");
-  /* Mỗi mục chênh lệch = 2 dòng: thông tin + yêu cầu */
+  lines.push("📊 TỔNG QUAN");
+  lines.push("   Hết hạn: "+expired.length+" mã (Cần tiêu hủy/xuất hủy)");
+  lines.push("   Cận date (< "+SO_NGAY+" ngày): "+nearExpiry.length+" mã (Ưu tiên xuất dùng/luân chuyển)");
   if(expired.length){
-    lines.push(roman[secIdx++]+". VẬT TƯ ĐÃ HẾT HẠN SỬ DỤNG ("+pad2(expired.length)+" mã)");
-    expired.forEach(function(e,i){
-      lines.push(String(i+1)+". "+e.name+" – Kho: "+(e.branch||"—")+" – SL: "+fmtQty(e)+" – HSD: "+fmtDate(e.exp)+" – ĐÃ QUÁ HẠN "+Math.abs(e.days)+" NGÀY");
-      lines.push("   ➡️ Dừng sử dụng ngay; cách ly, dán nhãn HẾT HẠN – KHÔNG ĐƯỢC SỬ DỤNG, xử lý theo quy trình Công ty.");
-    });
     lines.push("");
-  }
-  if(m1.length){
-    lines.push(roman[secIdx++]+". VẬT TƯ CÒN HẠN DƯỚI 01 THÁNG ("+pad2(m1.length)+" mã)");
-    m1.forEach(function(e,i){
-      lines.push(String(i+1)+". "+e.name+" – Kho: "+(e.branch||"—")+" – SL: "+fmtQty(e)+" – HSD: "+fmtDate(e.exp)+" – còn "+e.days+" ngày");
-      lines.push("   ➡️ Ưu tiên xuất dùng ngay; báo cáo HC Hậu cần nếu không thể sử dụng hết trước hạn để điều chuyển.");
+    lines.push("🚨 DANH SÁCH HÀNG HẾT HẠN (CẦN XỬ LÝ NGAY)");
+    expired.forEach(function(e){
+      lines.push("   "+e.name+" ("+(e.code||"—")+") — Lô: — | SL: "+fmtQty(e)+" | HSD: "+fmtDate(e.exp)+" (Đã quá hạn "+Math.abs(e.days)+" ngày)");
     });
-    lines.push("");
   }
-  if(m3.length){
-    lines.push(roman[secIdx++]+". VẬT TƯ CÒN HẠN DƯỚI 03 THÁNG ("+pad2(m3.length)+" mã)");
-    m3.forEach(function(e,i){
-      lines.push(String(i+1)+". "+e.name+" – Kho: "+(e.branch||"—")+" – SL: "+fmtQty(e)+" – HSD: "+fmtDate(e.exp)+" – còn "+e.days+" ngày");
-      lines.push("   ➡️ Ưu tiên xuất dùng theo nguyên tắc FEFO; hạn chế nhập thêm cùng mã khi tồn hiện tại còn đáp ứng.");
+  if(nearExpiry.length){
+    lines.push("");
+    lines.push("⚠️ DANH SÁCH HÀNG CẬN DATE (ƯU TIÊN XUẤT TRƯỚC)");
+    nearExpiry.forEach(function(e){
+      lines.push("   "+e.name+" ("+(e.code||"—")+") — Lô: — | SL: "+fmtQty(e)+" | HSD: "+fmtDate(e.exp)+" (Còn "+e.days+" ngày)");
     });
-    lines.push("");
   }
-  lines.push(roman[secIdx]+". YÊU CẦU THỰC HIỆN");
-  var ri=1;
-  if(expired.length){lines.push(ri+". Hàng hết hạn: Dừng sử dụng ngay – cách ly – lập biên bản – báo cáo HC Hậu cần trong 03 ngày làm việc.");ri++;}
-  if(m1.length||m3.length){lines.push(ri+". Hàng sắp hết hạn: Xuất dùng theo FEFO – hạn chế nhập thêm – đề xuất điều chuyển nếu cần – theo dõi kỳ kiểm kê tiếp theo.");}
   lines.push("");
-  lines.push("Đề nghị Ban Giám đốc và Thủ kho phối hợp thực hiện, hạn chế lãng phí và đảm bảo an toàn sử dụng vật tư.");
+  lines.push("👉 Đề nghị Thủ kho: Kiểm tra thực tế kho và cập nhật phương án xử lý (luân chuyển / thanh lý / hủy) trên hệ thống trước ngày "+hanXuLy+".");
+  lines.push("👉 Cập nhật phương án xử lý: "+appUrl);
   lines.push("");
-  lines.push("Trân trọng, MAI VĂN QUYẾT – Chuyên viên Hành chính – CÔNG TY CỔ PHẦN NỤ CƯỜI MỚI VIỆT NAM – Ngày "+dateStr);
+  lines.push("Trân trọng,\nPhòng Hành chính Hậu cần — Công ty Cổ phần Nụ Cười Mới Việt Nam\n(Email tự động, vui lòng không phản hồi trực tiếp)");
   var body=lines.join("\n");
   var subject="[MedDental] CẢNH BÁO hạn sử dụng vật tư"+(filterBranch?" – "+filterBranch:"")+" – "+String(now.getMonth()+1).padStart(2,"0")+"/"+now.getFullYear();
   var fname="CanhBao_HSD_"+(filterBranch?filterBranch.replace(/[^\w]/g,"_")+"_":"")+dateStr.replace(/\//g,"-")+".xlsx";
