@@ -728,9 +728,9 @@ function exportHsdAlert(filterBranch){
     var shared=false;
     if(file&&navigator.share&&navigator.canShare&&navigator.canShare({files:[file]})){
       shared=true;
-      if(navigator.clipboard&&navigator.clipboard.writeText)navigator.clipboard.writeText(body);
-      navigator.share({files:[file],title:subject}).then(function(){
-        toast("✉ File đính kèm xong · Tiêu đề đã điền · Nhấn Dán để thêm nội dung email");
+      var shareText=subject+"\n\n"+body;
+      navigator.share({files:[file],title:subject,text:shareText}).then(function(){
+        toast("✉ Đã mở soạn email — kiểm tra tiêu đề và nội dung trước khi gửi");
       }).catch(function(err){
         if(err&&err.name==="AbortError")return;
         dlAnchor(blob,fname);
@@ -763,32 +763,37 @@ function exportKiemKeEmail(p){
   p.items.forEach(function(i){if(i.branch&&branches.indexOf(i.branch)<0)branches.push(i.branch);});
   var branchStr=branches.length?branches.join(", "):"cơ sở";
   var fname2=("KiemKe_"+p.name).replace(/[^\w-]+/g,"_")+".xlsx";
-  /* Mỗi nhóm thông tin = 1 dòng → tránh email client thêm spacing */
-  var statLine="Tồn cuối kỳ: "+fmt(totalClose)+" | Thực tế: "+fmt(totalKK)+" | Chênh: "+(totalDiff>0?"+":"")+fmt(totalDiff)+" | Khớp: "+matchPct+"% ("+matched+"/"+counted.length+" mã)";
-  if(unchecked.length)statLine+=" | Chưa kiểm: "+unchecked.length+" mã";
+  var hanXuLyDate=new Date(now.getTime()+5*24*60*60*1000);
+  var hanXuLy=String(hanXuLyDate.getDate()).padStart(2,"0")+"/"+String(hanXuLyDate.getMonth()+1).padStart(2,"0")+"/"+hanXuLyDate.getFullYear();
+  var appUrl=(typeof window!=="undefined"&&window.location?window.location.href.split("?")[0]:"");
   var lines=[];
-  lines.push("Kính gửi: Ban Giám đốc cơ sở "+branchStr+" và Thủ kho,");
+  lines.push("Kính gửi: Ban Giám đốc cơ sở "+branchStr+" & Thủ kho,");
   lines.push("");
-  lines.push("Phòng Hành chính Hậu cần thông báo kết quả kiểm kê kho kỳ "+ky+".");
+  lines.push("Phòng Hành chính Hậu cần gửi kết quả kiểm kê kho kỳ "+ky+" để Quý đơn vị xem xét và xử lý:");
   lines.push("");
-  lines.push("📊 TỔNG KẾT: "+statLine);
-  lines.push("");
+  lines.push("📊 TỔNG KẾT KIỂM KÊ");
+  lines.push("   Tổng mã kiểm kê : "+counted.length+" mã");
+  lines.push("   Khớp sổ sách    : "+matched+" mã ("+matchPct+"%)");
+  lines.push("   Chênh lệch      : "+diffs.length+" mã"+(diffs.length?" (cần xử lý)":""));
+  lines.push("   Tồn cuối kỳ     : "+fmt(totalClose)+"  |  Thực tế: "+fmt(totalKK)+"  |  Chênh: "+(totalDiff>0?"+":"")+fmt(totalDiff));
   if(diffs.length){
-    lines.push("⚠️ VẬT TƯ CÓ CHÊNH LỆCH ("+diffs.length+" mã) – Đề nghị hoàn tất điều chỉnh số liệu trong 05 ngày làm việc:");
+    lines.push("");
+    lines.push("🔍 DANH SÁCH VẬT TƯ CHÊNH LỆCH");
     diffs.forEach(function(it,i){
       var d=diffOf(it);
       var dStr=(d>0?"+":"")+fmt(d)+(d>0?" (THỪA)":" (THIẾU)");
-      lines.push(String(i+1)+". "+it.name+(it.code?" ("+it.code+")":"")+" – Tồn: "+fmt(it.close)+" / Thực tế: "+fmt(it.countQty)+" / Chênh: "+dStr+" – Giải trình: "+(it.note||"Chưa có"));
+      lines.push("   "+String(i+1)+". "+it.name+(it.code?" ("+it.code+")":"")+" — Tồn sổ: "+fmt(it.close)+" | Thực tế: "+fmt(it.countQty)+" | Chênh: "+dStr+" | Giải trình: "+(it.note||"Chưa có"));
     });
     lines.push("");
-    lines.push("Trường hợp xác định mất mát vật tư, lập biên bản và xử lý theo quy định.");
+    lines.push("👉 Đề nghị Thủ kho: Xác minh nguyên nhân chênh lệch và hoàn tất điều chỉnh số liệu trước ngày "+hanXuLy+". Trường hợp mất mát vật tư, lập biên bản và xử lý theo quy định.");
   }else{
-    lines.push("✅ Toàn bộ vật tư đã kiểm đều KHỚP sổ sách — không có chênh lệch.");
+    lines.push("");
+    lines.push("✅ Kết quả kiểm kê: Toàn bộ vật tư KHỚP sổ sách — không có chênh lệch.");
+    lines.push("👉 Đề nghị Thủ kho tiếp tục duy trì công tác quản lý và bảo quản kho theo đúng quy định.");
   }
+  lines.push("👉 Xem biên bản chi tiết và cập nhật: "+appUrl);
   lines.push("");
-  lines.push("Chi tiết: Xem biên bản đính kèm ("+fname2+").");
-  lines.push("");
-  lines.push("Trân trọng, MAI VĂN QUYẾT – Chuyên viên Hành chính – CÔNG TY CỔ PHẦN NỤ CƯỜI MỚI VIỆT NAM");
+  lines.push("Trân trọng,\nPhòng Hành chính Hậu cần — Công ty Cổ phần Nụ Cười Mới Việt Nam\n(Email tự động, vui lòng không phản hồi trực tiếp)");
   var subject="[MedDental] Kết quả kiểm kê kho – "+p.name+" – "+dateStr;
   var body=lines.join("\n");
   var fname=("KiemKe_"+p.name).replace(/[^\w-]+/g,"_")+".xlsx";
@@ -803,9 +808,9 @@ function exportKiemKeEmail(p){
     var shared=false;
     if(file&&navigator.share&&navigator.canShare&&navigator.canShare({files:[file]})){
       shared=true;
-      if(navigator.clipboard&&navigator.clipboard.writeText)navigator.clipboard.writeText(body);
-      navigator.share({files:[file],title:subject}).then(function(){
-        toast("✉ File đính kèm xong · Tiêu đề đã điền · Nhấn Dán để thêm nội dung email");
+      var shareText=subject+"\n\n"+body;
+      navigator.share({files:[file],title:subject,text:shareText}).then(function(){
+        toast("✉ Đã mở soạn email — kiểm tra tiêu đề và nội dung trước khi gửi");
       }).catch(function(err){
         if(err&&err.name==="AbortError")return;
         dlAnchor(blob,fname);
