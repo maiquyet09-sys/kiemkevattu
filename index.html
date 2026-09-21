@@ -637,27 +637,25 @@ function exportHsdAlert(filterBranch){
   lines.push("Phòng Hành chính Hậu cần gửi danh sách vật tư cận date và hết hạn cần xử lý gấp:");
   lines.push("");
   lines.push("📊 TỔNG QUAN");
-  lines.push("   Hết hạn: "+expired.length+" mã (Cần tiêu hủy/xuất hủy)");
-  lines.push("   Cận date (< "+SO_NGAY+" ngày): "+nearExpiry.length+" mã (Ưu tiên xuất dùng/luân chuyển)");
+  lines.push("Hết hạn: "+expired.length+" mã (Cần tiêu hủy/xuất hủy)");
+  lines.push("Cận date (< "+SO_NGAY+" ngày): "+nearExpiry.length+" mã (Ưu tiên xuất dùng/luân chuyển)");
   if(expired.length){
     lines.push("");
     lines.push("🚨 DANH SÁCH HÀNG HẾT HẠN (CẦN XỬ LÝ NGAY)");
     expired.forEach(function(e){
-      lines.push("   "+e.name+" ("+(e.code||"—")+") — Lô: — | SL: "+fmtQty(e)+" | HSD: "+fmtDate(e.exp)+" (Đã quá hạn "+Math.abs(e.days)+" ngày)");
+      lines.push(e.name+" ("+(e.code||"—")+") — Lô: — | SL: "+fmtQty(e)+" | HSD: "+fmtDate(e.exp)+" (Đã quá hạn "+Math.abs(e.days)+" ngày)");
     });
   }
   if(nearExpiry.length){
     lines.push("");
     lines.push("⚠️ DANH SÁCH HÀNG CẬN DATE (ƯU TIÊN XUẤT TRƯỚC)");
     nearExpiry.forEach(function(e){
-      lines.push("   "+e.name+" ("+(e.code||"—")+") — Lô: — | SL: "+fmtQty(e)+" | HSD: "+fmtDate(e.exp)+" (Còn "+e.days+" ngày)");
+      lines.push(e.name+" ("+(e.code||"—")+") — Lô: — | SL: "+fmtQty(e)+" | HSD: "+fmtDate(e.exp)+" (Còn "+e.days+" ngày)");
     });
   }
   lines.push("");
   lines.push("👉 Đề nghị Thủ kho: Kiểm tra thực tế kho và cập nhật phương án xử lý (luân chuyển / thanh lý / hủy) trên hệ thống trước ngày "+hanXuLy+".");
-  lines.push("👉 Cập nhật phương án xử lý: "+appUrl);
-  lines.push("");
-  lines.push("Trân trọng,\nPhòng Hành chính Hậu cần — Công ty Cổ phần Nụ Cười Mới Việt Nam\n(Email tự động, vui lòng không phản hồi trực tiếp)");
+  lines.push("(Email tự động, vui lòng không phản hồi trực tiếp)\nMAI VĂN QUYẾT - CHUYÊN VIÊN HÀNH CHÍNH\nCÔNG TY CỔ PHẦN NỤ CƯỜI MỚI VIỆT NAM");
   var body=lines.join("\n");
   var subject="[MedDental] CẢNH BÁO hạn sử dụng vật tư"+(filterBranch?" – "+filterBranch:"")+" – "+String(now.getMonth()+1).padStart(2,"0")+"/"+now.getFullYear();
   var fname="CanhBao_HSD_"+(filterBranch?filterBranch.replace(/[^\w]/g,"_")+"_":"")+dateStr.replace(/\//g,"-")+".xlsx";
@@ -763,34 +761,30 @@ function exportKiemKeEmail(p){
   p.items.forEach(function(i){if(i.branch&&branches.indexOf(i.branch)<0)branches.push(i.branch);});
   var branchStr=branches.length?branches.join(", "):"cơ sở";
   var fname2=("KiemKe_"+p.name).replace(/[^\w-]+/g,"_")+".xlsx";
-  var appUrl=(typeof window!=="undefined"&&window.location?window.location.href.split("?")[0]:"");
+  var hanXuLyDate=new Date(now.getTime()+5*24*60*60*1000);
+  var hanXuLy=String(hanXuLyDate.getDate()).padStart(2,"0")+"/"+String(hanXuLyDate.getMonth()+1).padStart(2,"0")+"/"+hanXuLyDate.getFullYear();
   var lines=[];
-  /* Mỗi khối = 1 push, dùng \n bên trong → tránh email client thêm paragraph spacing */
-  lines.push("Kính gửi: Ban Giám đốc cơ sở "+branchStr+" và Thủ kho,\nPhòng Hành chính Hậu cần thông báo kết quả kiểm kê kho kỳ "+ky+" như sau:");
+  lines.push("Kính gửi: Ban Giám đốc cơ sở "+branchStr+" & Thủ kho,\nPhòng Hành chính Hậu cần gửi kết quả kiểm kê kho kỳ "+ky+" để Quý đơn vị xem xét và xử lý:");
   var sumBlock=[];
-  sumBlock.push("📊 TỔNG KẾT KẾT QUẢ KIỂM KÊ");
-  sumBlock.push("• Tổng số lượng cuối kỳ (sổ sách)  : "+fmt(totalClose));
-  sumBlock.push("• Tổng số lượng kiểm kê thực tế     : "+fmt(totalKK));
-  sumBlock.push("• Chênh lệch                        : "+(totalDiff>0?"+":"")+fmt(totalDiff));
-  sumBlock.push("• Tỷ lệ khớp kiểm kê                : "+matchPct+"%");
+  sumBlock.push("📊 TỔNG KẾT KIỂM KÊ");
+  sumBlock.push("Tổng mã kiểm kê    : "+counted.length+" mã");
+  sumBlock.push("Khớp sổ sách       : "+matched+" mã ("+matchPct+"%)");
+  sumBlock.push("Chênh lệch         : "+diffs.length+" mã"+(diffs.length?" (cần xử lý)":""));
+  sumBlock.push("Tồn cuối kỳ        : "+fmt(totalClose)+" | Thực tế: "+fmt(totalKK)+" | Chênh: "+(totalDiff>0?"+":"")+fmt(totalDiff));
   lines.push(sumBlock.join("\n"));
   if(diffs.length){
-    var diffBlock=[];
-    diffBlock.push("⚠️ VẬT TƯ CÓ CHÊNH LỆCH ("+diffs.length+" mã)");
+    var diffBlock=["🔍 DANH SÁCH VẬT TƯ CHÊNH LỆCH"];
     diffs.forEach(function(it,i){
       var d=diffOf(it);
       var dStr=(d>0?"+":"")+fmt(d)+(d>0?" (THỪA)":" (THIẾU)");
-      diffBlock.push(String(i+1)+". "+it.name+" (Mã: "+(it.code||"—")+")");
-      diffBlock.push("   • Tồn cuối kỳ : "+fmt(it.close)+"  |  Kiểm thực tế : "+fmt(it.countQty)+"  |  Chênh lệch : "+dStr);
-      diffBlock.push("   • Giải trình  : "+(it.note||"Chưa có giải trình")+"  |  Kho: "+it.branch);
+      diffBlock.push(String(i+1)+". "+it.name+" ("+it.code+") — Tồn sổ: "+fmt(it.close)+" | Thực tế: "+fmt(it.countQty)+" | Chênh: "+dStr+" | Giải trình: "+(it.note||"Chưa có"));
     });
     lines.push(diffBlock.join("\n"));
-    lines.push("Yêu cầu xử lý: Đề nghị Thủ kho rà soát, xác minh nguyên nhân chênh lệch và hoàn tất điều chỉnh số liệu trong 05 ngày làm việc. Trường hợp xác định có mất mát vật tư, thực hiện lập biên bản và xử lý theo quy định.");
+    lines.push("👉 Đề nghị Thủ kho: Xác minh nguyên nhân chênh lệch và hoàn tất điều chỉnh số liệu trước ngày "+hanXuLy+". Trường hợp mất mát vật tư, lập biên bản và xử lý theo quy định.");
   }else{
     lines.push("✅ Kết quả kiểm kê: Toàn bộ vật tư đã kiểm đều KHỚP sổ sách — không có chênh lệch.");
   }
-  lines.push("Chi tiết kết quả kiểm kê: Xem biên bản đính kèm ("+fname2+").");
-  lines.push("Trân trọng,\nMAI VĂN QUYẾT\nChuyên viên Hành chính\nCÔNG TY CỔ PHẦN NỤ CƯỜI MỚI VIỆT NAM");
+  lines.push("(Email tự động, vui lòng không phản hồi trực tiếp)\nMAI VĂN QUYẾT - CHUYÊN VIÊN HÀNH CHÍNH\nCÔNG TY CỔ PHẦN NỤ CƯỜI MỚI VIỆT NAM");
   var subject="[MedDental] Kết quả kiểm kê kho – "+p.name+" – "+dateStr;
   var body=lines.join("\n");
   var fname=("KiemKe_"+p.name).replace(/[^\w-]+/g,"_")+".xlsx";
