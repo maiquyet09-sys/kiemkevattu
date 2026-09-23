@@ -975,7 +975,8 @@ function renderHome(){
   });
   h+='</div></div>';
   h+='<div class="wrap mt24" style="padding-bottom:40px"><div class="sec">Kỳ kiểm kê</div>';
-  h+='<button class="btn btn-primary" style="margin-bottom:12px" onclick="A.go(\'upload\')">+ Tạo kỳ mới · Upload file tồn kho</button>';
+  h+='<button class="btn btn-primary" style="margin-bottom:8px" onclick="A.go(\'upload\')">+ Tạo kỳ mới · Upload file tồn kho</button>';
+  h+='<button class="btn btn-outline" style="margin-bottom:12px" onclick="A.go(\'baocao\')">📄 Tạo báo cáo kiểm kê (.docx)</button>';
   if(!db.periods.length){
     h+='<div class="card" style="font-size:14px;color:var(--mut)"><div style="font-weight:700;color:var(--ink);margin-bottom:8px">Quy trình 3 bước:</div>'+
       '<div style="margin-bottom:6px"><b style="color:var(--teal)">1.</b> Xuất báo cáo tồn kho từ MISA ra Excel, upload lên đây.</div>'+
