@@ -11,33 +11,24 @@
 <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.4.0/exceljs.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/docxtemplater/3.66.4/docxtemplater.min.js"
+  onerror="this.onerror=null;var s=document.createElement('script');s.src='https://cdn.jsdelivr.net/npm/docxtemplater@3.44.0/build/docxtemplater.js';s.onerror=function(){var s2=document.createElement('script');s2.src='https://unpkg.com/[email protected]/build/docxtemplater.js';document.head.appendChild(s2);};document.head.appendChild(s);"></script>
+<script src="https://cdn.jsdelivr.net/npm/pizzip@3.1.7/dist/pizzip.min.js"
+  onerror="this.onerror=null;var s=document.createElement('script');s.src='https://unpkg.com/[email protected]/dist/pizzip.min.js';s.onerror=function(){var s2=document.createElement('script');s2.src='https://cdn.jsdelivr.net/npm/[email protected]/dist/pizzip.js';document.head.appendChild(s2);};document.head.appendChild(s);"></script>
 <script>
-/* Tải PizZip + Docxtemplater bền hơn: thử nhiều CDN, có thể gọi lại nhiều lần mà không tải trùng */
-(function(){
-  function loadFrom(urls,i,done){
-    if(i>=urls.length){done(false);return;}
+/* Cho phép gọi lại thủ công nếu tất cả nguồn CDN ở trên đều lỗi khi trang tải xong */
+window.ensureBcLibs=function(){
+  if(typeof PizZip==="undefined"){
     var s=document.createElement('script');
-    s.src=urls[i];
-    s.onload=function(){done(true);};
-    s.onerror=function(){loadFrom(urls,i+1,done);};
+    s.src="https://cdn.jsdelivr.net/npm/[email protected]/dist/pizzip.js";
     document.head.appendChild(s);
   }
-  var pzUrls=[
-    "https://cdn.jsdelivr.net/npm/pizzip@3.1.7/dist/pizzip.min.js",
-    "https://unpkg.com/[email protected]/dist/pizzip.min.js"
-  ];
-  var dtUrls=[
-    "https://cdnjs.cloudflare.com/ajax/libs/docxtemplater/3.66.4/docxtemplater.js",
-    "https://cdn.jsdelivr.net/npm/docxtemplater@3.44.0/build/docxtemplater.js",
-    "https://unpkg.com/[email protected]/build/docxtemplater.js"
-  ];
-  var pzLoading=false,dtLoading=false;
-  window.ensureBcLibs=function(){
-    if(typeof PizZip==="undefined"&&!pzLoading){pzLoading=true;loadFrom(pzUrls,0,function(){pzLoading=false;});}
-    if(typeof Docxtemplater==="undefined"&&!dtLoading){dtLoading=true;loadFrom(dtUrls,0,function(){dtLoading=false;});}
-  };
-  window.ensureBcLibs();
-})();
+  if(typeof Docxtemplater==="undefined"){
+    var s2=document.createElement('script');
+    s2.src="https://cdn.jsdelivr.net/npm/[email protected]/build/docxtemplater.js";
+    document.head.appendChild(s2);
+  }
+};
 </script>
 <style>
 :root{
