@@ -597,8 +597,8 @@ function readKiemKeXlsx(file,cb){
           var note=String(row[10]||'').trim();
           totalClose+=closeQty;
           if(row[8]!==''&&row[8]!==null&&row[8]!==undefined)totalKiem+=kiemQty;
-          /* HHTM: mã bắt đầu bằng 9 hoặc code prefix 9 */
-          if(code&&(code.startsWith('9')||code.startsWith('16')||code.startsWith('13'))){
+          /* HHTM: chỉ lấy mã hàng bắt đầu bằng 90000 */
+          if(code&&code.startsWith('90000')){
             hhtmItems.push({
               stt:String(hhtmItems.length+1),
               ten_hang:name,dvt:String(row[3]||''),
