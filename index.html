@@ -532,6 +532,7 @@ var db={periods:[],hsd:{}};
 var route={view:"home"};
 var P=null;   // trạng thái màn hình kiểm kê
 var BC=null;  // trạng thái màn hình tạo báo cáo
+var BCMETA=null; // thông tin bổ sung cho báo cáo (số văn bản, thời gian, người kiểm kê...)
 var ST=null;  // trạng thái bảng tồn kho (chỉ xem)
 var UP=null;  // trạng thái upload
 var SB=null;  // trạng thái sheet nhập liệu
@@ -605,56 +606,110 @@ function readKiemKeXlsx(file,cb){
   reader.readAsArrayBuffer(file);
 }
 
+function ensureBCMeta(){
+  if(!BCMETA)BCMETA={soVanBan:'',diaDiem:'Hà Nội',thang:String(new Date().getMonth()+1),nam:String(new Date().getFullYear()),nguyennhan:'',br:{}};
+  if(BC&&BC.branches)BC.branches.forEach(function(b){
+    if(!BCMETA.br[b.name])BCMETA.br[b.name]={thoigian:'',nguoi:''};
+  });
+}
+
 function generateBaoCao(){
   if(!BC||!BC.branches.length){toast("Chưa có dữ liệu — hãy chọn file Excel kiểm kê");return;}
+  ensureBCMeta();
   try{
     var totC=0,totK=0,rows='';
     BC.branches.forEach(function(br){
       var chenh=br.totalKiem-br.totalClose;
-      var chenhTxt=chenh===0?'Khớp':(chenh>0?'+':'')+fmt(chenh);
-      rows+='<tr><td>'+esc(br.name)+'</td><td align="right">'+fmt(br.totalClose)+'</td><td align="right">'+fmt(br.totalKiem)+'</td><td align="right">'+chenhTxt+'</td></tr>';
+      var chenhTxt=chenh===0?'-':(chenh>0?'+':'')+fmt(chenh);
+      rows+='<tr><td>'+esc(br.name)+'</td><td align="right">'+fmt(br.totalClose)+'</td><td align="right">'+fmt(br.totalKiem)+'</td><td align="right">'+chenhTxt+'</td><td></td></tr>';
       totC+=br.totalClose;totK+=br.totalKiem;
     });
     var totChenh=totK-totC;
-    var totTxt=totChenh===0?'Khớp':(totChenh>0?'+':'')+fmt(totChenh);
-    rows+='<tr><td><b>TỔNG CỘNG</b></td><td align="right"><b>'+fmt(totC)+'</b></td><td align="right"><b>'+fmt(totK)+'</b></td><td align="right"><b>'+totTxt+'</b></td></tr>';
+    var totTxt=totChenh===0?'-':(totChenh>0?'+':'')+fmt(totChenh);
+    rows+='<tr><td><b>TỔNG CỘNG</b></td><td align="right"><b>'+fmt(totC)+'</b></td><td align="right"><b>'+fmt(totK)+'</b></td><td align="right"><b>'+totTxt+'</b></td><td></td></tr>';
+
+    var thoigianList='',thanhphanList='';
+    BC.branches.forEach(function(br){
+      var m=BCMETA.br[br.name]||{thoigian:'',nguoi:''};
+      thoigianList+='<p>- '+(m.thoigian?esc(m.thoigian)+' ':'')+esc(br.name)+'</p>';
+      thanhphanList+='<p>- Tại cơ sở '+esc(br.name)+(m.nguoi?': '+esc(m.nguoi):'')+'</p>';
+    });
 
     var hhtmSections='';
     BC.branches.forEach(function(br){
-      hhtmSections+='<h2>Danh sách hàng hóa thương mại &ndash; '+esc(br.name)+'</h2>';
+      var m=BCMETA.br[br.name]||{thoigian:''};
+      hhtmSections+='<p><b>CHI NHÁNH '+esc(br.name)+(m.thoigian?' ('+esc(m.thoigian)+')':'')+'</b></p>';
       if(br.hhtmItems&&br.hhtmItems.length){
         var itemRows='';
         br.hhtmItems.forEach(function(it){
           itemRows+='<tr><td align="center">'+esc(it.stt)+'</td><td>'+esc(it.ten_hang)+'</td><td align="center">'+esc(it.dvt)+'</td><td align="right">'+esc(it.sl_hang)+'</td><td align="right">'+esc(it.kiem_ke)+'</td></tr>';
         });
-        hhtmSections+='<table><thead><tr><th>STT</th><th>Tên hàng</th><th>ĐVT</th><th>SL tồn</th><th>SL kiểm kê</th></tr></thead><tbody>'+itemRows+'</tbody></table>';
+        hhtmSections+='<table><thead><tr><th>STT</th><th>Tên hàng</th><th>ĐVT</th><th>SL hàng hóa</th><th>Kiểm kê</th></tr></thead><tbody>'+itemRows+'</tbody></table>';
       }else{
         hhtmSections+='<p><i>(Không có dữ liệu)</i></p>';
       }
     });
 
-    var today=new Date().toLocaleDateString('vi-VN');
+    var nguyenNhanHtml='';
+    if(BCMETA.nguyennhan&&BCMETA.nguyennhan.trim()){
+      nguyenNhanHtml='<p><b>Nguyên nhân chênh lệch:</b></p>';
+      BCMETA.nguyennhan.split('\n').forEach(function(line){
+        if(line.trim())nguyenNhanHtml+='<p>'+esc(line)+'</p>';
+      });
+    }
+
+    var today=new Date();
+    var ngayLap=today.getDate()+'/'+(today.getMonth()+1)+'/'+today.getFullYear();
+
     var html='<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:w="urn:schemas-microsoft-com:office:word" xmlns="http://www.w3.org/TR/REC-html40">'
       +'<head><meta charset="utf-8"><title>Báo cáo kiểm kê</title>'
       +'<!--[if gte mso 9]><xml><w:WordDocument><w:View>Print</w:View><w:Zoom>100</w:Zoom></w:WordDocument></xml><![endif]-->'
       +'<style>'
       +'@page{size:21cm 29.7cm;margin:2cm;}'
       +'body{font-family:"Times New Roman",serif;font-size:13pt;}'
-      +'h1{font-size:16pt;text-align:center;text-transform:uppercase;}'
-      +'h2{font-size:13pt;margin-top:18pt;}'
-      +'table{border-collapse:collapse;width:100%;margin-bottom:12pt;}'
+      +'h1{font-size:16pt;text-align:center;text-transform:uppercase;margin-top:18pt;}'
+      +'h2{font-size:13pt;margin-top:16pt;}'
+      +'table{border-collapse:collapse;width:100%;margin:8pt 0 12pt;}'
       +'th,td{border:1px solid #000;padding:4pt 6pt;font-size:11pt;}'
-      +'th{background:#dbe5f1;font-weight:bold;text-align:center;}'
+      +'th{background:#dbe5f1;font-weight:bold;text-align:center;text-transform:uppercase;}'
+      +'.hdrtbl td{border:none;padding:0;vertical-align:top;}'
+      +'.center{text-align:center;}'
+      +'.sign td{border:none;text-align:center;font-weight:bold;padding-top:8pt;}'
       +'</style></head><body>'
-      +'<h1>Báo cáo kiểm kê kho</h1>'
-      +'<p style="text-align:center">Ngày lập: '+today+'</p>'
-      +'<h2>Tổng hợp theo chi nhánh</h2>'
-      +'<table><thead><tr><th>Chi nhánh</th><th>Tồn cuối</th><th>Kiểm kê</th><th>Chênh lệch</th></tr></thead><tbody>'+rows+'</tbody></table>'
+      +'<table class="hdrtbl"><tr>'
+      +'<td width="50%"><b>CÔNG TY CỔ PHẦN NỤ CƯỜI MỚI VIỆT NAM</b><br>Số: '+(esc(BCMETA.soVanBan)||'…………')+'/BB/'+BCMETA.nam+'/MDT</td>'
+      +'<td width="50%" class="center"><b>CỘNG HÒA XÃ HỘI CHỦ NGHĨA VIỆT NAM</b><br><b>Độc lập - Tự do - Hạnh phúc</b><br><i>'+esc(BCMETA.diaDiem)+', ngày '+ngayLap.split('/')[0]+' tháng '+ngayLap.split('/')[1]+' năm '+ngayLap.split('/')[2]+'</i></td>'
+      +'</tr></table>'
+      +'<h1>Báo cáo</h1>'
+      +'<p class="center"><i>(V/v kiểm kê vật tư tháng '+esc(BCMETA.thang)+')</i></p>'
+      +'<h2>I. THÔNG TIN CHUNG</h2>'
+      +'<p><b>1. Thời gian kiểm kê:</b></p>'+thoigianList
+      +'<p><b>2. Thành phần kiểm kê:</b></p>'+thanhphanList
+      +'<p><b>3. Nội dung kiểm kê:</b> Chốt số liệu kho vật tư tháng '+esc(BCMETA.thang)+'</p>'
+      +'<h2>II. BÁO CÁO KẾT QUẢ KIỂM KÊ VẬT TƯ</h2>'
+      +'<p>1. Kiểm kê vật tư tồn kho <i>(theo biên bản kiểm kê đính kèm)</i></p>'
+      +'<table><thead><tr><th>STT</th><th>Chi nhánh</th><th>Cuối kỳ (SL)</th><th>SL kiểm kê</th><th>Chênh</th><th>Ghi chú</th></tr></thead><tbody>'
+      +(function(){var s='';BC.branches.forEach(function(br,i){var chenh=br.totalKiem-br.totalClose;var chenhTxt=chenh===0?'-':(chenh>0?'+':'')+fmt(chenh);s+='<tr><td align="center">'+(i+1)+'</td><td>'+esc(br.name)+'</td><td align="right">'+fmt(br.totalClose)+'</td><td align="right">'+fmt(br.totalKiem)+'</td><td align="right">'+chenhTxt+'</td><td></td></tr>';});return s;})()
+      +'<tr><td colspan="2" align="center"><b>TỔNG CỘNG</b></td><td align="right"><b>'+fmt(totC)+'</b></td><td align="right"><b>'+fmt(totK)+'</b></td><td align="right"><b>'+totTxt+'</b></td><td></td></tr>'
+      +'</tbody></table>'
+      +nguyenNhanHtml
+      +'<h2>III. KIỂM KÊ SỐ LƯỢNG HÀNG HÓA THƯƠNG MẠI</h2>'
       +hhtmSections
+      +'<p><i>Phòng KT chịu trách nhiệm đối chiếu chênh lệch HHTM với các cơ sở.</i></p>'
+      +'<h2>IV. PHƯƠNG ÁN ĐỀ XUẤT</h2>'
+      +'<p><b>1. Đối với hàng hóa thương mại bị thiếu/thừa:</b></p>'
+      +'<p><b>- Trường hợp hàng thiếu:</b></p>'
+      +'<p>+ Cơ sở có trách nhiệm bồi hoàn hàng hóa thiếu bằng việc nộp tiền về Phòng Kế toán (giá trị bồi hoàn theo quy định của MDT).</p>'
+      +'<p><b>- Trường hợp hàng thừa:</b></p>'
+      +'<p>+ Phòng Kế toán có trách nhiệm nhập bổ sung số lượng hàng thừa vào kho để theo dõi và quản lý.</p>'
+      +'<p>+ Trường hợp kỳ kiểm kê tháng kế tiếp phát hiện chênh lệch âm, số lượng hàng âm sẽ được cấn trừ vào lượng hàng thừa đã ghi nhận trước đó.</p>'
+      +'<p><i>Trân trọng báo cáo!</i></p>'
+      +'<table class="sign" width="100%"><tr><td width="50%">PHÒNG KẾ TOÁN HO</td><td width="50%">PHÒNG HÀNH CHÍNH HO</td></tr>'
+      +'<tr><td>&nbsp;<br>&nbsp;<br>&nbsp;<br>&nbsp;</td><td>&nbsp;</td></tr></table>'
       +'</body></html>';
 
     var blob=new Blob(['\ufeff'+html],{type:'application/msword;charset=utf-8'});
-    var fname='BaoCao_KiemKe_'+(new Date().toLocaleDateString('vi-VN').replace(/\//g,'-'))+'.doc';
+    var fname='BaoCao_KiemKe_T'+BCMETA.thang+'_'+BCMETA.nam+'.doc';
     var file=null;try{file=new File([blob],fname,{type:blob.type});}catch(er){}
     if(file&&navigator.share&&navigator.canShare&&navigator.canShare({files:[file]})){
       navigator.share({files:[file],title:'Báo cáo kiểm kê'}).catch(function(){dlAnchor(blob,fname);});
@@ -664,6 +719,7 @@ function generateBaoCao(){
 }
 
 function renderBaoCao(){
+  ensureBCMeta();
   var h='<div class="topbar"><div class="trow wrap"><button class="back" onclick="A.go(\'home\')">‹</button><div class="ttl">Tạo báo cáo kiểm kê</div></div><div style="height:10px"></div></div>';
   h+='<div class="wrap" style="padding-top:16px;padding-bottom:100px">';
   h+='<div class="lbl">Chọn file Excel biên bản kiểm kê (có thể chọn nhiều)</div>';
@@ -687,6 +743,28 @@ function renderBaoCao(){
     if(BC.errors&&BC.errors.length){
       h+='<div class="note-warn" style="margin-top:8px">⚠️ Không đọc được: '+BC.errors.join(', ')+'</div>';
     }
+
+    h+='<div class="bcsec" style="margin-top:20px">Thông tin báo cáo (theo mẫu)</div>';
+    h+='<div style="display:flex;gap:8px;flex-wrap:wrap">';
+    h+='<div style="flex:1;min-width:140px"><label class="lbl">Số biên bản</label><input class="inp" placeholder="01" value="'+esc(BCMETA.soVanBan)+'" oninput="A.bcSet(\'soVanBan\',this.value)"></div>';
+    h+='<div style="flex:1;min-width:100px"><label class="lbl">Tháng</label><input class="inp" value="'+esc(BCMETA.thang)+'" oninput="A.bcSet(\'thang\',this.value)"></div>';
+    h+='<div style="flex:1;min-width:100px"><label class="lbl">Năm</label><input class="inp" value="'+esc(BCMETA.nam)+'" oninput="A.bcSet(\'nam\',this.value)"></div>';
+    h+='</div>';
+    h+='<label class="lbl" style="margin-top:10px">Địa điểm lập báo cáo</label><input class="inp" value="'+esc(BCMETA.diaDiem)+'" oninput="A.bcSet(\'diaDiem\',this.value)">';
+
+    h+='<div class="bcsec" style="margin-top:16px">Thời gian &amp; người kiểm kê từng chi nhánh</div>';
+    BC.branches.forEach(function(br,i){
+      var m=BCMETA.br[br.name]||{thoigian:'',nguoi:''};
+      h+='<div style="border:1px solid var(--line);border-radius:12px;padding:10px;margin-top:8px;background:var(--card)">';
+      h+='<div style="font-weight:700;margin-bottom:6px">'+esc(br.name)+'</div>';
+      h+='<input class="inp" placeholder="VD: Ngày 03/09/2026, sáng 9h00-11h30" value="'+esc(m.thoigian)+'" oninput="A.bcBr('+i+',\'thoigian\',this.value)" style="margin-bottom:6px">';
+      h+='<input class="inp" placeholder="Người kiểm kê (VD: Nguyễn Văn A – Thủ kho)" value="'+esc(m.nguoi)+'" oninput="A.bcBr('+i+',\'nguoi\',this.value)">';
+      h+='</div>';
+    });
+
+    h+='<label class="lbl" style="margin-top:16px">Nguyên nhân chênh lệch (mỗi dòng một ý, tuỳ chọn)</label>';
+    h+='<textarea class="inp" rows="4" placeholder="- Tại cơ sở ...: mã ... thiếu/thừa do ..." oninput="A.bcSet(\'nguyennhan\',this.value)">'+esc(BCMETA.nguyennhan)+'</textarea>';
+    h+='<div class="note-warn" style="margin-top:8px">⚠️ Báo cáo chưa có cột "Giá trị" (tiền) vì file Excel không có đơn giá vật tư — cột này để trống, bạn có thể điền tay sau khi mở file Word.</div>';
   }
   h+='</div>';
   h+='<div class="botbar"><div class="botin"><button class="bcbtn bcok" onclick="generateBaoCao()"'+(BC&&BC.branches.length?'':' disabled')+' style="box-shadow:0 8px 32px rgba(0,0,0,.5)">📄 Tạo báo cáo Word</button></div></div>';
@@ -1447,10 +1525,18 @@ var A={
         if(err){BC.errors.push(f.name);}
         else{branches.forEach(function(b){BC.branches.push(b);});}
         pending--;
-        if(pending===0){BC.loading=false;renderBaoCao();}
+        if(pending===0){BC.loading=false;ensureBCMeta();renderBaoCao();}
       });
     });
     input.value='';
+  },
+  bcSet:function(key,val){ensureBCMeta();BCMETA[key]=val;},
+  bcBr:function(idx,field,val){
+    ensureBCMeta();
+    var br=BC&&BC.branches&&BC.branches[idx];
+    if(!br)return;
+    if(!BCMETA.br[br.name])BCMETA.br[br.name]={thoigian:'',nguoi:''};
+    BCMETA.br[br.name][field]=val;
   },
   openPeriod:function(id){P={id:id,q:"",flt:"all",br:"all",limit:80};route={view:"period"};render();},
   delPeriod:function(id){
