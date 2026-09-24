@@ -571,6 +571,7 @@ function toast(m){
 
 /* ================= Trang chủ ================= */
 /* ================= Tạo báo cáo kiểm kê ================= */
+var HHTM_CODES=["90000001","90000003","90000004","90000008","90000009","90000010","90000012","90000024","90000025","90000026","90000027","90000028","90000029","99000002"];
 function readKiemKeXlsx(file,cb){
   var reader=new FileReader();
   reader.onload=function(e){
@@ -578,6 +579,7 @@ function readKiemKeXlsx(file,cb){
       var wb=XLSX.read(new Uint8Array(e.target.result),{type:'array'});
       var result=[];
       wb.SheetNames.forEach(function(sheetName){
+        if(norm(sheetName).indexOf('han su dung')!==-1)return; /* bỏ qua sheet phụ HSD, không phải chi nhánh */
         var ws=wb.Sheets[sheetName];
         var rows=XLSX.utils.sheet_to_json(ws,{header:1,defval:''});
         var branchName=sheetName;
@@ -595,10 +597,14 @@ function readKiemKeXlsx(file,cb){
           var closeQty=parseNum(row[7]);
           var kiemQty=parseNum(row[8]);
           var note=String(row[10]||'').trim();
-          totalClose+=closeQty;
-          if(row[8]!==''&&row[8]!==null&&row[8]!==undefined)totalKiem+=kiemQty;
-          /* HHTM: chỉ lấy mã hàng bắt đầu bằng 90000 */
-          if(code&&code.startsWith('90000')){
+          var codeNorm=code.replace(/\.0+$/,'');
+          var isHHTM=codeNorm&&HHTM_CODES.indexOf(codeNorm)!==-1;
+          if(!isHHTM){
+            totalClose+=closeQty;
+            if(row[8]!==''&&row[8]!==null&&row[8]!==undefined)totalKiem+=kiemQty;
+          }
+          /* HHTM: chỉ lấy đúng các mã hàng trong danh sách HHTM_CODES, tính riêng ở mục III, không cộng vào tổng tồn/kiểm kê vật tư */
+          if(isHHTM){
             hhtmItems.push({
               stt:String(hhtmItems.length+1),
               ten_hang:name,dvt:String(row[3]||''),
