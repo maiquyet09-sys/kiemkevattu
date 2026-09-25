@@ -621,10 +621,24 @@ function readKiemKeXlsx(file,cb){
   reader.readAsArrayBuffer(file);
 }
 
+var DEFAULT_NGUOI=[
+  {key:'bui thi xuan',name:'Bà Vũ Hải Vân – Trợ thủ kiêm quản lý kho'},
+  {key:'le van luong',name:'Bà Vũ Thị Ngọc Lan – Trưởng trợ thủ kiêm thủ kho'},
+  {key:'cat linh',name:'Bà Đỗ Thị Phương Thảo – Trưởng trợ thủ kiêm quản lý kho'},
+  {key:'nghia dung',name:'Bà Lê Thị Thủy – Thủ kho kiêm quản lý kho'},
+  {key:'quang ninh',name:'Bà Đỗ Thị Quỳnh – Thủ kho kiêm quản lý kho'}
+];
+function defaultNguoi(branchName){
+  var n=norm(branchName);
+  for(var i=0;i<DEFAULT_NGUOI.length;i++){
+    if(n.indexOf(DEFAULT_NGUOI[i].key)!==-1)return DEFAULT_NGUOI[i].name;
+  }
+  return '';
+}
 function ensureBCMeta(){
   if(!BCMETA)BCMETA={soVanBan:'',diaDiem:'Hà Nội',thang:String(new Date().getMonth()+1),nam:String(new Date().getFullYear()),nguyennhan:'',br:{}};
   if(BC&&BC.branches)BC.branches.forEach(function(b){
-    if(!BCMETA.br[b.name])BCMETA.br[b.name]={thoigian:'',nguoi:'',giatri:''};
+    if(!BCMETA.br[b.name])BCMETA.br[b.name]={thoigian:'',nguoi:defaultNguoi(b.name),giatri:''};
   });
 }
 
@@ -1561,7 +1575,7 @@ var A={
     ensureBCMeta();
     var br=BC&&BC.branches&&BC.branches[idx];
     if(!br)return;
-    if(!BCMETA.br[br.name])BCMETA.br[br.name]={thoigian:'',nguoi:'',giatri:''};
+    if(!BCMETA.br[br.name])BCMETA.br[br.name]={thoigian:'',nguoi:defaultNguoi(br.name),giatri:''};
     BCMETA.br[br.name][field]=val;
   },
   openPeriod:function(id){P={id:id,q:"",flt:"all",br:"all",limit:80};route={view:"period"};render();},
