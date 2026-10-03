@@ -567,7 +567,7 @@ function exportExcelBasic(p,fname){
 }
 
 /* ================= State ================= */
-var db={periods:[],hsd:{},handovers:[],explains:[]};
+var db={periods:[],hsd:{},handovers:[],explains:[],counters:{}};
 var route={view:"home"};
 var P=null;   // trạng thái màn hình kiểm kê
 var BC=null;  // trạng thái màn hình tạo báo cáo
@@ -955,19 +955,28 @@ function chipGroupUI(options,selArr,toggleFn){
   var h='<div class="chipwrap">';
   options.forEach(function(o){
     var on=selArr.indexOf(o)!==-1;
-    h+='<span class="chip'+(on?' chip-on':'')+'" onclick="'+toggleFn+'(\''+o.replace(/'/g,"\\'")+'\')">'+(on?'☑ ':'☐ ')+esc(o)+'</span>';
+    h+='<span class="chip'+(on?' chip-on':'')+'" onclick="'+toggleFn+'\''+o.replace(/'/g,"\\'")+'\')">'+(on?'☑ ':'☐ ')+esc(o)+'</span>';
   });
   h+='</div>';
   return h;
 }
 function toggleArr(arr,val){var i=arr.indexOf(val);if(i===-1)arr.push(val);else arr.splice(i,1);}
+function nextSoVanBan(prefix){
+  var year=new Date().getFullYear();
+  var key=prefix+'_'+year;
+  if(!db.counters)db.counters={};
+  var n=(db.counters[key]||0)+1;
+  db.counters[key]=n;
+  store.save();
+  return String(n).padStart(2,'0')+'/'+prefix+'/'+year;
+}
 function dot(val,ph){return val&&String(val).trim()?esc(val):(ph||'..................');}
 
 /* ================= 1. Biên bản bàn giao ================= */
 var HV_LOAI=['Công cụ dụng cụ','Tài sản cố định','Vật tư tiêu hao','Thiết bị – máy móc','Hồ sơ – chứng từ'];
 var HV_LYDO=['Cấp phát mới','Luân chuyển nội bộ','Thu hồi / nhập lại kho','Nghỉ việc / điều chuyển','Cho mượn / hoàn trả','Nhận / trả NCC'];
 var HV_HOSO=['Hóa đơn / phiếu nhập kho','Phiếu xuất / điều chuyển','Sổ bảo hành, HDSD','Phụ kiện đi kèm','Hình ảnh hiện trạng'];
-function newHV(){return {id:Date.now().toString(36),soBB:'',boPhan:'',
+function newHV(autoNumber){return {id:Date.now().toString(36),soBB:autoNumber?nextSoVanBan('BBBG'):'',boPhan:'',
   loai:[],loaiKhac:'',lyDo:[],lyDoKhac:'',
   thoiGian:'',diaDiem:'',canCu:'',
   benGiao:{ten:'',chucVu:'',boPhan:'',dienThoai:''},
@@ -1053,7 +1062,7 @@ function renderHandoverEdit(){
   var v=HV;
   var h='<div class="topbar"><div class="trow wrap"><button class="back" onclick="A.go(\'handover\')">‹</button><div class="ttl">Biên bản bàn giao</div></div><div style="height:10px"></div></div>';
   h+='<div class="wrap" style="padding-top:16px;padding-bottom:110px">';
-  h+='<div style="display:flex;gap:8px"><div style="flex:1"><label class="lbl">Số biên bản</label><input class="inp" placeholder="VD: 05/BBBG-2026" value="'+esc(v.soBB)+'" oninput="A.hvField(\'soBB\',this.value)"></div>';
+  h+='<div style="display:flex;gap:8px"><div style="flex:1"><label class="lbl">Số biên bản (tự động, có thể sửa)</label><input class="inp" value="'+esc(v.soBB)+'" oninput="A.hvField(\'soBB\',this.value)"></div>';
   h+='<div style="flex:1"><label class="lbl">Bộ phận / Chi nhánh</label><input class="inp" value="'+esc(v.boPhan)+'" oninput="A.hvField(\'boPhan\',this.value)"></div></div>';
 
   h+='<label class="lbl" style="margin-top:10px">1. Loại bàn giao (chạm để chọn, có thể chọn nhiều)</label>';
@@ -1123,7 +1132,7 @@ var EX_LOAI=['Công cụ dụng cụ','Tài sản cố định','Vật tư tiêu
 var EX_PHATHIEN=['Kiểm kê định kỳ','Kiểm kê đột xuất','Đối soát tồn / doanh thu','Báo cáo bộ phận','Đối soát công nợ NCC'];
 var EX_NGUYENNHAN=['Hao hụt định mức','Sai sót nhập – xuất','Hư hỏng / hết hạn','Mất mát / thất lạc','Dùng sai mục đích','Bàn giao thiếu chứng từ','Vượt định mức tiêu hao'];
 var EX_BANGCHUNG=['Biên bản kiểm kê','Phiếu nhập / xuất kho','Thẻ kho / sổ kho','Hình ảnh / camera','Báo cáo tiêu hao / DT'];
-function newEX(){return {id:Date.now().toString(36),soPhieu:'',boPhan:'',
+function newEX(autoNumber){return {id:Date.now().toString(36),soPhieu:autoNumber?nextSoVanBan('GT'):'',boPhan:'',
   nguoiGiaiTrinh:{ten:'',chucVu:'',boPhan:'',thoiGian:''},
   loai:[],loaiKhac:'',phatHien:[],phatHienKhac:'',
   ngayPhatHien:'',thoiDiemXayRa:'',diaDiem:'',canCu:'',
@@ -1236,7 +1245,7 @@ function renderExplainEdit(){
   var v=EX;
   var h='<div class="topbar"><div class="trow wrap"><button class="back" onclick="A.go(\'explain\')">‹</button><div class="ttl">Bản giải trình thất thoát</div></div><div style="height:10px"></div></div>';
   h+='<div class="wrap" style="padding-top:16px;padding-bottom:110px">';
-  h+='<div style="display:flex;gap:8px"><div style="flex:1"><label class="lbl">Số phiếu</label><input class="inp" placeholder="VD: 03/GT-2026" value="'+esc(v.soPhieu)+'" oninput="A.exField(\'soPhieu\',this.value)"></div>';
+  h+='<div style="display:flex;gap:8px"><div style="flex:1"><label class="lbl">Số phiếu (tự động, có thể sửa)</label><input class="inp" value="'+esc(v.soPhieu)+'" oninput="A.exField(\'soPhieu\',this.value)"></div>';
   h+='<div style="flex:1"><label class="lbl">Bộ phận / Chi nhánh</label><input class="inp" value="'+esc(v.boPhan)+'" oninput="A.exField(\'boPhan\',this.value)"></div></div>';
 
   h+='<div class="bcsec" style="margin-top:16px">I. Người giải trình</div>';
@@ -2097,10 +2106,10 @@ var A={
     input.value='';
   },
   /* ---- Biên bản bàn giao ---- */
-  hvNew:function(){HV=newHV();route={view:'handoverEdit'};render();},
+  hvNew:function(){HV=newHV(true);route={view:'handoverEdit'};render();},
   hvOpen:function(id){var v=null;for(var i=0;i<db.handovers.length;i++)if(db.handovers[i].id===id)v=db.handovers[i];if(!v)return;HV=v;route={view:'handoverEdit'};render();},
   hvDelete:function(id){if(!confirm('Xoá biên bản này?'))return;db.handovers=db.handovers.filter(function(v){return v.id!==id;});store.save();renderHandoverList();},
-  hvBlank:function(){exportDocHtml(generateHandoverDoc(newHV()),'Mau_BienBanBanGiao_trong.doc');},
+  hvBlank:function(){exportDocHtml(generateHandoverDoc(newHV(false)),'Mau_BienBanBanGiao_trong.doc');},
   hvField:function(k,val){HV[k]=val;},
   hvPerson:function(side,k,val){HV[side][k]=val;},
   hvToggle:function(field,val){toggleArr(HV[field],val);renderHandoverEdit();},
@@ -2115,10 +2124,10 @@ var A={
   },
   hvPrint:function(){A.hvSave(false);printPreviewHtml(generateHandoverDoc());},
   /* ---- Phiếu / Bản giải trình thất thoát ---- */
-  exNew:function(){EX=newEX();route={view:'explainEdit'};render();},
+  exNew:function(){EX=newEX(true);route={view:'explainEdit'};render();},
   exOpen:function(id){var v=null;for(var i=0;i<db.explains.length;i++)if(db.explains[i].id===id)v=db.explains[i];if(!v)return;EX=v;route={view:'explainEdit'};render();},
   exDelete:function(id){if(!confirm('Xoá phiếu này?'))return;db.explains=db.explains.filter(function(v){return v.id!==id;});store.save();renderExplainList();},
-  exBlank:function(){exportDocHtml(generateExplainDoc(newEX()),'Mau_GiaiTrinhThatThoat_trong.doc');},
+  exBlank:function(){exportDocHtml(generateExplainDoc(newEX(false)),'Mau_GiaiTrinhThatThoat_trong.doc');},
   exField:function(k,val){EX[k]=val;},
   exPerson:function(k,val){EX.nguoiGiaiTrinh[k]=val;},
   exToggle:function(field,val){toggleArr(EX[field],val);renderExplainEdit();},
@@ -2326,6 +2335,7 @@ var A={
   if(saved&&saved.periods)db=saved;
   if(!db.handovers)db.handovers=[];
   if(!db.explains)db.explains=[];
+  if(!db.counters)db.counters={};
   render();
   /* Watermark */
   try{
