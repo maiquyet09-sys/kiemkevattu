@@ -58,6 +58,7 @@ body{background:var(--bg);color:var(--ink);font-family:'Be Vietnam Pro',system-u
 .chips::-webkit-scrollbar{display:none}
 .chip{flex:0 0 auto;border:1px solid var(--line);background:rgba(255,255,255,.06);color:var(--mut);border-radius:999px;padding:7px 12px;font:inherit;font-size:13px;font-weight:600;white-space:nowrap;cursor:pointer}
 .chip-on{background:var(--teal);border-color:var(--teal);color:#071a14;font-weight:700}
+.chipwrap{display:flex;flex-wrap:wrap;gap:6px;margin:6px 0}
 select.chip{appearance:auto;color:var(--ink)}
 .item{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:12px 16px;margin-bottom:8px;display:flex;align-items:center;gap:12px;cursor:pointer}
 .item:active{background:var(--card2)}
@@ -198,6 +199,35 @@ function fmt(n){
   if(n===null||n===undefined||n==="")return "";
   var x=Number(n);
   return isNaN(x)?String(n):new Intl.NumberFormat("vi-VN",{maximumFractionDigits:2}).format(x);
+}
+function soThanhChu(num){
+  if(!num||isNaN(num)||num===0)return 'Không đồng';
+  var isNeg=num<0; num=Math.abs(Math.round(num));
+  var chuSo=['không','một','hai','ba','bốn','năm','sáu','bảy','tám','chín'];
+  var donVi=['','nghìn','triệu','tỷ'];
+  function docBaSo(baso,forceTram){
+    var tram=Math.floor(baso/100),chuc=Math.floor((baso%100)/10),dv=baso%10;
+    var s='';
+    if(tram>0){s+=chuSo[tram]+' trăm ';}
+    else if(forceTram){s+='không trăm ';}
+    if(chuc>1){s+=chuSo[chuc]+' mươi ';if(dv===1)s+='mốt ';else if(dv===5)s+='lăm ';else if(dv>0)s+=chuSo[dv]+' ';}
+    else if(chuc===1){s+='mười ';if(dv===1)s+='mốt ';else if(dv===5)s+='lăm ';else if(dv>0)s+=chuSo[dv]+' ';}
+    else if(chuc===0&&dv>0){if(tram>0||forceTram)s+='linh ';s+=chuSo[dv]+' ';}
+    return s.trim();
+  }
+  var groups=[];var n=num;
+  if(n===0)groups=[0];else{while(n>0){groups.unshift(n%1000);n=Math.floor(n/1000);}}
+  var parts=[];
+  for(var i=0;i<groups.length;i++){
+    var g=groups[i];
+    if(g===0)continue;
+    var s=docBaSo(g,i>0);
+    var unitIdx=groups.length-1-i;
+    parts.push(s+(donVi[unitIdx]?(' '+donVi[unitIdx]):''));
+  }
+  var result=parts.join(' ').replace(/\s+/g,' ').trim();
+  result=result.charAt(0).toUpperCase()+result.slice(1);
+  return (isNeg?'Âm ':'')+result+' đồng chẵn';
 }
 function daysTo(iso){
   if(!iso)return null;
@@ -842,6 +872,22 @@ function docSignHtml(cols){
   h+='</tr></table>';
   return h;
 }
+function docSignHtml4(cols,subs){
+  var h='<table class="sign" width="100%"><tr>';
+  cols.forEach(function(c){h+='<td width="25%">'+esc(c)+'</td>';});
+  h+='</tr><tr>';
+  subs.forEach(function(s){h+='<td style="font-weight:400;font-style:italic;font-size:10pt">'+esc(s)+'</td>';});
+  h+='</tr><tr>';
+  cols.forEach(function(){h+='<td>&nbsp;<br>&nbsp;<br>&nbsp;<br>&nbsp;</td>';});
+  h+='</tr></table>';
+  return h;
+}
+function docHeaderHtmlBP(boPhan,soVanBan,loaiVanBan){
+  return '<table class="hdrtbl"><tr>'
+    +'<td width="50%"><b>CÔNG TY CP NỤ CƯỜI MỚI VIỆT NAM</b><br>Bộ phận / Chi nhánh: '+dot(boPhan)+'</td>'
+    +'<td width="50%" class="center"><b>CỘNG HÒA XÃ HỘI CHỦ NGHĨA VIỆT NAM</b><br><b>Độc lập – Tự do – Hạnh phúc</b></td>'
+    +'</tr></table>';
+}
 function docWrap(title,bodyHtml){
   return '<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:w="urn:schemas-microsoft-com:office:word" xmlns="http://www.w3.org/TR/REC-html40">'
     +'<head><meta charset="utf-8"><title>'+esc(title)+'</title>'
@@ -898,49 +944,108 @@ function renderPicker(onlyDiff){
   return h;
 }
 
+/* ================= Nhóm tích chọn (checkbox chips) dùng chung ================= */
+function chkLine(options,selArr,khacVal,khacLabel){
+  /* render 1 dòng text tĩnh (không tương tác) dùng khi xuất doc: ☑/☐ */
+  var parts=options.map(function(o){return (selArr&&selArr.indexOf(o)!==-1?'☑':'☐')+' '+esc(o);});
+  if(khacLabel!==false)parts.push((khacVal&&khacVal.trim()?'☑':'☐')+' Khác: '+esc(khacVal||'..................'));
+  return parts.join('&nbsp;&nbsp;&nbsp;');
+}
+function chipGroupUI(options,selArr,toggleFn){
+  var h='<div class="chipwrap">';
+  options.forEach(function(o){
+    var on=selArr.indexOf(o)!==-1;
+    h+='<span class="chip'+(on?' chip-on':'')+'" onclick="'+toggleFn+'(\''+o.replace(/'/g,"\\'")+'\')">'+(on?'☑ ':'☐ ')+esc(o)+'</span>';
+  });
+  h+='</div>';
+  return h;
+}
+function toggleArr(arr,val){var i=arr.indexOf(val);if(i===-1)arr.push(val);else arr.splice(i,1);}
+function dot(val,ph){return val&&String(val).trim()?esc(val):(ph||'..................');}
+
 /* ================= 1. Biên bản bàn giao ================= */
-var HV_LOAI=[{k:'TSCD',label:'Tài sản cố định'},{k:'CCDC',label:'Công cụ dụng cụ'},{k:'VatTu',label:'Vật tư'},{k:'Khac',label:'Khác'}];
-function newHV(){return {id:Date.now().toString(36),loai:'VatTu',soBB:'',ngay:'',diaDiem:'Hà Nội',
-  benGiao:{ten:'',chucVu:'',donVi:''},benNhan:{ten:'',chucVu:'',donVi:''},
-  noiDung:'',items:[],createdAt:Date.now()};}
+var HV_LOAI=['Công cụ dụng cụ','Tài sản cố định','Vật tư tiêu hao','Thiết bị – máy móc','Hồ sơ – chứng từ'];
+var HV_LYDO=['Cấp phát mới','Luân chuyển nội bộ','Thu hồi / nhập lại kho','Nghỉ việc / điều chuyển','Cho mượn / hoàn trả','Nhận / trả NCC'];
+var HV_HOSO=['Hóa đơn / phiếu nhập kho','Phiếu xuất / điều chuyển','Sổ bảo hành, HDSD','Phụ kiện đi kèm','Hình ảnh hiện trạng'];
+function newHV(){return {id:Date.now().toString(36),soBB:'',boPhan:'',
+  loai:[],loaiKhac:'',lyDo:[],lyDoKhac:'',
+  thoiGian:'',diaDiem:'',canCu:'',
+  benGiao:{ten:'',chucVu:'',boPhan:'',dienThoai:''},
+  benNhan:{ten:'',chucVu:'',boPhan:'',dienThoai:''},
+  items:[],
+  hoSo:[],hoSoKhac:'',chenhLech:'',
+  soNgay:'05',soBan:'03',
+  createdAt:Date.now()};}
 
 function renderHandoverList(){
   var h='<div class="topbar"><div class="trow wrap"><button class="back" onclick="A.go(\'home\')">‹</button><div class="ttl">Biên bản bàn giao</div></div><div style="height:10px"></div></div>';
   h+='<div class="wrap" style="padding-top:16px;padding-bottom:100px">';
-  h+='<button class="btn btn-primary" style="margin-bottom:16px" onclick="A.hvNew()">+ Tạo biên bản mới</button>';
+  h+='<div style="display:flex;gap:8px;margin-bottom:16px"><button class="btn btn-primary" style="flex:1" onclick="A.hvNew()">+ Tạo biên bản mới</button></div>';
+  h+='<button class="addbat" style="margin-bottom:16px" onclick="A.hvBlank()">📄 Tải mẫu trống (.doc) để gửi người khác tự điền tay</button>';
   if(!db.handovers.length){
     h+='<div class="card" style="color:var(--mut);text-align:center">Chưa có biên bản bàn giao nào.</div>';
   }
   db.handovers.forEach(function(v){
-    var loaiLabel=(HV_LOAI.filter(function(l){return l.k===v.loai;})[0]||{}).label||v.loai;
     h+='<div class="card" style="margin-bottom:10px;cursor:pointer" onclick="A.hvOpen(\''+v.id+'\')">';
-    h+='<div style="display:flex;justify-content:space-between"><div style="font-weight:700">'+esc(loaiLabel)+(v.soBB?' · Số '+esc(v.soBB):'')+'</div><button class="addbat" style="color:var(--red)" onclick="event.stopPropagation();A.hvDelete(\''+v.id+'\')">Xoá</button></div>';
+    h+='<div style="display:flex;justify-content:space-between"><div style="font-weight:700">'+(v.loai.length?esc(v.loai.join(', ')):'Biên bản bàn giao')+(v.soBB?' · Số '+esc(v.soBB):'')+'</div><button class="addbat" style="color:var(--red)" onclick="event.stopPropagation();A.hvDelete(\''+v.id+'\')">Xoá</button></div>';
     h+='<div style="font-size:13px;color:var(--mut);margin-top:4px">'+esc(v.benGiao.ten||'(chưa đặt tên)')+' → '+esc(v.benNhan.ten||'(chưa đặt tên)')+'</div>';
-    h+='<div style="font-size:12px;color:var(--mut2);margin-top:2px">'+(v.ngay?'Ngày '+esc(v.ngay)+' · ':'')+v.items.length+' mục</div>';
+    h+='<div style="font-size:12px;color:var(--mut2);margin-top:2px">'+(v.thoiGian?esc(v.thoiGian)+' · ':'')+v.items.length+' mục</div>';
     h+='</div>';
   });
   h+='</div>';
   document.getElementById("app").innerHTML=h;
 }
 
-function generateHandoverDoc(){
-  var loaiLabel=(HV_LOAI.filter(function(l){return l.k===HV.loai;})[0]||{}).label||HV.loai;
+function generateHandoverDoc(v){
+  v=v||HV;
   var itemRows='';
-  HV.items.forEach(function(it,i){
-    itemRows+='<tr><td align="center">'+(i+1)+'</td><td>'+esc(it.ten)+'</td><td align="center">'+esc(it.maSo)+'</td><td align="center">'+esc(it.dvt)+'</td><td align="right">'+esc(it.soLuong)+'</td><td>'+esc(it.tinhTrang)+'</td><td>'+esc(it.ghiChu)+'</td></tr>';
-  });
-  if(!HV.items.length)itemRows='<tr><td colspan="7" align="center"><i>(Không có dữ liệu)</i></td></tr>';
-  var body=docHeaderHtml(HV.diaDiem,HV.soBB,'BBBG')
+  var slRows=8;
+  var tongSL=0;
+  for(var i=0;i<Math.max(v.items.length,slRows);i++){
+    var it=v.items[i];
+    if(it){
+      var slNum=parseFloat(String(it.sl).replace(/[^\d.-]/g,''));
+      if(!isNaN(slNum))tongSL+=slNum;
+      itemRows+='<tr><td align="center">'+(i+1)+'</td><td align="center">'+esc(it.ma)+'</td><td>'+esc(it.ten)+'</td><td align="center">'+esc(it.dvt)+'</td><td align="right">'+esc(it.sl)+'</td><td>'+esc(it.tinhTrang)+'</td><td>'+esc(it.ghiChu)+'</td></tr>';
+    }else{
+      itemRows+='<tr><td align="center">'+(i+1)+'</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td></tr>';
+    }
+  }
+  itemRows+='<tr><td colspan="4" align="center"><b>Tổng cộng</b></td><td align="right"><b>'+(tongSL?fmt(tongSL):'')+'</b></td><td></td><td></td></tr>';
+
+  var body=docHeaderHtmlBP(v.boPhan,v.soBB,'BBBG')
     +'<h1>Biên bản bàn giao</h1>'
-    +'<p class="center"><i>(Loại: '+esc(loaiLabel)+(HV.ngay?' — Ngày '+esc(HV.ngay):'')+')</i></p>'
-    +'<p>Hôm nay, '+(HV.ngay?'ngày '+esc(HV.ngay):'ngày ……………')+', tại '+esc(HV.diaDiem||'……………')+', chúng tôi gồm:</p>'
-    +'<p style="margin-left:18pt"><b>BÊN BÀN GIAO:</b> '+esc(HV.benGiao.ten||'……………')+(HV.benGiao.chucVu?' — '+esc(HV.benGiao.chucVu):'')+(HV.benGiao.donVi?' ('+esc(HV.benGiao.donVi)+')':'')+'</p>'
-    +'<p style="margin-left:18pt"><b>BÊN NHẬN BÀN GIAO:</b> '+esc(HV.benNhan.ten||'……………')+(HV.benNhan.chucVu?' — '+esc(HV.benNhan.chucVu):'')+(HV.benNhan.donVi?' ('+esc(HV.benNhan.donVi)+')':'')+'</p>'
-    +'<p>Cùng tiến hành bàn giao các tài sản/vật tư với nội dung như sau:</p>'
-    +(HV.noiDung&&HV.noiDung.trim()?'<p style="margin-left:18pt">'+esc(HV.noiDung).replace(/\n/g,'<br>')+'</p>':'')
-    +'<table><thead><tr><th>STT</th><th>Tên tài sản/vật tư</th><th>Mã số</th><th>ĐVT</th><th>Số lượng</th><th>Tình trạng</th><th>Ghi chú</th></tr></thead><tbody>'+itemRows+'</tbody></table>'
-    +'<p>Biên bản được lập thành 02 bản, mỗi bên giữ 01 bản có giá trị pháp lý như nhau.</p>'
-    +docSignHtml(['BÊN BÀN GIAO','BÊN NHẬN BÀN GIAO']);
+    +'<p class="center"><i>(Công cụ dụng cụ – Tài sản – Vật tư – Thiết bị – Hồ sơ)</i></p>'
+    +'<p class="center">Số: '+dot(v.soBB,'........./BBBG-............')+'</p>'
+    +'<h2>I. THÔNG TIN CHUNG</h2>'
+    +'<p><b>1. Loại bàn giao</b> <i>(tích chọn):</i></p>'
+    +'<p style="margin-left:18pt">'+chkLine(HV_LOAI,v.loai,v.loaiKhac)+'</p>'
+    +'<p><b>2. Lý do / hình thức bàn giao</b> <i>(tích chọn):</i></p>'
+    +'<p style="margin-left:18pt">'+chkLine(HV_LYDO,v.lyDo,v.lyDoKhac)+'</p>'
+    +'<p>3. Thời gian bàn giao: '+dot(v.thoiGian,'...... giờ ...... phút, ngày ...... tháng ...... năm 20......')+'</p>'
+    +'<p>4. Địa điểm bàn giao: '+dot(v.diaDiem)+'</p>'
+    +'<p>5. Căn cứ (đề xuất / phiếu xuất kho / quyết định số): '+dot(v.canCu)+'</p>'
+    +'<h2>II. CÁC BÊN THAM GIA BÀN GIAO</h2>'
+    +'<table><thead><tr><th>Nội dung</th><th>BÊN GIAO (A)</th><th>BÊN NHẬN (B)</th></tr></thead><tbody>'
+    +'<tr><td>Họ và tên</td><td>'+dot(v.benGiao.ten)+'</td><td>'+dot(v.benNhan.ten)+'</td></tr>'
+    +'<tr><td>Chức vụ</td><td>'+dot(v.benGiao.chucVu)+'</td><td>'+dot(v.benNhan.chucVu)+'</td></tr>'
+    +'<tr><td>Bộ phận / Chi nhánh</td><td>'+dot(v.benGiao.boPhan)+'</td><td>'+dot(v.benNhan.boPhan)+'</td></tr>'
+    +'<tr><td>Điện thoại / Mã NV</td><td>'+dot(v.benGiao.dienThoai)+'</td><td>'+dot(v.benNhan.dienThoai)+'</td></tr>'
+    +'</tbody></table>'
+    +'<h2>III. NỘI DUNG BÀN GIAO</h2>'
+    +'<table><thead><tr><th>STT</th><th>Mã / Serial</th><th>Tên công cụ – tài sản – vật tư</th><th>ĐVT</th><th>SL</th><th>Tình trạng</th><th>Ghi chú</th></tr></thead><tbody>'+itemRows+'</tbody></table>'
+    +'<p><i>Tình trạng ghi: Mới – Tốt – Cũ (còn dùng) – Hỏng/cần sửa – Thiếu.</i></p>'
+    +'<h2>IV. HỒ SƠ KÈM THEO VÀ GHI NHẬN CHÊNH LỆCH</h2>'
+    +'<p><b>1. Hồ sơ kèm theo</b> <i>(tích chọn):</i></p>'
+    +'<p style="margin-left:18pt">'+chkLine(HV_HOSO,v.hoSo,v.hoSoKhac)+'</p>'
+    +'<p><b>2. Chênh lệch, hư hỏng, thiếu hụt phát hiện khi bàn giao:</b></p>'
+    +'<p style="margin-left:18pt">'+dot(v.chenhLech,'(không có)')+'</p>'
+    +'<h2>V. CAM KẾT TRÁCH NHIỆM</h2>'
+    +'<p>1. Bên giao bàn giao đúng, đủ theo danh mục trên; chịu trách nhiệm về số liệu và tình trạng tại thời điểm bàn giao.</p>'
+    +'<p>2. Bên nhận đã kiểm đếm, đối chiếu thực tế, nhận đúng và đủ; kể từ thời điểm ký, chịu trách nhiệm bảo quản, sử dụng đúng mục đích và hoàn trả khi có yêu cầu.</p>'
+    +'<p>3. Hư hỏng, mất mát phát sinh sau thời điểm bàn giao do Bên nhận chịu trách nhiệm theo quy định của Công ty. Sai lệch phát hiện trong vòng '+dot(v.soNgay,'......')+' ngày kể từ ngày bàn giao: hai bên lập biên bản bổ sung.</p>'
+    +'<p>4. Biên bản lập thành '+dot(v.soBan,'......')+' bản, mỗi bên giữ 01 bản, 01 bản chuyển Hành chính – Kế toán để cập nhật sổ sách, thẻ kho.</p>'
+    +docSignHtml4(['BÊN GIAO','BÊN NHẬN','NGƯỜI KIỂM TRA','PHÊ DUYỆT'],['(Ký, ghi rõ họ tên)','(Ký, ghi rõ họ tên)','(Kế toán kho / HC kho)','(Trưởng BP / GĐ CN)']);
   return docWrap('Biên bản bàn giao',body);
 }
 
@@ -948,45 +1053,62 @@ function renderHandoverEdit(){
   var v=HV;
   var h='<div class="topbar"><div class="trow wrap"><button class="back" onclick="A.go(\'handover\')">‹</button><div class="ttl">Biên bản bàn giao</div></div><div style="height:10px"></div></div>';
   h+='<div class="wrap" style="padding-top:16px;padding-bottom:110px">';
-  h+='<label class="lbl">Loại đối tượng</label><select class="inp" onchange="A.hvField(\'loai\',this.value)" style="margin-bottom:10px">';
-  HV_LOAI.forEach(function(l){h+='<option value="'+l.k+'"'+(v.loai===l.k?' selected':'')+'>'+l.label+'</option>';});
-  h+='</select>';
-  h+='<div style="display:flex;gap:8px"><div style="flex:1"><label class="lbl">Số biên bản</label><input class="inp" value="'+esc(v.soBB)+'" oninput="A.hvField(\'soBB\',this.value)"></div>';
-  h+='<div style="flex:1"><label class="lbl">Ngày bàn giao</label><input class="inp" placeholder="VD: 05/09/2026" value="'+esc(v.ngay)+'" oninput="A.hvField(\'ngay\',this.value)"></div></div>';
-  h+='<label class="lbl" style="margin-top:10px">Địa điểm</label><input class="inp" value="'+esc(v.diaDiem)+'" oninput="A.hvField(\'diaDiem\',this.value)">';
+  h+='<div style="display:flex;gap:8px"><div style="flex:1"><label class="lbl">Số biên bản</label><input class="inp" placeholder="VD: 05/BBBG-2026" value="'+esc(v.soBB)+'" oninput="A.hvField(\'soBB\',this.value)"></div>';
+  h+='<div style="flex:1"><label class="lbl">Bộ phận / Chi nhánh</label><input class="inp" value="'+esc(v.boPhan)+'" oninput="A.hvField(\'boPhan\',this.value)"></div></div>';
 
-  h+='<div class="bcsec" style="margin-top:16px">Bên bàn giao</div>';
+  h+='<label class="lbl" style="margin-top:10px">1. Loại bàn giao (chạm để chọn, có thể chọn nhiều)</label>';
+  h+=chipGroupUI(HV_LOAI,v.loai,'A.hvToggle(\'loai\',');
+  h+='<input class="inp" placeholder="Khác (nếu có)" value="'+esc(v.loaiKhac)+'" oninput="A.hvField(\'loaiKhac\',this.value)">';
+
+  h+='<label class="lbl" style="margin-top:12px">2. Lý do / hình thức bàn giao</label>';
+  h+=chipGroupUI(HV_LYDO,v.lyDo,'A.hvToggle(\'lyDo\',');
+  h+='<input class="inp" placeholder="Khác (nếu có)" value="'+esc(v.lyDoKhac)+'" oninput="A.hvField(\'lyDoKhac\',this.value)">';
+
+  h+='<label class="lbl" style="margin-top:12px">3. Thời gian bàn giao</label><input class="inp" placeholder="VD: 14 giờ 30 phút, ngày 05 tháng 09 năm 2026" value="'+esc(v.thoiGian)+'" oninput="A.hvField(\'thoiGian\',this.value)">';
+  h+='<label class="lbl" style="margin-top:10px">4. Địa điểm bàn giao</label><input class="inp" value="'+esc(v.diaDiem)+'" oninput="A.hvField(\'diaDiem\',this.value)">';
+  h+='<label class="lbl" style="margin-top:10px">5. Căn cứ (đề xuất / phiếu xuất kho / quyết định số)</label><input class="inp" value="'+esc(v.canCu)+'" oninput="A.hvField(\'canCu\',this.value)">';
+
+  h+='<div class="bcsec" style="margin-top:16px">Bên giao (A)</div>';
   h+='<input class="inp" placeholder="Họ tên" value="'+esc(v.benGiao.ten)+'" oninput="A.hvPerson(\'benGiao\',\'ten\',this.value)" style="margin-bottom:6px">';
   h+='<input class="inp" placeholder="Chức vụ" value="'+esc(v.benGiao.chucVu)+'" oninput="A.hvPerson(\'benGiao\',\'chucVu\',this.value)" style="margin-bottom:6px">';
-  h+='<input class="inp" placeholder="Đơn vị / Phòng ban" value="'+esc(v.benGiao.donVi)+'" oninput="A.hvPerson(\'benGiao\',\'donVi\',this.value)">';
+  h+='<input class="inp" placeholder="Bộ phận / Chi nhánh" value="'+esc(v.benGiao.boPhan)+'" oninput="A.hvPerson(\'benGiao\',\'boPhan\',this.value)" style="margin-bottom:6px">';
+  h+='<input class="inp" placeholder="Điện thoại / Mã NV" value="'+esc(v.benGiao.dienThoai)+'" oninput="A.hvPerson(\'benGiao\',\'dienThoai\',this.value)">';
 
-  h+='<div class="bcsec" style="margin-top:16px">Bên nhận bàn giao</div>';
+  h+='<div class="bcsec" style="margin-top:16px">Bên nhận (B)</div>';
   h+='<input class="inp" placeholder="Họ tên" value="'+esc(v.benNhan.ten)+'" oninput="A.hvPerson(\'benNhan\',\'ten\',this.value)" style="margin-bottom:6px">';
   h+='<input class="inp" placeholder="Chức vụ" value="'+esc(v.benNhan.chucVu)+'" oninput="A.hvPerson(\'benNhan\',\'chucVu\',this.value)" style="margin-bottom:6px">';
-  h+='<input class="inp" placeholder="Đơn vị / Phòng ban" value="'+esc(v.benNhan.donVi)+'" oninput="A.hvPerson(\'benNhan\',\'donVi\',this.value)">';
+  h+='<input class="inp" placeholder="Bộ phận / Chi nhánh" value="'+esc(v.benNhan.boPhan)+'" oninput="A.hvPerson(\'benNhan\',\'boPhan\',this.value)" style="margin-bottom:6px">';
+  h+='<input class="inp" placeholder="Điện thoại / Mã NV" value="'+esc(v.benNhan.dienThoai)+'" oninput="A.hvPerson(\'benNhan\',\'dienThoai\',this.value)">';
 
-  h+='<label class="lbl" style="margin-top:16px">Nội dung bàn giao (tuỳ chọn, có thể bỏ trống)</label>';
-  h+='<textarea class="inp" rows="3" placeholder="VD: Bàn giao toàn bộ tài sản khi chuyển kho/nghỉ việc..." oninput="A.hvField(\'noiDung\',this.value)">'+esc(v.noiDung)+'</textarea>';
-
-  h+='<div class="bcsec" style="margin-top:16px">Danh sách tài sản/vật tư bàn giao · '+v.items.length+' mục</div>';
+  h+='<div class="bcsec" style="margin-top:16px">III. Nội dung bàn giao · '+v.items.length+' mục</div>';
   h+='<div style="overflow-x:auto;border:1px solid var(--line);border-radius:12px;background:var(--card);margin-bottom:8px">';
   if(v.items.length){
-    h+='<table class="bctbl"><thead><tr><th>Tên</th><th>Mã số</th><th>ĐVT</th><th>SL</th><th>Tình trạng</th><th></th></tr></thead><tbody>';
+    h+='<table class="bctbl"><thead><tr><th>Tên</th><th>Mã/Serial</th><th>ĐVT</th><th>SL</th><th>Tình trạng</th><th>Ghi chú</th><th></th></tr></thead><tbody>';
     v.items.forEach(function(it,i){
       h+='<tr>'
         +'<td><input class="inp" style="padding:4px 8px;font-size:13px" value="'+esc(it.ten)+'" oninput="A.hvItem('+i+',\'ten\',this.value)"></td>'
-        +'<td><input class="inp" style="padding:4px 8px;font-size:13px;width:80px" value="'+esc(it.maSo)+'" oninput="A.hvItem('+i+',\'maSo\',this.value)"></td>'
-        +'<td><input class="inp" style="padding:4px 8px;font-size:13px;width:60px" value="'+esc(it.dvt)+'" oninput="A.hvItem('+i+',\'dvt\',this.value)"></td>'
-        +'<td><input class="inp" style="padding:4px 8px;font-size:13px;width:60px" value="'+esc(it.soLuong)+'" oninput="A.hvItem('+i+',\'soLuong\',this.value)"></td>'
-        +'<td><input class="inp" style="padding:4px 8px;font-size:13px;width:90px" value="'+esc(it.tinhTrang)+'" oninput="A.hvItem('+i+',\'tinhTrang\',this.value)"></td>'
+        +'<td><input class="inp" style="padding:4px 8px;font-size:13px;width:70px" value="'+esc(it.ma)+'" oninput="A.hvItem('+i+',\'ma\',this.value)"></td>'
+        +'<td><input class="inp" style="padding:4px 8px;font-size:13px;width:55px" value="'+esc(it.dvt)+'" oninput="A.hvItem('+i+',\'dvt\',this.value)"></td>'
+        +'<td><input class="inp" style="padding:4px 8px;font-size:13px;width:55px" value="'+esc(it.sl)+'" oninput="A.hvItem('+i+',\'sl\',this.value)"></td>'
+        +'<td><input class="inp" style="padding:4px 8px;font-size:13px;width:85px" value="'+esc(it.tinhTrang)+'" oninput="A.hvItem('+i+',\'tinhTrang\',this.value)"></td>'
+        +'<td><input class="inp" style="padding:4px 8px;font-size:13px;width:85px" value="'+esc(it.ghiChu)+'" oninput="A.hvItem('+i+',\'ghiChu\',this.value)"></td>'
         +'<td><button class="addbat" style="color:var(--red)" onclick="A.hvItemDel('+i+')">✕</button></td>'
         +'</tr>';
     });
     h+='</tbody></table>';
   }
   h+='</div>';
-  h+='<div style="display:flex;gap:8px"><button class="addbat" onclick="A.hvItemAdd()">+ Thêm dòng</button><button class="addbat" onclick="A.pickOpen(false)">📥 Lấy từ kỳ kiểm kê</button></div>';
+  h+='<div style="display:flex;gap:8px;flex-wrap:wrap"><button class="addbat" onclick="A.hvItemAdd()">+ Thêm dòng</button><button class="addbat" onclick="A.pickOpen(false)">📥 Lấy từ kỳ kiểm kê</button></div>';
   h+=renderPicker(false);
+
+  h+='<label class="lbl" style="margin-top:16px">1. Hồ sơ kèm theo</label>';
+  h+=chipGroupUI(HV_HOSO,v.hoSo,'A.hvToggle(\'hoSo\',');
+  h+='<input class="inp" placeholder="Khác (nếu có)" value="'+esc(v.hoSoKhac)+'" oninput="A.hvField(\'hoSoKhac\',this.value)">';
+  h+='<label class="lbl" style="margin-top:12px">2. Chênh lệch, hư hỏng, thiếu hụt phát hiện khi bàn giao (tuỳ chọn)</label>';
+  h+='<textarea class="inp" rows="2" oninput="A.hvField(\'chenhLech\',this.value)">'+esc(v.chenhLech)+'</textarea>';
+
+  h+='<div style="display:flex;gap:8px;margin-top:10px"><div style="flex:1"><label class="lbl">Hạn đối chiếu bổ sung (ngày)</label><input class="inp" value="'+esc(v.soNgay)+'" oninput="A.hvField(\'soNgay\',this.value)"></div>';
+  h+='<div style="flex:1"><label class="lbl">Số bản lập</label><input class="inp" value="'+esc(v.soBan)+'" oninput="A.hvField(\'soBan\',this.value)"></div></div>';
 
   h+='</div>';
   h+='<div class="botbar"><div class="botin" style="display:flex;gap:8px">';
@@ -996,88 +1118,210 @@ function renderHandoverEdit(){
   document.getElementById("app").innerHTML=h;
 }
 
-/* ================= 2. Phiếu giải trình chênh lệch ================= */
-function newEX(){return {id:Date.now().toString(36),soPhieu:'',ngay:'',
-  nguoiGiaiTrinh:{ten:'',chucVu:'',donVi:''},
-  items:[],nguyennhan:'',noiDung:'',trachNhiem:'',bienPhap:'',deXuat:'',createdAt:Date.now()};}
+/* ================= 2. Phiếu/Bản giải trình thất thoát ================= */
+var EX_LOAI=['Công cụ dụng cụ','Tài sản cố định','Vật tư tiêu hao','Hàng hóa','Thiết bị – máy móc'];
+var EX_PHATHIEN=['Kiểm kê định kỳ','Kiểm kê đột xuất','Đối soát tồn / doanh thu','Báo cáo bộ phận','Đối soát công nợ NCC'];
+var EX_NGUYENNHAN=['Hao hụt định mức','Sai sót nhập – xuất','Hư hỏng / hết hạn','Mất mát / thất lạc','Dùng sai mục đích','Bàn giao thiếu chứng từ','Vượt định mức tiêu hao'];
+var EX_BANGCHUNG=['Biên bản kiểm kê','Phiếu nhập / xuất kho','Thẻ kho / sổ kho','Hình ảnh / camera','Báo cáo tiêu hao / DT'];
+function newEX(){return {id:Date.now().toString(36),soPhieu:'',boPhan:'',
+  nguoiGiaiTrinh:{ten:'',chucVu:'',boPhan:'',thoiGian:''},
+  loai:[],loaiKhac:'',phatHien:[],phatHienKhac:'',
+  ngayPhatHien:'',thoiDiemXayRa:'',diaDiem:'',canCu:'',
+  items:[],
+  vanDe:'',nguyenNhan:[],nguyenNhanKhac:'',nguyenNhanChiTiet:'',caNhanLienQuan:'',
+  bangChung:[],bangChungKhac:'',
+  bienPhap:[],
+  dxGiamTon:false,dxHaoHut:false,dxTruyTim:false,dxTruyTimHan:'',dxBoiHoan:false,dxBoiHoanTien:'',dxBoiHoanNguoi:'',dxKhac:false,dxKhacText:'',
+  createdAt:Date.now()};}
 
 function renderExplainList(){
-  var h='<div class="topbar"><div class="trow wrap"><button class="back" onclick="A.go(\'home\')">‹</button><div class="ttl">Phiếu giải trình chênh lệch</div></div><div style="height:10px"></div></div>';
+  var h='<div class="topbar"><div class="trow wrap"><button class="back" onclick="A.go(\'home\')">‹</button><div class="ttl">Bản giải trình thất thoát</div></div><div style="height:10px"></div></div>';
   h+='<div class="wrap" style="padding-top:16px;padding-bottom:100px">';
-  h+='<button class="btn btn-primary" style="margin-bottom:16px" onclick="A.exNew()">+ Tạo phiếu mới</button>';
+  h+='<div style="display:flex;gap:8px;margin-bottom:16px"><button class="btn btn-primary" style="flex:1" onclick="A.exNew()">+ Tạo phiếu mới</button></div>';
+  h+='<button class="addbat" style="margin-bottom:16px" onclick="A.exBlank()">📄 Tải mẫu trống (.doc) để gửi người khác tự điền tay</button>';
   if(!db.explains.length){
     h+='<div class="card" style="color:var(--mut);text-align:center">Chưa có phiếu giải trình nào.</div>';
   }
   db.explains.forEach(function(v){
     h+='<div class="card" style="margin-bottom:10px;cursor:pointer" onclick="A.exOpen(\''+v.id+'\')">';
-    h+='<div style="display:flex;justify-content:space-between"><div style="font-weight:700">'+(v.soPhieu?'Phiếu số '+esc(v.soPhieu):'Phiếu giải trình')+'</div><button class="addbat" style="color:var(--red)" onclick="event.stopPropagation();A.exDelete(\''+v.id+'\')">Xoá</button></div>';
+    h+='<div style="display:flex;justify-content:space-between"><div style="font-weight:700">'+(v.soPhieu?'Phiếu số '+esc(v.soPhieu):'Bản giải trình thất thoát')+'</div><button class="addbat" style="color:var(--red)" onclick="event.stopPropagation();A.exDelete(\''+v.id+'\')">Xoá</button></div>';
     h+='<div style="font-size:13px;color:var(--mut);margin-top:4px">'+esc(v.nguoiGiaiTrinh.ten||'(chưa đặt tên)')+'</div>';
-    h+='<div style="font-size:12px;color:var(--mut2);margin-top:2px">'+(v.ngay?'Ngày '+esc(v.ngay)+' · ':'')+v.items.length+' mã chênh lệch</div>';
+    h+='<div style="font-size:12px;color:var(--mut2);margin-top:2px">'+(v.ngayPhatHien?'Ngày '+esc(v.ngayPhatHien)+' · ':'')+v.items.length+' mã thất thoát</div>';
     h+='</div>';
   });
   h+='</div>';
   document.getElementById("app").innerHTML=h;
 }
 
-function generateExplainDoc(){
+function generateExplainDoc(v){
+  v=v||EX;
   var itemRows='';
-  EX.items.forEach(function(it,i){
-    itemRows+='<tr><td align="center">'+(i+1)+'</td><td>'+esc(it.ten)+'</td><td align="center">'+esc(it.maSo)+'</td><td align="center">'+esc(it.dvt)+'</td><td align="right">'+esc(it.soSach)+'</td><td align="right">'+esc(it.thucTe)+'</td><td align="right">'+esc(it.chenh)+'</td><td>'+esc(it.ghiChu)+'</td></tr>';
-  });
-  if(!EX.items.length)itemRows='<tr><td colspan="8" align="center"><i>(Không có dữ liệu)</i></td></tr>';
-  var body=docHeaderHtml('Hà Nội',EX.soPhieu,'GT')
-    +'<h1>Phiếu giải trình</h1>'
-    +'<p class="center"><i>(V/v chênh lệch kiểm kê tài sản/CCDC/vật tư'+(EX.ngay?' — ngày '+esc(EX.ngay):'')+')</i></p>'
-    +'<p style="margin-left:18pt"><b>Người giải trình:</b> '+esc(EX.nguoiGiaiTrinh.ten||'……………')+(EX.nguoiGiaiTrinh.chucVu?' — '+esc(EX.nguoiGiaiTrinh.chucVu):'')+(EX.nguoiGiaiTrinh.donVi?' ('+esc(EX.nguoiGiaiTrinh.donVi)+')':'')+'</p>'
-    +'<h2>I. BẢNG CHÊNH LỆCH KIỂM KÊ</h2>'
-    +'<table><thead><tr><th>STT</th><th>Tên</th><th>Mã số</th><th>ĐVT</th><th>SL sổ sách</th><th>SL thực tế</th><th>Chênh lệch</th><th>Ghi chú</th></tr></thead><tbody>'+itemRows+'</tbody></table>'
-    +'<h2>II. NỘI DUNG GIẢI TRÌNH</h2>'
-    +(EX.nguyennhan&&EX.nguyennhan.trim()?'<p><b>1. Nguyên nhân:</b></p><p style="margin-left:18pt">'+esc(EX.nguyennhan).replace(/\n/g,'<br>')+'</p>':'')
-    +(EX.noiDung&&EX.noiDung.trim()?'<p><b>2. Nội dung giải trình:</b></p><p style="margin-left:18pt">'+esc(EX.noiDung).replace(/\n/g,'<br>')+'</p>':'')
-    +(EX.trachNhiem&&EX.trachNhiem.trim()?'<p><b>3. Trách nhiệm:</b></p><p style="margin-left:18pt">'+esc(EX.trachNhiem).replace(/\n/g,'<br>')+'</p>':'')
-    +(EX.bienPhap&&EX.bienPhap.trim()?'<p><b>4. Biện pháp xử lý:</b></p><p style="margin-left:18pt">'+esc(EX.bienPhap).replace(/\n/g,'<br>')+'</p>':'')
-    +(EX.deXuat&&EX.deXuat.trim()?'<p><b>5. Đề xuất:</b></p><p style="margin-left:18pt">'+esc(EX.deXuat).replace(/\n/g,'<br>')+'</p>':'')
-    +docSignHtml(['NGƯỜI GIẢI TRÌNH','TRƯỞNG BỘ PHẬN','PHÊ DUYỆT']);
-  return docWrap('Phiếu giải trình',body);
+  var rows=6;
+  var tongTien=0;
+  for(var i=0;i<Math.max(v.items.length,rows);i++){
+    var it=v.items[i];
+    if(it){
+      var tt=parseFloat(String(it.thanhTien).replace(/[^\d.-]/g,''));
+      if(!isNaN(tt))tongTien+=tt;
+      itemRows+='<tr><td align="center">'+(i+1)+'</td><td align="center">'+esc(it.ma)+'</td><td>'+esc(it.ten)+'</td><td align="center">'+esc(it.dvt)+'</td><td align="right">'+esc(it.slSoSach)+'</td><td align="right">'+esc(it.slThucTe)+'</td><td align="right">'+esc(it.chenh)+'</td><td align="right">'+esc(it.donGia)+'</td><td align="right">'+esc(it.thanhTien)+'</td></tr>';
+    }else{
+      itemRows+='<tr><td align="center">'+(i+1)+'</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td></tr>';
+    }
+  }
+  itemRows+='<tr><td colspan="8" align="center"><b>Tổng giá trị thất thoát</b></td><td align="right"><b>'+(tongTien?fmt(tongTien):'')+'</b></td></tr>';
+
+  var bienPhapRows='';
+  var bpRows=5;
+  for(var j=0;j<Math.max(v.bienPhap.length,bpRows);j++){
+    var bp=v.bienPhap[j];
+    if(bp){
+      bienPhapRows+='<tr><td align="center">'+(j+1)+'</td><td>'+esc(bp.noiDung)+'</td><td>'+esc(bp.nguoiPhuTrach)+'</td><td align="center">'+esc(bp.thoiHan)+'</td><td align="center">'+esc(bp.nhom)+'</td></tr>';
+    }else{
+      bienPhapRows+='<tr><td align="center">'+(j+1)+'</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td></tr>';
+    }
+  }
+
+  var dx='';
+  dx+='<p>'+(v.dxGiamTon?'☑':'☐')+' Điều chỉnh giảm tồn / xuất hủy trên sổ sách</p>';
+  dx+='<p>'+(v.dxHaoHut?'☑':'☐')+' Tính vào hao hụt định mức được chấp nhận</p>';
+  dx+='<p>'+(v.dxTruyTim?'☑':'☐')+' Tiếp tục truy tìm, thời hạn: '+dot(v.dxTruyTimHan,'........................')+'</p>';
+  dx+='<p>'+(v.dxBoiHoan?'☑':'☐')+' Bồi hoàn: '+dot(v.dxBoiHoanTien,'...........................')+' đồng, người chịu trách nhiệm: '+dot(v.dxBoiHoanNguoi,'..................')+'</p>';
+  dx+='<p>'+(v.dxKhac?'☑':'☐')+' Khác: '+dot(v.dxKhacText,'......................................................')+'</p>';
+
+  var body=docHeaderHtmlBP(v.boPhan,v.soPhieu,'GT')
+    +'<h1>Bản giải trình thất thoát</h1>'
+    +'<p class="center"><i>(Vật tư – Tài sản – Công cụ dụng cụ – Hàng hóa)</i></p>'
+    +'<p class="center">Số: '+dot(v.soPhieu,'........./GT-............')+'</p>'
+    +'<p><b>Kính gửi:</b> Ban Giám đốc; Bộ phận Hành chính – Kế toán</p>'
+    +'<h2>I. NGƯỜI GIẢI TRÌNH</h2>'
+    +'<table><tbody>'
+    +'<tr><td width="35%">Họ và tên</td><td>'+dot(v.nguoiGiaiTrinh.ten)+'</td></tr>'
+    +'<tr><td>Chức vụ</td><td>'+dot(v.nguoiGiaiTrinh.chucVu)+'</td></tr>'
+    +'<tr><td>Bộ phận / Chi nhánh</td><td>'+dot(v.nguoiGiaiTrinh.boPhan)+'</td></tr>'
+    +'<tr><td>Thời gian phụ trách (từ – đến)</td><td>'+dot(v.nguoiGiaiTrinh.thoiGian)+'</td></tr>'
+    +'</tbody></table>'
+    +'<h2>II. THÔNG TIN SỰ VIỆC</h2>'
+    +'<p><b>1. Loại thất thoát</b> <i>(tích chọn):</i></p>'
+    +'<p style="margin-left:18pt">'+chkLine(EX_LOAI,v.loai,v.loaiKhac)+'</p>'
+    +'<p><b>2. Phát hiện qua</b> <i>(tích chọn):</i></p>'
+    +'<p style="margin-left:18pt">'+chkLine(EX_PHATHIEN,v.phatHien,v.phatHienKhac)+'</p>'
+    +'<p>3. Thời điểm phát hiện: '+dot(v.ngayPhatHien,'ngày ...... tháng ...... năm 20......')+'</p>'
+    +'<p>4. Thời điểm xảy ra (ước tính): '+dot(v.thoiDiemXayRa)+'</p>'
+    +'<p>5. Địa điểm / kho / chi nhánh: '+dot(v.diaDiem)+'</p>'
+    +'<p>6. Căn cứ (biên bản kiểm kê, phiếu, báo cáo số): '+dot(v.canCu)+'</p>'
+    +'<h2>III. DANH MỤC THẤT THOÁT</h2>'
+    +'<table><thead><tr><th>STT</th><th>Mã</th><th>Tên vật tư – tài sản – CCDC</th><th>ĐVT</th><th>SL sổ sách</th><th>SL thực tế</th><th>Chênh lệch</th><th>Đơn giá</th><th>Thành tiền</th></tr></thead><tbody>'+itemRows+'</tbody></table>'
+    +'<p>Bằng chữ: <i>'+(tongTien?esc(soThanhChu(tongTien)):dot(''))+'</i></p>'
+    +'<h2>IV. NỘI DUNG GIẢI TRÌNH</h2>'
+    +'<p><b>1. Vấn đề (diễn biến, thời gian, bối cảnh):</b></p>'
+    +'<p style="margin-left:18pt">'+dot(v.vanDe)+'</p>'
+    +'<p><b>2. Nguyên nhân</b> <i>(tích chọn nhóm nguyên nhân):</i></p>'
+    +'<p style="margin-left:18pt">'+chkLine(EX_NGUYENNHAN,v.nguyenNhan,v.nguyenNhanKhac)+'</p>'
+    +'<p><i>Giải thích chi tiết nguyên nhân:</i></p>'
+    +'<p style="margin-left:18pt">'+dot(v.nguyenNhanChiTiet)+'</p>'
+    +'<p>3. Cá nhân / bộ phận liên quan: '+dot(v.caNhanLienQuan)+'</p>'
+    +'<p><b>4. Bằng chứng kèm theo</b> <i>(tích chọn):</i></p>'
+    +'<p style="margin-left:18pt">'+chkLine(EX_BANGCHUNG,v.bangChung,v.bangChungKhac)+'</p>'
+    +'<h2>V. BIỆN PHÁP KHẮC PHỤC VÀ KIỂM SOÁT LÂU DÀI</h2>'
+    +'<table><thead><tr><th>STT</th><th>Biện pháp (khắc phục / phòng ngừa)</th><th>Người phụ trách</th><th>Thời hạn</th><th>Nhóm</th></tr></thead><tbody>'+bienPhapRows+'</tbody></table>'
+    +'<h2>VI. ĐỀ XUẤT XỬ LÝ</h2>'
+    +dx
+    +'<h2>VII. CAM KẾT</h2>'
+    +'<p>Tôi cam kết nội dung giải trình trên là đúng sự thật, đầy đủ và chịu trách nhiệm trước Công ty về thông tin đã cung cấp. Tôi sẽ phối hợp cung cấp thêm chứng từ, bằng chứng khi được yêu cầu.</p>'
+    +docSignHtml4(['NGƯỜI GIẢI TRÌNH','XÁC NHẬN','KIỂM TRA','PHÊ DUYỆT'],['(Ký, ghi rõ họ tên)','(Trưởng BP / GĐ CN)','(Kế toán / HC kho)','(Ban Giám đốc)']);
+  return docWrap('Bản giải trình thất thoát',body);
 }
 
 function renderExplainEdit(){
   var v=EX;
-  var h='<div class="topbar"><div class="trow wrap"><button class="back" onclick="A.go(\'explain\')">‹</button><div class="ttl">Phiếu giải trình</div></div><div style="height:10px"></div></div>';
+  var h='<div class="topbar"><div class="trow wrap"><button class="back" onclick="A.go(\'explain\')">‹</button><div class="ttl">Bản giải trình thất thoát</div></div><div style="height:10px"></div></div>';
   h+='<div class="wrap" style="padding-top:16px;padding-bottom:110px">';
-  h+='<div style="display:flex;gap:8px"><div style="flex:1"><label class="lbl">Số phiếu</label><input class="inp" value="'+esc(v.soPhieu)+'" oninput="A.exField(\'soPhieu\',this.value)"></div>';
-  h+='<div style="flex:1"><label class="lbl">Ngày</label><input class="inp" placeholder="VD: 05/09/2026" value="'+esc(v.ngay)+'" oninput="A.exField(\'ngay\',this.value)"></div></div>';
+  h+='<div style="display:flex;gap:8px"><div style="flex:1"><label class="lbl">Số phiếu</label><input class="inp" placeholder="VD: 03/GT-2026" value="'+esc(v.soPhieu)+'" oninput="A.exField(\'soPhieu\',this.value)"></div>';
+  h+='<div style="flex:1"><label class="lbl">Bộ phận / Chi nhánh</label><input class="inp" value="'+esc(v.boPhan)+'" oninput="A.exField(\'boPhan\',this.value)"></div></div>';
 
-  h+='<div class="bcsec" style="margin-top:16px">Người giải trình</div>';
+  h+='<div class="bcsec" style="margin-top:16px">I. Người giải trình</div>';
   h+='<input class="inp" placeholder="Họ tên" value="'+esc(v.nguoiGiaiTrinh.ten)+'" oninput="A.exPerson(\'ten\',this.value)" style="margin-bottom:6px">';
   h+='<input class="inp" placeholder="Chức vụ" value="'+esc(v.nguoiGiaiTrinh.chucVu)+'" oninput="A.exPerson(\'chucVu\',this.value)" style="margin-bottom:6px">';
-  h+='<input class="inp" placeholder="Đơn vị / Phòng ban" value="'+esc(v.nguoiGiaiTrinh.donVi)+'" oninput="A.exPerson(\'donVi\',this.value)">';
+  h+='<input class="inp" placeholder="Bộ phận / Chi nhánh" value="'+esc(v.nguoiGiaiTrinh.boPhan)+'" oninput="A.exPerson(\'boPhan\',this.value)" style="margin-bottom:6px">';
+  h+='<input class="inp" placeholder="Thời gian phụ trách (từ – đến)" value="'+esc(v.nguoiGiaiTrinh.thoiGian)+'" oninput="A.exPerson(\'thoiGian\',this.value)">';
 
-  h+='<div class="bcsec" style="margin-top:16px">Bảng chênh lệch · '+v.items.length+' mục</div>';
+  h+='<label class="lbl" style="margin-top:14px">II.1. Loại thất thoát</label>';
+  h+=chipGroupUI(EX_LOAI,v.loai,'A.exToggle(\'loai\',');
+  h+='<input class="inp" placeholder="Khác (nếu có)" value="'+esc(v.loaiKhac)+'" oninput="A.exField(\'loaiKhac\',this.value)">';
+
+  h+='<label class="lbl" style="margin-top:12px">II.2. Phát hiện qua</label>';
+  h+=chipGroupUI(EX_PHATHIEN,v.phatHien,'A.exToggle(\'phatHien\',');
+  h+='<input class="inp" placeholder="Khác (nếu có)" value="'+esc(v.phatHienKhac)+'" oninput="A.exField(\'phatHienKhac\',this.value)">';
+
+  h+='<div style="display:flex;gap:8px;margin-top:10px"><div style="flex:1"><label class="lbl">3. Thời điểm phát hiện</label><input class="inp" placeholder="VD: ngày 05 tháng 09 năm 2026" value="'+esc(v.ngayPhatHien)+'" oninput="A.exField(\'ngayPhatHien\',this.value)"></div></div>';
+  h+='<label class="lbl" style="margin-top:10px">4. Thời điểm xảy ra (ước tính)</label><input class="inp" value="'+esc(v.thoiDiemXayRa)+'" oninput="A.exField(\'thoiDiemXayRa\',this.value)">';
+  h+='<label class="lbl" style="margin-top:10px">5. Địa điểm / kho / chi nhánh</label><input class="inp" value="'+esc(v.diaDiem)+'" oninput="A.exField(\'diaDiem\',this.value)">';
+  h+='<label class="lbl" style="margin-top:10px">6. Căn cứ (biên bản kiểm kê, phiếu, báo cáo số)</label><input class="inp" value="'+esc(v.canCu)+'" oninput="A.exField(\'canCu\',this.value)">';
+
+  h+='<div class="bcsec" style="margin-top:16px">III. Danh mục thất thoát · '+v.items.length+' mục</div>';
   h+='<div style="overflow-x:auto;border:1px solid var(--line);border-radius:12px;background:var(--card);margin-bottom:8px">';
   if(v.items.length){
-    h+='<table class="bctbl"><thead><tr><th>Tên</th><th>Mã</th><th>SS</th><th>TT</th><th>Chênh</th><th></th></tr></thead><tbody>';
+    h+='<table class="bctbl"><thead><tr><th>Tên</th><th>Mã</th><th>ĐVT</th><th>SS</th><th>TT</th><th>Chênh</th><th>Đơn giá</th><th>T.Tiền</th><th></th></tr></thead><tbody>';
     v.items.forEach(function(it,i){
       h+='<tr>'
         +'<td><input class="inp" style="padding:4px 8px;font-size:13px" value="'+esc(it.ten)+'" oninput="A.exItem('+i+',\'ten\',this.value)"></td>'
-        +'<td><input class="inp" style="padding:4px 8px;font-size:13px;width:70px" value="'+esc(it.maSo)+'" oninput="A.exItem('+i+',\'maSo\',this.value)"></td>'
-        +'<td><input class="inp" style="padding:4px 8px;font-size:13px;width:55px" value="'+esc(it.soSach)+'" oninput="A.exItem('+i+',\'soSach\',this.value)"></td>'
-        +'<td><input class="inp" style="padding:4px 8px;font-size:13px;width:55px" value="'+esc(it.thucTe)+'" oninput="A.exItem('+i+',\'thucTe\',this.value)"></td>'
-        +'<td><input class="inp" style="padding:4px 8px;font-size:13px;width:55px" value="'+esc(it.chenh)+'" oninput="A.exItem('+i+',\'chenh\',this.value)"></td>'
+        +'<td><input class="inp" style="padding:4px 8px;font-size:13px;width:65px" value="'+esc(it.ma)+'" oninput="A.exItem('+i+',\'ma\',this.value)"></td>'
+        +'<td><input class="inp" style="padding:4px 8px;font-size:13px;width:50px" value="'+esc(it.dvt)+'" oninput="A.exItem('+i+',\'dvt\',this.value)"></td>'
+        +'<td><input class="inp" style="padding:4px 8px;font-size:13px;width:50px" value="'+esc(it.slSoSach)+'" oninput="A.exItem('+i+',\'slSoSach\',this.value)"></td>'
+        +'<td><input class="inp" style="padding:4px 8px;font-size:13px;width:50px" value="'+esc(it.slThucTe)+'" oninput="A.exItem('+i+',\'slThucTe\',this.value)"></td>'
+        +'<td><input class="inp" style="padding:4px 8px;font-size:13px;width:50px" value="'+esc(it.chenh)+'" oninput="A.exItem('+i+',\'chenh\',this.value)"></td>'
+        +'<td><input class="inp" style="padding:4px 8px;font-size:13px;width:70px" value="'+esc(it.donGia)+'" oninput="A.exItem('+i+',\'donGia\',this.value)"></td>'
+        +'<td><input class="inp" style="padding:4px 8px;font-size:13px;width:80px" value="'+esc(it.thanhTien)+'" oninput="A.exItem('+i+',\'thanhTien\',this.value)"></td>'
         +'<td><button class="addbat" style="color:var(--red)" onclick="A.exItemDel('+i+')">✕</button></td>'
         +'</tr>';
     });
     h+='</tbody></table>';
   }
   h+='</div>';
-  h+='<div style="display:flex;gap:8px"><button class="addbat" onclick="A.exItemAdd()">+ Thêm dòng</button><button class="addbat" onclick="A.pickOpen(true)">📥 Lấy chênh lệch từ kỳ kiểm kê</button></div>';
+  h+='<div style="display:flex;gap:8px;flex-wrap:wrap"><button class="addbat" onclick="A.exItemAdd()">+ Thêm dòng</button><button class="addbat" onclick="A.pickOpen(true)">📥 Lấy chênh lệch từ kỳ kiểm kê</button></div>';
   h+=renderPicker(true);
+  h+='<div class="note-warn" style="margin-top:8px">⚠️ Đơn giá / Thành tiền app không tự tính được (không có sẵn đơn giá vật tư) — bạn điền tay nếu cần, để trống thì báo cáo để trống ô đó.</div>';
 
-  h+='<label class="lbl" style="margin-top:16px">Nguyên nhân (tuỳ chọn)</label><textarea class="inp" rows="2" oninput="A.exField(\'nguyennhan\',this.value)">'+esc(v.nguyennhan)+'</textarea>';
-  h+='<label class="lbl" style="margin-top:10px">Nội dung giải trình (tuỳ chọn)</label><textarea class="inp" rows="2" oninput="A.exField(\'noiDung\',this.value)">'+esc(v.noiDung)+'</textarea>';
-  h+='<label class="lbl" style="margin-top:10px">Trách nhiệm (tuỳ chọn)</label><textarea class="inp" rows="2" oninput="A.exField(\'trachNhiem\',this.value)">'+esc(v.trachNhiem)+'</textarea>';
-  h+='<label class="lbl" style="margin-top:10px">Biện pháp xử lý (tuỳ chọn)</label><textarea class="inp" rows="2" oninput="A.exField(\'bienPhap\',this.value)">'+esc(v.bienPhap)+'</textarea>';
-  h+='<label class="lbl" style="margin-top:10px">Đề xuất (tuỳ chọn)</label><textarea class="inp" rows="2" oninput="A.exField(\'deXuat\',this.value)">'+esc(v.deXuat)+'</textarea>';
+  h+='<label class="lbl" style="margin-top:16px">IV.1. Vấn đề (diễn biến, thời gian, bối cảnh) — tuỳ chọn</label>';
+  h+='<textarea class="inp" rows="2" oninput="A.exField(\'vanDe\',this.value)">'+esc(v.vanDe)+'</textarea>';
+
+  h+='<label class="lbl" style="margin-top:12px">IV.2. Nguyên nhân (nhóm)</label>';
+  h+=chipGroupUI(EX_NGUYENNHAN,v.nguyenNhan,'A.exToggle(\'nguyenNhan\',');
+  h+='<input class="inp" placeholder="Khác (nếu có)" value="'+esc(v.nguyenNhanKhac)+'" oninput="A.exField(\'nguyenNhanKhac\',this.value)">';
+  h+='<textarea class="inp" rows="2" placeholder="Giải thích chi tiết nguyên nhân (tuỳ chọn)" style="margin-top:6px" oninput="A.exField(\'nguyenNhanChiTiet\',this.value)">'+esc(v.nguyenNhanChiTiet)+'</textarea>';
+
+  h+='<label class="lbl" style="margin-top:12px">IV.3. Cá nhân / bộ phận liên quan</label><input class="inp" value="'+esc(v.caNhanLienQuan)+'" oninput="A.exField(\'caNhanLienQuan\',this.value)">';
+
+  h+='<label class="lbl" style="margin-top:12px">IV.4. Bằng chứng kèm theo</label>';
+  h+=chipGroupUI(EX_BANGCHUNG,v.bangChung,'A.exToggle(\'bangChung\',');
+  h+='<input class="inp" placeholder="Khác (nếu có)" value="'+esc(v.bangChungKhac)+'" oninput="A.exField(\'bangChungKhac\',this.value)">';
+
+  h+='<div class="bcsec" style="margin-top:16px">V. Biện pháp khắc phục · '+v.bienPhap.length+' mục</div>';
+  h+='<div style="overflow-x:auto;border:1px solid var(--line);border-radius:12px;background:var(--card);margin-bottom:8px">';
+  if(v.bienPhap.length){
+    h+='<table class="bctbl"><thead><tr><th>Biện pháp</th><th>Người phụ trách</th><th>Thời hạn</th><th>Nhóm</th><th></th></tr></thead><tbody>';
+    v.bienPhap.forEach(function(bp,i){
+      h+='<tr>'
+        +'<td><input class="inp" style="padding:4px 8px;font-size:13px" value="'+esc(bp.noiDung)+'" oninput="A.exBP('+i+',\'noiDung\',this.value)"></td>'
+        +'<td><input class="inp" style="padding:4px 8px;font-size:13px;width:90px" value="'+esc(bp.nguoiPhuTrach)+'" oninput="A.exBP('+i+',\'nguoiPhuTrach\',this.value)"></td>'
+        +'<td><input class="inp" style="padding:4px 8px;font-size:13px;width:70px" value="'+esc(bp.thoiHan)+'" oninput="A.exBP('+i+',\'thoiHan\',this.value)"></td>'
+        +'<td><input class="inp" style="padding:4px 8px;font-size:13px;width:60px" value="'+esc(bp.nhom)+'" oninput="A.exBP('+i+',\'nhom\',this.value)"></td>'
+        +'<td><button class="addbat" style="color:var(--red)" onclick="A.exBPDel('+i+')">✕</button></td>'
+        +'</tr>';
+    });
+    h+='</tbody></table>';
+  }
+  h+='</div><button class="addbat" onclick="A.exBPAdd()">+ Thêm biện pháp</button>';
+
+  h+='<div class="bcsec" style="margin-top:16px">VI. Đề xuất xử lý</div>';
+  h+='<label style="display:flex;align-items:center;gap:8px;padding:6px 0"><input type="checkbox" onchange="A.exField(\'dxGiamTon\',this.checked)"'+(v.dxGiamTon?' checked':'')+'><span>Điều chỉnh giảm tồn / xuất hủy trên sổ sách</span></label>';
+  h+='<label style="display:flex;align-items:center;gap:8px;padding:6px 0"><input type="checkbox" onchange="A.exField(\'dxHaoHut\',this.checked)"'+(v.dxHaoHut?' checked':'')+'><span>Tính vào hao hụt định mức được chấp nhận</span></label>';
+  h+='<label style="display:flex;align-items:center;gap:8px;padding:6px 0"><input type="checkbox" onchange="A.exField(\'dxTruyTim\',this.checked)"'+(v.dxTruyTim?' checked':'')+'><span>Tiếp tục truy tìm</span></label>';
+  h+='<input class="inp" placeholder="Thời hạn truy tìm" value="'+esc(v.dxTruyTimHan)+'" oninput="A.exField(\'dxTruyTimHan\',this.value)" style="margin-bottom:6px">';
+  h+='<label style="display:flex;align-items:center;gap:8px;padding:6px 0"><input type="checkbox" onchange="A.exField(\'dxBoiHoan\',this.checked)"'+(v.dxBoiHoan?' checked':'')+'><span>Bồi hoàn</span></label>';
+  h+='<div style="display:flex;gap:8px;margin-bottom:6px"><input class="inp" placeholder="Số tiền bồi hoàn" value="'+esc(v.dxBoiHoanTien)+'" oninput="A.exField(\'dxBoiHoanTien\',this.value)"><input class="inp" placeholder="Người chịu trách nhiệm" value="'+esc(v.dxBoiHoanNguoi)+'" oninput="A.exField(\'dxBoiHoanNguoi\',this.value)"></div>';
+  h+='<label style="display:flex;align-items:center;gap:8px;padding:6px 0"><input type="checkbox" onchange="A.exField(\'dxKhac\',this.checked)"'+(v.dxKhac?' checked':'')+'><span>Khác</span></label>';
+  h+='<input class="inp" placeholder="Nội dung khác" value="'+esc(v.dxKhacText)+'" oninput="A.exField(\'dxKhacText\',this.value)">';
 
   h+='</div>';
   h+='<div class="botbar"><div class="botin" style="display:flex;gap:8px">';
@@ -1856,9 +2100,11 @@ var A={
   hvNew:function(){HV=newHV();route={view:'handoverEdit'};render();},
   hvOpen:function(id){var v=null;for(var i=0;i<db.handovers.length;i++)if(db.handovers[i].id===id)v=db.handovers[i];if(!v)return;HV=v;route={view:'handoverEdit'};render();},
   hvDelete:function(id){if(!confirm('Xoá biên bản này?'))return;db.handovers=db.handovers.filter(function(v){return v.id!==id;});store.save();renderHandoverList();},
+  hvBlank:function(){exportDocHtml(generateHandoverDoc(newHV()),'Mau_BienBanBanGiao_trong.doc');},
   hvField:function(k,val){HV[k]=val;},
   hvPerson:function(side,k,val){HV[side][k]=val;},
-  hvItemAdd:function(){HV.items.push({ten:'',maSo:'',dvt:'',soLuong:'',tinhTrang:'',ghiChu:''});renderHandoverEdit();},
+  hvToggle:function(field,val){toggleArr(HV[field],val);renderHandoverEdit();},
+  hvItemAdd:function(){HV.items.push({ma:'',ten:'',dvt:'',sl:'',tinhTrang:'',ghiChu:''});renderHandoverEdit();},
   hvItem:function(i,k,val){HV.items[i][k]=val;},
   hvItemDel:function(i){HV.items.splice(i,1);renderHandoverEdit();},
   hvSave:function(withExport){
@@ -1868,20 +2114,25 @@ var A={
     if(withExport)exportDocHtml(generateHandoverDoc(),'BienBanBanGiao_'+(HV.soBB||HV.id)+'.doc');
   },
   hvPrint:function(){A.hvSave(false);printPreviewHtml(generateHandoverDoc());},
-  /* ---- Phiếu giải trình ---- */
+  /* ---- Phiếu / Bản giải trình thất thoát ---- */
   exNew:function(){EX=newEX();route={view:'explainEdit'};render();},
   exOpen:function(id){var v=null;for(var i=0;i<db.explains.length;i++)if(db.explains[i].id===id)v=db.explains[i];if(!v)return;EX=v;route={view:'explainEdit'};render();},
   exDelete:function(id){if(!confirm('Xoá phiếu này?'))return;db.explains=db.explains.filter(function(v){return v.id!==id;});store.save();renderExplainList();},
+  exBlank:function(){exportDocHtml(generateExplainDoc(newEX()),'Mau_GiaiTrinhThatThoat_trong.doc');},
   exField:function(k,val){EX[k]=val;},
   exPerson:function(k,val){EX.nguoiGiaiTrinh[k]=val;},
-  exItemAdd:function(){EX.items.push({ten:'',maSo:'',dvt:'',soSach:'',thucTe:'',chenh:'',ghiChu:''});renderExplainEdit();},
+  exToggle:function(field,val){toggleArr(EX[field],val);renderExplainEdit();},
+  exItemAdd:function(){EX.items.push({ma:'',ten:'',dvt:'',slSoSach:'',slThucTe:'',chenh:'',donGia:'',thanhTien:''});renderExplainEdit();},
   exItem:function(i,k,val){EX.items[i][k]=val;},
   exItemDel:function(i){EX.items.splice(i,1);renderExplainEdit();},
+  exBPAdd:function(){EX.bienPhap.push({noiDung:'',nguoiPhuTrach:'',thoiHan:'',nhom:''});renderExplainEdit();},
+  exBP:function(i,k,val){EX.bienPhap[i][k]=val;},
+  exBPDel:function(i){EX.bienPhap.splice(i,1);renderExplainEdit();},
   exSave:function(withExport){
     if(!db.explains.some(function(v){return v.id===EX.id;}))db.explains.unshift(EX);
     store.save();
-    toast('Đã lưu phiếu giải trình');
-    if(withExport)exportDocHtml(generateExplainDoc(),'PhieuGiaiTrinh_'+(EX.soPhieu||EX.id)+'.doc');
+    toast('Đã lưu bản giải trình');
+    if(withExport)exportDocHtml(generateExplainDoc(),'GiaiTrinhThatThoat_'+(EX.soPhieu||EX.id)+'.doc');
   },
   exPrint:function(){A.exSave(false);printPreviewHtml(generateExplainDoc());},
   /* ---- Picker chọn vật tư từ kỳ kiểm kê (dùng chung) ---- */
@@ -1896,11 +2147,11 @@ var A={
     if(!items.length){toast('Chưa chọn mục nào');return;}
     if(onlyDiff){
       items.forEach(function(i){
-        EX.items.push({ten:i.name,maSo:i.code,dvt:i.unit,soSach:fmt(i.close),thucTe:i.counted?fmt(i.countQty):'',chenh:i.counted?fmt(diffOf(i)):'',ghiChu:''});
+        EX.items.push({ma:i.code,ten:i.name,dvt:i.unit,slSoSach:fmt(i.close),slThucTe:i.counted?fmt(i.countQty):'',chenh:i.counted?fmt(diffOf(i)):'',donGia:'',thanhTien:''});
       });
     }else{
       items.forEach(function(i){
-        HV.items.push({ten:i.name,maSo:i.code,dvt:i.unit,soLuong:fmt(i.counted?i.countQty:i.close),tinhTrang:'',ghiChu:''});
+        HV.items.push({ma:i.code,ten:i.name,dvt:i.unit,sl:fmt(i.counted?i.countQty:i.close),tinhTrang:'',ghiChu:''});
       });
     }
     PICK=null;
