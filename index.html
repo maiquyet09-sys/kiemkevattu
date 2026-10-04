@@ -8,24 +8,51 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <title>Kiểm kê kho · MedDental</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.4.0/exceljs.min.js"></script>
 <style>
 :root{
-  --bg:#0c1130; --card:#131c42; --card2:#1a2558; --ink:#e8eeff; --mut:rgba(180,196,255,0.55); --mut2:rgba(180,196,255,0.35); --line:rgba(255,255,255,0.09);
-  --teal:#00d4aa; --teal-d:#00b894; --teal-bg:rgba(0,212,170,0.1); --teal-ln:rgba(0,212,170,0.28);
-  --red:#ff7875; --red-bg:rgba(255,120,117,0.12); --red-ln:rgba(255,120,117,0.28);
-  --amber:#ffc07a; --amber-bg:rgba(255,180,100,0.12); --amber-ln:rgba(255,180,100,0.28);
-  --orange:#ff9a6c; --orange-bg:rgba(255,150,100,0.12); --orange-ln:rgba(255,150,100,0.28);
-  --sky:#74b9ff; --sky-bg:rgba(116,185,255,0.12); --sky-ln:rgba(116,185,255,0.28);
-  --green:#00d4aa; --green-bg:rgba(0,212,170,0.12); --green-ln:rgba(0,212,170,0.28);
+  --bg:#f3f5f9; --card:#ffffff; --card2:#f3f6fb; --ink:#101828; --mut:rgba(16,24,40,0.58); --mut2:rgba(16,24,40,0.38); --line:rgba(16,24,40,0.1);
+  --teal:#2f6fed; --teal-d:#1d55c9; --teal-bg:rgba(47,111,237,0.08); --teal-ln:rgba(47,111,237,0.28);
+  --red:#e0383d; --red-bg:#fde8e8; --red-ln:rgba(224,56,61,0.28);
+  --amber:#b4780a; --amber-bg:#fdf1d6; --amber-ln:rgba(180,120,10,0.28);
+  --orange:#c2540d; --orange-bg:#fde8d6; --orange-ln:rgba(194,84,13,0.28);
+  --sky:#0969b3; --sky-bg:#e0f0fc; --sky-ln:rgba(9,105,179,0.28);
+  --green:#15803d; --green-bg:#e1f6e8; --green-ln:rgba(21,128,61,0.28);
+  --sidebar-w:224px; --header-h:60px;
 }
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 html,body{margin:0;padding:0}
-body{background:var(--bg);color:var(--ink);font-family:'Be Vietnam Pro',system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;font-size:16px;line-height:1.45}
+body{background:var(--bg);color:var(--ink);font-family:'Inter',system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;font-size:16px;line-height:1.45}
 #app{max-width:480px;margin:0 auto;min-height:100vh;position:relative}
 .wrap{padding-left:16px;padding-right:16px}
+/* ===== Shell: header + sidebar (responsive) ===== */
+#gheader{position:sticky;top:0;z-index:50;height:var(--header-h);background:#fff;border-bottom:1px solid var(--line);display:flex;align-items:center;gap:12px;padding:0 16px}
+#ghmenu{display:flex;align-items:center;justify-content:center;width:38px;height:38px;border:none;background:var(--card2);border-radius:10px;cursor:pointer;font-size:18px;color:var(--ink)}
+#gbrand{display:flex;align-items:center;gap:8px;font-weight:800;font-size:17px;color:var(--ink);white-space:nowrap}
+#gbrand .dot{width:30px;height:30px;border-radius:9px;background:var(--teal);color:#fff;display:flex;align-items:center;justify-content:center;font-size:16px}
+#gshell{display:flex;min-height:calc(100vh - var(--header-h))}
+#gsidebar{display:none;flex:0 0 var(--sidebar-w);background:#fff;border-right:1px solid var(--line);padding:14px 10px}
+.gnav-item{display:flex;align-items:center;gap:10px;padding:11px 12px;border-radius:12px;color:var(--mut);font-weight:600;font-size:14px;cursor:pointer;margin-bottom:2px;text-decoration:none}
+.gnav-item:hover{background:var(--card2)}
+.gnav-item.on{background:var(--teal-bg);color:var(--teal)}
+.gnav-item .ic{font-size:17px;width:20px;text-align:center}
+#gmain{flex:1;min-width:0}
+#gdrawer-ovl{position:fixed;inset:0;background:rgba(16,24,40,.45);z-index:70;display:none}
+#gdrawer{position:fixed;top:0;left:0;bottom:0;width:78vw;max-width:280px;background:#fff;z-index:71;transform:translateX(-100%);transition:transform .22s ease;padding:16px 10px;overflow-y:auto}
+#gdrawer.open{transform:translateX(0)}
+#gdrawer-ovl.open{display:block}
+@media(min-width:900px){
+  #ghmenu{display:none}
+  #gsidebar{display:block}
+  #app{max-width:none;margin:0;padding-bottom:40px}
+  #gmain .wrap{max-width:900px;margin-left:auto;margin-right:auto}
+  #gmain .topbar{padding-left:0;padding-right:0}
+  #gmain .botbar{left:var(--sidebar-w)}
+  #gmain .botin{max-width:900px}
+  #gmain .stkwrap,#gmain .prev{max-width:900px;margin-left:auto;margin-right:auto}
+}
 .tnum{font-variant-numeric:tabular-nums}
 .eyebrow{font-size:11px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:var(--teal)}
 .h1{font-size:24px;font-weight:800;margin:4px 0 0;color:var(--ink)}
@@ -33,31 +60,31 @@ body{background:var(--bg);color:var(--ink);font-family:'Be Vietnam Pro',system-u
 .card{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:16px}
 .btn{display:block;width:100%;border:none;border-radius:16px;padding:14px;font:inherit;font-weight:700;cursor:pointer;text-align:center}
 .btn:active{opacity:.85}
-.btn-primary{background:var(--teal);color:#071a14;box-shadow:0 4px 20px rgba(0,212,170,.25)}
-.btn-outline{background:rgba(0,212,170,.08);color:var(--teal);border:1px solid var(--teal-ln)}
-.btn:disabled{background:rgba(255,255,255,.06);color:rgba(255,255,255,.25);border-color:rgba(255,255,255,.06);cursor:default}
-.inp{width:100%;border:1px solid var(--line);border-radius:12px;padding:11px 12px;font:inherit;background:rgba(255,255,255,.05);color:var(--ink);outline:none}
+.btn-primary{background:var(--teal);color:#071a2e;box-shadow:0 4px 20px rgba(77,166,255,.28)}
+.btn-outline{background:rgba(77,166,255,.08);color:var(--teal);border:1px solid var(--teal-ln)}
+.btn:disabled{background:rgba(16,24,40,.06);color:rgba(16,24,40,.28);border-color:rgba(16,24,40,.06);cursor:default}
+.inp{width:100%;border:1px solid var(--line);border-radius:12px;padding:11px 12px;font:inherit;background:var(--card2);color:var(--ink);outline:none}
 .inp:focus{border-color:var(--teal-ln)}
 .lbl{display:block;font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--mut);margin-bottom:6px}
-.topbar{position:sticky;top:0;z-index:20;background:var(--bg);border-bottom:1px solid var(--line)}
+.topbar{position:sticky;top:0;z-index:20;background:#fff;border-bottom:1px solid var(--line)}
 .trow{display:flex;align-items:center;gap:12px;padding-top:12px;padding-bottom:2px}
-.back{flex:0 0 auto;width:32px;height:32px;border:none;border-radius:50%;background:rgba(255,255,255,.08);color:var(--mut);font-size:18px;font-weight:700;cursor:pointer;line-height:1}
+.back{flex:0 0 auto;width:32px;height:32px;border:none;border-radius:50%;background:var(--card2);color:var(--mut);font-size:18px;font-weight:700;cursor:pointer;line-height:1}
 .ttl{flex:1;min-width:0;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:var(--ink)}
 .pill{flex:0 0 auto;border:1px solid var(--teal-ln);background:var(--teal-bg);color:var(--teal);border-radius:999px;padding:7px 12px;font:inherit;font-size:13px;font-weight:700;cursor:pointer}
-.bar{height:5px;background:rgba(255,255,255,.08);border-radius:999px;overflow:hidden}
+.bar{height:5px;background:rgba(16,24,40,.08);border-radius:999px;overflow:hidden}
 .fill{height:100%;background:var(--teal);border-radius:999px;transition:width .2s}
 .prow{display:flex;justify-content:space-between;font-size:12px;margin-top:6px;padding-bottom:4px;color:var(--mut)}
 .stklink{display:block;width:100%;text-align:left;border:none;background:none;padding:6px 0 0;font:inherit;font-size:13px;font-weight:700;color:var(--teal);cursor:pointer}
 .stkwrap{overflow-x:auto;-webkit-overflow-scrolling:touch;border:1px solid var(--line);border-radius:12px;background:var(--card)}
 .stktable{width:100%;border-collapse:collapse;font-size:12.5px;table-layout:fixed}
-.stktable th{text-align:left;font-weight:700;color:var(--mut);padding:8px 6px;border-bottom:1px solid var(--line);font-size:10.5px;text-transform:uppercase;letter-spacing:.03em;background:rgba(255,255,255,.03)}
+.stktable th{text-align:left;font-weight:700;color:var(--mut);padding:8px 6px;border-bottom:1px solid var(--line);font-size:10.5px;text-transform:uppercase;letter-spacing:.03em;background:rgba(16,24,40,.03)}
 .stktable td{padding:8px 6px;border-bottom:1px solid var(--line);vertical-align:top;color:var(--ink)}
 .stktable td.r,.stktable th.r{text-align:right}
 .stkname{font-weight:600;color:var(--ink);word-break:break-word}
 .chips{display:flex;gap:8px;overflow-x:auto;padding:0 16px 10px;scrollbar-width:none}
 .chips::-webkit-scrollbar{display:none}
-.chip{flex:0 0 auto;border:1px solid var(--line);background:rgba(255,255,255,.06);color:var(--mut);border-radius:999px;padding:7px 12px;font:inherit;font-size:13px;font-weight:600;white-space:nowrap;cursor:pointer}
-.chip-on{background:var(--teal);border-color:var(--teal);color:#071a14;font-weight:700}
+.chip{flex:0 0 auto;border:1px solid var(--line);background:var(--card2);color:var(--mut);border-radius:999px;padding:7px 12px;font:inherit;font-size:13px;font-weight:600;white-space:nowrap;cursor:pointer}
+.chip-on{background:var(--teal);border-color:var(--teal);color:#fff;font-weight:700}
 .chipwrap{display:flex;flex-wrap:wrap;gap:6px;margin:6px 0}
 select.chip{appearance:auto;color:var(--ink)}
 .item{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:12px 16px;margin-bottom:8px;display:flex;align-items:center;gap:12px;cursor:pointer}
@@ -65,7 +92,7 @@ select.chip{appearance:auto;color:var(--ink)}
 .iname{font-weight:600;line-height:1.35;color:var(--ink)}
 .isub{font-size:12px;color:var(--mut);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .ibadges{margin-top:6px;display:flex;gap:6px;flex-wrap:wrap}
-.bdg{font-size:11px;font-weight:600;border-radius:999px;padding:2px 8px;border:1px solid var(--line);background:rgba(255,255,255,.05);color:var(--mut)}
+.bdg{font-size:11px;font-weight:600;border-radius:999px;padding:2px 8px;border:1px solid var(--line);background:var(--card2);color:var(--mut)}
 .bdg-ok{background:var(--green-bg);border-color:var(--green-ln);color:var(--green)}
 .bdg-plus{background:var(--amber-bg);border-color:var(--amber-ln);color:var(--amber);font-weight:700}
 .bdg-minus{background:var(--red-bg);border-color:var(--red-ln);color:var(--red);font-weight:700}
@@ -84,16 +111,16 @@ select.chip{appearance:auto;color:var(--ink)}
 .scell{background:rgba(255,255,255,.05);border-radius:10px;padding:6px 4px;text-align:center;border:1px solid rgba(255,255,255,.06)}
 .scell .l{font-size:9px;color:#6b7280;font-weight:600;text-transform:uppercase;letter-spacing:.04em}
 .scell .v{font-size:13px;font-weight:700;margin-top:2px;color:#d1d5db}
-.scell-hl{background:rgba(0,212,170,.08);border:1px solid rgba(0,212,170,.25)}
-.scell-hl .l{color:#00d4aa;font-weight:700}
-.scell-hl .v{color:#00d4aa;font-size:14px;font-weight:800}
+.scell-hl{background:rgba(77,166,255,.08);border:1px solid rgba(77,166,255,.25)}
+.scell-hl .l{color:#4da6ff;font-weight:700}
+.scell-hl .v{color:#4da6ff;font-size:14px;font-weight:800}
 .qtyrow{display:flex;align-items:center;gap:8px;margin-top:6px}
 .qtydisp{flex:1;min-width:0;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.12);border-radius:18px;padding:8px 12px;font-size:38px;font-weight:800;text-align:center;font-variant-numeric:tabular-nums;color:#fff;user-select:none;letter-spacing:-.02em}
 .qtydisp-empty{color:rgba(255,255,255,.18)}
 .nudge{flex:0 0 auto;width:44px;height:44px;border-radius:14px;border:1px solid rgba(255,255,255,.1);background:rgba(255,255,255,.06);font:inherit;font-weight:800;font-size:16px;color:#9ca3af;cursor:pointer}
 .nudge:active{background:rgba(255,255,255,.13)}
-.matchbtn{display:block;width:100%;margin-top:8px;border:1px solid rgba(0,212,170,.3);background:rgba(0,212,170,.07);color:#00d4aa;font:inherit;font-weight:700;font-size:13px;border-radius:14px;padding:9px;text-align:center;cursor:pointer}
-.matchbtn:active{background:rgba(0,212,170,.15)}
+.matchbtn{display:block;width:100%;margin-top:8px;border:1px solid rgba(77,166,255,.3);background:rgba(77,166,255,.07);color:#4da6ff;font:inherit;font-weight:700;font-size:13px;border-radius:14px;padding:9px;text-align:center;cursor:pointer}
+.matchbtn:active{background:rgba(77,166,255,.15)}
 .keypad{display:grid;grid-template-columns:repeat(3,1fr);gap:5px;margin-top:8px}
 .kkey{border:1px solid rgba(255,255,255,.07);background:rgba(255,255,255,.06);border-radius:14px;padding:11px 0;font:inherit;font-size:22px;font-weight:700;color:#e5e7eb;cursor:pointer}
 .kkey:active{background:rgba(255,255,255,.14)}
@@ -105,13 +132,13 @@ select.chip{appearance:auto;color:var(--ink)}
 .btn-dk{border:1px solid rgba(255,255,255,.14);background:rgba(255,255,255,.06);color:#d1d5db;border-radius:16px;padding:14px;font:inherit;font-weight:700;cursor:pointer;text-align:center}
 .btn-dk:active{background:rgba(255,255,255,.12)}
 .btn-dk:disabled{opacity:.28;cursor:default}
-.btn-nxt{background:#00d4aa;color:#0a0f0d;border:none;border-radius:16px;padding:14px;font:inherit;font-weight:800;cursor:pointer;text-align:center;font-size:15px;letter-spacing:-.01em}
+.btn-nxt{background:#4da6ff;color:#0a0f0d;border:none;border-radius:16px;padding:14px;font:inherit;font-weight:800;cursor:pointer;text-align:center;font-size:15px;letter-spacing:-.01em}
 .btn-nxt:active{opacity:.85}
 .btn-nxt:disabled{opacity:.28;cursor:default}
 .sdivider{height:1px;background:rgba(255,255,255,.06);margin:18px 20px 0}
 .slbl{display:block;font-size:10px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:#6b7280;margin-bottom:6px}
 .sinp{width:100%;border:1px solid rgba(255,255,255,.1);border-radius:12px;padding:11px 12px;font:inherit;background:rgba(255,255,255,.05);color:#e5e7eb;outline:none}
-.sinp:focus{border-color:rgba(0,212,170,.5)}
+.sinp:focus{border-color:rgba(77,166,255,.5)}
 .hint-red{font-size:12px;color:#f87171;font-weight:600;margin-top:5px}
 .qchips{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0}
 .qchip{border:1px solid rgba(255,255,255,.1);background:rgba(255,255,255,.05);color:#9ca3af;border-radius:999px;padding:5px 12px;font:inherit;font-size:12px;font-weight:600;cursor:pointer}
@@ -132,9 +159,10 @@ select.chip{appearance:auto;color:var(--ink)}
 .c-org{background:var(--orange-bg);border-color:var(--orange-ln);color:var(--orange)}
 .c-amb{background:var(--amber-bg);border-color:var(--amber-ln);color:var(--amber)}
 .c-sky{background:var(--sky-bg);border-color:var(--sky-ln);color:var(--sky)}
+.c-green{background:var(--green-bg);border-color:var(--green-ln);color:var(--green)}
 .per{cursor:pointer;margin-bottom:8px}
 .per:active{background:var(--card2)}
-.perx{border:none;background:none;color:rgba(255,255,255,.18);font-size:16px;cursor:pointer;padding:2px 4px}
+.perx{border:none;background:none;color:rgba(16,24,40,.28);font-size:16px;cursor:pointer;padding:2px 4px}
 .prev{overflow-x:auto;border:1px solid var(--line);border-radius:12px;background:var(--card)}
 .prev table{border-collapse:collapse;font-size:12px;white-space:nowrap}
 .prev th{text-align:left;font-weight:600;color:var(--mut);padding:6px 8px;border-bottom:1px solid var(--line)}
@@ -142,19 +170,14 @@ select.chip{appearance:auto;color:var(--ink)}
 .prev .r{text-align:right;font-variant-numeric:tabular-nums}
 .maprow{display:flex;align-items:center;gap:8px;margin-bottom:8px}
 .maplbl{flex:0 0 112px;font-size:13px;color:var(--mut)}
-.maprow select{flex:1;min-width:0;border:1px solid var(--line);border-radius:12px;padding:8px;font:inherit;font-size:13px;background:rgba(255,255,255,.05);color:var(--ink);outline:none}
+.maprow select{flex:1;min-width:0;border:1px solid var(--line);border-radius:12px;padding:8px;font:inherit;font-size:13px;background:var(--card2);color:var(--ink);outline:none}
 .drop{width:100%;border:2px dashed var(--teal-ln);background:var(--teal-bg);border-radius:24px;padding:44px 16px;text-align:center;cursor:pointer;font:inherit}
-.drop:active{background:rgba(0,212,170,.15)}
-.empty{text-align:center;color:var(--mut);font-size:14px;padding:48px 0}
-#toast{position:fixed;bottom:96px;left:0;right:0;z-index:60;display:flex;justify-content:center;padding:0 16px;pointer-events:none}
-#toast .in{background:rgba(255,255,255,.12);backdrop-filter:blur(12px);color:var(--ink);font-size:14px;font-weight:500;border-radius:999px;padding:8px 16px;box-shadow:0 4px 20px rgba(0,0,0,.4);border:1px solid var(--line);opacity:0;transition:opacity .2s}
-#toast .in.show{opacity:1}
-.hsditem{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:10px 12px;margin-bottom:6px;display:flex;align-items:center;gap:12px}
+.drop:active{background:rgba(77,166,255,.15)}
 .empty{text-align:center;color:var(--mut2);font-size:14px;padding:48px 0}
 #toast{position:fixed;bottom:96px;left:0;right:0;z-index:60;display:flex;justify-content:center;padding:0 16px;pointer-events:none}
 #toast .in{background:#1c1917;color:#fff;font-size:14px;font-weight:500;border-radius:999px;padding:8px 16px;box-shadow:0 4px 16px rgba(0,0,0,.25);opacity:0;transition:opacity .2s}
 #toast .in.show{opacity:1}
-.hsditem{background:#fff;border:1px solid var(--line);border-radius:12px;padding:10px 12px;margin-bottom:6px;display:flex;align-items:center;gap:12px}
+.hsditem{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:10px 12px;margin-bottom:6px;display:flex;align-items:center;gap:12px}
 .mt8{margin-top:8px}.mt12{margin-top:12px}.mt16{margin-top:16px}.mt20{margin-top:20px}.mt24{margin-top:24px}
 .bcfile{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:10px 12px;margin-bottom:6px;display:flex;align-items:center;gap:10px}
 .bcbtn{display:block;width:100%;border:none;border-radius:14px;padding:13px;font:inherit;font-weight:700;cursor:pointer;text-align:center}
@@ -167,7 +190,16 @@ select.chip{appearance:auto;color:var(--ink)}
 </style>
 </head>
 <body>
-<div id="app"></div>
+<header id="gheader">
+  <button id="ghmenu" onclick="A.drawerToggle()">☰</button>
+  <div id="gbrand"><span class="dot">🦷</span> MedDental · Vật tư</div>
+</header>
+<div id="gshell">
+  <nav id="gsidebar"></nav>
+  <main id="gmain"><div id="app"></div></main>
+</div>
+<div id="gdrawer-ovl" onclick="A.drawerToggle()"></div>
+<nav id="gdrawer"></nav>
 <div id="modal"></div>
 <div id="toast"><div class="in" id="toastin"></div></div>
 
@@ -253,7 +285,7 @@ var BUCKETS=[
   {k:"expired",label:"Đã hết hạn",cls:"c-red",strong:"var(--red)",test:function(d){return d<0;}},
   {k:"m1",label:"Còn ≤ 1 tháng",cls:"c-org",strong:"var(--orange)",test:function(d){return d>=0&&d<=30;}},
   {k:"m3",label:"Còn ≤ 3 tháng",cls:"c-amb",strong:"var(--amber)",test:function(d){return d>30&&d<=90;}},
-  {k:"m6",label:"Còn ≤ 6 tháng",cls:"c-sky",strong:"var(--sky)",test:function(d){return d>90&&d<=180;}}
+  {k:"m6",label:"Còn ≤ 6 tháng",cls:"c-green",strong:"var(--green)",test:function(d){return d>90&&d<=180;}}
 ];
 
 /* Lý do giải trình nhanh — thêm/bớt/sửa câu chữ ngay trong mảng này */
@@ -1356,12 +1388,12 @@ function showHsdEmailPicker(){
   if(branches.length===1){exportHsdAlert(branches[0]);return;}
   var h='<div class="ovl" id="ovl"><div class="sheet" onclick="event.stopPropagation()">'+
     '<div class="shead"><div style="flex:1;min-width:0">'+
-    '<div style="font-size:10px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:#00d4aa;margin-bottom:4px">GỬI EMAIL CẢNH BÁO HSD</div>'+
+    '<div style="font-size:10px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:#4da6ff;margin-bottom:4px">GỬI EMAIL CẢNH BÁO HSD</div>'+
     '<div style="font-weight:700;font-size:16px;color:#f0f0f0">Chọn kho để gửi riêng</div>'+
     '<div style="font-size:12px;color:#6b7280;margin-top:3px">'+critical.length+' mã cần cảnh báo · '+branches.length+' kho</div>'+
     '</div><button class="sx" onclick="A.closeSheet()">✕</button></div>'+
     '<div style="padding:12px 20px 28px">'+
-    '<button onclick="A.closeSheet();exportHsdAlert()" style="display:block;width:100%;border:1px solid rgba(0,212,170,.3);background:rgba(0,212,170,.07);color:#00d4aa;font:inherit;font-size:14px;font-weight:700;border-radius:14px;padding:13px;text-align:left;cursor:pointer;margin-bottom:10px">'+
+    '<button onclick="A.closeSheet();exportHsdAlert()" style="display:block;width:100%;border:1px solid rgba(77,166,255,.3);background:rgba(77,166,255,.07);color:#4da6ff;font:inherit;font-size:14px;font-weight:700;border-radius:14px;padding:13px;text-align:left;cursor:pointer;margin-bottom:10px">'+
     '📧 Tất cả kho — 1 email tổng hợp ('+critical.length+' mã)</button>'+
     '<div style="font-size:11px;color:#6b7280;text-align:center;margin-bottom:10px">── hoặc gửi riêng từng kho ──</div>';
   branches.forEach(function(br){
@@ -1373,7 +1405,7 @@ function showHsdEmailPicker(){
     if(exp>0)badge+=' 🔴 '+exp+' hết hạn';
     if(m1>0)badge+=' 🟠 '+m1+' <1th';
     if(m3>0)badge+=' 🟡 '+m3+' <3th';
-    h+='<button onclick="A.closeSheet();exportHsdAlert(\''+esc(br)+'\')" style="display:block;width:100%;border:1px solid rgba(255,255,255,.09);background:rgba(255,255,255,.05);color:#e8eeff;font:inherit;font-size:14px;font-weight:600;border-radius:14px;padding:13px;text-align:left;cursor:pointer;margin-bottom:8px">'+
+    h+='<button onclick="A.closeSheet();exportHsdAlert(\''+esc(br)+'\')" style="display:block;width:100%;border:1px solid rgba(255,255,255,.09);background:rgba(255,255,255,.05);color:#ffffff;font:inherit;font-size:14px;font-weight:600;border-radius:14px;padding:13px;text-align:left;cursor:pointer;margin-bottom:8px">'+
       '<div style="font-weight:700">'+esc(br)+'</div>'+
       '<div style="font-size:12px;color:#6b7280;margin-top:3px">'+items.length+' mã cần cảnh báo ·'+badge+'</div>'+
       '</button>';
@@ -1606,7 +1638,7 @@ function exportKiemKeEmail(p){
 
 function renderHome(){
   var entries=hsdEntries();
-  var h='<div class="wrap" style="padding-top:24px"><div class="eyebrow">MedDental · Vật tư</div><h1 class="h1">Kiểm kê kho</h1><div style="font-size:12px;font-style:italic;color:#c4bfbb;margin-top:4px">Built by Quyet Mai</div></div>';
+  var h='<div class="wrap" style="padding-top:24px"><div class="eyebrow">MedDental · Vật tư</div><h1 class="h1">Kiểm kê kho</h1><div style="font-size:12px;font-style:italic;color:var(--mut2);margin-top:4px">Built by Quyet Mai</div></div>';
   if(!store.ok){
     h+='<div class="wrap mt12"><div class="note-warn">Trình duyệt đang chặn bộ nhớ lưu trữ — dữ liệu chỉ tồn tại trong phiên này. Mở file bằng Chrome/Safari hoặc đưa lên hosting để lưu lâu dài. Kiểm xong nhớ Xuất Excel ngay.</div></div>';
   }
@@ -1616,17 +1648,13 @@ function renderHome(){
     h+='<div class="hsdcard '+b.cls+'" onclick="A.go(\'hsd\')"><div class="n tnum">'+n+'</div><div class="t">'+b.label+'</div></div>';
   });
   h+='</div></div>';
-  h+='<div class="wrap mt24" style="padding-bottom:40px"><div class="sec">Kỳ kiểm kê</div>';
-  h+='<button class="btn btn-primary" style="margin-bottom:8px" onclick="A.go(\'upload\')">+ Tạo kỳ mới · Upload file tồn kho</button>';
-  h+='<button class="btn btn-outline" style="margin-bottom:8px" onclick="A.go(\'baocao\')">📄 Tạo báo cáo kiểm kê (.docx)</button>';
-  h+='<button class="btn btn-outline" style="margin-bottom:8px" onclick="A.go(\'handover\')">📋 Biên bản bàn giao</button>';
-  h+='<button class="btn btn-outline" style="margin-bottom:12px" onclick="A.go(\'explain\')">📝 Phiếu giải trình chênh lệch</button>';
-  if(!db.periods.length){
-    h+='<div class="card" style="font-size:14px;color:var(--mut)"><div style="font-weight:700;color:var(--ink);margin-bottom:8px">Quy trình 3 bước:</div>'+
-      '<div style="margin-bottom:6px"><b style="color:var(--teal)">1.</b> Xuất báo cáo tồn kho từ MISA ra Excel, upload lên đây.</div>'+
-      '<div style="margin-bottom:6px"><b style="color:var(--teal)">2.</b> Xuống kho, kiểm bằng điện thoại: tìm kiếm hoặc kiểm tuần tự. Lệch tồn là bắt buộc giải trình.</div>'+
-      '<div><b style="color:var(--teal)">3.</b> Xuất Excel làm biên bản. Hạn sử dụng tự kế thừa sang kỳ sau.</div></div>';
-  }
+  h+='<div class="wrap mt24"><div class="sec">Kỳ kiểm kê</div>';
+  h+='<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px">';
+  h+='<button class="btn btn-primary" style="grid-column:1/-1" onclick="A.go(\'upload\')">+ Tạo kỳ mới · Upload file tồn kho</button>';
+  h+='<button class="btn btn-outline" onclick="A.go(\'baocao\')">📄 Tạo báo cáo (.docx)</button>';
+  h+='<button class="btn btn-outline" onclick="A.go(\'handover\')">📋 Biên bản bàn giao</button>';
+  h+='<button class="btn btn-outline" style="grid-column:1/-1" onclick="A.go(\'explain\')">📝 Phiếu giải trình chênh lệch</button>';
+  h+='</div>';
   db.periods.forEach(function(p){
     var total=p.items.length;
     var done=p.items.filter(function(i){return i.counted;}).length;
@@ -1642,7 +1670,26 @@ function renderHome(){
       '<div class="bar" style="margin-top:12px"><div class="fill" style="width:'+pct+'%"></div></div>'+
       '<div style="display:flex;justify-content:space-between;font-size:12px;margin-top:6px"><span style="color:var(--mut)">Đã kiểm <b class="tnum" style="color:var(--ink)">'+done+'/'+total+'</b></span>'+right+'</div></div>';
   });
+  if(!db.periods.length){
+    h+='<div class="empty" style="padding:28px 0">Chưa có kỳ kiểm kê nào — bấm "Tạo kỳ mới" để bắt đầu.</div>';
+  }
   h+='</div>';
+  h+='<div class="wrap mt24" style="padding-bottom:40px"><div class="sec">Quy trình</div>';
+  h+='<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px">';
+  var steps=[
+    {n:1,icon:'📤',t:'Xuất file MISA',d:'Xuất báo cáo tồn kho từ MISA ra Excel.'},
+    {n:2,icon:'📲',t:'Upload &amp; kiểm',d:'Upload file, xuống kho kiểm bằng điện thoại.'},
+    {n:3,icon:'📄',t:'Tạo báo cáo &amp; biên bản',d:'Xuất báo cáo, biên bản bàn giao, giải trình chênh lệch.'}
+  ];
+  steps.forEach(function(s){
+    h+='<div class="card" style="text-align:center">'
+      +'<div style="width:32px;height:32px;border-radius:50%;background:var(--teal);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:14px;margin:0 auto 8px">'+s.n+'</div>'
+      +'<div style="font-size:24px;margin-bottom:6px">'+s.icon+'</div>'
+      +'<div style="font-weight:700;font-size:14px;margin-bottom:4px">'+s.t+'</div>'
+      +'<div style="font-size:12px;color:var(--mut)">'+s.d+'</div>'
+      +'</div>';
+  });
+  h+='</div></div>';
   document.getElementById("app").innerHTML=h;
 }
 
@@ -1904,10 +1951,10 @@ function renderPhotoSec(){
       '<div style="position:relative;border-radius:14px;overflow:hidden;border:1px solid rgba(255,255,255,.1)">'+
       '<img src="'+SB.photo+'" style="width:100%;max-height:220px;object-fit:contain;display:block;background:rgba(0,0,0,.3)">'+
       '<button onclick="A.photoClear()" style="position:absolute;top:8px;right:8px;width:30px;height:30px;border:none;border-radius:50%;background:rgba(0,0,0,.6);color:#fff;font-size:14px;cursor:pointer;line-height:1">✕</button></div>'+
-      '<button onclick="document.getElementById(\'photoin\').click()" style="margin-top:8px;border:none;background:none;color:#00d4aa;font:inherit;font-size:13px;font-weight:700;cursor:pointer;padding:0">🔄 Chụp lại</button>';
+      '<button onclick="document.getElementById(\'photoin\').click()" style="margin-top:8px;border:none;background:none;color:#4da6ff;font:inherit;font-size:13px;font-weight:700;cursor:pointer;padding:0">🔄 Chụp lại</button>';
   }else{
     sec.innerHTML='<label class="slbl">Ảnh vật tư</label>'+
-      '<button onclick="document.getElementById(\'photoin\').click()" style="display:block;width:100%;border:1px dashed rgba(0,212,170,.3);background:rgba(0,212,170,.05);border-radius:14px;padding:16px;color:#00d4aa;font:inherit;font-size:14px;font-weight:700;cursor:pointer;text-align:center">📷 Chụp ảnh vật tư</button>';
+      '<button onclick="document.getElementById(\'photoin\').click()" style="display:block;width:100%;border:1px dashed rgba(77,166,255,.3);background:rgba(77,166,255,.05);border-radius:14px;padding:16px;color:#4da6ff;font:inherit;font-size:14px;font-weight:700;cursor:pointer;text-align:center">📷 Chụp ảnh vật tư</button>';
   }
 }
 function openSheet(itemId,seq){
@@ -1920,7 +1967,7 @@ function openSheet(itemId,seq){
   var total=p.items.length;
   var h='<div class="ovl" id="ovl"><div class="sheet" onclick="event.stopPropagation()">'+
     '<div class="shead"><div style="flex:1;min-width:0">'+
-    (seq?'<div style="font-size:10px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:#00d4aa;margin-bottom:6px">Kiểm tuần tự · '+done+'/'+total+'</div>':"")+
+    (seq?'<div style="font-size:10px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:#4da6ff;margin-bottom:6px">Kiểm tuần tự · '+done+'/'+total+'</div>':"")+
     '<div style="font-weight:700;font-size:18px;line-height:1.3;color:#f0f0f0">'+esc(it.name)+'</div>'+
     '<div style="font-size:12px;color:#6b7280;margin-top:4px">'+[it.code,it.unit,it.branch].filter(function(x){return x;}).map(esc).join(" · ")+'</div></div>'+
     '<button class="sx" onclick="A.closeSheet()">✕</button></div>'+
@@ -1946,7 +1993,7 @@ function openSheet(itemId,seq){
     '<div id="snotehint"></div></div>'+
     '<div style="padding:16px 20px 0"><label class="slbl">Hạn sử dụng (theo lô)</label>'+
     '<div id="sbat"></div>'+
-    '<button class="addbat" style="color:#00d4aa" onclick="A.batAdd()">+ Thêm lô / hạn sử dụng</button>'+
+    '<button class="addbat" style="color:#4da6ff" onclick="A.batAdd()">+ Thêm lô / hạn sử dụng</button>'+
     '<div style="font-size:12px;color:#4b5563;margin-top:4px">HSD được lưu và tự kế thừa sang kỳ sau.</div></div>'+
     '<input type="file" id="photoin" accept="image/*" capture="environment" style="display:none" onchange="A.photoTake(this)">'+
     '<div style="padding:14px 20px 0" id="sphotosec"></div>'+
@@ -2022,6 +2069,56 @@ function renderHsd(){
 }
 
 /* ================= Router & Actions ================= */
+/* ================= Khung điều hướng: sidebar (máy tính) + drawer (điện thoại) ================= */
+var GNAV=[
+  {route:"home",icon:"🏠",label:"Tổng quan"},
+  {route:"stock",icon:"📦",label:"Vật tư / Tồn kho"},
+  {route:"reporthub",icon:"📄",label:"Báo cáo &amp; Biểu mẫu"},
+  {route:"hsd",icon:"⏰",label:"Cảnh báo HSD"},
+  {route:"settings",icon:"⚙️",label:"Cài đặt"}
+];
+function navHtml(){
+  var h='';
+  GNAV.forEach(function(n){
+    var on=route.view===n.route||(n.route==="home"&&route.view==="upload")||(n.route==="home"&&route.view==="period");
+    var action=n.route==="stock"?"A.navStock()":"A.navGo('"+n.route+"')";
+    h+='<a class="gnav-item'+(on?' on':'')+'" onclick="'+action+'"><span class="ic">'+n.icon+'</span>'+n.label+'</a>';
+  });
+  return h;
+}
+function renderNav(){
+  var h=navHtml();
+  document.getElementById("gsidebar").innerHTML=h;
+  document.getElementById("gdrawer").innerHTML=h;
+}
+function renderReportHub(){
+  var h='<div class="topbar"><div class="trow wrap"><button class="back" onclick="A.go(\'home\')">‹</button><div class="ttl">Báo cáo &amp; Biểu mẫu</div></div><div style="height:10px"></div></div>';
+  h+='<div class="wrap" style="padding-top:16px;padding-bottom:40px">';
+  var cards=[
+    {icon:'📄',title:'Tạo báo cáo kiểm kê',desc:'Tổng hợp số liệu kiểm kê nhiều chi nhánh thành báo cáo Word.',route:'baocao'},
+    {icon:'📋',title:'Biên bản bàn giao',desc:'Lập biên bản bàn giao tài sản, CCDC, vật tư.',route:'handover'},
+    {icon:'📝',title:'Phiếu giải trình chênh lệch',desc:'Giải trình thất thoát/chênh lệch khi kiểm kê.',route:'explain'}
+  ];
+  cards.forEach(function(c){
+    h+='<div class="card" style="margin-bottom:12px;cursor:pointer;display:flex;gap:14px;align-items:flex-start" onclick="A.go(\''+c.route+'\')">'
+      +'<div style="font-size:26px">'+c.icon+'</div>'
+      +'<div style="flex:1"><div style="font-weight:700;margin-bottom:3px">'+c.title+'</div><div style="font-size:13px;color:var(--mut)">'+c.desc+'</div></div>'
+      +'<div style="color:var(--mut2);font-size:18px">›</div>'
+      +'</div>';
+  });
+  h+='</div>';
+  document.getElementById("app").innerHTML=h;
+}
+function renderSettings(){
+  var h='<div class="topbar"><div class="trow wrap"><button class="back" onclick="A.go(\'home\')">‹</button><div class="ttl">Cài đặt</div></div><div style="height:10px"></div></div>';
+  h+='<div class="wrap" style="padding-top:16px;padding-bottom:40px">';
+  h+='<div class="card" style="margin-bottom:12px"><div style="font-weight:700;margin-bottom:4px">Về ứng dụng</div><div style="font-size:13px;color:var(--mut)">Kiểm kê kho MedDental · Built by Quyet Mai</div></div>';
+  h+='<div class="card" style="margin-bottom:12px"><div style="font-weight:700;margin-bottom:8px">Dữ liệu</div>'
+    +'<div style="font-size:13px;color:var(--mut);margin-bottom:10px">'+db.periods.length+' kỳ kiểm kê · '+db.handovers.length+' biên bản bàn giao · '+db.explains.length+' phiếu giải trình.</div>'
+    +'<div style="font-size:12px;color:var(--mut2)">Dữ liệu được lưu ngay trên trình duyệt này (localStorage). Xoá cache trình duyệt sẽ mất dữ liệu — nhớ xuất Excel/Word định kỳ để lưu trữ lâu dài.</div></div>';
+  h+='</div>';
+  document.getElementById("app").innerHTML=h;
+}
 function render(){
   document.getElementById("modal").innerHTML="";
   SB=null;
@@ -2035,6 +2132,9 @@ function render(){
   else if(route.view==="handoverEdit")renderHandoverEdit();
   else if(route.view==="explain")renderExplainList();
   else if(route.view==="explainEdit")renderExplainEdit();
+  else if(route.view==="reporthub")renderReportHub();
+  else if(route.view==="settings")renderSettings();
+  renderNav();
   window.scrollTo(0,0);
 }
 
@@ -2046,6 +2146,23 @@ var A={
         pname:"Kiểm kê "+String(now.getMonth()+1).padStart(2,"0")+"/"+now.getFullYear()};
     }
     route={view:v};render();
+  },
+  navGo:function(v){
+    A.drawerClose();
+    A.go(v);
+  },
+  navStock:function(){
+    A.drawerClose();
+    if(!db.periods.length){toast('Chưa có kỳ kiểm kê nào — tạo kỳ mới trước đã');A.go('home');return;}
+    A.openStock(db.periods[0].id);
+  },
+  drawerToggle:function(){
+    var open=document.getElementById("gdrawer").classList.contains("open");
+    if(open)A.drawerClose();else{document.getElementById("gdrawer").classList.add("open");document.getElementById("gdrawer-ovl").classList.add("open");}
+  },
+  drawerClose:function(){
+    document.getElementById("gdrawer").classList.remove("open");
+    document.getElementById("gdrawer-ovl").classList.remove("open");
   },
   onFile:function(input){
     var f=input.files&&input.files[0];
