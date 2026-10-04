@@ -280,6 +280,7 @@ function branchCode(name){
   return words.map(function(w){return w[0];}).join('').toUpperCase();
 }
 function diffOf(it){return (it.counted&&it.countQty!==null)?Math.round((it.countQty-it.close)*100)/100:null;}
+function needsCount(it){return !it.counted&&it.close!==0;} /* mã tồn cuối = 0 thì mặc định không cần kiểm tay */
 
 var BUCKETS=[
   {k:"expired",label:"Đã hết hạn",cls:"c-red",strong:"var(--red)",test:function(d){return d<0;}},
@@ -382,11 +383,12 @@ function buildItems(rows,start,map,branchManual,hsd){
     var close=map.close!==undefined?parseNum(get(row,"close")):open+inn-outn;
     var branch=(map.branch!==undefined?String(get(row,"branch")==null?"":get(row,"branch")).trim():"")||branchManual.trim()||"Kho chính";
     var reg=hsd[normKey(branch,code,name)];
+    var zeroStock=close===0; /* mã tồn cuối = 0: mặc định coi như đã kiểm khớp, khỏi cần đếm tay */
     out.push({
       id:"i"+r+"_"+out.length,branch:branch,code:code,name:name,
       unit:String(get(row,"unit")==null?"":get(row,"unit")).trim(),
       open:open,"in":inn,out:outn,close:close,
-      counted:false,countQty:null,note:"",
+      counted:zeroStock,countQty:zeroStock?0:null,note:"",
       batches:reg?reg.batches.map(function(b){return {qty:b.qty,exp:b.exp};}):[]
     });
   }
@@ -1573,7 +1575,7 @@ function exportKiemKeEmail(p){
   var diffs=p.items.filter(function(i){return i.counted&&diffOf(i)!==0;});
   var matched=counted.length-diffs.length;
   var matchPct=counted.length?Math.round(matched/counted.length*100):0;
-  var unchecked=p.items.filter(function(i){return !i.counted;});
+  var unchecked=p.items.filter(function(i){return needsCount(i);});
   var totalClose=0,totalKK=0,totalDiff=0;
   counted.forEach(function(i){totalClose+=i.close;totalKK+=i.countQty;});
   totalDiff=Math.round((totalKK-totalClose)*100)/100;
@@ -1770,7 +1772,7 @@ function baseList(p){
 }
 function filteredList(p){
   return baseList(p).filter(function(i){
-    if(P.flt==="todo")return !i.counted;
+    if(P.flt==="todo")return needsCount(i);
     if(P.flt==="done")return i.counted;
     if(P.flt==="diff")return i.counted&&diffOf(i)!==0;
     if(P.flt==="stock")return i.close>0;
@@ -1802,7 +1804,7 @@ function renderChips(p,base){
   p.items.forEach(function(i){if(i.branch&&branches.indexOf(i.branch)<0)branches.push(i.branch);});
   var cnt=function(k){
     return base.filter(function(i){
-      if(k==="todo")return !i.counted;
+      if(k==="todo")return needsCount(i);
       if(k==="done")return i.counted;
       if(k==="stock")return i.close>0;
       return i.counted&&diffOf(i)!==0;
@@ -1823,7 +1825,7 @@ function renderList(){
   var p=per(P.id);if(!p)return;
   var base=baseList(p);
   var list=base.filter(function(i){
-    if(P.flt==="todo")return !i.counted;
+    if(P.flt==="todo")return needsCount(i);
     if(P.flt==="done")return i.counted;
     if(P.flt==="diff")return i.counted&&diffOf(i)!==0;
     if(P.flt==="stock")return i.close>0;
@@ -1834,7 +1836,7 @@ function renderList(){
   var ndiff=p.items.filter(function(i){return i.counted&&diffOf(i)!==0;}).length;
   var pct=total?Math.round(done/total*100):0;
   var flist=filteredList(p);
-  var fTodo=flist.filter(function(i){return !i.counted;}).length;
+  var fTodo=flist.filter(function(i){return needsCount(i);}).length;
   var allDone=flist.length>0&&fTodo===0;
   document.getElementById("pfill").style.width=pct+"%";
   document.getElementById("pdone").innerHTML='Đã kiểm <b class="tnum" style="color:var(--ink)">'+done+"/"+total+"</b> · "+pct+"%";
@@ -2319,7 +2321,7 @@ var A={
   seqStart:function(){
     var p=per(P.id);if(!p)return;
     var flist=filteredList(p);
-    var allDone=flist.length>0&&flist.filter(function(i){return !i.counted;}).length===0;
+    var allDone=flist.length>0&&flist.filter(function(i){return needsCount(i);}).length===0;
     if(allDone){A.exportCur();return;}
     for(var i=0;i<flist.length;i++){
       if(!flist[i].counted){openSheet(flist[i].id,true);return;}
