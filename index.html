@@ -874,7 +874,7 @@ function docSignHtml(cols){
 }
 function docSignHtml4(cols,subs){
   var h='<table class="sign" width="100%"><tr>';
-  cols.forEach(function(c){h+='<td width="25%">'+esc(c)+'</td>';});
+  cols.forEach(function(c){h+='<td width="'+Math.round(100/cols.length)+'%">'+esc(c)+'</td>';});
   h+='</tr><tr>';
   subs.forEach(function(s){h+='<td style="font-weight:400;font-style:italic;font-size:10pt">'+esc(s)+'</td>';});
   h+='</tr><tr>';
@@ -1054,7 +1054,7 @@ function generateHandoverDoc(v){
     +'<p>2. Bên nhận đã kiểm đếm, đối chiếu thực tế, nhận đúng và đủ; kể từ thời điểm ký, chịu trách nhiệm bảo quản, sử dụng đúng mục đích và hoàn trả khi có yêu cầu.</p>'
     +'<p>3. Hư hỏng, mất mát phát sinh sau thời điểm bàn giao do Bên nhận chịu trách nhiệm theo quy định của Công ty. Sai lệch phát hiện trong vòng '+dot(v.soNgay,'......')+' ngày kể từ ngày bàn giao: hai bên lập biên bản bổ sung.</p>'
     +'<p>4. Biên bản lập thành '+dot(v.soBan,'......')+' bản, mỗi bên giữ 01 bản, 01 bản chuyển Hành chính – Kế toán để cập nhật sổ sách, thẻ kho.</p>'
-    +docSignHtml4(['BÊN GIAO','BÊN NHẬN','NGƯỜI KIỂM TRA','PHÊ DUYỆT'],['(Ký, ghi rõ họ tên)','(Ký, ghi rõ họ tên)','(Kế toán kho / HC kho)','(Trưởng BP / GĐ CN)']);
+    +docSignHtml4(['BÊN BÀN GIAO','BÊN NHẬN BÀN GIAO'],['(Ký, ghi rõ họ tên)','(Ký, ghi rõ họ tên)']);
   return docWrap('Biên bản bàn giao',body);
 }
 
@@ -1237,7 +1237,7 @@ function generateExplainDoc(v){
     +dx
     +'<h2>VII. CAM KẾT</h2>'
     +'<p>Tôi cam kết nội dung giải trình trên là đúng sự thật, đầy đủ và chịu trách nhiệm trước Công ty về thông tin đã cung cấp. Tôi sẽ phối hợp cung cấp thêm chứng từ, bằng chứng khi được yêu cầu.</p>'
-    +docSignHtml4(['NGƯỜI GIẢI TRÌNH','XÁC NHẬN','KIỂM TRA','PHÊ DUYỆT'],['(Ký, ghi rõ họ tên)','(Trưởng BP / GĐ CN)','(Kế toán / HC kho)','(Ban Giám đốc)']);
+    +docSignHtml4(['NGƯỜI GIẢI TRÌNH','XÁC NHẬN CỦA LÃNH ĐẠO ĐƠN VỊ'],['(Ký, ghi rõ họ tên)','(Ký, ghi rõ họ tên)']);
   return docWrap('Bản giải trình thất thoát',body);
 }
 
