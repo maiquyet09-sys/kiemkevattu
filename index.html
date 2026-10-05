@@ -1939,7 +1939,9 @@ function compressImg(file,maxPx,quality,cb){
       var scale=Math.min(1,maxPx/img.width,maxPx/img.height);
       var w=Math.round(img.width*scale),h=Math.round(img.height*scale);
       var c=document.createElement('canvas');c.width=w;c.height=h;
-      c.getContext('2d').drawImage(img,0,0,w,h);
+      var ctx=c.getContext('2d');
+      ctx.imageSmoothingEnabled=true;ctx.imageSmoothingQuality='high';
+      ctx.drawImage(img,0,0,w,h);
       cb(c.toDataURL('image/jpeg',quality));
     };
     img.src=e.target.result;
@@ -2390,7 +2392,7 @@ var A={
   photoTake:function(input){
     var f=input.files&&input.files[0];if(!f)return;
     input.value="";
-    compressImg(f,160,0.48,function(b64){SB.photo=b64;renderPhotoSec();});
+    compressImg(f,1600,0.9,function(b64){SB.photo=b64;renderPhotoSec();});
   },
   photoClear:function(){SB.photo=null;renderPhotoSec();},
   sheetSave:function(advance){
