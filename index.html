@@ -31,13 +31,14 @@ body{background:var(--bg);color:var(--ink);font-family:'Inter',system-ui,-apple-
 #gheader{position:sticky;top:0;z-index:50;height:var(--header-h);background:#fff;border-bottom:1px solid var(--line);display:flex;align-items:center;gap:12px;padding:0 16px}
 #ghmenu{display:flex;align-items:center;justify-content:center;width:38px;height:38px;border:none;background:var(--card2);border-radius:10px;cursor:pointer;font-size:18px;color:var(--ink)}
 #gbrand{display:flex;align-items:center;gap:8px;font-weight:800;font-size:17px;color:var(--ink);white-space:nowrap}
-#gbrand .dot{width:30px;height:30px;border-radius:9px;background:var(--teal);color:#fff;display:flex;align-items:center;justify-content:center;font-size:16px}
+#gbrand .dot{width:30px;height:30px;border-radius:9px;background:var(--teal);color:#fff;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:800;letter-spacing:-.02em}
+#gbrand .sep{color:var(--mut2);font-weight:400;margin:0 2px}
 #gshell{display:flex;min-height:calc(100vh - var(--header-h))}
 #gsidebar{display:none;flex:0 0 var(--sidebar-w);background:#fff;border-right:1px solid var(--line);padding:14px 10px}
 .gnav-item{display:flex;align-items:center;gap:10px;padding:11px 12px;border-radius:12px;color:var(--mut);font-weight:600;font-size:14px;cursor:pointer;margin-bottom:2px;text-decoration:none}
 .gnav-item:hover{background:var(--card2)}
 .gnav-item.on{background:var(--teal-bg);color:var(--teal)}
-.gnav-item .ic{font-size:17px;width:20px;text-align:center}
+.gnav-item .ic{margin-right:2px}
 #gmain{flex:1;min-width:0}
 #gdrawer-ovl{position:fixed;inset:0;background:rgba(16,24,40,.45);z-index:70;display:none}
 #gdrawer{position:fixed;top:0;left:0;bottom:0;width:78vw;max-width:280px;background:#fff;z-index:71;transform:translateX(-100%);transition:transform .22s ease;padding:16px 10px;overflow-y:auto}
@@ -54,18 +55,22 @@ body{background:var(--bg);color:var(--ink);font-family:'Inter',system-ui,-apple-
   #gmain .stkwrap,#gmain .prev{max-width:900px;margin-left:auto;margin-right:auto}
 }
 .tnum{font-variant-numeric:tabular-nums}
-.eyebrow{font-size:11px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:var(--teal)}
+.eyebrow{font-size:14px;font-weight:700;color:var(--teal)}
 .h1{font-size:24px;font-weight:800;margin:4px 0 0;color:var(--ink)}
 .sec{font-size:14px;font-weight:700;margin-bottom:8px;color:var(--ink)}
 .card{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:16px}
-.btn{display:block;width:100%;border:none;border-radius:16px;padding:14px;font:inherit;font-weight:700;cursor:pointer;text-align:center}
-.btn:active{opacity:.85}
-.btn-primary{background:var(--teal);color:#071a2e;box-shadow:0 4px 20px rgba(77,166,255,.28)}
-.btn-outline{background:rgba(77,166,255,.08);color:var(--teal);border:1px solid var(--teal-ln)}
-.btn:disabled{background:rgba(16,24,40,.06);color:rgba(16,24,40,.28);border-color:rgba(16,24,40,.06);cursor:default}
-.inp{width:100%;border:1px solid var(--line);border-radius:12px;padding:11px 12px;font:inherit;background:var(--card2);color:var(--ink);outline:none}
+.btn{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;border:none;border-radius:14px;padding:14px;font:inherit;font-weight:700;cursor:pointer;text-align:center;transition:transform .12s ease,opacity .12s ease,background-color .15s ease}
+.btn:active{transform:scale(.97);opacity:.9}
+.btn-primary{background:var(--teal);color:#fff;box-shadow:0 4px 16px rgba(47,111,237,.25)}
+.btn-outline{background:var(--teal-bg);color:var(--teal);border:1px solid var(--teal-ln)}
+.btn:disabled{background:rgba(16,24,40,.06);color:rgba(16,24,40,.28);border-color:rgba(16,24,40,.06);cursor:default;box-shadow:none;transform:none}
+.inp{width:100%;border:1px solid var(--line);border-radius:12px;padding:11px 12px;font:inherit;background:var(--card2);color:var(--ink);outline:none;transition:border-color .15s ease}
 .inp:focus{border-color:var(--teal-ln)}
-.lbl{display:block;font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--mut);margin-bottom:6px}
+.lbl{display:block;font-size:13px;font-weight:600;color:var(--mut);margin-bottom:6px}
+.ic{display:inline-block;vertical-align:-3px;flex:none}
+button{-webkit-tap-highlight-color:transparent}
+.addbat{transition:opacity .12s ease}
+.addbat:active{opacity:.6}
 .topbar{position:sticky;top:0;z-index:20;background:#fff;border-bottom:1px solid var(--line)}
 .trow{display:flex;align-items:center;gap:12px;padding-top:12px;padding-bottom:2px}
 .back{flex:0 0 auto;width:32px;height:32px;border:none;border-radius:50%;background:var(--card2);color:var(--mut);font-size:18px;font-weight:700;cursor:pointer;line-height:1}
@@ -152,7 +157,11 @@ select.chip{appearance:auto;color:var(--ink)}
 .reset{display:block;width:100%;border:none;background:none;color:#4b5563;font:inherit;font-size:13px;text-decoration:underline;cursor:pointer;padding:10px 0 24px}
 .note-warn{background:var(--amber-bg);border:1px solid var(--amber-ln);color:var(--amber);font-size:12px;border-radius:12px;padding:9px 12px}
 .hsdgrid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
-.hsdcard{border:1px solid;border-radius:16px;padding:12px;cursor:pointer}
+.hsdcard{border:1px solid;border-radius:16px;padding:12px;cursor:pointer;transition:transform .12s ease}
+.hsdcard:active{transform:scale(.96)}
+.gnav-item{transition:background-color .15s ease}
+.card[onclick]{transition:transform .12s ease,box-shadow .15s ease;cursor:pointer}
+.card[onclick]:active{transform:scale(.985)}
 .hsdcard .n{font-size:24px;font-weight:800}
 .hsdcard .t{font-size:12px;font-weight:600;margin-top:2px}
 .c-red{background:var(--red-bg);border-color:var(--red-ln);color:var(--red)}
@@ -180,8 +189,9 @@ select.chip{appearance:auto;color:var(--ink)}
 .hsditem{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:10px 12px;margin-bottom:6px;display:flex;align-items:center;gap:12px}
 .mt8{margin-top:8px}.mt12{margin-top:12px}.mt16{margin-top:16px}.mt20{margin-top:20px}.mt24{margin-top:24px}
 .bcfile{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:10px 12px;margin-bottom:6px;display:flex;align-items:center;gap:10px}
-.bcbtn{display:block;width:100%;border:none;border-radius:14px;padding:13px;font:inherit;font-weight:700;cursor:pointer;text-align:center}
-.bcok{background:var(--teal);color:#071a14}
+.bcbtn{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;border:none;border-radius:14px;padding:14px;font:inherit;font-weight:700;cursor:pointer;text-align:center;transition:transform .12s ease,opacity .12s ease}
+.bcbtn:active{transform:scale(.97);opacity:.9}
+.bcok{background:var(--teal);color:#fff;box-shadow:0 4px 16px rgba(47,111,237,.25)}
 .bcsec{font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--mut);margin-bottom:6px}
 .bctbl{width:100%;border-collapse:collapse;font-size:12px}
 .bctbl th{text-align:left;color:var(--mut);padding:5px 6px;border-bottom:1px solid var(--line)}
@@ -191,8 +201,8 @@ select.chip{appearance:auto;color:var(--ink)}
 </head>
 <body>
 <header id="gheader">
-  <button id="ghmenu" onclick="A.drawerToggle()">☰</button>
-  <div id="gbrand"><span class="dot">🦷</span> MedDental · Vật tư</div>
+  <button id="ghmenu" onclick="A.drawerToggle()"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M3 12h18M3 18h18"/></svg></button>
+  <div id="gbrand"><span class="dot">MD</span> MedDental<span class="sep">—</span>Vật tư</div>
 </header>
 <div id="gshell">
   <nav id="gsidebar"></nav>
@@ -208,6 +218,40 @@ select.chip{appearance:auto;color:var(--ink)}
 /* ================= Helpers ================= */
 function norm(s){return (s==null?"":String(s)).toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"").replace(/đ/g,"d").replace(/\s+/g," ").trim();}
 function esc(s){return (s==null?"":String(s)).replace(/[&<>"']/g,function(m){return {"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[m];});}
+/* ================= Bộ icon SVG dùng chung (thay thế emoji trong giao diện) ================= */
+var ICONS={
+  home:'<path d="M3 11.5 12 4l9 7.5"/><path d="M5 10v9a1 1 0 0 0 1 1h3m10-10v9a1 1 0 0 1-1 1h-3"/><path d="M9 20v-6h6v6"/>',
+  box:'<path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/><path d="M3.27 6.96 12 12.01l8.73-5.05"/><path d="M12 22.08V12"/>',
+  file:'<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8Z"/><path d="M14 2v6h6"/><path d="M9 13h6M9 17h6"/>',
+  clock:'<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>',
+  gear:'<circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1Z"/>',
+  menu:'<path d="M3 6h18M3 12h18M3 18h18"/>',
+  upload:'<path d="M20 16.5v3a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2v-3"/><path d="M16 8.5 12 4.5 8 8.5"/><path d="M12 4.5v12"/>',
+  eye:'<path d="M1.5 12S5.5 4.5 12 4.5 22.5 12 22.5 12 18.5 19.5 12 19.5 1.5 12 1.5 12Z"/><circle cx="12" cy="12" r="3"/>',
+  mail:'<path d="M4 4h16a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2Z"/><path d="m22 6-10 7L2 6"/>',
+  check:'<path d="M20 6 9 17l-5-5"/>',
+  x:'<path d="M18 6 6 18M6 6l12 12"/>',
+  chev:'<path d="m9 18 6-6-6-6"/>',
+  folder:'<path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2Z"/>',
+  search:'<circle cx="11" cy="11" r="7"/><path d="m21 21-4.35-4.35"/>',
+  plus:'<path d="M12 5v14M5 12h14"/>',
+  edit:'<path d="M11 4H5a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2h13a2 2 0 0 0 2-2v-6"/><path d="M18.5 2.5a2.12 2.12 0 0 1 3 3L12 15l-4 1 1-4Z"/>',
+  trash:'<path d="M3 6h18M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2m3 0-1 14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2L4 6"/>',
+  download:'<path d="M20 16.5v3a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2v-3"/><path d="m8 11 4 4 4-4"/><path d="M12 15V3"/>',
+  bell:'<path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/>',
+  camera:'<path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2Z"/><circle cx="12" cy="13" r="4"/>',
+  warn:'<path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0Z"/><path d="M12 9v4M12 17h.01"/>',
+  play:'<path d="M6 3v18l15-9Z"/>',
+  grid:'<rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M3 15h18M9 3v18M15 3v18"/>',
+  doc:'<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8Z"/><path d="M14 2v6h6"/><path d="M9 13h6M9 17h4"/>',
+  users:'<circle cx="9" cy="8" r="3.2"/><path d="M3 20c0-3.3 2.7-6 6-6s6 2.7 6 6"/><circle cx="18" cy="9" r="2.6"/><path d="M15.5 14.2c2.6.3 4.5 2.6 4.5 5.3"/>',
+  swap:'<path d="M7 4v13M7 4 3 8M7 4l4 4"/><path d="M17 20V7M17 20l4-4M17 20l-4-4"/>',
+  refresh:'<path d="M21 12a9 9 0 1 1-3-6.7"/><path d="M21 3v6h-6"/>'
+};
+function icon(name,size,cls){
+  var d=ICONS[name]||ICONS.file;
+  return '<svg class="ic'+(cls?' '+cls:'')+'" width="'+(size||18)+'" height="'+(size||18)+'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">'+d+'</svg>';
+}
 function parseNum(v){
   if(v===null||v===undefined||v==="")return 0;
   if(typeof v==="number")return v;
@@ -830,7 +874,7 @@ function renderBaoCao(){
   h+='<div class="wrap" style="padding-top:16px;padding-bottom:100px">';
   h+='<div class="lbl">Chọn file Excel biên bản kiểm kê (có thể chọn nhiều)</div>';
   h+='<input type="file" id="bc_files" accept=".xlsx,.xls" multiple style="display:none" onchange="A.bcFiles(this)">';
-  h+='<button class="drop" onclick="document.getElementById(\'bc_files\').click()" style="padding:28px 16px"><div style="font-size:28px">📂</div><div style="font-weight:700;color:var(--teal);margin-top:6px">Chọn file Excel biên bản kiểm kê</div><div style="font-size:12px;color:var(--mut);margin-top:4px">Có thể chọn nhiều file cùng lúc · .xlsx / .xls</div></button>';
+  h+='<button class="drop" onclick="document.getElementById(\'bc_files\').click()" style="padding:28px 16px"><div style="color:var(--teal);display:flex;justify-content:center">'+icon('folder',28)+'</div><div style="font-weight:700;color:var(--teal);margin-top:6px">Chọn file Excel biên bản kiểm kê</div><div style="font-size:12px;color:var(--mut);margin-top:4px">Có thể chọn nhiều file cùng lúc, định dạng .xlsx / .xls</div></button>';
 
   if(BC&&BC.branches.length){
     h+='<div class="bcsec" style="margin-top:16px">Dữ liệu đọc được · '+BC.branches.length+' chi nhánh</div>';
@@ -847,7 +891,7 @@ function renderBaoCao(){
     h+='<tr style="font-weight:700;border-top:2px solid var(--line)"><td>TỔNG CỘNG</td><td class="r">'+fmt(totC)+'</td><td class="r">'+fmt(totK)+'</td><td class="r" style="'+totColor+'">'+(totChenh===0?'Khớp':(totChenh>0?'+':'')+fmt(totChenh))+'</td></tr>';
     h+='</tbody></table></div>';
     if(BC.errors&&BC.errors.length){
-      h+='<div class="note-warn" style="margin-top:8px">⚠️ Không đọc được: '+BC.errors.join(', ')+'</div>';
+      h+='<div class="note-warn" style="margin-top:8px;display:flex;gap:8px;align-items:flex-start">'+icon('warn',16)+'<span>Không đọc được: '+BC.errors.join(', ')+'</span></div>';
     }
 
     h+='<div class="bcsec" style="margin-top:20px">Thông tin báo cáo (theo mẫu)</div>';
@@ -871,10 +915,10 @@ function renderBaoCao(){
 
     h+='<label class="lbl" style="margin-top:16px">Nguyên nhân chênh lệch (mỗi dòng một ý, tuỳ chọn)</label>';
     h+='<textarea class="inp" rows="4" placeholder="- Tại cơ sở ...: mã ... thiếu/thừa do ..." oninput="A.bcSet(\'nguyennhan\',this.value)">'+esc(BCMETA.nguyennhan)+'</textarea>';
-    h+='<div class="note-warn" style="margin-top:8px">⚠️ File Excel kiểm kê không có sẵn đơn giá vật tư nên không tự tính được "Giá trị" — bạn có thể tự điền số tiền vào ô trên nếu biết, để trống thì báo cáo sẽ để trống ô đó.</div>';
+    h+='<div class="note-warn" style="margin-top:8px;display:flex;gap:8px;align-items:flex-start">'+icon('warn',16)+'<span>File Excel kiểm kê không có sẵn đơn giá vật tư nên không tự tính được "Giá trị" — bạn có thể tự điền số tiền vào ô trên nếu biết, để trống thì báo cáo sẽ để trống ô đó.</span></div>';
   }
   h+='</div>';
-  h+='<div class="botbar"><div class="botin"><button class="bcbtn bcok" onclick="generateBaoCao()"'+(BC&&BC.branches.length?'':' disabled')+' style="box-shadow:0 8px 32px rgba(0,0,0,.5)">📄 Tạo báo cáo Word</button></div></div>';
+  h+='<div class="botbar"><div class="botin"><button class="bcbtn bcok" onclick="generateBaoCao()"'+(BC&&BC.branches.length?'':' disabled')+' style="box-shadow:0 8px 32px rgba(0,0,0,.5)">'+icon('file',18)+'Tạo báo cáo Word</button></div></div>';
   document.getElementById("app").innerHTML=h;
 }
 
@@ -953,7 +997,7 @@ function printPreviewHtml(html){
 function renderPicker(onlyDiff){
   if(!PICK)return '';
   var h='<div class="card" style="margin-top:10px">';
-  h+='<div style="font-weight:700;margin-bottom:8px">📥 Lấy dữ liệu từ kỳ kiểm kê</div>';
+  h+='<div style="font-weight:700;margin-bottom:8px;display:flex;align-items:center;gap:7px">'+icon('download',16)+'Lấy dữ liệu từ kỳ kiểm kê</div>';
   h+='<select class="inp" onchange="A.pickPeriod(this.value)" style="margin-bottom:8px"><option value="">— Chọn kỳ kiểm kê —</option>';
   db.periods.forEach(function(p){h+='<option value="'+esc(p.id)+'"'+(PICK.pid===p.id?' selected':'')+'>'+esc(p.name)+'</option>';});
   h+='</select>';
@@ -1024,7 +1068,7 @@ function renderHandoverList(){
   var h='<div class="topbar"><div class="trow wrap"><button class="back" onclick="A.go(\'home\')">‹</button><div class="ttl">Biên bản bàn giao</div></div><div style="height:10px"></div></div>';
   h+='<div class="wrap" style="padding-top:16px;padding-bottom:100px">';
   h+='<div style="display:flex;gap:8px;margin-bottom:16px"><button class="btn btn-primary" style="flex:1" onclick="A.hvNew()">+ Tạo biên bản mới</button></div>';
-  h+='<button class="addbat" style="margin-bottom:16px" onclick="A.hvBlank()">📄 Tải mẫu trống (.doc) để gửi người khác tự điền tay</button>';
+  h+='<button class="addbat" style="margin-bottom:16px;display:flex;align-items:center;gap:6px" onclick="A.hvBlank()">'+icon('download',15)+'Tải mẫu trống (.doc) để gửi người khác tự điền tay</button>';
   if(!db.handovers.length){
     h+='<div class="card" style="color:var(--mut);text-align:center">Chưa có biên bản bàn giao nào.</div>';
   }
@@ -1135,13 +1179,13 @@ function renderHandoverEdit(){
         +'<td><input class="inp" style="padding:4px 8px;font-size:13px;width:55px" value="'+esc(it.sl)+'" oninput="A.hvItem('+i+',\'sl\',this.value)"></td>'
         +'<td><input class="inp" style="padding:4px 8px;font-size:13px;width:85px" value="'+esc(it.tinhTrang)+'" oninput="A.hvItem('+i+',\'tinhTrang\',this.value)"></td>'
         +'<td><input class="inp" style="padding:4px 8px;font-size:13px;width:85px" value="'+esc(it.ghiChu)+'" oninput="A.hvItem('+i+',\'ghiChu\',this.value)"></td>'
-        +'<td><button class="addbat" style="color:var(--red)" onclick="A.hvItemDel('+i+')">✕</button></td>'
+        +'<td><button class="addbat" style="color:var(--red);display:flex" onclick="A.hvItemDel('+i+')">'+icon('x',15)+'</button></td>'
         +'</tr>';
     });
     h+='</tbody></table>';
   }
   h+='</div>';
-  h+='<div style="display:flex;gap:8px;flex-wrap:wrap"><button class="addbat" onclick="A.hvItemAdd()">+ Thêm dòng</button><button class="addbat" onclick="A.pickOpen(false)">📥 Lấy từ kỳ kiểm kê</button></div>';
+  h+='<div style="display:flex;gap:8px;flex-wrap:wrap"><button class="addbat" onclick="A.hvItemAdd()">+ Thêm dòng</button><button class="addbat" style="display:flex;align-items:center;gap:6px" onclick="A.pickOpen(false)">'+icon('download',15)+'Lấy từ kỳ kiểm kê</button></div>';
   h+=renderPicker(false);
 
   h+='<label class="lbl" style="margin-top:16px">1. Hồ sơ kèm theo</label>';
@@ -1155,8 +1199,8 @@ function renderHandoverEdit(){
 
   h+='</div>';
   h+='<div class="botbar"><div class="botin" style="display:flex;gap:8px">';
-  h+='<button class="bcbtn" style="flex:1;background:var(--card);border:1px solid var(--line)" onclick="A.hvPrint()">👁 Xem trước / In</button>';
-  h+='<button class="bcbtn bcok" style="flex:1" onclick="A.hvSave(true)">📄 Lưu &amp; tải Word</button>';
+  h+='<button class="bcbtn" style="flex:1;background:var(--card);border:1px solid var(--line)" onclick="A.hvPrint()">'+icon('eye',17)+'Xem trước, In</button>';
+  h+='<button class="bcbtn bcok" style="flex:1" onclick="A.hvSave(true)">'+icon('file',17)+'Lưu &amp; tải Word</button>';
   h+='</div></div>';
   document.getElementById("app").innerHTML=h;
 }
@@ -1181,7 +1225,7 @@ function renderExplainList(){
   var h='<div class="topbar"><div class="trow wrap"><button class="back" onclick="A.go(\'home\')">‹</button><div class="ttl">Bản giải trình thất thoát</div></div><div style="height:10px"></div></div>';
   h+='<div class="wrap" style="padding-top:16px;padding-bottom:100px">';
   h+='<div style="display:flex;gap:8px;margin-bottom:16px"><button class="btn btn-primary" style="flex:1" onclick="A.exNew()">+ Tạo phiếu mới</button></div>';
-  h+='<button class="addbat" style="margin-bottom:16px" onclick="A.exBlank()">📄 Tải mẫu trống (.doc) để gửi người khác tự điền tay</button>';
+  h+='<button class="addbat" style="margin-bottom:16px;display:flex;align-items:center;gap:6px" onclick="A.exBlank()">'+icon('download',15)+'Tải mẫu trống (.doc) để gửi người khác tự điền tay</button>';
   if(!db.explains.length){
     h+='<div class="card" style="color:var(--mut);text-align:center">Chưa có phiếu giải trình nào.</div>';
   }
@@ -1315,15 +1359,15 @@ function renderExplainEdit(){
         +'<td><input class="inp" style="padding:4px 8px;font-size:13px;width:50px" value="'+esc(it.chenh)+'" oninput="A.exItem('+i+',\'chenh\',this.value)"></td>'
         +'<td><input class="inp" style="padding:4px 8px;font-size:13px;width:70px" value="'+esc(it.donGia)+'" oninput="A.exItem('+i+',\'donGia\',this.value)"></td>'
         +'<td><input class="inp" style="padding:4px 8px;font-size:13px;width:80px" value="'+esc(it.thanhTien)+'" oninput="A.exItem('+i+',\'thanhTien\',this.value)"></td>'
-        +'<td><button class="addbat" style="color:var(--red)" onclick="A.exItemDel('+i+')">✕</button></td>'
+        +'<td><button class="addbat" style="color:var(--red);display:flex" onclick="A.exItemDel('+i+')">'+icon('x',15)+'</button></td>'
         +'</tr>';
     });
     h+='</tbody></table>';
   }
   h+='</div>';
-  h+='<div style="display:flex;gap:8px;flex-wrap:wrap"><button class="addbat" onclick="A.exItemAdd()">+ Thêm dòng</button><button class="addbat" onclick="A.pickOpen(true)">📥 Lấy chênh lệch từ kỳ kiểm kê</button></div>';
+  h+='<div style="display:flex;gap:8px;flex-wrap:wrap"><button class="addbat" onclick="A.exItemAdd()">+ Thêm dòng</button><button class="addbat" style="display:flex;align-items:center;gap:6px" onclick="A.pickOpen(true)">'+icon('download',15)+'Lấy chênh lệch từ kỳ kiểm kê</button></div>';
   h+=renderPicker(true);
-  h+='<div class="note-warn" style="margin-top:8px">⚠️ Đơn giá / Thành tiền app không tự tính được (không có sẵn đơn giá vật tư) — bạn điền tay nếu cần, để trống thì báo cáo để trống ô đó.</div>';
+  h+='<div class="note-warn" style="margin-top:8px;display:flex;gap:8px;align-items:flex-start">'+icon('warn',16)+'<span>Đơn giá, Thành tiền app không tự tính được (không có sẵn đơn giá vật tư) — bạn điền tay nếu cần, để trống thì báo cáo để trống ô đó.</span></div>';
 
   h+='<label class="lbl" style="margin-top:16px">IV.1. Vấn đề (diễn biến, thời gian, bối cảnh) — tuỳ chọn</label>';
   h+='<textarea class="inp" rows="2" oninput="A.exField(\'vanDe\',this.value)">'+esc(v.vanDe)+'</textarea>';
@@ -1349,7 +1393,7 @@ function renderExplainEdit(){
         +'<td><input class="inp" style="padding:4px 8px;font-size:13px;width:90px" value="'+esc(bp.nguoiPhuTrach)+'" oninput="A.exBP('+i+',\'nguoiPhuTrach\',this.value)"></td>'
         +'<td><input class="inp" style="padding:4px 8px;font-size:13px;width:70px" value="'+esc(bp.thoiHan)+'" oninput="A.exBP('+i+',\'thoiHan\',this.value)"></td>'
         +'<td><input class="inp" style="padding:4px 8px;font-size:13px;width:60px" value="'+esc(bp.nhom)+'" oninput="A.exBP('+i+',\'nhom\',this.value)"></td>'
-        +'<td><button class="addbat" style="color:var(--red)" onclick="A.exBPDel('+i+')">✕</button></td>'
+        +'<td><button class="addbat" style="color:var(--red);display:flex" onclick="A.exBPDel('+i+')">'+icon('x',15)+'</button></td>'
         +'</tr>';
     });
     h+='</tbody></table>';
@@ -1368,8 +1412,8 @@ function renderExplainEdit(){
 
   h+='</div>';
   h+='<div class="botbar"><div class="botin" style="display:flex;gap:8px">';
-  h+='<button class="bcbtn" style="flex:1;background:var(--card);border:1px solid var(--line)" onclick="A.exPrint()">👁 Xem trước / In</button>';
-  h+='<button class="bcbtn bcok" style="flex:1" onclick="A.exSave(true)">📄 Lưu &amp; tải Word</button>';
+  h+='<button class="bcbtn" style="flex:1;background:var(--card);border:1px solid var(--line)" onclick="A.exPrint()">'+icon('eye',17)+'Xem trước, In</button>';
+  h+='<button class="bcbtn bcok" style="flex:1" onclick="A.exSave(true)">'+icon('file',17)+'Lưu &amp; tải Word</button>';
   h+='</div></div>';
   document.getElementById("app").innerHTML=h;
 }
@@ -1640,11 +1684,11 @@ function exportKiemKeEmail(p){
 
 function renderHome(){
   var entries=hsdEntries();
-  var h='<div class="wrap" style="padding-top:24px"><div class="eyebrow">MedDental · Vật tư</div><h1 class="h1">Kiểm kê kho</h1><div style="font-size:12px;font-style:italic;color:var(--mut2);margin-top:4px">Built by Quyet Mai</div></div>';
+  var h='<div class="wrap" style="padding-top:24px"><div class="eyebrow">MedDental Vật tư</div><h1 class="h1">Kiểm kê kho</h1><div style="font-size:12px;font-style:italic;color:var(--mut2);margin-top:4px">Built by Quyet Mai</div></div>';
   if(!store.ok){
     h+='<div class="wrap mt12"><div class="note-warn">Trình duyệt đang chặn bộ nhớ lưu trữ — dữ liệu chỉ tồn tại trong phiên này. Mở file bằng Chrome/Safari hoặc đưa lên hosting để lưu lâu dài. Kiểm xong nhớ Xuất Excel ngay.</div></div>';
   }
-  h+='<div class="wrap mt20"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px"><span class="sec" style="margin:0">Cảnh báo hạn sử dụng</span><div style="display:flex;gap:8px;align-items:center"><button class="addbat" style="color:var(--teal)" onclick="showHsdEmailPicker()">✉ Email</button><button class="addbat" onclick="A.go(\'hsd\')">Xem chi tiết ›</button></div></div><div class="hsdgrid">';
+  h+='<div class="wrap mt20"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px"><span class="sec" style="margin:0">Cảnh báo hạn sử dụng</span><div style="display:flex;gap:14px;align-items:center"><button class="addbat" style="color:var(--teal);display:flex;align-items:center;gap:5px" onclick="showHsdEmailPicker()">'+icon('mail',15)+'Email</button><button class="addbat" style="display:flex;align-items:center;gap:3px" onclick="A.go(\'hsd\')">Xem chi tiết'+icon('chev',15)+'</button></div></div><div class="hsdgrid">';
   BUCKETS.forEach(function(b){
     var n=entries.filter(function(e){return b.test(e.days);}).length;
     h+='<div class="hsdcard '+b.cls+'" onclick="A.go(\'hsd\')"><div class="n tnum">'+n+'</div><div class="t">'+b.label+'</div></div>';
@@ -1652,10 +1696,10 @@ function renderHome(){
   h+='</div></div>';
   h+='<div class="wrap mt24"><div class="sec">Kỳ kiểm kê</div>';
   h+='<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px">';
-  h+='<button class="btn btn-primary" style="grid-column:1/-1" onclick="A.go(\'upload\')">+ Tạo kỳ mới · Upload file tồn kho</button>';
-  h+='<button class="btn btn-outline" onclick="A.go(\'baocao\')">📄 Tạo báo cáo (.docx)</button>';
-  h+='<button class="btn btn-outline" onclick="A.go(\'handover\')">📋 Biên bản bàn giao</button>';
-  h+='<button class="btn btn-outline" style="grid-column:1/-1" onclick="A.go(\'explain\')">📝 Phiếu giải trình chênh lệch</button>';
+  h+='<button class="btn btn-primary" style="grid-column:1/-1" onclick="A.go(\'upload\')">'+icon('plus',18)+'Tạo kỳ mới, upload file tồn kho</button>';
+  h+='<button class="btn btn-outline" onclick="A.go(\'baocao\')">'+icon('file',17)+'Tạo báo cáo</button>';
+  h+='<button class="btn btn-outline" onclick="A.go(\'handover\')">'+icon('users',17)+'Biên bản bàn giao</button>';
+  h+='<button class="btn btn-outline" style="grid-column:1/-1" onclick="A.go(\'explain\')">'+icon('edit',17)+'Phiếu giải trình chênh lệch</button>';
   h+='</div>';
   db.periods.forEach(function(p){
     var total=p.items.length;
@@ -1663,30 +1707,34 @@ function renderHome(){
     var diff=p.items.filter(function(i){return i.counted&&diffOf(i)!==0;}).length;
     var pct=total?Math.round(done/total*100):0;
     var right=diff>0?'<span style="font-weight:700;color:var(--red)">'+diff+' mã chênh lệch</span>':
-      (total>0&&done===total?'<span style="font-weight:700;color:var(--green)">✓ Hoàn tất</span>':'<span style="color:var(--mut2)">Đang kiểm</span>');
+      (total>0&&done===total?'<span style="font-weight:700;color:var(--green);display:inline-flex;align-items:center;gap:4px">'+icon('check',14)+'Hoàn tất</span>':'<span style="color:var(--mut2)">Đang kiểm</span>');
     h+='<div class="card per" onclick="A.openPeriod(\''+p.id+'\')">'+
       '<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px">'+
       '<div style="min-width:0"><div style="font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+esc(p.name)+'</div>'+
       '<div style="font-size:12px;color:var(--mut);margin-top:2px">Tạo '+new Date(p.createdAt).toLocaleDateString("vi-VN")+' · '+total+' mã VT</div></div>'+
-      '<button class="perx" onclick="event.stopPropagation();A.delPeriod(\''+p.id+'\')" title="Xóa kỳ">✕</button></div>'+
+      '<button class="perx" onclick="event.stopPropagation();A.delPeriod(\''+p.id+'\')" title="Xóa kỳ" style="display:flex">'+icon('x',15)+'</button></div>'+
       '<div class="bar" style="margin-top:12px"><div class="fill" style="width:'+pct+'%"></div></div>'+
       '<div style="display:flex;justify-content:space-between;font-size:12px;margin-top:6px"><span style="color:var(--mut)">Đã kiểm <b class="tnum" style="color:var(--ink)">'+done+'/'+total+'</b></span>'+right+'</div></div>';
   });
   if(!db.periods.length){
-    h+='<div class="empty" style="padding:28px 0">Chưa có kỳ kiểm kê nào — bấm "Tạo kỳ mới" để bắt đầu.</div>';
+    h+='<div style="text-align:center;padding:36px 20px;border:1.5px dashed var(--line);border-radius:16px">'
+      +'<div style="width:44px;height:44px;border-radius:50%;background:var(--teal-bg);color:var(--teal);display:flex;align-items:center;justify-content:center;margin:0 auto 12px">'+icon('box',22)+'</div>'
+      +'<div style="font-weight:700;margin-bottom:4px">Chưa có kỳ kiểm kê nào</div>'
+      +'<div style="font-size:13px;color:var(--mut)">Bấm nút "Tạo kỳ mới" ở trên để upload file tồn kho và bắt đầu kiểm.</div>'
+      +'</div>';
   }
   h+='</div>';
   h+='<div class="wrap mt24" style="padding-bottom:40px"><div class="sec">Quy trình</div>';
   h+='<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px">';
   var steps=[
-    {n:1,icon:'📤',t:'Xuất file MISA',d:'Xuất báo cáo tồn kho từ MISA ra Excel.'},
-    {n:2,icon:'📲',t:'Upload &amp; kiểm',d:'Upload file, xuống kho kiểm bằng điện thoại.'},
-    {n:3,icon:'📄',t:'Tạo báo cáo &amp; biên bản',d:'Xuất báo cáo, biên bản bàn giao, giải trình chênh lệch.'}
+    {n:1,icon:'upload',t:'Xuất file MISA',d:'Xuất báo cáo tồn kho từ MISA ra Excel.'},
+    {n:2,icon:'search',t:'Upload và kiểm',d:'Upload file, xuống kho kiểm bằng điện thoại.'},
+    {n:3,icon:'file',t:'Tạo báo cáo, biên bản',d:'Xuất báo cáo, biên bản bàn giao, giải trình chênh lệch.'}
   ];
   steps.forEach(function(s){
     h+='<div class="card" style="text-align:center">'
       +'<div style="width:32px;height:32px;border-radius:50%;background:var(--teal);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:14px;margin:0 auto 8px">'+s.n+'</div>'
-      +'<div style="font-size:24px;margin-bottom:6px">'+s.icon+'</div>'
+      +'<div style="color:var(--teal);margin-bottom:6px;display:flex;justify-content:center">'+icon(s.icon,24)+'</div>'
       +'<div style="font-weight:700;font-size:14px;margin-bottom:4px">'+s.t+'</div>'
       +'<div style="font-size:12px;color:var(--mut)">'+s.d+'</div>'
       +'</div>';
@@ -1702,10 +1750,10 @@ function renderUpload(){
     h+='<div class="wrap" style="padding-top:24px">'+
       '<input type="file" id="file" accept=".xlsx,.xls,.csv" style="display:none" onchange="A.onFile(this)">'+
       '<button class="drop" onclick="document.getElementById(\'file\').click()">'+
-      '<div style="font-size:36px">📄</div><div style="font-weight:800;color:var(--teal-d);margin-top:8px">Chọn file tồn kho</div>'+
+      '<div style="color:var(--teal-d);display:flex;justify-content:center">'+icon('upload',34)+'</div><div style="font-weight:800;color:var(--teal-d);margin-top:8px">Chọn file tồn kho</div>'+
       '<div style="font-size:14px;color:var(--teal);margin-top:4px">Excel xuất từ MISA (.xlsx, .xls, .csv)</div></button>'+
       '<div class="card mt16" style="font-size:14px;color:var(--mut)"><div style="font-weight:700;color:var(--ink);margin-bottom:4px">File cần có các cột:</div>'+
-      'Chi nhánh/Kho · Mã VT · Tên VT · ĐVT · Tồn đầu · Nhập · Xuất · Tồn cuối. Hệ thống tự nhận diện cột, chỉnh tay được ở bước sau.</div></div>';
+      'Chi nhánh/Kho, Mã VT, Tên VT, ĐVT, Tồn đầu, Nhập, Xuất, Tồn cuối. Hệ thống tự nhận diện cột, chỉnh tay được ở bước sau.</div></div>';
     document.getElementById("app").innerHTML=h;
     return;
   }
@@ -1786,11 +1834,11 @@ function renderPeriod(){
     '<button class="back" onclick="A.go(\'home\')">‹</button>'+
     '<div class="ttl">'+esc(p.name)+'</div>'+
     '<div style="display:flex;gap:6px;flex-shrink:0">'+
-    '<button class="pill" title="Gửi email kết quả kiểm kê" onclick="A.kiemKeEmail()">✉</button>'+
-    '<button class="pill" onclick="A.exportCur()">⬇ Excel</button></div></div>'+
+    '<button class="pill" title="Gửi email kết quả kiểm kê" style="display:inline-flex" onclick="A.kiemKeEmail()">'+icon('mail',15)+'</button>'+
+    '<button class="pill" style="display:inline-flex;align-items:center;gap:5px" onclick="A.exportCur()">'+icon('download',15)+'Excel</button></div></div>'+
     '<div class="wrap" style="padding-top:10px"><div class="bar"><div class="fill" id="pfill"></div></div>'+
     '<div class="prow"><span id="pdone"></span><span id="pdiff"></span></div>'+
-    '<button class="stklink" onclick="A.openStock(\''+p.id+'\')">📋 Bảng tồn kho (chỉ mã còn tồn) ›</button></div>'+
+    '<button class="stklink" style="display:flex;align-items:center;gap:7px" onclick="A.openStock(\''+p.id+'\')">'+icon('grid',16)+'Bảng tồn kho (chỉ mã còn tồn)'+icon('chev',16)+'</button></div>'+
     '<div class="wrap" style="padding-bottom:8px"><input class="inp" style="background:var(--card)" id="q" placeholder="Tìm tên hoặc mã vật tư (không dấu vẫn ra)…" oninput="A.qInput(this.value)"></div>'+
     '<div class="chips" id="chips"></div></div>'+
     '<div class="wrap" id="list" style="padding-top:12px;padding-bottom:110px"></div>'+
@@ -1857,13 +1905,13 @@ function renderList(){
     (it.batches||[]).forEach(function(b){var x=daysTo(b.exp);if(x!==null&&(worst===null||x<worst))worst=x;});
     var badges="";
     if(!it.counted)badges+='<span class="bdg">Chưa kiểm</span>';
-    else if(d===0)badges+='<span class="bdg bdg-ok">✓ Khớp</span>';
+    else if(d===0)badges+='<span class="bdg bdg-ok" style="display:inline-flex;align-items:center;gap:3px">'+icon('check',11)+'Khớp</span>';
     else if(d>0)badges+='<span class="bdg bdg-plus">+'+fmt(d)+' Thừa</span>';
     else badges+='<span class="bdg bdg-minus">−'+fmt(Math.abs(d))+' Thiếu</span>';
     if(worst!==null&&worst<=90){
       badges+='<span class="bdg '+(worst<0?"bdg-minus":worst<=30?"bdg-org":"bdg-plus")+'">HSD '+(worst<0?"quá hạn":"còn "+worst+"d")+'</span>';
     }
-    if(it.photo)badges+='<span class="bdg" style="font-size:10px">📷 Có ảnh</span>';
+    if(it.photo)badges+='<span class="bdg" style="font-size:10px;display:inline-flex;align-items:center;gap:3px">'+icon('camera',11)+'Có ảnh</span>';
     var sub=[it.code,it.unit,branchesMulti?it.branch:null].filter(function(x){return x;}).map(esc).join(" · ");
     h+='<div class="item" onclick="A.openItem(\''+it.id+'\',false)">'+
       '<div style="flex:1;min-width:0"><div class="iname">'+esc(it.name)+'</div>'+
@@ -1954,11 +2002,11 @@ function renderPhotoSec(){
     sec.innerHTML='<label class="slbl">Ảnh vật tư</label>'+
       '<div style="position:relative;border-radius:14px;overflow:hidden;border:1px solid rgba(255,255,255,.1)">'+
       '<img src="'+SB.photo+'" style="width:100%;max-height:220px;object-fit:contain;display:block;background:rgba(0,0,0,.3)">'+
-      '<button onclick="A.photoClear()" style="position:absolute;top:8px;right:8px;width:30px;height:30px;border:none;border-radius:50%;background:rgba(0,0,0,.6);color:#fff;font-size:14px;cursor:pointer;line-height:1">✕</button></div>'+
-      '<button onclick="document.getElementById(\'photoin\').click()" style="margin-top:8px;border:none;background:none;color:#4da6ff;font:inherit;font-size:13px;font-weight:700;cursor:pointer;padding:0">🔄 Chụp lại</button>';
+      '<button onclick="A.photoClear()" style="position:absolute;top:8px;right:8px;width:30px;height:30px;border:none;border-radius:50%;background:rgba(0,0,0,.6);color:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center">'+icon('x',15)+'</button></div>'+
+      '<button onclick="document.getElementById(\'photoin\').click()" style="margin-top:8px;border:none;background:none;color:#4da6ff;font:inherit;font-size:13px;font-weight:700;cursor:pointer;padding:0;display:inline-flex;align-items:center;gap:5px">'+icon('refresh',14)+'Chụp lại</button>';
   }else{
     sec.innerHTML='<label class="slbl">Ảnh vật tư</label>'+
-      '<button onclick="document.getElementById(\'photoin\').click()" style="display:block;width:100%;border:1px dashed rgba(77,166,255,.3);background:rgba(77,166,255,.05);border-radius:14px;padding:16px;color:#4da6ff;font:inherit;font-size:14px;font-weight:700;cursor:pointer;text-align:center">📷 Chụp ảnh vật tư</button>';
+      '<button onclick="document.getElementById(\'photoin\').click()" style="display:flex;align-items:center;justify-content:center;gap:7px;width:100%;border:1px dashed rgba(77,166,255,.3);background:rgba(77,166,255,.05);border-radius:14px;padding:16px;color:#4da6ff;font:inherit;font-size:14px;font-weight:700;cursor:pointer;text-align:center">'+icon('camera',17)+'Chụp ảnh vật tư</button>';
   }
 }
 function openSheet(itemId,seq){
@@ -2075,18 +2123,18 @@ function renderHsd(){
 /* ================= Router & Actions ================= */
 /* ================= Khung điều hướng: sidebar (máy tính) + drawer (điện thoại) ================= */
 var GNAV=[
-  {route:"home",icon:"🏠",label:"Tổng quan"},
-  {route:"stock",icon:"📦",label:"Vật tư / Tồn kho"},
-  {route:"reporthub",icon:"📄",label:"Báo cáo &amp; Biểu mẫu"},
-  {route:"hsd",icon:"⏰",label:"Cảnh báo HSD"},
-  {route:"settings",icon:"⚙️",label:"Cài đặt"}
+  {route:"home",icon:"home",label:"Tổng quan"},
+  {route:"stock",icon:"box",label:"Vật tư, tồn kho"},
+  {route:"reporthub",icon:"file",label:"Báo cáo, biểu mẫu"},
+  {route:"hsd",icon:"clock",label:"Cảnh báo hạn sử dụng"},
+  {route:"settings",icon:"gear",label:"Cài đặt"}
 ];
 function navHtml(){
   var h='';
   GNAV.forEach(function(n){
     var on=route.view===n.route||(n.route==="home"&&route.view==="upload")||(n.route==="home"&&route.view==="period");
     var action=n.route==="stock"?"A.navStock()":"A.navGo('"+n.route+"')";
-    h+='<a class="gnav-item'+(on?' on':'')+'" onclick="'+action+'"><span class="ic">'+n.icon+'</span>'+n.label+'</a>';
+    h+='<a class="gnav-item'+(on?' on':'')+'" onclick="'+action+'">'+icon(n.icon,18)+n.label+'</a>';
   });
   return h;
 }
@@ -2099,15 +2147,15 @@ function renderReportHub(){
   var h='<div class="topbar"><div class="trow wrap"><button class="back" onclick="A.go(\'home\')">‹</button><div class="ttl">Báo cáo &amp; Biểu mẫu</div></div><div style="height:10px"></div></div>';
   h+='<div class="wrap" style="padding-top:16px;padding-bottom:40px">';
   var cards=[
-    {icon:'📄',title:'Tạo báo cáo kiểm kê',desc:'Tổng hợp số liệu kiểm kê nhiều chi nhánh thành báo cáo Word.',route:'baocao'},
-    {icon:'📋',title:'Biên bản bàn giao',desc:'Lập biên bản bàn giao tài sản, CCDC, vật tư.',route:'handover'},
-    {icon:'📝',title:'Phiếu giải trình chênh lệch',desc:'Giải trình thất thoát/chênh lệch khi kiểm kê.',route:'explain'}
+    {icon:'file',title:'Tạo báo cáo kiểm kê',desc:'Tổng hợp số liệu kiểm kê nhiều chi nhánh thành báo cáo Word.',route:'baocao'},
+    {icon:'users',title:'Biên bản bàn giao',desc:'Lập biên bản bàn giao tài sản, CCDC, vật tư.',route:'handover'},
+    {icon:'edit',title:'Phiếu giải trình chênh lệch',desc:'Giải trình thất thoát, chênh lệch khi kiểm kê.',route:'explain'}
   ];
   cards.forEach(function(c){
     h+='<div class="card" style="margin-bottom:12px;cursor:pointer;display:flex;gap:14px;align-items:flex-start" onclick="A.go(\''+c.route+'\')">'
-      +'<div style="font-size:26px">'+c.icon+'</div>'
+      +'<div style="width:40px;height:40px;flex:none;border-radius:11px;background:var(--teal-bg);color:var(--teal);display:flex;align-items:center;justify-content:center">'+icon(c.icon,20)+'</div>'
       +'<div style="flex:1"><div style="font-weight:700;margin-bottom:3px">'+c.title+'</div><div style="font-size:13px;color:var(--mut)">'+c.desc+'</div></div>'
-      +'<div style="color:var(--mut2);font-size:18px">›</div>'
+      +'<div style="color:var(--mut2);display:flex;align-items:center">'+icon('chev',18)+'</div>'
       +'</div>';
   });
   h+='</div>';
