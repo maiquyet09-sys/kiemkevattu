@@ -2,6 +2,7 @@
 <html lang="vi">
 <head>
 <meta charset="UTF-8">
+<meta name="app-version" content="2026100802">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
 <meta name="theme-color" content="#0f766e">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -91,6 +92,9 @@ button{-webkit-tap-highlight-color:transparent}
 .chip{flex:0 0 auto;border:1px solid var(--line);background:var(--card2);color:var(--mut);border-radius:999px;padding:7px 12px;font:inherit;font-size:13px;font-weight:600;white-space:nowrap;cursor:pointer}
 .chip-on{background:var(--teal);border-color:var(--teal);color:#fff;font-weight:700}
 .chipwrap{display:flex;flex-wrap:wrap;gap:6px;margin:6px 0}
+#sigovl{position:fixed;inset:0;z-index:150;background:rgba(16,24,40,.55);display:flex;align-items:center;justify-content:center;padding:16px}
+.sigcard{background:#fff;border-radius:18px;width:100%;max-width:480px;padding:16px;box-shadow:0 12px 40px rgba(0,0,0,.25)}
+#sigcv{display:block;width:100%;height:210px;border:1.5px dashed rgba(16,24,40,.25);border-radius:12px;background:#fff;touch-action:none;-webkit-user-select:none;user-select:none}
 select.chip{appearance:auto;color:var(--ink)}
 .item{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:12px 16px;margin-bottom:8px;display:flex;align-items:center;gap:12px;cursor:pointer}
 .item:active{background:var(--card2)}
@@ -950,15 +954,24 @@ function docSignHtml(cols){
   h+='</tr></table>';
   return h;
 }
-function docSignHtml4(cols,subs){
-  var h='<table class="sign" width="100%"><tr>';
-  cols.forEach(function(c){h+='<td width="'+Math.round(100/cols.length)+'%">'+esc(c)+'</td>';});
-  h+='</tr><tr>';
-  subs.forEach(function(s){h+='<td style="font-weight:400;font-style:italic;font-size:10pt">'+esc(s)+'</td>';});
-  h+='</tr><tr>';
-  cols.forEach(function(){h+='<td>&nbsp;<br>&nbsp;<br>&nbsp;<br>&nbsp;</td>';});
-  h+='</tr></table>';
-  return h;
+function docSignHtml4(cols,subs,sigs){
+  /* Một hàng duy nhất để khối ký không bị tách đôi giữa 2 trang */
+  var h='<table class="sign" width="100%" style="page-break-inside:avoid"><tr style="page-break-inside:avoid">';
+  cols.forEach(function(x,k){
+    var s=sigs&&sigs[k];
+    h+='<td width="'+Math.round(100/cols.length)+'%" align="center" valign="top"><b>'+esc(x)+'</b>'
+      +'<br><span style="font-weight:400;font-style:italic;font-size:10pt">'+esc(subs[k]||'')+'</span><br>';
+    if(s&&s.img){
+      var hh=56,ww=Math.round(hh*(s.w||300)/(s.h||120));
+      if(ww>170){ww=170;hh=Math.round(ww*(s.h||120)/(s.w||300));}
+      h+='<img src="'+s.img+'" width="'+ww+'" height="'+hh+'"><br><b>'+esc(s.ten)+'</b>'
+        +'<br><span style="font-size:9pt;font-weight:400;font-style:italic">Ký điện tử '+esc(s.time)+' ('+esc(s.dev)+')</span>';
+    }else{
+      h+='&nbsp;<br>&nbsp;<br>&nbsp;<br>&nbsp;';
+    }
+    h+='</td>';
+  });
+  return h+'</tr></table>';
 }
 function docHeaderHtmlBP(boPhan,soVanBan,loaiVanBan){
   return '<table class="hdrtbl"><tr>'
@@ -972,9 +985,30 @@ function docWrap(title,bodyHtml){
     +'<!--[if gte mso 9]><xml><w:WordDocument><w:View>Print</w:View><w:Zoom>100</w:Zoom></w:WordDocument></xml><![endif]-->'
     +'<style>'+DOC_STYLE+'</style></head><body>'+bodyHtml+'</body></html>';
 }
+function toMhtml(html){
+  var imgs=[];
+  var out=html.replace(/src="data:(image\/[a-z+]+);base64,([^"]+)"/g,function(m,mime,b64){
+    var n=imgs.length+1,ext=mime.split('/')[1].replace('jpeg','jpg');
+    var loc='file:///C:/chuky'+n+'.'+ext;
+    imgs.push({mime:mime,b64:b64,loc:loc});
+    return 'src="'+loc+'"';
+  });
+  if(!imgs.length)return null;
+  function wrap76(s){return s.replace(/(.{76})/g,'$1\r\n');}
+  var bytes=new TextEncoder().encode(out),bin='';
+  for(var i=0;i<bytes.length;i+=8192)bin+=String.fromCharCode.apply(null,bytes.subarray(i,i+8192));
+  var B='----=_NextPart_MD'+Date.now().toString(36);
+  var s='MIME-Version: 1.0\r\nContent-Type: multipart/related; boundary="'+B+'"; type="text/html"\r\n\r\n';
+  s+='--'+B+'\r\nContent-Type: text/html; charset="utf-8"\r\nContent-Transfer-Encoding: base64\r\nContent-Location: file:///C:/baocao.htm\r\n\r\n'+wrap76(btoa(bin))+'\r\n\r\n';
+  imgs.forEach(function(im){
+    s+='--'+B+'\r\nContent-Type: '+im.mime+'\r\nContent-Transfer-Encoding: base64\r\nContent-Location: '+im.loc+'\r\n\r\n'+wrap76(im.b64)+'\r\n\r\n';
+  });
+  return s+'--'+B+'--\r\n';
+}
 function exportDocHtml(html,fname){
   try{
-    var blob=new Blob(['\ufeff'+html],{type:'application/msword;charset=utf-8'});
+    var mh=toMhtml(html);
+    var blob=new Blob([mh!==null?mh:'\ufeff'+html],{type:'application/msword'+(mh!==null?'':';charset=utf-8')});
     var file=null;try{file=new File([blob],fname,{type:blob.type});}catch(er){}
     if(file&&navigator.share&&navigator.canShare&&navigator.canShare({files:[file]})){
       navigator.share({files:[file],title:fname}).catch(function(){dlAnchor(blob,fname);});
@@ -991,6 +1025,108 @@ function printPreviewHtml(html){
     if(!w){toast('Trình duyệt chặn mở tab mới — cho phép popup rồi thử lại');return;}
     setTimeout(function(){URL.revokeObjectURL(url);},60000);
   }catch(err){console.error(err);toast('Không mở được bản xem trước: '+err.message);}
+}
+
+/* ================= Chữ ký điện tử: vẽ trên màn hình ================= */
+var SIGP=null;
+function deviceLabel(){
+  var u=navigator.userAgent||'';
+  var os=/iPhone/.test(u)?'iPhone':/iPad/.test(u)?'iPad':/Android/.test(u)?'Android':/Windows/.test(u)?'Windows':/Mac OS X/.test(u)?'Mac':'thiết bị khác';
+  var br=/Edg\//.test(u)?'Edge':/Chrome\//.test(u)?'Chrome':/Safari\//.test(u)?'Safari':/Firefox\//.test(u)?'Firefox':'';
+  return os+(br?', '+br:'');
+}
+function nowLabel(){
+  var d=new Date(),p=function(n){return String(n).padStart(2,'0');};
+  return p(d.getHours())+':'+p(d.getMinutes())+' ngày '+p(d.getDate())+'/'+p(d.getMonth()+1)+'/'+d.getFullYear();
+}
+function sigBoxHtml(kind,key,label){
+  var S=kind==='hv'?HV:EX; S.sig=S.sig||{};
+  var s=S.sig[key];
+  var h='<div style="flex:1;min-width:0;border:1px solid var(--line);border-radius:14px;padding:10px;background:var(--card)">';
+  h+='<div style="font-weight:700;font-size:13px;margin-bottom:8px">'+label+'</div>';
+  if(s){
+    h+='<div style="height:84px;display:flex;align-items:center;justify-content:center;background:var(--card2);border-radius:10px"><img src="'+s.img+'" style="max-width:100%;max-height:76px"></div>';
+    h+='<div style="font-size:13px;font-weight:600;margin-top:6px">'+esc(s.ten)+'</div><div style="font-size:11px;color:var(--mut)">'+esc(s.time)+'</div>';
+    h+='<div style="display:flex;gap:14px;margin-top:6px"><button class="addbat" style="color:var(--teal)" onclick="A.sigOpen(\''+kind+'\',\''+key+'\')">Ký lại</button><button class="addbat" style="color:var(--red)" onclick="A.sigClear(\''+kind+'\',\''+key+'\')">Xoá</button></div>';
+  }else{
+    h+='<div style="height:84px;display:flex;align-items:center;justify-content:center;border:1.5px dashed var(--line);border-radius:10px;color:var(--mut2);font-size:12px">Chưa ký</div>';
+    h+='<button class="btn btn-outline" style="margin-top:8px;padding:10px;font-size:13px" onclick="A.sigOpen(\''+kind+'\',\''+key+'\')">'+icon('edit',15)+'Ký tại đây</button>';
+  }
+  return h+'</div>';
+}
+function sigSectionHtml(kind){
+  var cfg=kind==='hv'?[['benGiao','Bên bàn giao'],['benNhan','Bên nhận bàn giao']]:[['nguoiGiaiTrinh','Người giải trình'],['lanhDao','Lãnh đạo đơn vị']];
+  var h='<div class="bcsec" style="margin-top:20px">Chữ ký điện tử (tuỳ chọn)</div>';
+  h+='<div style="font-size:12px;color:var(--mut);margin-bottom:8px">Ký bằng ngón tay ngay trên màn hình. Chữ ký được chèn vào file Word và bản in, kèm họ tên, thời gian và thiết bị. Không ký thì ô ký vẫn để trống cho ký tay. Nếu sửa nội dung sau khi ký, nên ký lại.</div>';
+  h+='<div style="display:flex;gap:10px">'+sigBoxHtml(kind,cfg[0][0],cfg[0][1])+sigBoxHtml(kind,cfg[1][0],cfg[1][1])+'</div>';
+  return h;
+}
+function sigPadOpen(kind,key,title,defName){
+  SIGP={kind:kind,key:key,ink:false,drawing:false,minx:1e9,miny:1e9,maxx:-1e9,maxy:-1e9};
+  var o=document.createElement('div');
+  o.id='sigovl';
+  o.innerHTML='<div class="sigcard">'
+    +'<div style="font-weight:800;font-size:16px;margin-bottom:10px">Ký xác nhận: '+esc(title)+'</div>'
+    +'<label class="lbl">Họ tên người ký</label><input class="inp" id="signame" value="'+esc(defName||'')+'" style="margin-bottom:10px">'
+    +'<canvas id="sigcv"></canvas>'
+    +'<div style="font-size:12px;color:var(--mut);margin:6px 0 12px">Dùng ngón tay vẽ chữ ký vào khung. Chữ ký sẽ được lưu kèm họ tên, thời gian và thiết bị.</div>'
+    +'<div style="display:flex;gap:8px"><button class="btn btn-outline" style="flex:1;padding:12px" onclick="sigPadClear()">Vẽ lại</button>'
+    +'<button class="btn btn-outline" style="flex:1;padding:12px" onclick="sigPadClose()">Huỷ</button>'
+    +'<button class="btn btn-primary" style="flex:1.3;padding:12px" onclick="sigConfirm()">'+icon('check',16)+'Xác nhận</button></div>'
+    +'</div>';
+  document.body.appendChild(o);
+  document.body.style.overflow='hidden';
+  var cv=document.getElementById('sigcv'),dpr=window.devicePixelRatio||1,r=cv.getBoundingClientRect();
+  cv.width=Math.round(r.width*dpr);cv.height=Math.round(r.height*dpr);
+  var ctx=cv.getContext('2d');
+  ctx.scale(dpr,dpr);ctx.lineWidth=2.4;ctx.lineCap='round';ctx.lineJoin='round';ctx.strokeStyle='#0b1b3a';
+  SIGP.cv=cv;SIGP.ctx=ctx;SIGP.dpr=dpr;
+  function pos(e){var b=cv.getBoundingClientRect();return {x:e.clientX-b.left,y:e.clientY-b.top};}
+  function box(p){SIGP.minx=Math.min(SIGP.minx,p.x);SIGP.miny=Math.min(SIGP.miny,p.y);SIGP.maxx=Math.max(SIGP.maxx,p.x);SIGP.maxy=Math.max(SIGP.maxy,p.y);}
+  cv.addEventListener('pointerdown',function(e){
+    e.preventDefault();if(cv.setPointerCapture)cv.setPointerCapture(e.pointerId);
+    var p=pos(e);SIGP.drawing=true;SIGP.last=p;box(p);
+    ctx.beginPath();ctx.moveTo(p.x,p.y);ctx.lineTo(p.x+0.01,p.y+0.01);ctx.stroke();ctx.beginPath();ctx.moveTo(p.x,p.y);
+  });
+  cv.addEventListener('pointermove',function(e){
+    if(!SIGP||!SIGP.drawing)return;e.preventDefault();
+    var p=pos(e),m={x:(SIGP.last.x+p.x)/2,y:(SIGP.last.y+p.y)/2};
+    ctx.quadraticCurveTo(SIGP.last.x,SIGP.last.y,m.x,m.y);ctx.stroke();
+    ctx.beginPath();ctx.moveTo(m.x,m.y);SIGP.last=p;box(p);SIGP.ink=true;
+  });
+  var stop=function(){if(SIGP)SIGP.drawing=false;};
+  cv.addEventListener('pointerup',stop);cv.addEventListener('pointercancel',stop);cv.addEventListener('pointerleave',stop);
+}
+function sigPadClear(){
+  if(!SIGP)return;
+  var cv=SIGP.cv;SIGP.ctx.clearRect(0,0,cv.width,cv.height);
+  SIGP.ink=false;SIGP.minx=1e9;SIGP.miny=1e9;SIGP.maxx=-1e9;SIGP.maxy=-1e9;
+}
+function sigPadClose(){
+  var o=document.getElementById('sigovl');if(o)o.remove();
+  document.body.style.overflow='';SIGP=null;
+}
+function sigExport(){
+  var d=SIGP.dpr,pad=10,cv=SIGP.cv;
+  var x=Math.max(0,SIGP.minx-pad),y=Math.max(0,SIGP.miny-pad);
+  var w=Math.min(cv.width/d-x,SIGP.maxx-SIGP.minx+pad*2),h=Math.min(cv.height/d-y,SIGP.maxy-SIGP.miny+pad*2);
+  var ow=Math.min(Math.round(w*d),600),oh=Math.max(1,Math.round(h*d*(ow/(w*d))));
+  var oc=document.createElement('canvas');oc.width=ow;oc.height=oh;
+  oc.getContext('2d').drawImage(cv,x*d,y*d,w*d,h*d,0,0,ow,oh);
+  return {url:oc.toDataURL('image/png'),w:ow,h:oh};
+}
+function sigConfirm(){
+  if(!SIGP)return;
+  var ten=(document.getElementById('signame').value||'').trim();
+  if(!SIGP.ink){toast('Chưa có chữ ký, hãy vẽ vào khung');return;}
+  if(!ten){toast('Nhập họ tên người ký');return;}
+  var ex=sigExport();
+  var sig={img:ex.url,w:ex.w,h:ex.h,ten:ten,time:nowLabel(),dev:deviceLabel()};
+  var kind=SIGP.kind,key=SIGP.key;
+  sigPadClose();
+  if(kind==='hv'){HV.sig=HV.sig||{};HV.sig[key]=sig;A.hvSave(false);renderHandoverEdit();}
+  else{EX.sig=EX.sig||{};EX.sig[key]=sig;A.exSave(false);renderExplainEdit();}
+  toast('Đã ký xác nhận');
 }
 
 /* ================= Picker: lấy vật tư/tài sản từ kỳ kiểm kê ================= */
@@ -1054,7 +1190,7 @@ function dot(val,ph){return val&&String(val).trim()?esc(val):(ph||'.............
 var HV_LOAI=['Công cụ dụng cụ','Tài sản cố định','Vật tư tiêu hao','Thiết bị – máy móc','Hồ sơ – chứng từ'];
 var HV_LYDO=['Cấp phát mới','Luân chuyển nội bộ','Thu hồi / nhập lại kho','Nghỉ việc / điều chuyển','Cho mượn / hoàn trả','Nhận / trả NCC'];
 var HV_HOSO=['Hóa đơn / phiếu nhập kho','Phiếu xuất / điều chuyển','Sổ bảo hành, HDSD','Phụ kiện đi kèm','Hình ảnh hiện trạng'];
-function newHV(autoNumber){return {id:Date.now().toString(36),soBB:autoNumber?nextSoVanBan('BBBG'):'',boPhan:'',
+function newHV(autoNumber){return {id:Date.now().toString(36),sig:{},soBB:autoNumber?nextSoVanBan('BBBG'):'',boPhan:'',
   loai:[],loaiKhac:'',lyDo:[],lyDoKhac:'',
   thoiGian:'',diaDiem:'',canCu:'',
   benGiao:{ten:'',chucVu:'',boPhan:'',dienThoai:''},
@@ -1132,7 +1268,7 @@ function generateHandoverDoc(v){
     +'<p>2. Bên nhận đã kiểm đếm, đối chiếu thực tế, nhận đúng và đủ; kể từ thời điểm ký, chịu trách nhiệm bảo quản, sử dụng đúng mục đích và hoàn trả khi có yêu cầu.</p>'
     +'<p>3. Hư hỏng, mất mát phát sinh sau thời điểm bàn giao do Bên nhận chịu trách nhiệm theo quy định của Công ty. Sai lệch phát hiện trong vòng '+dot(v.soNgay,'......')+' ngày kể từ ngày bàn giao: hai bên lập biên bản bổ sung.</p>'
     +'<p>4. Biên bản lập thành '+dot(v.soBan,'......')+' bản, mỗi bên giữ 01 bản, 01 bản chuyển Hành chính – Kế toán để cập nhật sổ sách, thẻ kho.</p>'
-    +docSignHtml4(['BÊN BÀN GIAO','BÊN NHẬN BÀN GIAO'],['(Ký, ghi rõ họ tên)','(Ký, ghi rõ họ tên)']);
+    +docSignHtml4(['BÊN BÀN GIAO','BÊN NHẬN BÀN GIAO'],['(Ký, ghi rõ họ tên)','(Ký, ghi rõ họ tên)'],[(v.sig||{}).benGiao,(v.sig||{}).benNhan]);
   return docWrap('Biên bản bàn giao',body);
 }
 
@@ -1197,6 +1333,7 @@ function renderHandoverEdit(){
   h+='<div style="display:flex;gap:8px;margin-top:10px"><div style="flex:1"><label class="lbl">Hạn đối chiếu bổ sung (ngày)</label><input class="inp" value="'+esc(v.soNgay)+'" oninput="A.hvField(\'soNgay\',this.value)"></div>';
   h+='<div style="flex:1"><label class="lbl">Số bản lập</label><input class="inp" value="'+esc(v.soBan)+'" oninput="A.hvField(\'soBan\',this.value)"></div></div>';
 
+  h+=sigSectionHtml('hv');
   h+='</div>';
   h+='<div class="botbar"><div class="botin" style="display:flex;gap:8px">';
   h+='<button class="bcbtn" style="flex:1;background:var(--card);border:1px solid var(--line)" onclick="A.hvPrint()">'+icon('eye',17)+'Xem trước, In</button>';
@@ -1210,7 +1347,7 @@ var EX_LOAI=['Công cụ dụng cụ','Tài sản cố định','Vật tư tiêu
 var EX_PHATHIEN=['Kiểm kê định kỳ','Kiểm kê đột xuất','Đối soát tồn / doanh thu','Báo cáo bộ phận','Đối soát công nợ NCC'];
 var EX_NGUYENNHAN=['Hao hụt định mức','Sai sót nhập – xuất','Hư hỏng / hết hạn','Mất mát / thất lạc','Dùng sai mục đích','Bàn giao thiếu chứng từ','Vượt định mức tiêu hao'];
 var EX_BANGCHUNG=['Biên bản kiểm kê','Phiếu nhập / xuất kho','Thẻ kho / sổ kho','Hình ảnh / camera','Báo cáo tiêu hao / DT'];
-function newEX(autoNumber){return {id:Date.now().toString(36),soPhieu:autoNumber?nextSoVanBan('GT'):'',boPhan:'',
+function newEX(autoNumber){return {id:Date.now().toString(36),sig:{},soPhieu:autoNumber?nextSoVanBan('GT'):'',boPhan:'',
   nguoiGiaiTrinh:{ten:'',chucVu:'',boPhan:'',thoiGian:''},
   loai:[],loaiKhac:'',phatHien:[],phatHienKhac:'',
   ngayPhatHien:'',thoiDiemXayRa:'',diaDiem:'',canCu:'',
@@ -1315,7 +1452,7 @@ function generateExplainDoc(v){
     +dx
     +'<h2>VII. CAM KẾT</h2>'
     +'<p>Tôi cam kết nội dung giải trình trên là đúng sự thật, đầy đủ và chịu trách nhiệm trước Công ty về thông tin đã cung cấp. Tôi sẽ phối hợp cung cấp thêm chứng từ, bằng chứng khi được yêu cầu.</p>'
-    +docSignHtml4(['NGƯỜI GIẢI TRÌNH','XÁC NHẬN CỦA LÃNH ĐẠO ĐƠN VỊ'],['(Ký, ghi rõ họ tên)','(Ký, ghi rõ họ tên)']);
+    +docSignHtml4(['NGƯỜI GIẢI TRÌNH','XÁC NHẬN CỦA LÃNH ĐẠO ĐƠN VỊ'],['(Ký, ghi rõ họ tên)','(Ký, ghi rõ họ tên)'],[(v.sig||{}).nguoiGiaiTrinh,(v.sig||{}).lanhDao]);
   return docWrap('Bản giải trình thất thoát',body);
 }
 
@@ -1410,6 +1547,7 @@ function renderExplainEdit(){
   h+='<label style="display:flex;align-items:center;gap:8px;padding:6px 0"><input type="checkbox" onchange="A.exField(\'dxKhac\',this.checked)"'+(v.dxKhac?' checked':'')+'><span>Khác</span></label>';
   h+='<input class="inp" placeholder="Nội dung khác" value="'+esc(v.dxKhacText)+'" oninput="A.exField(\'dxKhacText\',this.value)">';
 
+  h+=sigSectionHtml('ex');
   h+='</div>';
   h+='<div class="botbar"><div class="botin" style="display:flex;gap:8px">';
   h+='<button class="bcbtn" style="flex:1;background:var(--card);border:1px solid var(--line)" onclick="A.exPrint()">'+icon('eye',17)+'Xem trước, In</button>';
@@ -2274,6 +2412,19 @@ var A={
     });
     input.value='';
   },
+  /* ---- Chữ ký điện tử ---- */
+  sigOpen:function(kind,key){
+    var names={benGiao:'Bên bàn giao',benNhan:'Bên nhận bàn giao',nguoiGiaiTrinh:'Người giải trình',lanhDao:'Lãnh đạo đơn vị'};
+    var def='';
+    if(kind==='hv'&&HV[key])def=HV[key].ten||'';
+    if(kind==='ex'&&key==='nguoiGiaiTrinh')def=EX.nguoiGiaiTrinh.ten||'';
+    sigPadOpen(kind,key,names[key]||'',def);
+  },
+  sigClear:function(kind,key){
+    if(!confirm('Xoá chữ ký này?'))return;
+    if(kind==='hv'){HV.sig=HV.sig||{};delete HV.sig[key];A.hvSave(false);renderHandoverEdit();}
+    else{EX.sig=EX.sig||{};delete EX.sig[key];A.exSave(false);renderExplainEdit();}
+  },
   /* ---- Biên bản bàn giao ---- */
   hvNew:function(){HV=newHV(true);route={view:'handoverEdit'};render();},
   hvOpen:function(id){var v=null;for(var i=0;i<db.handovers.length;i++)if(db.handovers[i].id===id)v=db.handovers[i];if(!v)return;HV=v;route={view:'handoverEdit'};render();},
@@ -2499,6 +2650,39 @@ var A={
 };
 
 /* ================= Init ================= */
+/* ================= Tự động kiểm tra bản mới ================= */
+var APP_VERSION=(document.querySelector&&document.querySelector('meta[name="app-version"]'))?document.querySelector('meta[name="app-version"]').content:'';
+var UPD_SHOWN=false;
+function showUpdateBanner(newVer){
+  if(UPD_SHOWN)return;
+  UPD_SHOWN=true;
+  var d=document.createElement('div');
+  d.id='updbanner';
+  d.style.cssText='position:fixed;top:0;left:0;right:0;z-index:200;background:#2f6fed;color:#fff;display:flex;align-items:center;justify-content:center;gap:12px;padding:10px 14px;font-size:14px;font-weight:600;box-shadow:0 2px 12px rgba(0,0,0,.2)';
+  d.innerHTML='<span>Có bản cập nhật mới</span>'
+    +'<button style="border:none;background:#fff;color:#2f6fed;font:inherit;font-weight:700;border-radius:999px;padding:6px 14px;cursor:pointer" onclick="reloadLatest(\''+newVer+'\')">Tải lại ngay</button>'
+    +'<button style="border:none;background:none;color:rgba(255,255,255,.8);font:inherit;cursor:pointer" onclick="document.getElementById(\'updbanner\').remove()">Để sau</button>';
+  document.body.appendChild(d);
+}
+function reloadLatest(ver){
+  var base=location.href.split('#')[0].split('?')[0];
+  location.href=base+'?v='+encodeURIComponent(ver||Date.now());
+}
+function checkForUpdate(){
+  if(!APP_VERSION||!window.fetch||location.protocol==='file:')return;
+  var base=location.href.split('#')[0].split('?')[0];
+  fetch(base+'?_='+Date.now(),{cache:'no-store'})
+    .then(function(r){return r.ok?r.text():'';})
+    .then(function(t){
+      var m=t&&t.match(/<meta name="app-version" content="([^"]+)"/);
+      if(m&&m[1]!==APP_VERSION)showUpdateBanner(m[1]);
+    })
+    .catch(function(){});
+}
+setTimeout(checkForUpdate,4000);
+setInterval(checkForUpdate,5*60*1000);
+document.addEventListener('visibilitychange',function(){if(document.visibilityState==='visible')checkForUpdate();});
+
 (function(){
   var saved=store.load();
   if(saved&&saved.periods)db=saved;
