@@ -2,7 +2,7 @@
 <html lang="vi">
 <head>
 <meta charset="UTF-8">
-<meta name="app-version" content="2026100902">
+<meta name="app-version" content="2026100903">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
 <meta name="theme-color" content="#0f766e">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -1094,7 +1094,7 @@ function sigBoxHtml(kind,key){
     h+='<div style="display:flex;gap:14px;margin-top:6px"><button class="addbat" style="color:var(--teal)" onclick="A.sigOpen(\''+kind+'\',\''+key+'\')">Ký lại</button><button class="addbat" style="color:var(--red)" onclick="A.sigClear(\''+kind+'\',\''+key+'\')">Xoá</button><button class="addbat" style="color:var(--green)" onclick="A.sigSend(\''+kind+'\',\''+key+'\')">Gửi bản xác nhận</button></div>';
   }else{
     h+='<div style="height:84px;display:flex;align-items:center;justify-content:center;border:1.5px dashed var(--line);border-radius:10px;color:var(--mut2);font-size:12px">Chưa ký</div>';
-    h+='<button class="btn btn-outline" style="margin-top:8px;padding:10px;font-size:13px" onclick="A.sigOpen(\''+kind+'\',\''+key+'\')">'+icon('edit',15)+'Ký tại đây</button>';
+    h+='<button class="btn btn-outline" style="margin-top:8px;padding:10px;font-size:13px" onclick="A.sigOpen(\''+kind+'\',\''+key+'\')">'+icon('edit',15)+'Ký tại đây</button>'+'<button class="addbat" style="color:var(--teal);margin-top:6px" onclick="A.sigPack(\''+kind+'\',\''+key+'\')">Gửi để người khác ký</button>';
   }
   return h+'</div>';
 }
@@ -1104,7 +1104,7 @@ function sigSectionHtml(kind){
   h+='<div style="font-size:12px;color:var(--mut);margin-bottom:8px">Ký bằng ngón tay ngay trên màn hình, mực xanh. Chữ ký được chèn vào '+where+', kèm họ tên, thời gian và thiết bị. Không ký thì ô ký vẫn để trống cho ký tay. Nếu sửa nội dung sau khi ký, nên ký lại.</div>';
   h+='<div style="display:flex;gap:10px;flex-wrap:wrap">';
   SIG_KEYS[kind].forEach(function(k){h+=sigBoxHtml(kind,k);});
-  return h+sigLockHtml(kind)+'</div>';
+  return h+'<div style="flex:1 1 100%"><button class="btn btn-outline" style="padding:10px;font-size:13px" onclick="A.sigImportRes(\''+kind+'\')">Nhập chữ ký đã nhận (file)</button></div>'+sigLockHtml(kind)+'</div>';
 }
 function sigPeriodToggle(p){
   p.sig=p.sig||{};
@@ -1211,14 +1211,30 @@ async function waSign(ten,doc){
   var msg=new Uint8Array(ad.length+32);msg.set(ad,0);msg.set(cd,ad.length);
   var ok=await crypto.subtle.verify(ec?{name:'ECDSA',hash:'SHA-256'}:{name:'RSASSA-PKCS1-v1_5'},key,ec?derToRaw(r.signature):new Uint8Array(r.signature),msg);
   if(!ok)throw new Error('Chữ ký thiết bị không hợp lệ');
-  return {cid:rec.id,pub:rec.pub,ad:b64u(ad),cd:b64u(r.clientDataJSON),sg:b64u(r.signature),ch:b64u(ch)};
+  return {cid:rec.id,alg:rec.alg,pub:rec.pub,ad:b64u(ad),cd:b64u(r.clientDataJSON),sg:b64u(r.signature),ch:b64u(ch)};
+}
+function pickJson(cb){var i=document.createElement('input');i.type='file';i.accept='.json,application/json';i.onchange=function(){var f=i.files&&i.files[0];if(!f)return;var r=new FileReader();r.onload=function(){var o;try{o=JSON.parse(r.result);}catch(e){toast('File không hợp lệ');return;}cb(o);};r.readAsText(f);};i.click();}
+function sigReply(pk,sig){shareOrDownload(new Blob([JSON.stringify({v:1,t:'res',kind:pk.kind,key:pk.key,dh:pk.dh,sig:sig})],{type:'application/json'}),'da-ky-'+pk.kind+'-'+pk.key+'.json');toast('Đã ký — gửi file này lại cho người gửi');}
+async function waCheck(w,doc,ten){
+  var enc=new TextEncoder(),ch=new Uint8Array(await crypto.subtle.digest('SHA-256',enc.encode(doc+'|'+ten)));
+  if(b64u(ch)!==w.ch)return 'Chữ ký không gắn với nội dung này';
+  var cd=JSON.parse(new TextDecoder().decode(unb64u(w.cd)));
+  if(cd.type!=='webauthn.get'||cd.challenge!==w.ch)return 'Dữ liệu xác thực không khớp';
+  var ad=unb64u(w.ad),rp=new Uint8Array(await crypto.subtle.digest('SHA-256',enc.encode(location.hostname)));
+  for(var i=0;i<32;i++)if(rp[i]!==ad[i])return 'Chữ ký được tạo ở địa chỉ web khác';
+  if(!(ad[32]&4))return 'Thiết bị chưa xác thực người dùng';
+  var ec=w.alg===-7,sg=unb64u(w.sg);
+  var key=await crypto.subtle.importKey('spki',unb64u(w.pub),ec?{name:'ECDSA',namedCurve:'P-256'}:{name:'RSASSA-PKCS1-v1_5',hash:'SHA-256'},false,['verify']);
+  var h=new Uint8Array(await crypto.subtle.digest('SHA-256',unb64u(w.cd))),m=new Uint8Array(ad.length+32);m.set(ad,0);m.set(h,ad.length);
+  var ok=await crypto.subtle.verify(ec?{name:'ECDSA',hash:'SHA-256'}:{name:'RSASSA-PKCS1-v1_5'},key,ec?derToRaw(sg):sg,m);
+  return ok?'':'Chữ ký thiết bị không hợp lệ';
 }
 async function sigConfirm(){
   if(!SIGP||SIGP.busy)return;
   var ten=(document.getElementById('signame').value||'').trim();
   if(!SIGP.ink){toast('Chưa có chữ ký, hãy vẽ vào khung');return;}
   if(!ten||ten==='__new__'){toast('Chọn người ký trong danh sách');return;}
-  var ex=sigExport(),kind=SIGP.kind,key=SIGP.key,doc=sigDoc(kind);
+  var ex=sigExport(),kind=SIGP.kind,key=SIGP.key,pk=SIGP.pack,doc=pk?pk.doc:sigDoc(kind);
   var sig={img:ex.url,w:ex.w,h:ex.h,ten:ten,time:nowLabel(),dev:deviceLabel(),dh:h53(doc)};
   if(waOk()){
     SIGP.busy=true;toast('Xác thực bằng Face ID / vân tay / mã khoá…');
@@ -1229,6 +1245,7 @@ async function sigConfirm(){
       if(!confirm('Không xác thực được thiết bị ('+((e&&(e.message||e.name))||'lỗi')+'). Vẫn lưu chữ ký nhưng KHÔNG kèm xác thực thiết bị?'))return;
     }
   }
+  if(pk){sigPadClose();sigReply(pk,sig);return;}
   sigPadClose();
   var S=sigStore(kind);S.sig=S.sig||{};S.sig[key]=sig;
   sigPersist(kind);
@@ -2381,6 +2398,7 @@ function navHtml(){
     var action=n.route==="stock"?"A.navStock()":"A.navGo('"+n.route+"')";
     h+='<a class="gnav-item'+(on?' on':'')+'" onclick="'+action+'">'+icon(n.icon,18)+n.label+'</a>';
   });
+  h+='<a class="gnav-item" onclick="A.sigImportReq()">'+icon('edit',18)+'Ký biên bản được gửi</a>';
   return h;
 }
 function renderNav(){
@@ -2543,6 +2561,39 @@ var A={
   sigUnlock:function(kind){
     if(!confirm('Mở chốt sẽ xoá toàn bộ chữ ký của biên bản này. Tiếp tục?'))return;
     var S=sigStore(kind);delete S.lock;S.sig={};sigPersist(kind);sigRerender(kind);
+  },
+  sigPack:function(kind,key){
+    var S=sigStore(kind);if(S.lock){toast('Đã chốt — mở chốt trước');return;}
+    var doc=sigDoc(kind),t=SIG_TITLES[kind+'.'+key];
+    shareOrDownload(new Blob([JSON.stringify({v:1,t:'req',kind:kind,key:key,role:t,title:S.name||t,host:location.hostname,time:nowLabel(),doc:doc,dh:h53(doc)})],{type:'application/json'}),'can-ky-'+kind+'-'+key+'.json');
+  },
+  sigImportReq:function(){
+    A.drawerClose();
+    pickJson(function(p){
+      if(!p||p.t!=='req'||!p.doc||!SIG_KEYS[p.kind]||SIG_KEYS[p.kind].indexOf(p.key)<0){toast('Không phải gói cần ký');return;}
+      if(p.host!==location.hostname){alert('Gói này tạo ở địa chỉ "'+p.host+'". Hãy mở app đúng địa chỉ đó rồi nhập lại.');return;}
+      if(h53(p.doc)!==p.dh){toast('Gói bị lỗi hoặc đã bị sửa');return;}
+      var sum='';try{var o=JSON.parse(p.doc);if(o.items){var c=o.items.filter(function(i){return i.counted;}).length,d=o.items.filter(function(i){return i.counted&&Math.round((i.countQty-i.close)*100)!==0;}).length;sum='\n'+o.items.length+' mã hàng, đã kiểm '+c+', chênh lệch '+d;}}catch(e){}
+      if(!confirm('Ký với vai trò "'+p.role+'"\n'+p.title+sum+'\nGửi lúc '+p.time+'\nTiếp tục?'))return;
+      sigPadOpen(p.kind,p.key,p.role+' – '+p.title,'');SIGP.pack=p;
+    });
+  },
+  sigImportRes:function(kind){
+    var S=sigStore(kind);if(S.lock){toast('Đã chốt — mở chốt trước');return;}
+    pickJson(async function(r){
+      if(!r||r.t!=='res'||r.kind!==kind||!r.sig||SIG_KEYS[kind].indexOf(r.key)<0){toast('Không phải chữ ký cho loại biên bản này');return;}
+      var doc=sigDoc(kind);
+      if(r.dh!==h53(doc)||r.sig.dh!==r.dh){alert('Nội dung biên bản đã thay đổi so với lúc gửi đi, hoặc đây là chữ ký của biên bản khác. Hãy gửi lại để ký.');return;}
+      var w=r.sig.wa,ten=r.sig.ten;
+      if(w){
+        var er;try{er=await waCheck(w,doc,ten);}catch(e){er='Không kiểm tra được ('+e.message+')';}
+        if(er){alert('Từ chối chữ ký: '+er);return;}
+        db.keys=db.keys||{};
+        if(db.keys[ten]&&db.keys[ten]!==w.pub&&!confirm('Khoá thiết bị của "'+ten+'" khác lần ký trước (có thể ký từ máy khác). Vẫn nhận?'))return;
+        db.keys[ten]=w.pub;store.save();
+      }else if(!confirm('Chữ ký này KHÔNG có xác thực thiết bị. Vẫn nhận?'))return;
+      S.sig=S.sig||{};S.sig[r.key]=r.sig;sigPersist(kind);sigRerender(kind);toast('Đã nhận chữ ký của '+ten);
+    });
   },
   sigSend:function(kind,key){
     var t=sigReceipt(kind,key);
