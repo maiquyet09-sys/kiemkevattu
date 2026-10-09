@@ -2,7 +2,7 @@
 <html lang="vi">
 <head>
 <meta charset="UTF-8">
-<meta name="app-version" content="2026100802">
+<meta name="app-version" content="2026100902">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
 <meta name="theme-color" content="#0f766e">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -518,7 +518,8 @@ function buildBienBan(p){
     used[sname.toLowerCase()]=1;
     var ws=wb.addWorksheet(sname,{views:[{state:"frozen",ySplit:4}]});
     if(wmId!==null)try{ws.addBackgroundImage(wmId);}catch(e){}
-    [4.43,14.57,52,12.29,14.57,14.57,14.57,14.57,11.43,11.43,49.29,13].forEach(function(w,i){ws.getColumn(i+1).width=w;});
+    var cwArr=[4.43,14.57,52,12.29,14.57,14.57,14.57,14.57,11.43,11.43,49.29,13];
+    cwArr.forEach(function(w,i){ws.getColumn(i+1).width=w;});
     var last=4+items.length;
     ws.mergeCells(1,1,1,11);
     var c=ws.getCell(1,1);
@@ -600,6 +601,35 @@ function buildBienBan(p){
     ws.mergeCells(sr,10,sr,11);
     var s3=ws.getCell(sr,10);
     s3.value="PHÒNG HÀNH CHÍNH HẬU CẦN";s3.font={name:"Times New Roman",size:11,bold:true};s3.alignment={horizontal:"center"};
+    /* Chữ ký điện tử (nếu có): ảnh dưới nhãn, rồi họ tên + thời gian + thiết bị */
+    var sgs=p.sig||{};
+    var px=cwArr.map(function(w){return w*7+5;});
+    function anchorCol(c1,c2,imgW){
+      var total=0,i2;
+      for(i2=c1-1;i2<=c2-1;i2++)total+=px[i2];
+      var off=Math.max(0,(total-imgW)/2),idx=c1-1;
+      while(idx<c2-1&&off>px[idx]){off-=px[idx];idx++;}
+      return idx+off/px[idx];
+    }
+    [[3,3,sgs.giamDoc],[6,7,sgs.thuKho],[10,11,sgs.hanhChinh]].forEach(function(z){
+      var s=z[2];if(!s||!s.img)return;
+      try{
+        var hh=48,ww=Math.round(hh*(s.w||300)/(s.h||120));
+        if(ww>150){ww=150;hh=Math.round(ww*(s.h||120)/(s.w||300));}
+        var imgId=wb.addImage({base64:s.img.split(",")[1],extension:"png"});
+        ws.getRow(sr+1).height=Math.round(hh*0.75)+8;
+        ws.addImage(imgId,{tl:{col:anchorCol(z[0],z[1],ww),row:sr+0.08},ext:{width:ww,height:hh}});
+        if(z[1]>z[0]){ws.mergeCells(sr+2,z[0],sr+2,z[1]);ws.mergeCells(sr+3,z[0],sr+3,z[1]);}
+        var nm=ws.getCell(sr+2,z[0]);
+        nm.value=s.ten;nm.font={name:"Times New Roman",size:11,bold:true};nm.alignment={horizontal:"center"};
+        var tm=ws.getCell(sr+3,z[0]);
+        tm.value=sigLine(s);tm.font={name:"Arial",size:8,italic:true};
+        tm.alignment={horizontal:"center",vertical:"top",wrapText:true};
+        ws.getRow(sr+3).height=40;
+      }catch(sigErr){}
+    });
+    var ll=lockLine(p);
+    if(ll){ws.mergeCells(sr+4,3,sr+4,11);var lc=ws.getCell(sr+4,3);lc.value=ll;lc.font={name:"Arial",size:8,italic:true};lc.alignment={horizontal:"center",wrapText:true};ws.getRow(sr+4).height=24;}
   });
   var hsd=hsdRowsOf(p);
   if(hsd.length){
@@ -751,7 +781,8 @@ function defaultNguoi(branchName){
   return '';
 }
 function ensureBCMeta(){
-  if(!BCMETA)BCMETA={soVanBan:'',diaDiem:'Hà Nội',thang:String(new Date().getMonth()+1),nam:String(new Date().getFullYear()),nguyennhan:'',br:{}};
+  if(!BCMETA)BCMETA={soVanBan:'',diaDiem:'Hà Nội',thang:String(new Date().getMonth()+1),nam:String(new Date().getFullYear()),nguyennhan:'',br:{},sig:{}};
+  if(BCMETA&&!BCMETA.sig)BCMETA.sig={};
   if(BC&&BC.branches)BC.branches.forEach(function(b){
     if(!BCMETA.br[b.name])BCMETA.br[b.name]={thoigian:'',nguoi:defaultNguoi(b.name),giatri:''};
   });
@@ -858,17 +889,10 @@ function generateBaoCao(){
       +'<p style="margin-left:36pt;margin-top:4pt;margin-bottom:4pt">+ Phòng Kế toán có trách nhiệm nhập bổ sung số lượng hàng thừa vào kho để theo dõi và quản lý.</p>'
       +'<p style="margin-left:36pt;margin-top:4pt;margin-bottom:4pt">+ Trường hợp kỳ kiểm kê tháng kế tiếp phát hiện chênh lệch âm, số lượng hàng âm sẽ được cấn trừ vào lượng hàng thừa đã ghi nhận trước đó.</p>'
       +'<p><i>Trân trọng báo cáo!</i></p>'
-      +'<table class="sign" width="100%"><tr><td width="50%">PHÒNG KẾ TOÁN HO</td><td width="50%">PHÒNG HÀNH CHÍNH HO</td></tr>'
-      +'<tr><td>&nbsp;<br>&nbsp;<br>&nbsp;<br>&nbsp;</td><td>&nbsp;</td></tr></table>'
+      +docSignHtml4(['PHÒNG KẾ TOÁN HO','PHÒNG HÀNH CHÍNH HO'],['',''],[(BCMETA.sig||{}).keToan,(BCMETA.sig||{}).hanhChinh],BCMETA)
       +'</body></html>';
 
-    var blob=new Blob(['\ufeff'+html],{type:'application/msword;charset=utf-8'});
-    var fname='BaoCao_KiemKe_T'+BCMETA.thang+'_'+BCMETA.nam+'.doc';
-    var file=null;try{file=new File([blob],fname,{type:blob.type});}catch(er){}
-    if(file&&navigator.share&&navigator.canShare&&navigator.canShare({files:[file]})){
-      navigator.share({files:[file],title:'Báo cáo kiểm kê'}).catch(function(){dlAnchor(blob,fname);});
-    }else{dlAnchor(blob,fname);}
-    toast("✅ Đã tạo báo cáo — kiểm tra file vừa tải");
+    exportDocHtml(html,'BaoCao_KiemKe_T'+BCMETA.thang+'_'+BCMETA.nam+'.doc');
   }catch(err){console.error(err);toast("Lỗi tạo báo cáo: "+err.message);}
 }
 
@@ -920,6 +944,7 @@ function renderBaoCao(){
     h+='<label class="lbl" style="margin-top:16px">Nguyên nhân chênh lệch (mỗi dòng một ý, tuỳ chọn)</label>';
     h+='<textarea class="inp" rows="4" placeholder="- Tại cơ sở ...: mã ... thiếu/thừa do ..." oninput="A.bcSet(\'nguyennhan\',this.value)">'+esc(BCMETA.nguyennhan)+'</textarea>';
     h+='<div class="note-warn" style="margin-top:8px;display:flex;gap:8px;align-items:flex-start">'+icon('warn',16)+'<span>File Excel kiểm kê không có sẵn đơn giá vật tư nên không tự tính được "Giá trị" — bạn có thể tự điền số tiền vào ô trên nếu biết, để trống thì báo cáo sẽ để trống ô đó.</span></div>';
+    h+=sigSectionHtml('bc');
   }
   h+='</div>';
   h+='<div class="botbar"><div class="botin"><button class="bcbtn bcok" onclick="generateBaoCao()"'+(BC&&BC.branches.length?'':' disabled')+' style="box-shadow:0 8px 32px rgba(0,0,0,.5)">'+icon('file',18)+'Tạo báo cáo Word</button></div></div>';
@@ -954,24 +979,26 @@ function docSignHtml(cols){
   h+='</tr></table>';
   return h;
 }
-function docSignHtml4(cols,subs,sigs){
+function docSignHtml4(cols,subs,sigs,holder){
   /* Một hàng duy nhất để khối ký không bị tách đôi giữa 2 trang */
   var h='<table class="sign" width="100%" style="page-break-inside:avoid"><tr style="page-break-inside:avoid">';
   cols.forEach(function(x,k){
     var s=sigs&&sigs[k];
     h+='<td width="'+Math.round(100/cols.length)+'%" align="center" valign="top"><b>'+esc(x)+'</b>'
-      +'<br><span style="font-weight:400;font-style:italic;font-size:10pt">'+esc(subs[k]||'')+'</span><br>';
+      +((subs[k]||'')?'<br><span style="font-weight:400;font-style:italic;font-size:10pt">'+esc(subs[k])+'</span>':'')+'<br>';
     if(s&&s.img){
       var hh=56,ww=Math.round(hh*(s.w||300)/(s.h||120));
       if(ww>170){ww=170;hh=Math.round(ww*(s.h||120)/(s.w||300));}
       h+='<img src="'+s.img+'" width="'+ww+'" height="'+hh+'"><br><b>'+esc(s.ten)+'</b>'
-        +'<br><span style="font-size:9pt;font-weight:400;font-style:italic">Ký điện tử '+esc(s.time)+' ('+esc(s.dev)+')</span>';
+        +'<br><span style="font-size:9pt;font-weight:400;font-style:italic">'+esc(sigLine(s))+'</span>';
     }else{
       h+='&nbsp;<br>&nbsp;<br>&nbsp;<br>&nbsp;';
     }
     h+='</td>';
   });
-  return h+'</tr></table>';
+  h+='</tr></table>';
+  var ll=lockLine(holder);
+  return h+(ll?'<p style="text-align:center;font-size:9pt;font-style:italic">'+esc(ll)+'</p>':'');
 }
 function docHeaderHtmlBP(boPhan,soVanBan,loaiVanBan){
   return '<table class="hdrtbl"><tr>'
@@ -1039,15 +1066,32 @@ function nowLabel(){
   var d=new Date(),p=function(n){return String(n).padStart(2,'0');};
   return p(d.getHours())+':'+p(d.getMinutes())+' ngày '+p(d.getDate())+'/'+p(d.getMonth()+1)+'/'+d.getFullYear();
 }
-function sigBoxHtml(kind,key,label){
-  var S=kind==='hv'?HV:EX; S.sig=S.sig||{};
-  var s=S.sig[key];
-  var h='<div style="flex:1;min-width:0;border:1px solid var(--line);border-radius:14px;padding:10px;background:var(--card)">';
+var SIG_TITLES={'hv.benGiao':'Bên bàn giao','hv.benNhan':'Bên nhận bàn giao','ex.nguoiGiaiTrinh':'Người giải trình','ex.lanhDao':'Lãnh đạo đơn vị','bc.keToan':'Phòng Kế toán HO','bc.hanhChinh':'Phòng Hành chính HO','pe.giamDoc':'Giám đốc cơ sở','pe.thuKho':'Thủ kho cơ sở','pe.hanhChinh':'Phòng Hành chính Hậu cần'};
+var SIG_KEYS={hv:['benGiao','benNhan'],ex:['nguoiGiaiTrinh','lanhDao'],bc:['keToan','hanhChinh'],pe:['giamDoc','thuKho','hanhChinh']};
+function sigStore(kind){
+  if(kind==='hv')return HV;
+  if(kind==='ex')return EX;
+  if(kind==='bc'){ensureBCMeta();return BCMETA;}
+  return per(P.id);
+}
+function sigRerender(kind){
+  if(kind==='hv')renderHandoverEdit();else if(kind==='ex')renderExplainEdit();else if(kind==='bc')renderBaoCao();else renderPeriod();
+}
+function sigPersist(kind){
+  if(kind==='hv')A.hvSave(false);else if(kind==='ex')A.exSave(false);else if(kind==='pe')store.save();
+}
+function sigBoxHtml(kind,key){
+  var S=sigStore(kind);S.sig=S.sig||{};
+  var s=S.sig[key],label=SIG_TITLES[kind+'.'+key];
+  var h='<div style="flex:1 1 140px;min-width:0;border:1px solid var(--line);border-radius:14px;padding:10px;background:var(--card)">';
   h+='<div style="font-weight:700;font-size:13px;margin-bottom:8px">'+label+'</div>';
   if(s){
     h+='<div style="height:84px;display:flex;align-items:center;justify-content:center;background:var(--card2);border-radius:10px"><img src="'+s.img+'" style="max-width:100%;max-height:76px"></div>';
     h+='<div style="font-size:13px;font-weight:600;margin-top:6px">'+esc(s.ten)+'</div><div style="font-size:11px;color:var(--mut)">'+esc(s.time)+'</div>';
-    h+='<div style="display:flex;gap:14px;margin-top:6px"><button class="addbat" style="color:var(--teal)" onclick="A.sigOpen(\''+kind+'\',\''+key+'\')">Ký lại</button><button class="addbat" style="color:var(--red)" onclick="A.sigClear(\''+kind+'\',\''+key+'\')">Xoá</button></div>';
+    if(s.wa)h+='<div style="font-size:11px;color:var(--green);font-weight:600;margin-top:2px">🔒 Đã xác thực thiết bị</div>';
+    else h+='<div style="font-size:11px;color:var(--amber);margin-top:2px">Chưa xác thực thiết bị</div>';
+    if(s.dh&&s.dh!==h53(sigDoc(kind)))h+='<div style="font-size:11px;color:var(--red);font-weight:600;margin-top:2px">⚠ Nội dung đã sửa sau khi ký — nên ký lại</div>';
+    h+='<div style="display:flex;gap:14px;margin-top:6px"><button class="addbat" style="color:var(--teal)" onclick="A.sigOpen(\''+kind+'\',\''+key+'\')">Ký lại</button><button class="addbat" style="color:var(--red)" onclick="A.sigClear(\''+kind+'\',\''+key+'\')">Xoá</button><button class="addbat" style="color:var(--green)" onclick="A.sigSend(\''+kind+'\',\''+key+'\')">Gửi bản xác nhận</button></div>';
   }else{
     h+='<div style="height:84px;display:flex;align-items:center;justify-content:center;border:1.5px dashed var(--line);border-radius:10px;color:var(--mut2);font-size:12px">Chưa ký</div>';
     h+='<button class="btn btn-outline" style="margin-top:8px;padding:10px;font-size:13px" onclick="A.sigOpen(\''+kind+'\',\''+key+'\')">'+icon('edit',15)+'Ký tại đây</button>';
@@ -1055,10 +1099,18 @@ function sigBoxHtml(kind,key,label){
   return h+'</div>';
 }
 function sigSectionHtml(kind){
-  var cfg=kind==='hv'?[['benGiao','Bên bàn giao'],['benNhan','Bên nhận bàn giao']]:[['nguoiGiaiTrinh','Người giải trình'],['lanhDao','Lãnh đạo đơn vị']];
+  var where=kind==='pe'?'file Excel biên bản (áp dụng cho mọi sheet chi nhánh trong kỳ này)':'file Word và bản in';
   var h='<div class="bcsec" style="margin-top:20px">Chữ ký điện tử (tuỳ chọn)</div>';
-  h+='<div style="font-size:12px;color:var(--mut);margin-bottom:8px">Ký bằng ngón tay ngay trên màn hình. Chữ ký được chèn vào file Word và bản in, kèm họ tên, thời gian và thiết bị. Không ký thì ô ký vẫn để trống cho ký tay. Nếu sửa nội dung sau khi ký, nên ký lại.</div>';
-  h+='<div style="display:flex;gap:10px">'+sigBoxHtml(kind,cfg[0][0],cfg[0][1])+sigBoxHtml(kind,cfg[1][0],cfg[1][1])+'</div>';
+  h+='<div style="font-size:12px;color:var(--mut);margin-bottom:8px">Ký bằng ngón tay ngay trên màn hình, mực xanh. Chữ ký được chèn vào '+where+', kèm họ tên, thời gian và thiết bị. Không ký thì ô ký vẫn để trống cho ký tay. Nếu sửa nội dung sau khi ký, nên ký lại.</div>';
+  h+='<div style="display:flex;gap:10px;flex-wrap:wrap">';
+  SIG_KEYS[kind].forEach(function(k){h+=sigBoxHtml(kind,k);});
+  return h+sigLockHtml(kind)+'</div>';
+}
+function sigPeriodToggle(p){
+  p.sig=p.sig||{};
+  var n=SIG_KEYS.pe.filter(function(k){return p.sig[k];}).length;
+  var h='<button class="stklink" style="display:flex;align-items:center;gap:7px" onclick="A.sigPanelToggle()">'+icon('edit',16)+'Chữ ký điện tử cho biên bản Excel ('+n+'/3)'+icon('chev',16)+'</button>';
+  if(P.sigOpen)h+=sigSectionHtml('pe');
   return h;
 }
 function sigPadOpen(kind,key,title,defName){
@@ -1067,7 +1119,7 @@ function sigPadOpen(kind,key,title,defName){
   o.id='sigovl';
   o.innerHTML='<div class="sigcard">'
     +'<div style="font-weight:800;font-size:16px;margin-bottom:10px">Ký xác nhận: '+esc(title)+'</div>'
-    +'<label class="lbl">Họ tên người ký</label><input class="inp" id="signame" value="'+esc(defName||'')+'" style="margin-bottom:10px">'
+    +'<label class="lbl">Họ tên người ký</label><select class="inp" id="signame" onchange="signerChange(this)" style="margin-bottom:10px">'+signerOpts(defName||'')+'</select>'
     +'<canvas id="sigcv"></canvas>'
     +'<div style="font-size:12px;color:var(--mut);margin:6px 0 12px">Dùng ngón tay vẽ chữ ký vào khung. Chữ ký sẽ được lưu kèm họ tên, thời gian và thiết bị.</div>'
     +'<div style="display:flex;gap:8px"><button class="btn btn-outline" style="flex:1;padding:12px" onclick="sigPadClear()">Vẽ lại</button>'
@@ -1079,7 +1131,7 @@ function sigPadOpen(kind,key,title,defName){
   var cv=document.getElementById('sigcv'),dpr=window.devicePixelRatio||1,r=cv.getBoundingClientRect();
   cv.width=Math.round(r.width*dpr);cv.height=Math.round(r.height*dpr);
   var ctx=cv.getContext('2d');
-  ctx.scale(dpr,dpr);ctx.lineWidth=2.4;ctx.lineCap='round';ctx.lineJoin='round';ctx.strokeStyle='#0b1b3a';
+  ctx.scale(dpr,dpr);ctx.lineWidth=2.4;ctx.lineCap='round';ctx.lineJoin='round';ctx.strokeStyle='#1d4ed8';
   SIGP.cv=cv;SIGP.ctx=ctx;SIGP.dpr=dpr;
   function pos(e){var b=cv.getBoundingClientRect();return {x:e.clientX-b.left,y:e.clientY-b.top};}
   function box(p){SIGP.minx=Math.min(SIGP.minx,p.x);SIGP.miny=Math.min(SIGP.miny,p.y);SIGP.maxx=Math.max(SIGP.maxx,p.x);SIGP.maxy=Math.max(SIGP.maxy,p.y);}
@@ -1115,18 +1167,73 @@ function sigExport(){
   oc.getContext('2d').drawImage(cv,x*d,y*d,w*d,h*d,0,0,ow,oh);
   return {url:oc.toDataURL('image/png'),w:ow,h:oh};
 }
-function sigConfirm(){
-  if(!SIGP)return;
+/* ===== WebAuthn: xác thực thiết bị khi ký (Face ID / vân tay / mã khoá, không cần CA) ===== */
+var WA_K='kk_wa_v1';
+function b64u(buf){var b=new Uint8Array(buf),t='';for(var i=0;i<b.length;i++)t+=String.fromCharCode(b[i]);return btoa(t).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');}
+function unb64u(t){t=t.replace(/-/g,'+').replace(/_/g,'/');while(t.length%4)t+='=';var r=atob(t),a=new Uint8Array(r.length);for(var i=0;i<r.length;i++)a[i]=r.charCodeAt(i);return a;}
+function h53(t){var a=3735928559,b=1103547991,c;for(var i=0;i<t.length;i++){c=t.charCodeAt(i);a=Math.imul(a^c,2654435761);b=Math.imul(b^c,1597334677);}a=Math.imul(a^(a>>>16),2246822507)^Math.imul(b^(b>>>13),3266489909);b=Math.imul(b^(b>>>16),2246822507)^Math.imul(a^(a>>>13),3266489909);return (4294967296*(2097151&b)+(a>>>0)).toString(36);}
+function waOk(){return !!(window.PublicKeyCredential&&navigator.credentials&&window.isSecureContext&&window.crypto&&crypto.subtle);}
+function waCreds(){try{return JSON.parse(localStorage.getItem(WA_K)||'[]');}catch(e){return [];}}
+function sigDocOf(o){return JSON.stringify(o,function(k,v){return (k==='sig'||k==='photo'||k==='lock')?undefined:v;});}
+function sigDoc(kind){return sigDocOf(sigStore(kind));}
+function lockLine(o){var l=o&&o.lock;if(!l)return '';return l.dh===h53(sigDocOf(o))?'Biên bản đã chốt lúc '+l.time+' – mã băm nội dung (SHA-256): '+l.h.slice(0,16):'⚠ Nội dung đã được sửa sau khi chốt lúc '+l.time+' – các chữ ký có thể không còn hiệu lực';}
+function signerOpts(sel){var L=(db.signers||[]).slice();if(sel&&L.indexOf(sel)<0)L.push(sel);var h='<option value="">— Chọn người ký —</option>';L.forEach(function(n){h+='<option value="'+esc(n)+'"'+(n===sel?' selected':'')+'>'+esc(n)+'</option>';});return h+'<option value="__new__">➕ Đăng ký người ký mới…</option>';}
+function signerChange(el){if(el.value!=='__new__')return;el.value='';var n=(prompt('Họ tên người ký mới (đúng như trên giấy tờ):')||'').trim();if(!n)return;if(!confirm('Người quản lý xác nhận đã kiểm tra danh tính "'+n+'" và người này đang tự cầm máy của mình để đăng ký?'))return;db.signers=db.signers||[];if(db.signers.indexOf(n)<0)db.signers.push(n);store.save();el.innerHTML=signerOpts(n);el.value=n;}
+function sigReceipt(kind,key){var S=sigStore(kind),s=S.sig[key];var nm={pe:'Biên bản kiểm kê',hv:'Biên bản bàn giao',ex:'Giải trình chênh lệch',bc:'Báo cáo'}[kind]+(kind==='pe'&&S.name?' – '+S.name:'');return 'XÁC NHẬN ĐÃ KÝ ĐIỆN TỬ\n'+nm+'\nVai trò: '+SIG_TITLES[kind+'.'+key]+'\nNgười ký: '+s.ten+'\nThời gian: '+s.time+'\nThiết bị: '+s.dev+'\n'+(s.wa?'Xác thực: sinh trắc/mã khoá thiết bị (mã '+s.wa.ch.slice(0,8)+')':'Xác thực thiết bị: không')+(S.lock?'\nMã băm nội dung đã chốt (SHA-256): '+S.lock.h:'\nMã nội dung: '+s.dh)+'\nVui lòng lưu lại thư/tin nhắn này.';}
+function sigLockHtml(kind){
+  var S=sigStore(kind),K=SIG_KEYS[kind],n=K.filter(function(k){return (S.sig||{})[k];}).length,all=n===K.length;
+  var h='<div style="flex:1 1 100%;border:1px solid var(--line);border-radius:14px;padding:10px">';
+  if(S.lock)h+='<div style="font-size:13px;font-weight:700">🔒 '+esc(lockLine(S))+'</div><button class="addbat" style="color:var(--red);margin-top:6px" onclick="A.sigUnlock(\''+kind+'\')">Mở chốt (xoá toàn bộ chữ ký)</button>';
+  else h+='<button class="btn btn-outline" style="padding:10px;font-size:13px"'+(all?'':' disabled')+' onclick="A.sigLock(\''+kind+'\')">Chốt biên bản'+(all?'':' (cần đủ '+K.length+' chữ ký)')+'</button>';
+  return h+'</div>';
+}
+function sigLine(s){return (s.wa?'Đã xác thực bằng thiết bị (sinh trắc/mã khoá)':'Ký điện tử')+' – '+s.ten+' – '+s.time+' – '+s.dev+(s.wa?' – mã '+s.wa.ch.slice(0,8):'');}
+function derToRaw(d){d=new Uint8Array(d);var o=2,l=d[o+1],r=d.slice(o+2,o+2+l);o=o+2+l;var l2=d[o+1],q=d.slice(o+2,o+2+l2);function f(x){while(x.length>32&&x[0]===0)x=x.slice(1);var z=new Uint8Array(32);z.set(x,32-x.length);return z;}var out=new Uint8Array(64);out.set(f(r),0);out.set(f(q),32);return out;}
+async function waEnroll(ten){
+  var c=await navigator.credentials.create({publicKey:{rp:{name:'Kiểm kê kho',id:location.hostname},user:{id:crypto.getRandomValues(new Uint8Array(16)),name:ten,displayName:ten},challenge:crypto.getRandomValues(new Uint8Array(32)),pubKeyCredParams:[{type:'public-key',alg:-7},{type:'public-key',alg:-257}],authenticatorSelection:{authenticatorAttachment:'platform',userVerification:'required',residentKey:'discouraged'},attestation:'none',timeout:60000}});
+  var r=c.response,pk=r.getPublicKey?r.getPublicKey():null;
+  if(!pk)throw new Error('Trình duyệt không trả khoá công khai');
+  var rec={id:b64u(c.rawId),pub:b64u(pk),alg:r.getPublicKeyAlgorithm?r.getPublicKeyAlgorithm():-7,ten:ten,t:Date.now()};
+  var a=waCreds();a.push(rec);try{localStorage.setItem(WA_K,JSON.stringify(a));}catch(e){}
+  return rec;
+}
+async function waSign(ten,doc){
+  var cr=waCreds(),rec=null;
+  for(var i=0;i<cr.length;i++)if(cr[i].ten.toLowerCase()===ten.toLowerCase()){rec=cr[i];break;}
+  if(!rec)rec=await waEnroll(ten);
+  var ch=new Uint8Array(await crypto.subtle.digest('SHA-256',new TextEncoder().encode(doc+'|'+ten)));
+  var a=await navigator.credentials.get({publicKey:{challenge:ch,rpId:location.hostname,allowCredentials:[{type:'public-key',id:unb64u(rec.id),transports:['internal']}],userVerification:'required',timeout:60000}});
+  var r=a.response,ad=new Uint8Array(r.authenticatorData);
+  if(!(ad[32]&4))throw new Error('Thiết bị chưa xác thực người dùng');
+  var ec=rec.alg===-7;
+  var key=await crypto.subtle.importKey('spki',unb64u(rec.pub),ec?{name:'ECDSA',namedCurve:'P-256'}:{name:'RSASSA-PKCS1-v1_5',hash:'SHA-256'},false,['verify']);
+  var cd=new Uint8Array(await crypto.subtle.digest('SHA-256',r.clientDataJSON));
+  var msg=new Uint8Array(ad.length+32);msg.set(ad,0);msg.set(cd,ad.length);
+  var ok=await crypto.subtle.verify(ec?{name:'ECDSA',hash:'SHA-256'}:{name:'RSASSA-PKCS1-v1_5'},key,ec?derToRaw(r.signature):new Uint8Array(r.signature),msg);
+  if(!ok)throw new Error('Chữ ký thiết bị không hợp lệ');
+  return {cid:rec.id,pub:rec.pub,ad:b64u(ad),cd:b64u(r.clientDataJSON),sg:b64u(r.signature),ch:b64u(ch)};
+}
+async function sigConfirm(){
+  if(!SIGP||SIGP.busy)return;
   var ten=(document.getElementById('signame').value||'').trim();
   if(!SIGP.ink){toast('Chưa có chữ ký, hãy vẽ vào khung');return;}
-  if(!ten){toast('Nhập họ tên người ký');return;}
-  var ex=sigExport();
-  var sig={img:ex.url,w:ex.w,h:ex.h,ten:ten,time:nowLabel(),dev:deviceLabel()};
-  var kind=SIGP.kind,key=SIGP.key;
+  if(!ten||ten==='__new__'){toast('Chọn người ký trong danh sách');return;}
+  var ex=sigExport(),kind=SIGP.kind,key=SIGP.key,doc=sigDoc(kind);
+  var sig={img:ex.url,w:ex.w,h:ex.h,ten:ten,time:nowLabel(),dev:deviceLabel(),dh:h53(doc)};
+  if(waOk()){
+    SIGP.busy=true;toast('Xác thực bằng Face ID / vân tay / mã khoá…');
+    try{sig.wa=await waSign(ten,doc);}
+    catch(e){
+      SIGP.busy=false;
+      if(e&&e.name==='NotAllowedError'){toast('Đã huỷ xác thực — chưa lưu chữ ký');return;}
+      if(!confirm('Không xác thực được thiết bị ('+((e&&(e.message||e.name))||'lỗi')+'). Vẫn lưu chữ ký nhưng KHÔNG kèm xác thực thiết bị?'))return;
+    }
+  }
   sigPadClose();
-  if(kind==='hv'){HV.sig=HV.sig||{};HV.sig[key]=sig;A.hvSave(false);renderHandoverEdit();}
-  else{EX.sig=EX.sig||{};EX.sig[key]=sig;A.exSave(false);renderExplainEdit();}
-  toast('Đã ký xác nhận');
+  var S=sigStore(kind);S.sig=S.sig||{};S.sig[key]=sig;
+  sigPersist(kind);
+  sigRerender(kind);
+  toast(sig.wa?'Đã ký và xác thực thiết bị':'Đã ký (chưa xác thực thiết bị)');
 }
 
 /* ================= Picker: lấy vật tư/tài sản từ kỳ kiểm kê ================= */
@@ -1268,7 +1375,7 @@ function generateHandoverDoc(v){
     +'<p>2. Bên nhận đã kiểm đếm, đối chiếu thực tế, nhận đúng và đủ; kể từ thời điểm ký, chịu trách nhiệm bảo quản, sử dụng đúng mục đích và hoàn trả khi có yêu cầu.</p>'
     +'<p>3. Hư hỏng, mất mát phát sinh sau thời điểm bàn giao do Bên nhận chịu trách nhiệm theo quy định của Công ty. Sai lệch phát hiện trong vòng '+dot(v.soNgay,'......')+' ngày kể từ ngày bàn giao: hai bên lập biên bản bổ sung.</p>'
     +'<p>4. Biên bản lập thành '+dot(v.soBan,'......')+' bản, mỗi bên giữ 01 bản, 01 bản chuyển Hành chính – Kế toán để cập nhật sổ sách, thẻ kho.</p>'
-    +docSignHtml4(['BÊN BÀN GIAO','BÊN NHẬN BÀN GIAO'],['(Ký, ghi rõ họ tên)','(Ký, ghi rõ họ tên)'],[(v.sig||{}).benGiao,(v.sig||{}).benNhan]);
+    +docSignHtml4(['BÊN BÀN GIAO','BÊN NHẬN BÀN GIAO'],['(Ký, ghi rõ họ tên)','(Ký, ghi rõ họ tên)'],[(v.sig||{}).benGiao,(v.sig||{}).benNhan],v);
   return docWrap('Biên bản bàn giao',body);
 }
 
@@ -1452,7 +1559,7 @@ function generateExplainDoc(v){
     +dx
     +'<h2>VII. CAM KẾT</h2>'
     +'<p>Tôi cam kết nội dung giải trình trên là đúng sự thật, đầy đủ và chịu trách nhiệm trước Công ty về thông tin đã cung cấp. Tôi sẽ phối hợp cung cấp thêm chứng từ, bằng chứng khi được yêu cầu.</p>'
-    +docSignHtml4(['NGƯỜI GIẢI TRÌNH','XÁC NHẬN CỦA LÃNH ĐẠO ĐƠN VỊ'],['(Ký, ghi rõ họ tên)','(Ký, ghi rõ họ tên)'],[(v.sig||{}).nguoiGiaiTrinh,(v.sig||{}).lanhDao]);
+    +docSignHtml4(['NGƯỜI GIẢI TRÌNH','XÁC NHẬN CỦA LÃNH ĐẠO ĐƠN VỊ'],['(Ký, ghi rõ họ tên)','(Ký, ghi rõ họ tên)'],[(v.sig||{}).nguoiGiaiTrinh,(v.sig||{}).lanhDao],v);
   return docWrap('Bản giải trình thất thoát',body);
 }
 
@@ -1976,7 +2083,7 @@ function renderPeriod(){
     '<button class="pill" style="display:inline-flex;align-items:center;gap:5px" onclick="A.exportCur()">'+icon('download',15)+'Excel</button></div></div>'+
     '<div class="wrap" style="padding-top:10px"><div class="bar"><div class="fill" id="pfill"></div></div>'+
     '<div class="prow"><span id="pdone"></span><span id="pdiff"></span></div>'+
-    '<button class="stklink" style="display:flex;align-items:center;gap:7px" onclick="A.openStock(\''+p.id+'\')">'+icon('grid',16)+'Bảng tồn kho (chỉ mã còn tồn)'+icon('chev',16)+'</button></div>'+
+    '<button class="stklink" style="display:flex;align-items:center;gap:7px" onclick="A.openStock(\''+p.id+'\')">'+icon('grid',16)+'Bảng tồn kho (chỉ mã còn tồn)'+icon('chev',16)+'</button>'+sigPeriodToggle(p)+'</div>'+
     '<div class="wrap" style="padding-bottom:8px"><input class="inp" style="background:var(--card)" id="q" placeholder="Tìm tên hoặc mã vật tư (không dấu vẫn ra)…" oninput="A.qInput(this.value)"></div>'+
     '<div class="chips" id="chips"></div></div>'+
     '<div class="wrap" id="list" style="padding-top:12px;padding-bottom:110px"></div>'+
@@ -2414,16 +2521,33 @@ var A={
   },
   /* ---- Chữ ký điện tử ---- */
   sigOpen:function(kind,key){
-    var names={benGiao:'Bên bàn giao',benNhan:'Bên nhận bàn giao',nguoiGiaiTrinh:'Người giải trình',lanhDao:'Lãnh đạo đơn vị'};
+    if((sigStore(kind)||{}).lock){toast('Đã chốt — mở chốt để sửa chữ ký');return;}
     var def='';
     if(kind==='hv'&&HV[key])def=HV[key].ten||'';
     if(kind==='ex'&&key==='nguoiGiaiTrinh')def=EX.nguoiGiaiTrinh.ten||'';
-    sigPadOpen(kind,key,names[key]||'',def);
+    sigPadOpen(kind,key,SIG_TITLES[kind+'.'+key]||'',def);
   },
   sigClear:function(kind,key){
+    if((sigStore(kind)||{}).lock){toast('Đã chốt — mở chốt để sửa chữ ký');return;}
     if(!confirm('Xoá chữ ký này?'))return;
-    if(kind==='hv'){HV.sig=HV.sig||{};delete HV.sig[key];A.hvSave(false);renderHandoverEdit();}
-    else{EX.sig=EX.sig||{};delete EX.sig[key];A.exSave(false);renderExplainEdit();}
+    var S=sigStore(kind);S.sig=S.sig||{};delete S.sig[key];
+    sigPersist(kind);sigRerender(kind);
+  },
+  sigPanelToggle:function(){P.sigOpen=!P.sigOpen;renderPeriod();},
+  sigLock:async function(kind){
+    if(!confirm('Chốt biên bản? Sau khi chốt, mọi chỉnh sửa nội dung sẽ bị đánh dấu "sửa sau khi chốt" ngay trên file xuất.'))return;
+    var S=sigStore(kind),doc=sigDoc(kind),h;
+    try{h=Array.prototype.map.call(new Uint8Array(await crypto.subtle.digest('SHA-256',new TextEncoder().encode(doc))),function(b){return ('0'+b.toString(16)).slice(-2);}).join('');}catch(e){h=h53(doc);}
+    S.lock={time:nowLabel(),h:h,dh:h53(doc)};sigPersist(kind);sigRerender(kind);toast('Đã chốt biên bản');
+  },
+  sigUnlock:function(kind){
+    if(!confirm('Mở chốt sẽ xoá toàn bộ chữ ký của biên bản này. Tiếp tục?'))return;
+    var S=sigStore(kind);delete S.lock;S.sig={};sigPersist(kind);sigRerender(kind);
+  },
+  sigSend:function(kind,key){
+    var t=sigReceipt(kind,key);
+    if(navigator.share)navigator.share({title:'Xác nhận ký điện tử',text:t}).catch(function(){});
+    else location.href='mailto:?subject='+encodeURIComponent('Xác nhận ký điện tử')+'&body='+encodeURIComponent(t);
   },
   /* ---- Biên bản bàn giao ---- */
   hvNew:function(){HV=newHV(true);route={view:'handoverEdit'};render();},
@@ -2689,6 +2813,7 @@ document.addEventListener('visibilitychange',function(){if(document.visibilitySt
   if(!db.handovers)db.handovers=[];
   if(!db.explains)db.explains=[];
   if(!db.counters)db.counters={};
+  if(!db.signers)db.signers=[];
   render();
   /* Watermark */
   try{
