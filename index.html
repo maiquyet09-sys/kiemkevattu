@@ -2,7 +2,7 @@
 <html lang="vi">
 <head>
 <meta charset="UTF-8">
-<meta name="app-version" content="2026100903">
+<meta name="app-version" content="2026100806">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
 <meta name="theme-color" content="#0f766e">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -34,6 +34,10 @@ body{background:var(--bg);color:var(--ink);font-family:'Inter',system-ui,-apple-
 #gbrand{display:flex;align-items:center;gap:8px;font-weight:800;font-size:17px;color:var(--ink);white-space:nowrap}
 #gbrand .dot{width:30px;height:30px;border-radius:9px;background:var(--teal);color:#fff;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:800;letter-spacing:-.02em}
 #gbrand .sep{color:var(--mut2);font-weight:400;margin:0 2px}
+#guser{margin-left:auto;display:flex;align-items:center;gap:8px;cursor:pointer;font-size:13px;font-weight:600;color:var(--mut)}
+#guser .av{width:32px;height:32px;border-radius:50%;background:var(--teal-bg);color:var(--teal);display:flex;align-items:center;justify-content:center;font-weight:800;font-size:12px}
+#guser .nm{display:none}
+@media(min-width:900px){#guser .nm{display:block}}
 #gshell{display:flex;min-height:calc(100vh - var(--header-h))}
 #gsidebar{display:none;flex:0 0 var(--sidebar-w);background:#fff;border-right:1px solid var(--line);padding:14px 10px}
 .gnav-item{display:flex;align-items:center;gap:10px;padding:11px 12px;border-radius:12px;color:var(--mut);font-weight:600;font-size:14px;cursor:pointer;margin-bottom:2px;text-decoration:none}
@@ -207,6 +211,7 @@ select.chip{appearance:auto;color:var(--ink)}
 <header id="gheader">
   <button id="ghmenu" onclick="A.drawerToggle()"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M3 12h18M3 18h18"/></svg></button>
   <div id="gbrand"><span class="dot">MD</span> MedDental<span class="sep">—</span>Vật tư</div>
+  <div id="guser" onclick="A.go('settings')"></div>
 </header>
 <div id="gshell">
   <nav id="gsidebar"></nav>
@@ -623,13 +628,11 @@ function buildBienBan(p){
         var nm=ws.getCell(sr+2,z[0]);
         nm.value=s.ten;nm.font={name:"Times New Roman",size:11,bold:true};nm.alignment={horizontal:"center"};
         var tm=ws.getCell(sr+3,z[0]);
-        tm.value=sigLine(s);tm.font={name:"Arial",size:8,italic:true};
+        tm.value="Ký điện tử "+s.time+" ("+s.dev+")";tm.font={name:"Arial",size:8,italic:true};
         tm.alignment={horizontal:"center",vertical:"top",wrapText:true};
-        ws.getRow(sr+3).height=40;
+        ws.getRow(sr+3).height=24;
       }catch(sigErr){}
     });
-    var ll=lockLine(p);
-    if(ll){ws.mergeCells(sr+4,3,sr+4,11);var lc=ws.getCell(sr+4,3);lc.value=ll;lc.font={name:"Arial",size:8,italic:true};lc.alignment={horizontal:"center",wrapText:true};ws.getRow(sr+4).height=24;}
   });
   var hsd=hsdRowsOf(p);
   if(hsd.length){
@@ -679,7 +682,7 @@ function exportExcelBasic(p,fname){
 }
 
 /* ================= State ================= */
-var db={periods:[],hsd:{},handovers:[],explains:[],counters:{}};
+var db={periods:[],hsd:{},handovers:[],explains:[],counters:{},profile:{ten:'',chucVu:'',chiNhanh:'',ma:'',maManual:false}};
 var route={view:"home"};
 var P=null;   // trạng thái màn hình kiểm kê
 var BC=null;  // trạng thái màn hình tạo báo cáo
@@ -889,7 +892,7 @@ function generateBaoCao(){
       +'<p style="margin-left:36pt;margin-top:4pt;margin-bottom:4pt">+ Phòng Kế toán có trách nhiệm nhập bổ sung số lượng hàng thừa vào kho để theo dõi và quản lý.</p>'
       +'<p style="margin-left:36pt;margin-top:4pt;margin-bottom:4pt">+ Trường hợp kỳ kiểm kê tháng kế tiếp phát hiện chênh lệch âm, số lượng hàng âm sẽ được cấn trừ vào lượng hàng thừa đã ghi nhận trước đó.</p>'
       +'<p><i>Trân trọng báo cáo!</i></p>'
-      +docSignHtml4(['PHÒNG KẾ TOÁN HO','PHÒNG HÀNH CHÍNH HO'],['',''],[(BCMETA.sig||{}).keToan,(BCMETA.sig||{}).hanhChinh],BCMETA)
+      +docSignHtml4(['PHÒNG KẾ TOÁN HO','PHÒNG HÀNH CHÍNH HO'],['',''],[(BCMETA.sig||{}).keToan,(BCMETA.sig||{}).hanhChinh])
       +'</body></html>';
 
     exportDocHtml(html,'BaoCao_KiemKe_T'+BCMETA.thang+'_'+BCMETA.nam+'.doc');
@@ -979,7 +982,7 @@ function docSignHtml(cols){
   h+='</tr></table>';
   return h;
 }
-function docSignHtml4(cols,subs,sigs,holder){
+function docSignHtml4(cols,subs,sigs){
   /* Một hàng duy nhất để khối ký không bị tách đôi giữa 2 trang */
   var h='<table class="sign" width="100%" style="page-break-inside:avoid"><tr style="page-break-inside:avoid">';
   cols.forEach(function(x,k){
@@ -990,15 +993,13 @@ function docSignHtml4(cols,subs,sigs,holder){
       var hh=56,ww=Math.round(hh*(s.w||300)/(s.h||120));
       if(ww>170){ww=170;hh=Math.round(ww*(s.h||120)/(s.w||300));}
       h+='<img src="'+s.img+'" width="'+ww+'" height="'+hh+'"><br><b>'+esc(s.ten)+'</b>'
-        +'<br><span style="font-size:9pt;font-weight:400;font-style:italic">'+esc(sigLine(s))+'</span>';
+        +'<br><span style="font-size:9pt;font-weight:400;font-style:italic">Ký điện tử '+esc(s.time)+' ('+esc(s.dev)+')</span>';
     }else{
       h+='&nbsp;<br>&nbsp;<br>&nbsp;<br>&nbsp;';
     }
     h+='</td>';
   });
-  h+='</tr></table>';
-  var ll=lockLine(holder);
-  return h+(ll?'<p style="text-align:center;font-size:9pt;font-style:italic">'+esc(ll)+'</p>':'');
+  return h+'</tr></table>';
 }
 function docHeaderHtmlBP(boPhan,soVanBan,loaiVanBan){
   return '<table class="hdrtbl"><tr>'
@@ -1088,13 +1089,10 @@ function sigBoxHtml(kind,key){
   if(s){
     h+='<div style="height:84px;display:flex;align-items:center;justify-content:center;background:var(--card2);border-radius:10px"><img src="'+s.img+'" style="max-width:100%;max-height:76px"></div>';
     h+='<div style="font-size:13px;font-weight:600;margin-top:6px">'+esc(s.ten)+'</div><div style="font-size:11px;color:var(--mut)">'+esc(s.time)+'</div>';
-    if(s.wa)h+='<div style="font-size:11px;color:var(--green);font-weight:600;margin-top:2px">🔒 Đã xác thực thiết bị</div>';
-    else h+='<div style="font-size:11px;color:var(--amber);margin-top:2px">Chưa xác thực thiết bị</div>';
-    if(s.dh&&s.dh!==h53(sigDoc(kind)))h+='<div style="font-size:11px;color:var(--red);font-weight:600;margin-top:2px">⚠ Nội dung đã sửa sau khi ký — nên ký lại</div>';
-    h+='<div style="display:flex;gap:14px;margin-top:6px"><button class="addbat" style="color:var(--teal)" onclick="A.sigOpen(\''+kind+'\',\''+key+'\')">Ký lại</button><button class="addbat" style="color:var(--red)" onclick="A.sigClear(\''+kind+'\',\''+key+'\')">Xoá</button><button class="addbat" style="color:var(--green)" onclick="A.sigSend(\''+kind+'\',\''+key+'\')">Gửi bản xác nhận</button></div>';
+    h+='<div style="display:flex;gap:14px;margin-top:6px"><button class="addbat" style="color:var(--teal)" onclick="A.sigOpen(\''+kind+'\',\''+key+'\')">Ký lại</button><button class="addbat" style="color:var(--red)" onclick="A.sigClear(\''+kind+'\',\''+key+'\')">Xoá</button></div>';
   }else{
     h+='<div style="height:84px;display:flex;align-items:center;justify-content:center;border:1.5px dashed var(--line);border-radius:10px;color:var(--mut2);font-size:12px">Chưa ký</div>';
-    h+='<button class="btn btn-outline" style="margin-top:8px;padding:10px;font-size:13px" onclick="A.sigOpen(\''+kind+'\',\''+key+'\')">'+icon('edit',15)+'Ký tại đây</button>'+'<button class="addbat" style="color:var(--teal);margin-top:6px" onclick="A.sigPack(\''+kind+'\',\''+key+'\')">Gửi để người khác ký</button>';
+    h+='<button class="btn btn-outline" style="margin-top:8px;padding:10px;font-size:13px" onclick="A.sigOpen(\''+kind+'\',\''+key+'\')">'+icon('edit',15)+'Ký tại đây</button>';
   }
   return h+'</div>';
 }
@@ -1104,7 +1102,7 @@ function sigSectionHtml(kind){
   h+='<div style="font-size:12px;color:var(--mut);margin-bottom:8px">Ký bằng ngón tay ngay trên màn hình, mực xanh. Chữ ký được chèn vào '+where+', kèm họ tên, thời gian và thiết bị. Không ký thì ô ký vẫn để trống cho ký tay. Nếu sửa nội dung sau khi ký, nên ký lại.</div>';
   h+='<div style="display:flex;gap:10px;flex-wrap:wrap">';
   SIG_KEYS[kind].forEach(function(k){h+=sigBoxHtml(kind,k);});
-  return h+'<div style="flex:1 1 100%"><button class="btn btn-outline" style="padding:10px;font-size:13px" onclick="A.sigImportRes(\''+kind+'\')">Nhập chữ ký đã nhận (file)</button></div>'+sigLockHtml(kind)+'</div>';
+  return h+'</div>';
 }
 function sigPeriodToggle(p){
   p.sig=p.sig||{};
@@ -1119,7 +1117,7 @@ function sigPadOpen(kind,key,title,defName){
   o.id='sigovl';
   o.innerHTML='<div class="sigcard">'
     +'<div style="font-weight:800;font-size:16px;margin-bottom:10px">Ký xác nhận: '+esc(title)+'</div>'
-    +'<label class="lbl">Họ tên người ký</label><select class="inp" id="signame" onchange="signerChange(this)" style="margin-bottom:10px">'+signerOpts(defName||'')+'</select>'
+    +'<label class="lbl">Họ tên người ký</label><input class="inp" id="signame" value="'+esc(defName||'')+'" style="margin-bottom:10px">'
     +'<canvas id="sigcv"></canvas>'
     +'<div style="font-size:12px;color:var(--mut);margin:6px 0 12px">Dùng ngón tay vẽ chữ ký vào khung. Chữ ký sẽ được lưu kèm họ tên, thời gian và thiết bị.</div>'
     +'<div style="display:flex;gap:8px"><button class="btn btn-outline" style="flex:1;padding:12px" onclick="sigPadClear()">Vẽ lại</button>'
@@ -1167,90 +1165,19 @@ function sigExport(){
   oc.getContext('2d').drawImage(cv,x*d,y*d,w*d,h*d,0,0,ow,oh);
   return {url:oc.toDataURL('image/png'),w:ow,h:oh};
 }
-/* ===== WebAuthn: xác thực thiết bị khi ký (Face ID / vân tay / mã khoá, không cần CA) ===== */
-var WA_K='kk_wa_v1';
-function b64u(buf){var b=new Uint8Array(buf),t='';for(var i=0;i<b.length;i++)t+=String.fromCharCode(b[i]);return btoa(t).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');}
-function unb64u(t){t=t.replace(/-/g,'+').replace(/_/g,'/');while(t.length%4)t+='=';var r=atob(t),a=new Uint8Array(r.length);for(var i=0;i<r.length;i++)a[i]=r.charCodeAt(i);return a;}
-function h53(t){var a=3735928559,b=1103547991,c;for(var i=0;i<t.length;i++){c=t.charCodeAt(i);a=Math.imul(a^c,2654435761);b=Math.imul(b^c,1597334677);}a=Math.imul(a^(a>>>16),2246822507)^Math.imul(b^(b>>>13),3266489909);b=Math.imul(b^(b>>>16),2246822507)^Math.imul(a^(a>>>13),3266489909);return (4294967296*(2097151&b)+(a>>>0)).toString(36);}
-function waOk(){return !!(window.PublicKeyCredential&&navigator.credentials&&window.isSecureContext&&window.crypto&&crypto.subtle);}
-function waCreds(){try{return JSON.parse(localStorage.getItem(WA_K)||'[]');}catch(e){return [];}}
-function sigDocOf(o){return JSON.stringify(o,function(k,v){return (k==='sig'||k==='photo'||k==='lock')?undefined:v;});}
-function sigDoc(kind){return sigDocOf(sigStore(kind));}
-function lockLine(o){var l=o&&o.lock;if(!l)return '';return l.dh===h53(sigDocOf(o))?'Biên bản đã chốt lúc '+l.time+' – mã băm nội dung (SHA-256): '+l.h.slice(0,16):'⚠ Nội dung đã được sửa sau khi chốt lúc '+l.time+' – các chữ ký có thể không còn hiệu lực';}
-function signerOpts(sel){var L=(db.signers||[]).slice();if(sel&&L.indexOf(sel)<0)L.push(sel);var h='<option value="">— Chọn người ký —</option>';L.forEach(function(n){h+='<option value="'+esc(n)+'"'+(n===sel?' selected':'')+'>'+esc(n)+'</option>';});return h+'<option value="__new__">➕ Đăng ký người ký mới…</option>';}
-function signerChange(el){if(el.value!=='__new__')return;el.value='';var n=(prompt('Họ tên người ký mới (đúng như trên giấy tờ):')||'').trim();if(!n)return;if(!confirm('Người quản lý xác nhận đã kiểm tra danh tính "'+n+'" và người này đang tự cầm máy của mình để đăng ký?'))return;db.signers=db.signers||[];if(db.signers.indexOf(n)<0)db.signers.push(n);store.save();el.innerHTML=signerOpts(n);el.value=n;}
-function sigReceipt(kind,key){var S=sigStore(kind),s=S.sig[key];var nm={pe:'Biên bản kiểm kê',hv:'Biên bản bàn giao',ex:'Giải trình chênh lệch',bc:'Báo cáo'}[kind]+(kind==='pe'&&S.name?' – '+S.name:'');return 'XÁC NHẬN ĐÃ KÝ ĐIỆN TỬ\n'+nm+'\nVai trò: '+SIG_TITLES[kind+'.'+key]+'\nNgười ký: '+s.ten+'\nThời gian: '+s.time+'\nThiết bị: '+s.dev+'\n'+(s.wa?'Xác thực: sinh trắc/mã khoá thiết bị (mã '+s.wa.ch.slice(0,8)+')':'Xác thực thiết bị: không')+(S.lock?'\nMã băm nội dung đã chốt (SHA-256): '+S.lock.h:'\nMã nội dung: '+s.dh)+'\nVui lòng lưu lại thư/tin nhắn này.';}
-function sigLockHtml(kind){
-  var S=sigStore(kind),K=SIG_KEYS[kind],n=K.filter(function(k){return (S.sig||{})[k];}).length,all=n===K.length;
-  var h='<div style="flex:1 1 100%;border:1px solid var(--line);border-radius:14px;padding:10px">';
-  if(S.lock)h+='<div style="font-size:13px;font-weight:700">🔒 '+esc(lockLine(S))+'</div><button class="addbat" style="color:var(--red);margin-top:6px" onclick="A.sigUnlock(\''+kind+'\')">Mở chốt (xoá toàn bộ chữ ký)</button>';
-  else h+='<button class="btn btn-outline" style="padding:10px;font-size:13px"'+(all?'':' disabled')+' onclick="A.sigLock(\''+kind+'\')">Chốt biên bản'+(all?'':' (cần đủ '+K.length+' chữ ký)')+'</button>';
-  return h+'</div>';
-}
-function sigLine(s){return (s.wa?'Đã xác thực bằng thiết bị (sinh trắc/mã khoá)':'Ký điện tử')+' – '+s.ten+' – '+s.time+' – '+s.dev+(s.wa?' – mã '+s.wa.ch.slice(0,8):'');}
-function derToRaw(d){d=new Uint8Array(d);var o=2,l=d[o+1],r=d.slice(o+2,o+2+l);o=o+2+l;var l2=d[o+1],q=d.slice(o+2,o+2+l2);function f(x){while(x.length>32&&x[0]===0)x=x.slice(1);var z=new Uint8Array(32);z.set(x,32-x.length);return z;}var out=new Uint8Array(64);out.set(f(r),0);out.set(f(q),32);return out;}
-async function waEnroll(ten){
-  var c=await navigator.credentials.create({publicKey:{rp:{name:'Kiểm kê kho',id:location.hostname},user:{id:crypto.getRandomValues(new Uint8Array(16)),name:ten,displayName:ten},challenge:crypto.getRandomValues(new Uint8Array(32)),pubKeyCredParams:[{type:'public-key',alg:-7},{type:'public-key',alg:-257}],authenticatorSelection:{authenticatorAttachment:'platform',userVerification:'required',residentKey:'discouraged'},attestation:'none',timeout:60000}});
-  var r=c.response,pk=r.getPublicKey?r.getPublicKey():null;
-  if(!pk)throw new Error('Trình duyệt không trả khoá công khai');
-  var rec={id:b64u(c.rawId),pub:b64u(pk),alg:r.getPublicKeyAlgorithm?r.getPublicKeyAlgorithm():-7,ten:ten,t:Date.now()};
-  var a=waCreds();a.push(rec);try{localStorage.setItem(WA_K,JSON.stringify(a));}catch(e){}
-  return rec;
-}
-async function waSign(ten,doc){
-  var cr=waCreds(),rec=null;
-  for(var i=0;i<cr.length;i++)if(cr[i].ten.toLowerCase()===ten.toLowerCase()){rec=cr[i];break;}
-  if(!rec)rec=await waEnroll(ten);
-  var ch=new Uint8Array(await crypto.subtle.digest('SHA-256',new TextEncoder().encode(doc+'|'+ten)));
-  var a=await navigator.credentials.get({publicKey:{challenge:ch,rpId:location.hostname,allowCredentials:[{type:'public-key',id:unb64u(rec.id),transports:['internal']}],userVerification:'required',timeout:60000}});
-  var r=a.response,ad=new Uint8Array(r.authenticatorData);
-  if(!(ad[32]&4))throw new Error('Thiết bị chưa xác thực người dùng');
-  var ec=rec.alg===-7;
-  var key=await crypto.subtle.importKey('spki',unb64u(rec.pub),ec?{name:'ECDSA',namedCurve:'P-256'}:{name:'RSASSA-PKCS1-v1_5',hash:'SHA-256'},false,['verify']);
-  var cd=new Uint8Array(await crypto.subtle.digest('SHA-256',r.clientDataJSON));
-  var msg=new Uint8Array(ad.length+32);msg.set(ad,0);msg.set(cd,ad.length);
-  var ok=await crypto.subtle.verify(ec?{name:'ECDSA',hash:'SHA-256'}:{name:'RSASSA-PKCS1-v1_5'},key,ec?derToRaw(r.signature):new Uint8Array(r.signature),msg);
-  if(!ok)throw new Error('Chữ ký thiết bị không hợp lệ');
-  return {cid:rec.id,alg:rec.alg,pub:rec.pub,ad:b64u(ad),cd:b64u(r.clientDataJSON),sg:b64u(r.signature),ch:b64u(ch)};
-}
-function pickJson(cb){var i=document.createElement('input');i.type='file';i.accept='.json,application/json';i.onchange=function(){var f=i.files&&i.files[0];if(!f)return;var r=new FileReader();r.onload=function(){var o;try{o=JSON.parse(r.result);}catch(e){toast('File không hợp lệ');return;}cb(o);};r.readAsText(f);};i.click();}
-function sigReply(pk,sig){shareOrDownload(new Blob([JSON.stringify({v:1,t:'res',kind:pk.kind,key:pk.key,dh:pk.dh,sig:sig})],{type:'application/json'}),'da-ky-'+pk.kind+'-'+pk.key+'.json');toast('Đã ký — gửi file này lại cho người gửi');}
-async function waCheck(w,doc,ten){
-  var enc=new TextEncoder(),ch=new Uint8Array(await crypto.subtle.digest('SHA-256',enc.encode(doc+'|'+ten)));
-  if(b64u(ch)!==w.ch)return 'Chữ ký không gắn với nội dung này';
-  var cd=JSON.parse(new TextDecoder().decode(unb64u(w.cd)));
-  if(cd.type!=='webauthn.get'||cd.challenge!==w.ch)return 'Dữ liệu xác thực không khớp';
-  var ad=unb64u(w.ad),rp=new Uint8Array(await crypto.subtle.digest('SHA-256',enc.encode(location.hostname)));
-  for(var i=0;i<32;i++)if(rp[i]!==ad[i])return 'Chữ ký được tạo ở địa chỉ web khác';
-  if(!(ad[32]&4))return 'Thiết bị chưa xác thực người dùng';
-  var ec=w.alg===-7,sg=unb64u(w.sg);
-  var key=await crypto.subtle.importKey('spki',unb64u(w.pub),ec?{name:'ECDSA',namedCurve:'P-256'}:{name:'RSASSA-PKCS1-v1_5',hash:'SHA-256'},false,['verify']);
-  var h=new Uint8Array(await crypto.subtle.digest('SHA-256',unb64u(w.cd))),m=new Uint8Array(ad.length+32);m.set(ad,0);m.set(h,ad.length);
-  var ok=await crypto.subtle.verify(ec?{name:'ECDSA',hash:'SHA-256'}:{name:'RSASSA-PKCS1-v1_5'},key,ec?derToRaw(sg):sg,m);
-  return ok?'':'Chữ ký thiết bị không hợp lệ';
-}
-async function sigConfirm(){
-  if(!SIGP||SIGP.busy)return;
+function sigConfirm(){
+  if(!SIGP)return;
   var ten=(document.getElementById('signame').value||'').trim();
   if(!SIGP.ink){toast('Chưa có chữ ký, hãy vẽ vào khung');return;}
-  if(!ten||ten==='__new__'){toast('Chọn người ký trong danh sách');return;}
-  var ex=sigExport(),kind=SIGP.kind,key=SIGP.key,pk=SIGP.pack,doc=pk?pk.doc:sigDoc(kind);
-  var sig={img:ex.url,w:ex.w,h:ex.h,ten:ten,time:nowLabel(),dev:deviceLabel(),dh:h53(doc)};
-  if(waOk()){
-    SIGP.busy=true;toast('Xác thực bằng Face ID / vân tay / mã khoá…');
-    try{sig.wa=await waSign(ten,doc);}
-    catch(e){
-      SIGP.busy=false;
-      if(e&&e.name==='NotAllowedError'){toast('Đã huỷ xác thực — chưa lưu chữ ký');return;}
-      if(!confirm('Không xác thực được thiết bị ('+((e&&(e.message||e.name))||'lỗi')+'). Vẫn lưu chữ ký nhưng KHÔNG kèm xác thực thiết bị?'))return;
-    }
-  }
-  if(pk){sigPadClose();sigReply(pk,sig);return;}
+  if(!ten){toast('Nhập họ tên người ký');return;}
+  var ex=sigExport();
+  var sig={img:ex.url,w:ex.w,h:ex.h,ten:ten,time:nowLabel(),dev:deviceLabel()};
+  var kind=SIGP.kind,key=SIGP.key;
   sigPadClose();
   var S=sigStore(kind);S.sig=S.sig||{};S.sig[key]=sig;
   sigPersist(kind);
   sigRerender(kind);
-  toast(sig.wa?'Đã ký và xác thực thiết bị':'Đã ký (chưa xác thực thiết bị)');
+  toast('Đã ký xác nhận');
 }
 
 /* ================= Picker: lấy vật tư/tài sản từ kỳ kiểm kê ================= */
@@ -1301,12 +1228,25 @@ function chipGroupUI(options,selArr,toggleFn){
 function toggleArr(arr,val){var i=arr.indexOf(val);if(i===-1)arr.push(val);else arr.splice(i,1);}
 function nextSoVanBan(prefix){
   var year=new Date().getFullYear();
-  var key=prefix+'_'+year;
+  var ma=(db.profile&&db.profile.ma)||'';
+  var key=prefix+'_'+(ma?ma+'_':'')+year;
   if(!db.counters)db.counters={};
   var n=(db.counters[key]||0)+1;
   db.counters[key]=n;
   store.save();
-  return String(n).padStart(2,'0')+'/'+prefix+'/'+year;
+  return String(n).padStart(2,'0')+'/'+prefix+'/'+(ma?ma+'/':'')+year;
+}
+function profileFillHV(o){
+  var pr=db.profile||{};
+  if(pr.chiNhanh){o.boPhan=pr.chiNhanh;o.benGiao.boPhan=pr.chiNhanh;}
+  if(pr.ten)o.benGiao.ten=pr.ten;
+  if(pr.chucVu)o.benGiao.chucVu=pr.chucVu;
+}
+function profileFillEX(o){
+  var pr=db.profile||{};
+  if(pr.chiNhanh){o.boPhan=pr.chiNhanh;o.nguoiGiaiTrinh.boPhan=pr.chiNhanh;o.diaDiem=pr.chiNhanh;}
+  if(pr.ten)o.nguoiGiaiTrinh.ten=pr.ten;
+  if(pr.chucVu)o.nguoiGiaiTrinh.chucVu=pr.chucVu;
 }
 function dot(val,ph){return val&&String(val).trim()?esc(val):(ph||'..................');}
 
@@ -1314,7 +1254,7 @@ function dot(val,ph){return val&&String(val).trim()?esc(val):(ph||'.............
 var HV_LOAI=['Công cụ dụng cụ','Tài sản cố định','Vật tư tiêu hao','Thiết bị – máy móc','Hồ sơ – chứng từ'];
 var HV_LYDO=['Cấp phát mới','Luân chuyển nội bộ','Thu hồi / nhập lại kho','Nghỉ việc / điều chuyển','Cho mượn / hoàn trả','Nhận / trả NCC'];
 var HV_HOSO=['Hóa đơn / phiếu nhập kho','Phiếu xuất / điều chuyển','Sổ bảo hành, HDSD','Phụ kiện đi kèm','Hình ảnh hiện trạng'];
-function newHV(autoNumber){return {id:Date.now().toString(36),sig:{},soBB:autoNumber?nextSoVanBan('BBBG'):'',boPhan:'',
+function newHV(autoNumber){var o={id:Date.now().toString(36),sig:{},soBB:autoNumber?nextSoVanBan('BBBG'):'',boPhan:'',
   loai:[],loaiKhac:'',lyDo:[],lyDoKhac:'',
   thoiGian:'',diaDiem:'',canCu:'',
   benGiao:{ten:'',chucVu:'',boPhan:'',dienThoai:''},
@@ -1322,7 +1262,7 @@ function newHV(autoNumber){return {id:Date.now().toString(36),sig:{},soBB:autoNu
   items:[],
   hoSo:[],hoSoKhac:'',chenhLech:'',
   soNgay:'05',soBan:'03',
-  createdAt:Date.now()};}
+  createdAt:Date.now()};if(autoNumber)profileFillHV(o);return o;}
 
 function renderHandoverList(){
   var h='<div class="topbar"><div class="trow wrap"><button class="back" onclick="A.go(\'home\')">‹</button><div class="ttl">Biên bản bàn giao</div></div><div style="height:10px"></div></div>';
@@ -1392,7 +1332,7 @@ function generateHandoverDoc(v){
     +'<p>2. Bên nhận đã kiểm đếm, đối chiếu thực tế, nhận đúng và đủ; kể từ thời điểm ký, chịu trách nhiệm bảo quản, sử dụng đúng mục đích và hoàn trả khi có yêu cầu.</p>'
     +'<p>3. Hư hỏng, mất mát phát sinh sau thời điểm bàn giao do Bên nhận chịu trách nhiệm theo quy định của Công ty. Sai lệch phát hiện trong vòng '+dot(v.soNgay,'......')+' ngày kể từ ngày bàn giao: hai bên lập biên bản bổ sung.</p>'
     +'<p>4. Biên bản lập thành '+dot(v.soBan,'......')+' bản, mỗi bên giữ 01 bản, 01 bản chuyển Hành chính – Kế toán để cập nhật sổ sách, thẻ kho.</p>'
-    +docSignHtml4(['BÊN BÀN GIAO','BÊN NHẬN BÀN GIAO'],['(Ký, ghi rõ họ tên)','(Ký, ghi rõ họ tên)'],[(v.sig||{}).benGiao,(v.sig||{}).benNhan],v);
+    +docSignHtml4(['BÊN BÀN GIAO','BÊN NHẬN BÀN GIAO'],['(Ký, ghi rõ họ tên)','(Ký, ghi rõ họ tên)'],[(v.sig||{}).benGiao,(v.sig||{}).benNhan]);
   return docWrap('Biên bản bàn giao',body);
 }
 
@@ -1471,7 +1411,7 @@ var EX_LOAI=['Công cụ dụng cụ','Tài sản cố định','Vật tư tiêu
 var EX_PHATHIEN=['Kiểm kê định kỳ','Kiểm kê đột xuất','Đối soát tồn / doanh thu','Báo cáo bộ phận','Đối soát công nợ NCC'];
 var EX_NGUYENNHAN=['Hao hụt định mức','Sai sót nhập – xuất','Hư hỏng / hết hạn','Mất mát / thất lạc','Dùng sai mục đích','Bàn giao thiếu chứng từ','Vượt định mức tiêu hao'];
 var EX_BANGCHUNG=['Biên bản kiểm kê','Phiếu nhập / xuất kho','Thẻ kho / sổ kho','Hình ảnh / camera','Báo cáo tiêu hao / DT'];
-function newEX(autoNumber){return {id:Date.now().toString(36),sig:{},soPhieu:autoNumber?nextSoVanBan('GT'):'',boPhan:'',
+function newEX(autoNumber){var o={id:Date.now().toString(36),sig:{},soPhieu:autoNumber?nextSoVanBan('GT'):'',boPhan:'',
   nguoiGiaiTrinh:{ten:'',chucVu:'',boPhan:'',thoiGian:''},
   loai:[],loaiKhac:'',phatHien:[],phatHienKhac:'',
   ngayPhatHien:'',thoiDiemXayRa:'',diaDiem:'',canCu:'',
@@ -1480,7 +1420,7 @@ function newEX(autoNumber){return {id:Date.now().toString(36),sig:{},soPhieu:aut
   bangChung:[],bangChungKhac:'',
   bienPhap:[],
   dxGiamTon:false,dxHaoHut:false,dxTruyTim:false,dxTruyTimHan:'',dxBoiHoan:false,dxBoiHoanTien:'',dxBoiHoanNguoi:'',dxKhac:false,dxKhacText:'',
-  createdAt:Date.now()};}
+  createdAt:Date.now()};if(autoNumber)profileFillEX(o);return o;}
 
 function renderExplainList(){
   var h='<div class="topbar"><div class="trow wrap"><button class="back" onclick="A.go(\'home\')">‹</button><div class="ttl">Bản giải trình thất thoát</div></div><div style="height:10px"></div></div>';
@@ -1576,7 +1516,7 @@ function generateExplainDoc(v){
     +dx
     +'<h2>VII. CAM KẾT</h2>'
     +'<p>Tôi cam kết nội dung giải trình trên là đúng sự thật, đầy đủ và chịu trách nhiệm trước Công ty về thông tin đã cung cấp. Tôi sẽ phối hợp cung cấp thêm chứng từ, bằng chứng khi được yêu cầu.</p>'
-    +docSignHtml4(['NGƯỜI GIẢI TRÌNH','XÁC NHẬN CỦA LÃNH ĐẠO ĐƠN VỊ'],['(Ký, ghi rõ họ tên)','(Ký, ghi rõ họ tên)'],[(v.sig||{}).nguoiGiaiTrinh,(v.sig||{}).lanhDao],v);
+    +docSignHtml4(['NGƯỜI GIẢI TRÌNH','XÁC NHẬN CỦA LÃNH ĐẠO ĐƠN VỊ'],['(Ký, ghi rõ họ tên)','(Ký, ghi rõ họ tên)'],[(v.sig||{}).nguoiGiaiTrinh,(v.sig||{}).lanhDao]);
   return docWrap('Bản giải trình thất thoát',body);
 }
 
@@ -1872,6 +1812,23 @@ function exportHsdAlert(filterBranch){
 }
 
 /* ================= Gửi email kết quả kiểm kê ================= */
+/* Cấu hình câu chữ trong email xác nhận chữ ký. QUY_CHE_TEXT chỉ điền khi công ty đã thực sự ban hành quy chế,
+   ví dụ: "Các bên đã thống nhất dùng phương thức này theo Quy chế kiểm kê số .../QĐ-...". Để trống thì email không nêu. */
+var QUY_CHE_TEXT='';
+var XAC_NHAN_HAN_NGAY=3;
+function sigConfirmBlock(p,ky){
+  var sg=p.sig||{},done=[],todo=[];
+  SIG_KEYS.pe.forEach(function(k){
+    var s=sg[k],t=SIG_TITLES['pe.'+k];
+    if(s&&s.img)done.push('- '+t+': '+s.ten+', ký lúc '+s.time+' ('+s.dev+')');else todo.push(t);
+  });
+  if(!done.length)return '';
+  var b=['✍ XÁC NHẬN CHỮ KÝ ĐIỆN TỬ','Biên bản kiểm kê đính kèm đã được ký xác nhận bằng chữ ký điện tử ngay trên ứng dụng Kiểm kê kho (thiết bị của người lập biên bản) bởi:'].concat(done);
+  if(todo.length)b.push('Chưa ký điện tử: '+todo.join(', ')+'.');
+  if(QUY_CHE_TEXT)b.push(QUY_CHE_TEXT);
+  b.push('Đề nghị Quý anh/chị trả lời email này bằng câu: "Tôi xác nhận đã ký và đồng ý nội dung biên bản kiểm kê kỳ '+ky+'" trong vòng '+XAC_NHAN_HAN_NGAY+' ngày. Nếu không ký hoặc có ý kiến khác, vui lòng nêu rõ trong phản hồi.');
+  return b.join('\n');
+}
 function exportKiemKeEmail(p){
   var now=new Date();
   var dateStr=String(now.getDate()).padStart(2,"0")+"/"+String(now.getMonth()+1).padStart(2,"0")+"/"+now.getFullYear();
@@ -1913,7 +1870,9 @@ function exportKiemKeEmail(p){
   }else{
     lines.push("✅ Kết quả kiểm kê: Toàn bộ vật tư đã kiểm đều KHỚP sổ sách — không có chênh lệch.");
   }
-  lines.push("(Email tự động, vui lòng không phản hồi trực tiếp)\nMAI VĂN QUYẾT - CHUYÊN VIÊN HÀNH CHÍNH\nCÔNG TY CỔ PHẦN NỤ CƯỜI MỚI VIỆT NAM");
+  var sigBlock=sigConfirmBlock(p,ky);
+  if(sigBlock)lines.push(sigBlock);
+  lines.push((sigBlock?"Trân trọng,":"(Email tự động, vui lòng không phản hồi trực tiếp)")+"\nMAI VĂN QUYẾT - CHUYÊN VIÊN HÀNH CHÍNH\nCÔNG TY CỔ PHẦN NỤ CƯỜI MỚI VIỆT NAM");
   var subject="[MedDental] Kết quả kiểm kê kho – "+p.name+" – "+dateStr;
   var body=lines.join("\n");
   var fname=("KiemKe_"+p.name).replace(/[^\w-]+/g,"_")+".xlsx";
@@ -1950,6 +1909,7 @@ function renderHome(){
   if(!store.ok){
     h+='<div class="wrap mt12"><div class="note-warn">Trình duyệt đang chặn bộ nhớ lưu trữ — dữ liệu chỉ tồn tại trong phiên này. Mở file bằng Chrome/Safari hoặc đưa lên hosting để lưu lâu dài. Kiểm xong nhớ Xuất Excel ngay.</div></div>';
   }
+  h+=homeNoticesHtml();
   h+='<div class="wrap mt20"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px"><span class="sec" style="margin:0">Cảnh báo hạn sử dụng</span><div style="display:flex;gap:14px;align-items:center"><button class="addbat" style="color:var(--teal);display:flex;align-items:center;gap:5px" onclick="showHsdEmailPicker()">'+icon('mail',15)+'Email</button><button class="addbat" style="display:flex;align-items:center;gap:3px" onclick="A.go(\'hsd\')">Xem chi tiết'+icon('chev',15)+'</button></div></div><div class="hsdgrid">';
   BUCKETS.forEach(function(b){
     var n=entries.filter(function(e){return b.test(e.days);}).length;
@@ -1973,7 +1933,7 @@ function renderHome(){
     h+='<div class="card per" onclick="A.openPeriod(\''+p.id+'\')">'+
       '<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px">'+
       '<div style="min-width:0"><div style="font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+esc(p.name)+'</div>'+
-      '<div style="font-size:12px;color:var(--mut);margin-top:2px">Tạo '+new Date(p.createdAt).toLocaleDateString("vi-VN")+' · '+total+' mã VT</div></div>'+
+      '<div style="font-size:12px;color:var(--mut);margin-top:2px">Tạo '+new Date(p.createdAt).toLocaleDateString("vi-VN")+' · '+total+' mã VT'+(p.by?', bởi '+esc(p.by):'')+'</div></div>'+
       '<button class="perx" onclick="event.stopPropagation();A.delPeriod(\''+p.id+'\')" title="Xóa kỳ" style="display:flex">'+icon('x',15)+'</button></div>'+
       '<div class="bar" style="margin-top:12px"><div class="fill" style="width:'+pct+'%"></div></div>'+
       '<div style="display:flex;justify-content:space-between;font-size:12px;margin-top:6px"><span style="color:var(--mut)">Đã kiểm <b class="tnum" style="color:var(--ink)">'+done+'/'+total+'</b></span>'+right+'</div></div>';
@@ -2383,6 +2343,46 @@ function renderHsd(){
 }
 
 /* ================= Router & Actions ================= */
+/* ================= Sao lưu và khôi phục dữ liệu ================= */
+function tsLabel(ts){
+  var d=new Date(ts),p=function(n){return String(n).padStart(2,'0');};
+  return p(d.getHours())+':'+p(d.getMinutes())+' ngày '+p(d.getDate())+'/'+p(d.getMonth()+1)+'/'+d.getFullYear();
+}
+function mergeDb(d){
+  var st={p:0,h:0,e:0};
+  function add(dst,src,k){
+    (src||[]).forEach(function(x){
+      if(x&&x.id&&!dst.some(function(y){return y.id===x.id;})){dst.push(x);st[k]++;}
+    });
+    dst.sort(function(a,b){return (b.createdAt||0)-(a.createdAt||0);});
+  }
+  add(db.periods,d.periods,'p');add(db.handovers,d.handovers,'h');add(db.explains,d.explains,'e');
+  Object.keys(d.hsd||{}).forEach(function(k){if(!db.hsd[k])db.hsd[k]=d.hsd[k];});
+  Object.keys(d.counters||{}).forEach(function(k){db.counters[k]=Math.max(db.counters[k]||0,d.counters[k]||0);});
+  if(d.profile&&d.profile.ten&&!(db.profile&&db.profile.ten))db.profile=d.profile;
+  return st;
+}
+function homeNoticesHtml(){
+  var h='',pr=db.profile||{};
+  if(!pr.ten){
+    h+='<div class="wrap mt12"><div class="card" style="display:flex;gap:12px;align-items:center" onclick="A.go(\'settings\')">'
+      +'<div style="width:38px;height:38px;flex:none;border-radius:11px;background:var(--teal-bg);color:var(--teal);display:flex;align-items:center;justify-content:center">'+icon('users',20)+'</div>'
+      +'<div style="flex:1"><div style="font-weight:700;font-size:14px">Thiết lập hồ sơ của bạn</div><div style="font-size:12px;color:var(--mut)">Điền tên và chi nhánh một lần, app tự điền vào biên bản và ô ký.</div></div>'
+      +'<div style="color:var(--mut2)">'+icon('chev',18)+'</div></div></div>';
+  }
+  var any=db.periods.length||db.handovers.length||db.explains.length;
+  if(any&&Date.now()>=(db.backupSnooze||0)){
+    var last=db.lastBackup||0,days=last?Math.floor((Date.now()-last)/86400000):0;
+    if(!last||days>=7){
+      h+='<div class="wrap mt12"><div class="note-warn" style="display:flex;gap:10px;align-items:flex-start">'+icon('warn',18)
+        +'<div style="flex:1"><div style="font-weight:700">'+(last?'Đã '+days+' ngày chưa sao lưu dữ liệu':'Bạn chưa sao lưu dữ liệu lần nào')+'</div>'
+        +'<div style="font-size:12px;margin:2px 0 8px">Dữ liệu chỉ nằm trên trình duyệt này, xoá cache hoặc đổi máy là mất.</div>'
+        +'<div style="display:flex;gap:16px"><button class="addbat" style="color:var(--teal);font-weight:700" onclick="A.backupNow()">Sao lưu ngay</button><button class="addbat" onclick="A.backupSnooze()">Nhắc sau 3 ngày</button></div></div></div></div>';
+    }
+  }
+  return h;
+}
+
 /* ================= Khung điều hướng: sidebar (máy tính) + drawer (điện thoại) ================= */
 var GNAV=[
   {route:"home",icon:"home",label:"Tổng quan"},
@@ -2398,10 +2398,20 @@ function navHtml(){
     var action=n.route==="stock"?"A.navStock()":"A.navGo('"+n.route+"')";
     h+='<a class="gnav-item'+(on?' on':'')+'" onclick="'+action+'">'+icon(n.icon,18)+n.label+'</a>';
   });
-  h+='<a class="gnav-item" onclick="A.sigImportReq()">'+icon('edit',18)+'Ký biên bản được gửi</a>';
   return h;
 }
+function userInitials(n){
+  var w=String(n||'').trim().split(/\s+/).filter(Boolean);
+  if(!w.length)return '';
+  return (w[0][0]+(w.length>1?w[w.length-1][0]:'')).toUpperCase();
+}
+function renderUser(){
+  var el=document.getElementById('guser');if(!el)return;
+  var pr=db.profile||{};
+  el.innerHTML=pr.ten?'<span class="nm">'+esc(pr.ten)+'</span><span class="av">'+esc(userInitials(pr.ten))+'</span>':'';
+}
 function renderNav(){
+  renderUser();
   var h=navHtml();
   document.getElementById("gsidebar").innerHTML=h;
   document.getElementById("gdrawer").innerHTML=h;
@@ -2425,12 +2435,25 @@ function renderReportHub(){
   document.getElementById("app").innerHTML=h;
 }
 function renderSettings(){
+  var pr=db.profile||{};
   var h='<div class="topbar"><div class="trow wrap"><button class="back" onclick="A.go(\'home\')">‹</button><div class="ttl">Cài đặt</div></div><div style="height:10px"></div></div>';
   h+='<div class="wrap" style="padding-top:16px;padding-bottom:40px">';
-  h+='<div class="card" style="margin-bottom:12px"><div style="font-weight:700;margin-bottom:4px">Về ứng dụng</div><div style="font-size:13px;color:var(--mut)">Kiểm kê kho MedDental · Built by Quyet Mai</div></div>';
-  h+='<div class="card" style="margin-bottom:12px"><div style="font-weight:700;margin-bottom:8px">Dữ liệu</div>'
-    +'<div style="font-size:13px;color:var(--mut);margin-bottom:10px">'+db.periods.length+' kỳ kiểm kê · '+db.handovers.length+' biên bản bàn giao · '+db.explains.length+' phiếu giải trình.</div>'
-    +'<div style="font-size:12px;color:var(--mut2)">Dữ liệu được lưu ngay trên trình duyệt này (localStorage). Xoá cache trình duyệt sẽ mất dữ liệu — nhớ xuất Excel/Word định kỳ để lưu trữ lâu dài.</div></div>';
+  h+='<div class="card" style="margin-bottom:12px"><div style="font-weight:700;margin-bottom:2px">Hồ sơ của bạn</div>'
+    +'<div style="font-size:12px;color:var(--mut);margin-bottom:12px">App tự điền thông tin này vào biên bản bàn giao, phiếu giải trình và ô ký. Chỉ lưu trên máy này.</div>'
+    +'<label class="lbl">Họ tên</label><input class="inp" id="pf_ten" value="'+esc(pr.ten)+'" oninput="A.pfSet(\'ten\',this.value)" style="margin-bottom:10px">'
+    +'<label class="lbl">Chức vụ</label><input class="inp" id="pf_cv" value="'+esc(pr.chucVu)+'" oninput="A.pfSet(\'chucVu\',this.value)" style="margin-bottom:10px">'
+    +'<label class="lbl">Chi nhánh, bộ phận (VD: Kho Cát Linh)</label><input class="inp" id="pf_cn" value="'+esc(pr.chiNhanh)+'" oninput="A.pfSet(\'chiNhanh\',this.value)" style="margin-bottom:10px">'
+    +'<label class="lbl">Mã chi nhánh trong số biên bản (VD: CL)</label><input class="inp" id="pf_ma" value="'+esc(pr.ma)+'" oninput="A.pfSet(\'ma\',this.value)">'
+    +'<div style="font-size:12px;color:var(--mut);margin-top:6px">Số biên bản sẽ có dạng 01/BBBG/'+esc(pr.ma||'CL')+'/'+new Date().getFullYear()+', mỗi chi nhánh đếm riêng nên không bị trùng số.</div></div>';
+  h+='<div class="card" style="margin-bottom:12px"><div style="font-weight:700;margin-bottom:2px">Sao lưu và khôi phục</div>'
+    +'<div style="font-size:12px;color:var(--mut);margin-bottom:12px">'+db.periods.length+' kỳ kiểm kê, '+db.handovers.length+' biên bản bàn giao, '+db.explains.length+' phiếu giải trình. '+(db.lastBackup?'Sao lưu gần nhất lúc '+tsLabel(db.lastBackup)+'.':'Chưa sao lưu lần nào.')+'</div>'
+    +'<button class="btn btn-primary" style="margin-bottom:8px" onclick="A.backupNow()">'+icon('download',17)+'Sao lưu dữ liệu (tải file)</button>'
+    +'<input type="file" id="restorein" accept=".json,application/json" style="display:none" onchange="A.restoreFile(this)">'
+    +'<button class="btn btn-outline" onclick="document.getElementById(\'restorein\').click()">'+icon('upload',17)+'Khôi phục từ file sao lưu</button>'
+    +'<div style="font-size:12px;color:var(--mut);margin-top:8px">Khôi phục chỉ thêm phần còn thiếu vào dữ liệu hiện có, không ghi đè hay xoá gì. Nên sao lưu mỗi tuần và cất file ở Zalo, email hoặc Drive.</div></div>';
+  h+='<div class="card" style="margin-bottom:12px"><div style="font-weight:700;margin-bottom:4px">Giữ dữ liệu an toàn</div>'
+    +'<div style="font-size:13px;color:var(--mut)">Dữ liệu lưu ngay trên trình duyệt của máy này. Safari trên iPhone có thể tự xoá dữ liệu trang web nếu lâu không mở. Hãy thêm app vào Màn hình chính (Chia sẻ, Thêm vào MH chính) và sao lưu định kỳ.</div></div>';
+  h+='<div class="card"><div style="font-weight:700;margin-bottom:4px">Về ứng dụng</div><div style="font-size:13px;color:var(--mut)">Kiểm kê kho MedDental, built by Quyet Mai.</div></div>';
   h+='</div>';
   document.getElementById("app").innerHTML=h;
 }
@@ -2514,7 +2537,7 @@ var A={
   createPeriod:function(){
     var items=UP._built||buildItems(UP.rows,UP.start,UP.map,UP.branchManual,db.hsd);
     if(UP.map.name===undefined||!items.length){toast("Cần chọn cột Tên vật tư và có dữ liệu");return;}
-    var p={id:Date.now().toString(36),name:(UP.pname||"").trim()||"Kỳ kiểm kê",createdAt:Date.now(),items:items};
+    var p={id:Date.now().toString(36),name:(UP.pname||"").trim()||"Kỳ kiểm kê",createdAt:Date.now(),items:items,by:((db.profile&&db.profile.ten)||'')};
     db.periods.unshift(p);
     store.save();
     P={id:p.id,q:"",flt:"all",br:"all",limit:80};
@@ -2537,69 +2560,58 @@ var A={
     });
     input.value='';
   },
+  /* ---- Hồ sơ, sao lưu ---- */
+  pfSet:function(k,v){
+    var pr=db.profile=db.profile||{};
+    if(k==='ma'){
+      v=String(v).replace(/[^A-Za-z0-9]/g,'').toUpperCase();
+      pr.maManual=!!v;
+      var el=document.getElementById('pf_ma');if(el&&el.value!==v)el.value=v;
+    }
+    pr[k]=v;
+    if(k==='chiNhanh'&&!pr.maManual){
+      pr.ma=branchCode(v);
+      var e2=document.getElementById('pf_ma');if(e2)e2.value=pr.ma;
+    }
+    renderUser();saveSoon();
+  },
+  backupNow:function(){
+    try{
+      db.lastBackup=Date.now();db.backupSnooze=0;store.save();
+      var d=new Date(),p=function(n){return String(n).padStart(2,'0');};
+      var fname='SaoLuu_KiemKe_'+d.getFullYear()+p(d.getMonth()+1)+p(d.getDate())+'_'+p(d.getHours())+p(d.getMinutes())+'.json';
+      shareOrDownload(new Blob([JSON.stringify(db)],{type:'application/json'}),fname);
+      if(route.view==='home'||route.view==='settings')render();
+    }catch(err){console.error(err);toast('Không sao lưu được: '+err.message);}
+  },
+  backupSnooze:function(){db.backupSnooze=Date.now()+3*86400000;store.save();render();},
+  restoreFile:function(input){
+    var f=input.files&&input.files[0];if(!f)return;
+    var r=new FileReader();
+    r.onload=function(e){
+      try{
+        var d=JSON.parse(e.target.result);
+        if(!d||!Array.isArray(d.periods))throw new Error('không phải file sao lưu của app');
+        var st=mergeDb(d);store.save();render();
+        toast('Đã khôi phục: thêm '+st.p+' kỳ kiểm kê, '+st.h+' biên bản, '+st.e+' phiếu');
+      }catch(err){toast('File không hợp lệ: '+err.message);}
+    };
+    r.readAsText(f);input.value='';
+  },
   /* ---- Chữ ký điện tử ---- */
   sigOpen:function(kind,key){
-    if((sigStore(kind)||{}).lock){toast('Đã chốt — mở chốt để sửa chữ ký');return;}
     var def='';
     if(kind==='hv'&&HV[key])def=HV[key].ten||'';
     if(kind==='ex'&&key==='nguoiGiaiTrinh')def=EX.nguoiGiaiTrinh.ten||'';
+    if(!def)def=(db.profile&&db.profile.ten)||'';
     sigPadOpen(kind,key,SIG_TITLES[kind+'.'+key]||'',def);
   },
   sigClear:function(kind,key){
-    if((sigStore(kind)||{}).lock){toast('Đã chốt — mở chốt để sửa chữ ký');return;}
     if(!confirm('Xoá chữ ký này?'))return;
     var S=sigStore(kind);S.sig=S.sig||{};delete S.sig[key];
     sigPersist(kind);sigRerender(kind);
   },
   sigPanelToggle:function(){P.sigOpen=!P.sigOpen;renderPeriod();},
-  sigLock:async function(kind){
-    if(!confirm('Chốt biên bản? Sau khi chốt, mọi chỉnh sửa nội dung sẽ bị đánh dấu "sửa sau khi chốt" ngay trên file xuất.'))return;
-    var S=sigStore(kind),doc=sigDoc(kind),h;
-    try{h=Array.prototype.map.call(new Uint8Array(await crypto.subtle.digest('SHA-256',new TextEncoder().encode(doc))),function(b){return ('0'+b.toString(16)).slice(-2);}).join('');}catch(e){h=h53(doc);}
-    S.lock={time:nowLabel(),h:h,dh:h53(doc)};sigPersist(kind);sigRerender(kind);toast('Đã chốt biên bản');
-  },
-  sigUnlock:function(kind){
-    if(!confirm('Mở chốt sẽ xoá toàn bộ chữ ký của biên bản này. Tiếp tục?'))return;
-    var S=sigStore(kind);delete S.lock;S.sig={};sigPersist(kind);sigRerender(kind);
-  },
-  sigPack:function(kind,key){
-    var S=sigStore(kind);if(S.lock){toast('Đã chốt — mở chốt trước');return;}
-    var doc=sigDoc(kind),t=SIG_TITLES[kind+'.'+key];
-    shareOrDownload(new Blob([JSON.stringify({v:1,t:'req',kind:kind,key:key,role:t,title:S.name||t,host:location.hostname,time:nowLabel(),doc:doc,dh:h53(doc)})],{type:'application/json'}),'can-ky-'+kind+'-'+key+'.json');
-  },
-  sigImportReq:function(){
-    A.drawerClose();
-    pickJson(function(p){
-      if(!p||p.t!=='req'||!p.doc||!SIG_KEYS[p.kind]||SIG_KEYS[p.kind].indexOf(p.key)<0){toast('Không phải gói cần ký');return;}
-      if(p.host!==location.hostname){alert('Gói này tạo ở địa chỉ "'+p.host+'". Hãy mở app đúng địa chỉ đó rồi nhập lại.');return;}
-      if(h53(p.doc)!==p.dh){toast('Gói bị lỗi hoặc đã bị sửa');return;}
-      var sum='';try{var o=JSON.parse(p.doc);if(o.items){var c=o.items.filter(function(i){return i.counted;}).length,d=o.items.filter(function(i){return i.counted&&Math.round((i.countQty-i.close)*100)!==0;}).length;sum='\n'+o.items.length+' mã hàng, đã kiểm '+c+', chênh lệch '+d;}}catch(e){}
-      if(!confirm('Ký với vai trò "'+p.role+'"\n'+p.title+sum+'\nGửi lúc '+p.time+'\nTiếp tục?'))return;
-      sigPadOpen(p.kind,p.key,p.role+' – '+p.title,'');SIGP.pack=p;
-    });
-  },
-  sigImportRes:function(kind){
-    var S=sigStore(kind);if(S.lock){toast('Đã chốt — mở chốt trước');return;}
-    pickJson(async function(r){
-      if(!r||r.t!=='res'||r.kind!==kind||!r.sig||SIG_KEYS[kind].indexOf(r.key)<0){toast('Không phải chữ ký cho loại biên bản này');return;}
-      var doc=sigDoc(kind);
-      if(r.dh!==h53(doc)||r.sig.dh!==r.dh){alert('Nội dung biên bản đã thay đổi so với lúc gửi đi, hoặc đây là chữ ký của biên bản khác. Hãy gửi lại để ký.');return;}
-      var w=r.sig.wa,ten=r.sig.ten;
-      if(w){
-        var er;try{er=await waCheck(w,doc,ten);}catch(e){er='Không kiểm tra được ('+e.message+')';}
-        if(er){alert('Từ chối chữ ký: '+er);return;}
-        db.keys=db.keys||{};
-        if(db.keys[ten]&&db.keys[ten]!==w.pub&&!confirm('Khoá thiết bị của "'+ten+'" khác lần ký trước (có thể ký từ máy khác). Vẫn nhận?'))return;
-        db.keys[ten]=w.pub;store.save();
-      }else if(!confirm('Chữ ký này KHÔNG có xác thực thiết bị. Vẫn nhận?'))return;
-      S.sig=S.sig||{};S.sig[r.key]=r.sig;sigPersist(kind);sigRerender(kind);toast('Đã nhận chữ ký của '+ten);
-    });
-  },
-  sigSend:function(kind,key){
-    var t=sigReceipt(kind,key);
-    if(navigator.share)navigator.share({title:'Xác nhận ký điện tử',text:t}).catch(function(){});
-    else location.href='mailto:?subject='+encodeURIComponent('Xác nhận ký điện tử')+'&body='+encodeURIComponent(t);
-  },
   /* ---- Biên bản bàn giao ---- */
   hvNew:function(){HV=newHV(true);route={view:'handoverEdit'};render();},
   hvOpen:function(id){var v=null;for(var i=0;i<db.handovers.length;i++)if(db.handovers[i].id===id)v=db.handovers[i];if(!v)return;HV=v;route={view:'handoverEdit'};render();},
@@ -2788,6 +2800,7 @@ var A={
     Object.keys(it).forEach(function(k){updated[k]=it[k];});
     updated.counted=true;updated.countQty=qn;updated.note=note;updated.batches=batches;
     updated.photo=SB.photo||null;
+    updated.by=(db.profile&&db.profile.ten)||'';updated.at=Date.now();
     var wasSeq=SB.seq,savedId=SB.itemId;
     applyItem(updated);
     if(advance){
@@ -2864,7 +2877,8 @@ document.addEventListener('visibilitychange',function(){if(document.visibilitySt
   if(!db.handovers)db.handovers=[];
   if(!db.explains)db.explains=[];
   if(!db.counters)db.counters={};
-  if(!db.signers)db.signers=[];
+  if(!db.profile)db.profile={ten:'',chucVu:'',chiNhanh:'',ma:'',maManual:false};
+  try{if(navigator.storage&&navigator.storage.persist)navigator.storage.persist();}catch(e){}
   render();
   /* Watermark */
   try{
