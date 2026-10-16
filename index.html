@@ -2,7 +2,7 @@
 <html lang="vi">
 <head>
 <meta charset="UTF-8">
-<meta name="app-version" content="2026101605">
+<meta name="app-version" content="2026101606">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
 <meta name="theme-color" content="#0f766e">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -2097,7 +2097,66 @@ function renderHome(){
 }
 
 /* ================= Upload & khớp cột ================= */
+/* ---- Lấy dữ liệu từ kỳ kiểm kê có sẵn (hồ sơ kiểm kê) ---- */
+function srcItemsOf(p,mode){
+  var n=0;
+  return p.items.map(function(i){
+    var o=i.open,inn=i["in"],out=i.out,cl=i.close;
+    if(mode==='next'){o=trAvail(i);inn=0;out=0;cl=o;}
+    var zero=cl===0;
+    n++;
+    return {id:"i"+n+"_"+Math.random().toString(36).slice(2,6),branch:i.branch,code:i.code,name:i.name,unit:i.unit,
+      open:o,"in":inn,out:out,close:cl,counted:zero,countQty:zero?0:null,note:"",
+      batches:(i.batches||[]).map(function(b){return {qty:b.qty,exp:b.exp};})};
+  });
+}
+function upSrcCardHtml(){
+  if(!db.periods.length)return '';
+  var h='<div class="card mt16"><div style="font-weight:700;margin-bottom:4px">Hoặc lấy từ hồ sơ kiểm kê có sẵn</div>'
+    +'<div style="font-size:13px;color:var(--mut);margin-bottom:10px">Không cần upload lại file, dùng luôn dữ liệu của một kỳ đã tạo.</div>'
+    +'<select class="inp" onchange="UP.srcPid=this.value;renderUpload()"><option value="">— Chọn kỳ nguồn —</option>';
+  var groups=db.folders.concat(['']);
+  groups.forEach(function(f){
+    var list=periodsIn(f);if(!list.length)return;
+    h+='<optgroup label="'+esc(f||'Chưa phân loại')+'">';
+    list.forEach(function(p){h+='<option value="'+esc(p.id)+'"'+(UP.srcPid===p.id?' selected':'')+'>'+esc(p.name)+' ('+p.items.length+' mã)</option>';});
+    h+='</optgroup>';
+  });
+  h+='</select>';
+  if(UP.srcPid&&per(UP.srcPid)){
+    var m=UP.srcMode;
+    h+='<div style="display:flex;flex-direction:column;gap:8px;margin-top:10px">'
+      +'<label class="card" style="padding:12px;display:flex;gap:10px;align-items:flex-start;cursor:pointer'+(m==='keep'?';border-color:var(--teal)':'')+'"><input type="radio" name="srcm" '+(m==='keep'?'checked ':'')+'onchange="UP.srcMode=\'keep\';renderUpload()" style="margin-top:3px"><span><b>Giữ nguyên số liệu sổ sách</b><br><span style="font-size:12px;color:var(--mut)">Kiểm kê lại từ đầu với cùng tồn đầu, nhập, xuất, tồn cuối.</span></span></label>'
+      +'<label class="card" style="padding:12px;display:flex;gap:10px;align-items:flex-start;cursor:pointer'+(m==='next'?';border-color:var(--teal)':'')+'"><input type="radio" name="srcm" '+(m==='next'?'checked ':'')+'onchange="UP.srcMode=\'next\';renderUpload()" style="margin-top:3px"><span><b>Kỳ kế tiếp</b><br><span style="font-size:12px;color:var(--mut)">Tồn đầu = số đã kiểm kê của kỳ nguồn (mã chưa kiểm lấy số sổ sách). Nhập, xuất đặt về 0.</span></span></label></div>'
+      +'<button class="btn btn-primary mt16" onclick="A.upUseSrc()">Dùng dữ liệu kỳ này</button>';
+  }
+  return h+'</div>';
+}
+function renderUploadFromSrc(){
+  var src=per(UP.srcPid),items=UP.src.items;
+  var h='<div class="topbar"><div class="trow wrap"><button class="back" onclick="A.upSrcClear()">‹</button><div class="ttl">Tạo kỳ từ hồ sơ có sẵn</div></div><div style="height:10px"></div></div>';
+  h+='<div class="wrap" style="padding-top:16px;padding-bottom:40px">';
+  h+='<div class="note-warn" style="margin-bottom:12px">Nguồn: <b>'+esc(src?src.name:'(đã xóa)')+'</b> · '+(UP.srcMode==='next'?'Kỳ kế tiếp (tồn đầu = số đã kiểm)':'Giữ nguyên số liệu sổ sách')+'. Kỳ nguồn không bị thay đổi.</div>';
+  h+='<label class="lbl">Lưu vào thư mục chi nhánh *</label><select class="inp" style="margin-bottom:12px" onchange="UP.folder=this.value;renderUpload()"><option value="">— Chọn chi nhánh —</option>';
+  db.folders.forEach(function(f){h+='<option value="'+esc(f)+'"'+(UP.folder===f?' selected':'')+'>'+esc(f)+'</option>';});
+  h+='</select>';
+  h+='<label class="lbl">Tên kỳ kiểm kê</label><input class="inp" value="'+esc(UP.pname)+'" oninput="UP.pname=this.value">';
+  h+='<div class="lbl" style="margin-top:16px">Xem trước · <b class="tnum" style="color:var(--ink)">'+items.length+'</b> mã vật tư</div>';
+  h+='<div class="prev"><table><thead><tr>';
+  ["Kho","Mã","Tên vật tư","ĐVT","Đầu","Nhập","Xuất","Cuối"].forEach(function(x){h+="<th>"+x+"</th>";});
+  h+='</tr></thead><tbody>';
+  items.slice(0,5).forEach(function(it){
+    h+='<tr><td>'+esc(it.branch)+'</td><td>'+esc(it.code)+'</td><td>'+esc(it.name)+'</td><td>'+esc(it.unit)+'</td><td class="r">'+fmt(it.open)+'</td><td class="r">'+fmt(it["in"])+'</td><td class="r">'+fmt(it.out)+'</td><td class="r" style="font-weight:700">'+fmt(it.close)+'</td></tr>';
+  });
+  h+='</tbody></table></div>';
+  var ok=!!UP.folder&&items.length>0;
+  h+='<button class="btn btn-primary mt20" '+(ok?'':'disabled ')+'onclick="A.createPeriod()">Tạo kỳ kiểm kê ('+items.length+' mã VT)</button>';
+  if(!ok)h+='<div class="hint-red" style="text-align:center">Chọn thư mục chi nhánh để lưu kỳ kiểm kê.</div>';
+  h+='</div>';
+  document.getElementById("app").innerHTML=h;
+}
 function renderUpload(){
+  if(UP.src){renderUploadFromSrc();return;}
   var h='<div class="topbar"><div class="trow wrap"><button class="back" onclick="A.upBack()">‹</button><div class="ttl">Tạo kỳ kiểm kê mới</div></div><div style="height:10px"></div></div>';
   if(!UP.rows){
     h+='<div class="wrap" style="padding-top:24px">'+
@@ -2106,7 +2165,7 @@ function renderUpload(){
       '<div style="color:var(--teal-d);display:flex;justify-content:center">'+icon('upload',34)+'</div><div style="font-weight:800;color:var(--teal-d);margin-top:8px">Chọn file tồn kho</div>'+
       '<div style="font-size:14px;color:var(--teal);margin-top:4px">Excel xuất từ MISA (.xlsx, .xls, .csv)</div></button>'+
       '<div class="card mt16" style="font-size:14px;color:var(--mut)"><div style="font-weight:700;color:var(--ink);margin-bottom:4px">File cần có các cột:</div>'+
-      'Chi nhánh/Kho, Mã VT, Tên VT, ĐVT, Tồn đầu, Nhập, Xuất, Tồn cuối. Hệ thống tự nhận diện cột, chỉnh tay được ở bước sau.</div></div>';
+      'Chi nhánh/Kho, Mã VT, Tên VT, ĐVT, Tồn đầu, Nhập, Xuất, Tồn cuối. Hệ thống tự nhận diện cột, chỉnh tay được ở bước sau.</div>'+upSrcCardHtml()+'</div>';
     document.getElementById("app").innerHTML=h;
     return;
   }
@@ -2643,7 +2702,7 @@ var A={
     if(v==="upload"){
       var now=new Date();
       var fromF=(route.view==="folder"&&FD&&FD.name)?FD.name:"";
-      UP={folder:fromF,fromFolder:!!fromF,wb:null,sheet:"",rows:null,hr:0,start:1,map:{},branchManual:"",
+      UP={folder:fromF,fromFolder:!!fromF,src:null,srcPid:"",srcMode:"keep",wb:null,sheet:"",rows:null,hr:0,start:1,map:{},branchManual:"",
         pname:"Kiểm kê "+String(now.getMonth()+1).padStart(2,"0")+"/"+now.getFullYear()};
     }
     route={view:v};render();
@@ -2697,9 +2756,17 @@ var A={
   upStart:function(v){UP.start=Math.max(0,Math.min(UP.rows.length,Number(v)||1)-1);renderUpload();},
   upMap:function(k,v){if(v==="")delete UP.map[k];else UP.map[k]=Number(v);renderUpload();},
   upBranch:function(v){UP.branchManual=v;renderUpload();},
+  upUseSrc:function(){
+    var src=per(UP.srcPid);if(!src){toast('Chọn kỳ nguồn');return;}
+    UP.src={items:srcItemsOf(src,UP.srcMode)};
+    if(!UP.folder&&src.folder)UP.folder=src.folder;
+    renderUpload();
+  },
+  upSrcClear:function(){UP.src=null;renderUpload();},
   createPeriod:function(){
-    var items=UP._built||buildItems(UP.rows,UP.start,UP.map,UP.branchManual,db.hsd);
-    if(UP.map.name===undefined||!items.length){toast("Cần chọn cột Tên vật tư và có dữ liệu");return;}
+    var items=UP.src?UP.src.items:(UP._built||buildItems(UP.rows,UP.start,UP.map,UP.branchManual,db.hsd));
+    if(!UP.src&&(UP.map.name===undefined||!items.length)){toast("Cần chọn cột Tên vật tư và có dữ liệu");return;}
+    if(!items.length){toast("Kỳ nguồn không có vật tư");return;}
     var p={id:Date.now().toString(36),name:(UP.pname||"").trim()||"Kỳ kiểm kê",createdAt:Date.now(),items:items,folder:UP.folder||'',by:((db.profile&&db.profile.ten)||'')};
     if(!UP.folder){toast("Chọn thư mục chi nhánh trước");return;}
     db.periods.unshift(p);
