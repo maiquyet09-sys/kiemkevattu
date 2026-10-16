@@ -2,7 +2,7 @@
 <html lang="vi">
 <head>
 <meta charset="UTF-8">
-<meta name="app-version" content="2026101606">
+<meta name="app-version" content="2026101607">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
 <meta name="theme-color" content="#0f766e">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -908,6 +908,50 @@ function generateBaoCao(){
   }catch(err){console.error(err);toast("Lỗi tạo báo cáo: "+err.message);}
 }
 
+/* ---- Lấy dữ liệu báo cáo từ hồ sơ kiểm kê có sẵn ---- */
+var BCSRC={sel:{}};
+function periodCounted(p){var n=0;p.items.forEach(function(i){if(i.counted&&i.countQty!==null)n++;});return n;}
+function bcBranchOfPeriod(p){
+  if(p.folder)return p.folder;
+  var cnt={},best='',bn=0;
+  p.items.forEach(function(i){var b=i.branch||'';cnt[b]=(cnt[b]||0)+1;if(cnt[b]>bn){bn=cnt[b];best=b;}});
+  return (best||p.name).replace(/^kho\s+/i,'');
+}
+function bcFromPeriod(p){
+  var totalClose=0,totalKiem=0,hh=[];
+  p.items.forEach(function(i){
+    var code=String(i.code||'').replace(/\.0+$/,'');
+    var done=i.counted&&i.countQty!==null;
+    if(code&&HHTM_CODES.indexOf(code)!==-1){
+      hh.push({stt:String(hh.length+1),ten_hang:i.name,dvt:i.unit||'',sl_hang:i.close?fmt(i.close):'',kiem_ke:done?fmt(i.countQty):''});
+    }else{
+      totalClose+=i.close;
+      if(done)totalKiem+=i.countQty;
+    }
+  });
+  return {name:bcBranchOfPeriod(p),totalClose:totalClose,totalKiem:totalKiem,hhtmItems:hh,fileName:'Hồ sơ kiểm kê: '+p.name,periodId:p.id};
+}
+function bcSrcCardHtml(){
+  if(!db.periods.length)return '';
+  var h='<div class="card mt16"><div style="font-weight:700;margin-bottom:4px">Hoặc lấy từ hồ sơ kiểm kê có sẵn</div>'
+    +'<div style="font-size:13px;color:var(--mut);margin-bottom:10px">Tích chọn kỳ kiểm kê của từng chi nhánh, không cần upload lại file Excel.</div>';
+  var n=0;
+  db.folders.concat(['']).forEach(function(f){
+    var list=periodsIn(f);if(!list.length)return;
+    h+='<div style="font-size:12px;font-weight:700;color:var(--mut);text-transform:uppercase;margin:10px 0 4px">'+esc(f||'Chưa phân loại')+'</div>';
+    list.forEach(function(p){
+      var on=!!BCSRC.sel[p.id];if(on)n++;
+      h+='<label style="display:flex;gap:10px;align-items:center;padding:8px 0;cursor:pointer;border-top:1px solid var(--line)">'
+        +'<input type="checkbox" style="width:22px;height:22px;flex:none" '+(on?'checked ':'')+'onchange="A.bcSrcToggle(\''+p.id+'\')">'
+        +'<span style="min-width:0"><span style="display:block;font-weight:600;font-size:14px;word-break:break-word">'+esc(p.name)+'</span>'
+        +'<span style="display:block;font-size:12px;color:var(--mut)">Đã kiểm '+periodCounted(p)+'/'+p.items.length+' mã</span></span></label>';
+    });
+  });
+  h+='<div style="display:flex;gap:10px;margin-top:10px"><button class="btn btn-outline" style="flex:1;padding:12px" onclick="A.bcSrcLatest()">Chọn kỳ mới nhất mỗi chi nhánh</button></div>'
+    +'<button class="btn btn-primary mt16" '+(n?'':'disabled ')+'onclick="A.bcUseSrc()">'+(n?'Lấy dữ liệu ('+n+' chi nhánh)':'Tích chọn kỳ kiểm kê')+'</button></div>';
+  return h;
+}
+
 function renderBaoCao(){
   ensureBCMeta();
   var h='<div class="topbar"><div class="trow wrap"><button class="back" onclick="A.go(\'home\')">‹</button><div class="ttl">Tạo báo cáo kiểm kê</div></div><div style="height:10px"></div></div>';
@@ -916,6 +960,7 @@ function renderBaoCao(){
   h+='<input type="file" id="bc_files" accept=".xlsx,.xls" multiple style="display:none" onchange="A.bcFiles(this)">';
   h+='<button class="drop" onclick="document.getElementById(\'bc_files\').click()" style="padding:28px 16px"><div style="color:var(--teal);display:flex;justify-content:center">'+icon('folder',28)+'</div><div style="font-weight:700;color:var(--teal);margin-top:6px">Chọn file Excel biên bản kiểm kê</div><div style="font-size:12px;color:var(--mut);margin-top:4px">Có thể chọn nhiều file cùng lúc, định dạng .xlsx / .xls</div></button>';
 
+  h+=bcSrcCardHtml();
   if(BC&&BC.branches.length){
     h+='<div class="bcsec" style="margin-top:16px">Dữ liệu đọc được · '+BC.branches.length+' chi nhánh</div>';
     h+='<div style="overflow-x:auto;border:1px solid var(--line);border-radius:12px;background:var(--card)"><table class="bctbl"><thead><tr><th>Chi nhánh</th><th class="r">Tồn cuối</th><th class="r">Kiểm kê</th><th class="r">Chênh</th></tr></thead><tbody>';
@@ -930,6 +975,9 @@ function renderBaoCao(){
     var totColor=totChenh===0?'color:var(--green)':totChenh>0?'color:var(--amber)':'color:var(--red)';
     h+='<tr style="font-weight:700;border-top:2px solid var(--line)"><td>TỔNG CỘNG</td><td class="r">'+fmt(totC)+'</td><td class="r">'+fmt(totK)+'</td><td class="r" style="'+totColor+'">'+(totChenh===0?'Khớp':(totChenh>0?'+':'')+fmt(totChenh))+'</td></tr>';
     h+='</tbody></table></div>';
+    if(BC.warns&&BC.warns.length){
+      h+='<div class="note-warn" style="margin-top:8px;display:flex;gap:8px;align-items:flex-start">'+icon('warn',16)+'<span>'+BC.warns.map(esc).join('<br>')+'</span></div>';
+    }
     if(BC.errors&&BC.errors.length){
       h+='<div class="note-warn" style="margin-top:8px;display:flex;gap:8px;align-items:flex-start">'+icon('warn',16)+'<span>Không đọc được: '+BC.errors.join(', ')+'</span></div>';
     }
@@ -2774,6 +2822,37 @@ var A={
     P={id:p.id,q:"",flt:"all",br:"all",limit:80};
     route={view:"period"};render();
     toast("Đã tạo kỳ kiểm kê · "+items.length+" mã VT");
+  },
+  bcSrcToggle:function(id){
+    var p=per(id);if(!p)return;
+    if(BCSRC.sel[id]){delete BCSRC.sel[id];}
+    else{
+      if(p.folder)periodsIn(p.folder).forEach(function(q){delete BCSRC.sel[q.id];}); /* mỗi chi nhánh chỉ 1 kỳ */
+      BCSRC.sel[id]=true;
+    }
+    renderBaoCao();
+  },
+  bcSrcLatest:function(){
+    BCSRC.sel={};
+    db.folders.forEach(function(f){
+      var l=periodsIn(f).slice().sort(function(a,b){return (b.createdAt||0)-(a.createdAt||0);});
+      if(l[0])BCSRC.sel[l[0].id]=true;
+    });
+    renderBaoCao();
+  },
+  bcUseSrc:function(){
+    var ps=db.periods.filter(function(p){return BCSRC.sel[p.id];});
+    if(!ps.length){toast('Tích chọn ít nhất một kỳ kiểm kê');return;}
+    var order=db.folders;
+    ps.sort(function(a,b){var x=order.indexOf(a.folder),y=order.indexOf(b.folder);return (x<0?99:x)-(y<0?99:y);});
+    var warns=[];
+    ps.forEach(function(p){
+      var c=periodCounted(p);
+      if(c<p.items.length)warns.push('Kỳ "'+p.name+'" mới kiểm '+c+'/'+p.items.length+' mã, số kiểm kê chưa đủ nên chênh lệch có thể lớn.');
+    });
+    BC={branches:ps.map(bcFromPeriod),errors:[],warns:warns,loading:false};
+    ensureBCMeta();renderBaoCao();
+    toast('Đã lấy dữ liệu '+ps.length+' chi nhánh');
   },
   bcFiles:function(input){
     var files=Array.from(input.files||[]);
