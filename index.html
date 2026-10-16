@@ -2,7 +2,7 @@
 <html lang="vi">
 <head>
 <meta charset="UTF-8">
-<meta name="app-version" content="2026100807">
+<meta name="app-version" content="2026101605">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
 <meta name="theme-color" content="#0f766e">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -44,6 +44,13 @@ body{background:var(--bg);color:var(--ink);font-family:'Inter',system-ui,-apple-
 .gnav-item:hover{background:var(--card2)}
 .gnav-item.on{background:var(--teal-bg);color:var(--teal)}
 .gnav-item .ic{margin-right:2px}
+.gnav-grp{justify-content:flex-start}
+.gnav-grp .chv{margin-left:auto;transition:transform .15s ease;display:flex}
+.gnav-grp .chv.open{transform:rotate(90deg)}
+.gnav-sub{padding:9px 12px 9px 40px;font-size:13.5px;gap:8px}
+.gnav-sub .cnt{margin-left:auto;font-size:12px;font-weight:700;color:var(--mut2)}
+.gnav-sub.on .cnt{color:var(--teal)}
+.gnav-add{color:var(--teal)}
 #gmain{flex:1;min-width:0}
 #gdrawer-ovl{position:fixed;inset:0;background:rgba(16,24,40,.45);z-index:70;display:none}
 #gdrawer{position:fixed;top:0;left:0;bottom:0;width:78vw;max-width:280px;background:#fff;z-index:71;transform:translateX(-100%);transition:transform .22s ease;padding:16px 10px;overflow-y:auto}
@@ -116,7 +123,7 @@ select.chip{appearance:auto;color:var(--ink)}
 .botbar{position:fixed;bottom:0;left:0;right:0;z-index:20;pointer-events:none}
 .botin{max-width:480px;margin:0 auto;padding:0 16px 16px;pointer-events:auto}
 .botin .btn{box-shadow:0 8px 32px rgba(0,0,0,.5)}
-.ovl{position:fixed;inset:0;z-index:40;background:rgba(5,5,15,.82);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);display:flex;align-items:flex-end;justify-content:center}
+.ovl{position:fixed;inset:0;z-index:55;background:rgba(5,5,15,.82);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);display:flex;align-items:flex-end;justify-content:center}
 .sheet{width:100%;max-width:480px;background:#0f1117;border-radius:28px 28px 0 0;max-height:94vh;overflow-y:auto;box-shadow:0 -24px 80px rgba(0,0,0,.7)}
 .shead{position:sticky;top:0;background:#0f1117;z-index:5;display:flex;align-items:flex-start;gap:12px;padding:14px 20px 10px;border-bottom:1px solid rgba(255,255,255,.06)}
 .sx{flex:0 0 auto;width:32px;height:32px;border:none;border-radius:50%;background:rgba(255,255,255,.08);color:#9ca3af;cursor:pointer;font-size:13px}
@@ -682,7 +689,9 @@ function exportExcelBasic(p,fname){
 }
 
 /* ================= State ================= */
-var db={periods:[],hsd:{},handovers:[],explains:[],counters:{},profile:{ten:'',chucVu:'',chiNhanh:'',ma:'',maManual:false}};
+var DEFAULT_FOLDERS=['Bùi Thị Xuân','Lê Văn Lương','Cát Linh','Quảng Ninh','Ba Đình-Nghĩa Dũng'];
+var FD=null; // thư mục chi nhánh đang mở
+var db={folders:DEFAULT_FOLDERS.slice(),periods:[],hsd:{},handovers:[],explains:[],counters:{},profile:{ten:'',chucVu:'',chiNhanh:'',ma:'',maManual:false}};
 var route={view:"home"};
 var P=null;   // trạng thái màn hình kiểm kê
 var BC=null;  // trạng thái màn hình tạo báo cáo
@@ -1214,7 +1223,7 @@ function renderPicker(onlyDiff){
   var h='<div class="card" style="margin-top:10px">';
   h+='<div style="font-weight:700;margin-bottom:8px;display:flex;align-items:center;gap:7px">'+icon('download',16)+'Lấy dữ liệu từ kỳ kiểm kê</div>';
   h+='<select class="inp" onchange="A.pickPeriod(this.value)" style="margin-bottom:8px"><option value="">— Chọn kỳ kiểm kê —</option>';
-  db.periods.forEach(function(p){h+='<option value="'+esc(p.id)+'"'+(PICK.pid===p.id?' selected':'')+'>'+esc(p.name)+'</option>';});
+  db.periods.forEach(function(p){h+='<option value="'+esc(p.id)+'"'+(PICK.pid===p.id?' selected':'')+'>'+esc((p.folder?p.folder+' · ':'')+p.name)+'</option>';});
   h+='</select>';
   if(PICK.pid){
     var p=per(PICK.pid);
@@ -1931,6 +1940,121 @@ function exportKiemKeEmail(p){
   }).catch(function(e){console.error(e);toast("Không tạo được file báo cáo");});
 }
 
+function periodCardHtml(p){
+    var total=p.items.length;
+    var done=p.items.filter(function(i){return i.counted;}).length;
+    var diff=p.items.filter(function(i){return i.counted&&diffOf(i)!==0;}).length;
+    var pct=total?Math.round(done/total*100):0;
+    var right=diff>0?'<span style="font-weight:700;color:var(--red)">'+diff+' mã chênh lệch</span>':
+      (total>0&&done===total?'<span style="font-weight:700;color:var(--green);display:inline-flex;align-items:center;gap:4px">'+icon('check',14)+'Hoàn tất</span>':'<span style="color:var(--mut2)">Đang kiểm</span>');
+    return '<div class="card per" onclick="A.openPeriod(\''+p.id+'\')">'+
+      '<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px">'+
+      '<div style="min-width:0"><div style="font-weight:700;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;word-break:break-word">'+esc(p.name)+'</div>'+
+      '<div style="font-size:12px;color:var(--mut);margin-top:2px">Tạo '+new Date(p.createdAt).toLocaleDateString("vi-VN")+' · '+total+' mã VT'+(p.by?', bởi '+esc(p.by):'')+'</div></div>'+
+      '<div style="display:flex;flex:none">'+'<button class="perx" onclick="event.stopPropagation();A.periodMove(\''+p.id+'\')" title="Chuyển sang thư mục khác" style="display:flex">'+icon('folder',15)+'</button>'+'<button class="perx" onclick="event.stopPropagation();A.renamePeriod(\''+p.id+'\')" title="Sửa tên kỳ" style="display:flex">'+icon('edit',15)+'</button>'+'<button class="perx" onclick="event.stopPropagation();A.delPeriod(\''+p.id+'\')" title="Xóa kỳ" style="display:flex">'+icon('x',15)+'</button></div></div>'+
+      '<div class="bar" style="margin-top:12px"><div class="fill" style="width:'+pct+'%"></div></div>'+
+      '<div style="display:flex;justify-content:space-between;font-size:12px;margin-top:6px"><span style="color:var(--mut)">Đã kiểm <b class="tnum" style="color:var(--ink)">'+done+'/'+total+'</b></span>'+right+'</div></div>';
+}
+
+
+/* ================= Thư mục chi nhánh ================= */
+function guessFolder(name){
+  var m=String(name||'').trim().toUpperCase().match(/^(BTX|LVL|CL|QN|41ND)(?=[\s_\-.(]|$)/);
+  if(!m)return '';
+  var f={BTX:'Bùi Thị Xuân',LVL:'Lê Văn Lương',CL:'Cát Linh',QN:'Quảng Ninh','41ND':'Ba Đình-Nghĩa Dũng'}[m[1]];
+  return db.folders.indexOf(f)>=0?f:'';
+}
+function migrateFolders(){
+  if(!Array.isArray(db.folders))db.folders=DEFAULT_FOLDERS.slice();
+  db.periods.forEach(function(p){
+    if(!p.folder){var g=guessFolder(p.name);if(g)p.folder=g;}
+    if(p.folder&&db.folders.indexOf(p.folder)<0)db.folders.push(p.folder);
+  });
+}
+function periodsIn(name){return db.periods.filter(function(p){return (p.folder||'')===name;});}
+/* ================= Bàn giao vật tư từ kỳ kiểm kê (không trừ số liệu kiểm kê) ================= */
+var TR=null,trT=null;
+function trAvail(i){return (i.counted&&i.countQty!==null)?i.countQty:i.close;}
+function trItems(p){
+  var q=norm(TR.q||'');
+  return p.items.filter(function(i){
+    if(!(trAvail(i)>0))return false;
+    return !q||norm(i.name+' '+i.code).indexOf(q)>=0;
+  });
+}
+function trRow(i){
+  var on=!!TR.sel[i.id],av=trAvail(i);
+  var h='<div class="card" style="margin-bottom:8px;padding:12px;display:flex;gap:10px;align-items:center'+(on?';border-color:var(--teal)':'')+'">'
+    +'<label style="display:flex;gap:10px;align-items:center;flex:1;min-width:0;cursor:pointer"><input type="checkbox" style="width:22px;height:22px;flex:none" '+(on?'checked ':'')+'onchange="A.trToggle(\''+i.id+'\')">'
+    +'<span style="min-width:0"><span style="display:block;font-weight:700;font-size:14px;word-break:break-word">'+esc(i.name)+'</span>'
+    +'<span style="display:block;font-size:12px;color:var(--mut)">'+esc(i.code)+' · '+esc(i.unit)+' · '+(i.counted?'kiểm kê ':'sổ sách ')+fmt(av)+'</span></span></label>';
+  if(on)h+='<input class="inp tnum" inputmode="decimal" placeholder="SL" style="width:84px;text-align:center;flex:none" value="'+esc(TR.qty[i.id]==null?'':TR.qty[i.id])+'" oninput="TR.qty[\''+i.id+'\']=this.value">';
+  return h+'</div>';
+}
+function trSelCount(){var n=0;for(var k in TR.sel)if(TR.sel[k])n++;return n;}
+function renderTrList(){
+  var p=per(TR.pid);if(!p)return;
+  var list=trItems(p),h='';
+  list.slice(0,TR.limit).forEach(function(i){h+=trRow(i);});
+  if(!list.length)h='<div class="card" style="text-align:center;color:var(--mut)">Không có vật tư nào còn tồn để bàn giao.</div>';
+  if(list.length>TR.limit)h+='<button class="btn btn-outline" onclick="A.trMore()">Xem thêm ('+(list.length-TR.limit)+' mã)</button>';
+  document.getElementById('trlist').innerHTML=h;
+  var n=trSelCount(),b=document.getElementById('trbtn');
+  if(b){b.disabled=!n;b.textContent=n?'Tạo biên bản bàn giao ('+n+' mã)':'Tích chọn vật tư để bàn giao';}
+}
+function renderTransfer(){
+  var p=per(TR&&TR.pid);
+  if(!p){route={view:'home'};render();return;}
+  var h='<div class="topbar"><div class="trow wrap"><button class="back" onclick="A.trBack()">‹</button><div class="ttl">Bàn giao vật tư</div></div><div style="height:10px"></div></div>';
+  h+='<div class="wrap" style="padding-top:14px;padding-bottom:120px">';
+  h+='<div class="note-warn" style="margin-bottom:12px">Chỉ lập biên bản bàn giao. Số liệu kiểm kê của kỳ <b>'+esc(p.name)+'</b> giữ nguyên, không bị trừ số lượng chuyển đi.</div>';
+  h+='<label class="lbl">Nơi nhận</label><select class="inp" onchange="A.trDest(this.value)"><option value="">— Chọn nơi nhận —</option><option value="HO"'+(TR.dest==='HO'?' selected':'')+'>Văn phòng / HO</option>';
+  db.folders.forEach(function(f){if(f===(p.folder||''))return;h+='<option value="'+esc(f)+'"'+(TR.dest===f?' selected':'')+'>'+esc(f)+'</option>';});
+  h+='<option value="__other"'+(TR.dest==='__other'?' selected':'')+'>Nơi khác (nhập tên)</option></select>';
+  if(TR.dest==='__other')h+='<input class="inp" style="margin-top:8px" placeholder="Tên cơ sở / bộ phận nhận" value="'+esc(TR.destOther)+'" oninput="TR.destOther=this.value">';
+  h+='<div style="display:flex;justify-content:space-between;align-items:center;margin:16px 0 8px"><span class="sec" style="margin:0">Chọn vật tư và số lượng</span><span style="display:flex;gap:14px"><button class="addbat" onclick="A.trAll()">Chọn hết</button><button class="addbat" style="color:var(--mut)" onclick="A.trNone()">Bỏ chọn</button></span></div>';
+  h+='<input class="inp" style="margin-bottom:10px" placeholder="Tìm tên hoặc mã vật tư…" value="'+esc(TR.q)+'" oninput="A.trQ(this.value)">';
+  h+='<div id="trlist"></div></div>';
+  h+='<div class="botbar"><div class="botin"><button class="btn btn-primary" id="trbtn" onclick="A.trCreate()"></button></div></div>';
+  document.getElementById('app').innerHTML=h;
+  renderTrList();
+}
+
+function renderFolder(){
+  if(!FD){route={view:'home'};render();return;}
+  var name=FD.name,list=periodsIn(name);
+  var h='<div class="topbar"><div class="trow wrap"><button class="back" onclick="A.go(\'home\')">‹</button>'
+    +'<div class="ttl">'+esc(name||'Chưa phân loại')+'</div>'
+    +'<div style="display:flex;gap:6px;flex-shrink:0">'
+    +(name?'<button class="pill" style="display:inline-flex" title="Đổi tên chi nhánh" onclick="A.folderRename()">'+icon('edit',15)+'</button>':'')
+    +(name?'<button class="pill" style="display:inline-flex;align-items:center;gap:4px" onclick="A.folderNewPeriod()">'+icon('plus',15)+'Kỳ mới</button>':'')
+    +'</div></div><div style="height:10px"></div></div>';
+  h+='<div class="wrap" style="padding-top:16px;padding-bottom:40px">';
+  if(!name)h+='<div class="note-warn" style="margin-bottom:12px">Các kỳ dưới đây chưa thuộc chi nhánh nào. Bấm biểu tượng thư mục trên từng kỳ để chuyển vào đúng chi nhánh.</div>';
+  list.forEach(function(p){h+=periodCardHtml(p);});
+  if(!list.length){
+    h+='<div style="text-align:center;padding:36px 20px;border:1.5px dashed var(--line);border-radius:16px">'
+      +'<div style="width:44px;height:44px;border-radius:50%;background:var(--teal-bg);color:var(--teal);display:flex;align-items:center;justify-content:center;margin:0 auto 12px">'+icon('box',22)+'</div>'
+      +'<div style="font-weight:700;margin-bottom:4px">Chưa có kỳ kiểm kê nào</div>'
+      +'<div style="font-size:13px;color:var(--mut)">Bấm "Kỳ mới" để upload file tồn kho cho chi nhánh này.</div></div>';
+    if(name)h+='<div style="text-align:center;margin-top:16px"><button class="addbat" style="color:var(--red)" onclick="A.folderDel()">Xóa thư mục này</button></div>';
+  }
+  h+='</div>';
+  document.getElementById('app').innerHTML=h;
+}
+function moveModal(p){
+  var o=document.createElement('div');
+  o.id='nmovl';
+  var opts='';
+  db.folders.forEach(function(f){opts+='<option value="'+esc(f)+'"'+((p.folder||'')===f?' selected':'')+'>'+esc(f)+'</option>';});
+  o.innerHTML='<div class="sigcard">'
+    +'<div style="font-weight:800;font-size:16px;margin-bottom:10px">Chuyển sang thư mục</div>'
+    +'<select class="inp" id="mvsel">'+(p.folder?'':'<option value="">— Chọn chi nhánh —</option>')+opts+'</select>'
+    +'<div style="display:flex;gap:8px;margin-top:12px"><button class="btn btn-outline" style="flex:1;padding:12px" onclick="renameClose()">Huỷ</button>'
+    +'<button class="btn btn-primary" style="flex:1;padding:12px" onclick="A.periodMoveSave(\''+p.id+'\')">'+icon('check',16)+'Chuyển</button></div></div>';
+  document.body.appendChild(o);
+}
+
 function renderHome(){
   var entries=hsdEntries();
   var h='<div class="wrap" style="padding-top:24px"><div class="eyebrow">MedDental Vật tư</div><h1 class="h1">Kiểm kê kho</h1><div style="font-size:12px;font-style:italic;color:var(--mut2);margin-top:4px">Built by Quyet Mai</div></div>';
@@ -1944,35 +2068,14 @@ function renderHome(){
     h+='<div class="hsdcard '+b.cls+'" onclick="A.go(\'hsd\')"><div class="n tnum">'+n+'</div><div class="t">'+b.label+'</div></div>';
   });
   h+='</div></div>';
-  h+='<div class="wrap mt24"><div class="sec">Kỳ kiểm kê</div>';
+  h+='<div class="wrap mt24"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px"><span class="sec" style="margin:0">Kỳ kiểm kê</span></div>';
   h+='<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px">';
   h+='<button class="btn btn-primary" style="grid-column:1/-1" onclick="A.go(\'upload\')">'+icon('plus',18)+'Tạo kỳ mới, upload file tồn kho</button>';
   h+='<button class="btn btn-outline" onclick="A.go(\'baocao\')">'+icon('file',17)+'Tạo báo cáo</button>';
   h+='<button class="btn btn-outline" onclick="A.go(\'handover\')">'+icon('users',17)+'Biên bản bàn giao</button>';
   h+='<button class="btn btn-outline" style="grid-column:1/-1" onclick="A.go(\'explain\')">'+icon('edit',17)+'Phiếu giải trình chênh lệch</button>';
   h+='</div>';
-  db.periods.forEach(function(p){
-    var total=p.items.length;
-    var done=p.items.filter(function(i){return i.counted;}).length;
-    var diff=p.items.filter(function(i){return i.counted&&diffOf(i)!==0;}).length;
-    var pct=total?Math.round(done/total*100):0;
-    var right=diff>0?'<span style="font-weight:700;color:var(--red)">'+diff+' mã chênh lệch</span>':
-      (total>0&&done===total?'<span style="font-weight:700;color:var(--green);display:inline-flex;align-items:center;gap:4px">'+icon('check',14)+'Hoàn tất</span>':'<span style="color:var(--mut2)">Đang kiểm</span>');
-    h+='<div class="card per" onclick="A.openPeriod(\''+p.id+'\')">'+
-      '<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px">'+
-      '<div style="min-width:0"><div style="font-weight:700;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;word-break:break-word">'+esc(p.name)+'</div>'+
-      '<div style="font-size:12px;color:var(--mut);margin-top:2px">Tạo '+new Date(p.createdAt).toLocaleDateString("vi-VN")+' · '+total+' mã VT'+(p.by?', bởi '+esc(p.by):'')+'</div></div>'+
-      '<div style="display:flex;flex:none">'+'<button class="perx" onclick="event.stopPropagation();A.renamePeriod(\''+p.id+'\')" title="Sửa tên kỳ" style="display:flex">'+icon('edit',15)+'</button>'+'<button class="perx" onclick="event.stopPropagation();A.delPeriod(\''+p.id+'\')" title="Xóa kỳ" style="display:flex">'+icon('x',15)+'</button></div></div>'+
-      '<div class="bar" style="margin-top:12px"><div class="fill" style="width:'+pct+'%"></div></div>'+
-      '<div style="display:flex;justify-content:space-between;font-size:12px;margin-top:6px"><span style="color:var(--mut)">Đã kiểm <b class="tnum" style="color:var(--ink)">'+done+'/'+total+'</b></span>'+right+'</div></div>';
-  });
-  if(!db.periods.length){
-    h+='<div style="text-align:center;padding:36px 20px;border:1.5px dashed var(--line);border-radius:16px">'
-      +'<div style="width:44px;height:44px;border-radius:50%;background:var(--teal-bg);color:var(--teal);display:flex;align-items:center;justify-content:center;margin:0 auto 12px">'+icon('box',22)+'</div>'
-      +'<div style="font-weight:700;margin-bottom:4px">Chưa có kỳ kiểm kê nào</div>'
-      +'<div style="font-size:13px;color:var(--mut)">Bấm nút "Tạo kỳ mới" ở trên để upload file tồn kho và bắt đầu kiểm.</div>'
-      +'</div>';
-  }
+  h+='<div style="font-size:12px;color:var(--mut);margin-top:2px">Hồ sơ các kỳ kiểm kê nằm trong menu ☰ › <b>Hồ sơ kiểm kê</b>, chia theo chi nhánh.</div>';
   h+='</div>';
   h+='<div class="wrap mt24" style="padding-bottom:40px"><div class="sec">Quy trình</div>';
   h+='<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px">';
@@ -1995,7 +2098,7 @@ function renderHome(){
 
 /* ================= Upload & khớp cột ================= */
 function renderUpload(){
-  var h='<div class="topbar"><div class="trow wrap"><button class="back" onclick="A.go(\'home\')">‹</button><div class="ttl">Tạo kỳ kiểm kê mới</div></div><div style="height:10px"></div></div>';
+  var h='<div class="topbar"><div class="trow wrap"><button class="back" onclick="A.upBack()">‹</button><div class="ttl">Tạo kỳ kiểm kê mới</div></div><div style="height:10px"></div></div>';
   if(!UP.rows){
     h+='<div class="wrap" style="padding-top:24px">'+
       '<input type="file" id="file" accept=".xlsx,.xls,.csv" style="display:none" onchange="A.onFile(this)">'+
@@ -2010,10 +2113,13 @@ function renderUpload(){
   var headers=(UP.rows[UP.hr]||[]).map(function(x){return String(x);});
   var built=buildItems(UP.rows,UP.start,UP.map,UP.branchManual,db.hsd);
   var inherited=built.filter(function(i){return i.batches.length>0;}).length;
-  var canCreate=UP.map.name!==undefined&&built.length>0;
+  var canCreate=UP.map.name!==undefined&&built.length>0&&!!UP.folder;
   UP._built=built;
 
   h+='<div class="wrap" style="padding-top:16px;padding-bottom:40px">';
+  h+='<label class="lbl">Lưu vào thư mục chi nhánh *</label><select class="inp" style="margin-bottom:12px" onchange="UP.folder=this.value;renderUpload()"><option value="">— Chọn chi nhánh —</option>';
+  db.folders.forEach(function(f){h+='<option value="'+esc(f)+'"'+(UP.folder===f?' selected':'')+'>'+esc(f)+'</option>';});
+  h+='</select>';
   h+='<label class="lbl">Tên kỳ kiểm kê</label><input class="inp" value="'+esc(UP.pname)+'" oninput="UP.pname=this.value">';
   if(UP.wb&&UP.wb.SheetNames.length>1){
     h+='<label class="lbl" style="margin-top:12px">Sheet dữ liệu</label><select class="inp" onchange="A.upSheet(this.value)">';
@@ -2054,7 +2160,7 @@ function renderUpload(){
   h+='</tbody></table></div>';
 
   h+='<button class="btn btn-primary mt20" '+(canCreate?"":"disabled ")+'onclick="A.createPeriod()">Tạo kỳ kiểm kê ('+built.length+' mã VT)</button>';
-  if(!canCreate)h+='<div class="hint-red" style="text-align:center">Cần chọn đúng cột "Tên vật tư" và có ít nhất 1 dòng dữ liệu.</div>';
+  if(!canCreate)h+='<div class="hint-red" style="text-align:center">'+(!UP.folder?'Chọn thư mục chi nhánh để lưu kỳ kiểm kê. ':'')+'Cần chọn đúng cột "Tên vật tư" và có ít nhất 1 dòng dữ liệu.</div>';
   h+='</div>';
   document.getElementById("app").innerHTML=h;
 }
@@ -2081,14 +2187,14 @@ function renderPeriod(){
   var p=per(P.id);
   if(!p){route={view:"home"};render();return;}
   var h='<div class="topbar"><div class="trow wrap">'+
-    '<button class="back" onclick="A.go(\'home\')">‹</button>'+
+    '<button class="back" onclick="A.periodBack()">‹</button>'+
     '<div class="ttl" style="cursor:text" title="Chạm để sửa tên" onclick="A.renamePeriod(\''+p.id+'\')">'+esc(p.name)+'</div>'+
     '<div style="display:flex;gap:6px;flex-shrink:0">'+
     '<button class="pill" title="Gửi email kết quả kiểm kê" style="display:inline-flex" onclick="A.kiemKeEmail()">'+icon('mail',15)+'</button>'+
     '<button class="pill" style="display:inline-flex;align-items:center;gap:5px" onclick="A.exportCur()">'+icon('download',15)+'Excel</button></div></div>'+
     '<div class="wrap" style="padding-top:10px"><div class="bar"><div class="fill" id="pfill"></div></div>'+
     '<div class="prow"><span id="pdone"></span><span id="pdiff"></span></div>'+
-    '<button class="stklink" style="display:flex;align-items:center;gap:7px" onclick="A.openStock(\''+p.id+'\')">'+icon('grid',16)+'Bảng tồn kho (chỉ mã còn tồn)'+icon('chev',16)+'</button>'+sigPeriodToggle(p)+'</div>'+
+    '<button class="stklink" style="display:flex;align-items:center;gap:7px" onclick="A.openStock(\''+p.id+'\')">'+icon('grid',16)+'Bảng tồn kho (chỉ mã còn tồn)'+icon('chev',16)+'</button>'+'<button class="stklink" style="display:flex;align-items:center;gap:7px" onclick="A.periodTransfer()">'+icon('users',16)+'Bàn giao vật tư cho HO / cơ sở khác'+icon('chev',16)+'</button>'+'<button class="stklink" id="exlink" style="display:none;align-items:center;gap:7px;color:var(--red)" onclick="A.periodExplain()"></button>'+sigPeriodToggle(p)+'</div>'+
     '<div class="wrap" style="padding-bottom:8px"><input class="inp" style="background:var(--card)" id="q" placeholder="Tìm tên hoặc mã vật tư (không dấu vẫn ra)…" oninput="A.qInput(this.value)"></div>'+
     '<div class="chips" id="chips"></div></div>'+
     '<div class="wrap" id="list" style="padding-top:12px;padding-bottom:110px"></div>'+
@@ -2139,6 +2245,11 @@ function renderList(){
   document.getElementById("pfill").style.width=pct+"%";
   document.getElementById("pdone").innerHTML='Đã kiểm <b class="tnum" style="color:var(--ink)">'+done+"/"+total+"</b> · "+pct+"%";
   document.getElementById("pdiff").innerHTML=ndiff>0?'<b style="color:var(--red)">'+ndiff+" mã chênh lệch</b>":"Chưa có chênh lệch";
+  var exl=document.getElementById("exlink");
+  if(exl){
+    if(ndiff>0){exl.style.display="flex";exl.innerHTML=icon('edit',16)+'Làm phiếu giải trình ('+ndiff+' mã chênh lệch)'+icon('chev',16);}
+    else exl.style.display="none";
+  }
   document.getElementById("seqbtn").textContent=allDone?"✓ Hoàn tất — Xuất báo cáo Excel":"▶ Kiểm tuần tự · còn "+fTodo+" mã";
   renderChips(p,base);
 
@@ -2385,6 +2496,8 @@ function mergeDb(d){
     dst.sort(function(a,b){return (b.createdAt||0)-(a.createdAt||0);});
   }
   add(db.periods,d.periods,'p');add(db.handovers,d.handovers,'h');add(db.explains,d.explains,'e');
+  (d.folders||[]).forEach(function(f){if(f&&db.folders.indexOf(f)<0)db.folders.push(f);});
+  migrateFolders();
   Object.keys(d.hsd||{}).forEach(function(k){if(!db.hsd[k])db.hsd[k]=d.hsd[k];});
   Object.keys(d.counters||{}).forEach(function(k){db.counters[k]=Math.max(db.counters[k]||0,d.counters[k]||0);});
   if(d.profile&&d.profile.ten&&!(db.profile&&db.profile.ten))db.profile=d.profile;
@@ -2419,12 +2532,31 @@ var GNAV=[
   {route:"hsd",icon:"clock",label:"Cảnh báo hạn sử dụng"},
   {route:"settings",icon:"gear",label:"Cài đặt"}
 ];
+var NAV_FOLDERS_OPEN=true;
+function navCurFolder(){
+  if(route.view==="folder"&&FD)return FD.name;
+  if(route.view==="period"){var p=per(P&&P.id);if(p)return p.folder||"";}
+  return null;
+}
+function navFoldersHtml(){
+  var cur=navCurFolder();
+  var h='<a class="gnav-item gnav-grp" onclick="A.navFoldersToggle()">'+icon('folder',18)+'Hồ sơ kiểm kê<span class="chv'+(NAV_FOLDERS_OPEN?' open':'')+'">'+icon('chev',16)+'</span></a>';
+  if(!NAV_FOLDERS_OPEN)return h;
+  db.folders.forEach(function(f,i){
+    h+='<a class="gnav-item gnav-sub'+(cur===f?' on':'')+'" onclick="A.navFolder('+i+')">'+esc(f)+'<span class="cnt">'+periodsIn(f).length+'</span></a>';
+  });
+  var un=periodsIn('').length;
+  if(un)h+='<a class="gnav-item gnav-sub'+(cur===''?' on':'')+'" onclick="A.navFolder(-1)">Chưa phân loại<span class="cnt">'+un+'</span></a>';
+  h+='<a class="gnav-item gnav-sub gnav-add" onclick="A.navFolderAdd()">'+icon('plus',15)+'Thêm chi nhánh</a>';
+  return h;
+}
 function navHtml(){
   var h='';
   GNAV.forEach(function(n){
-    var on=route.view===n.route||(n.route==="home"&&route.view==="upload")||(n.route==="home"&&route.view==="period");
+    var on=route.view===n.route||(n.route==="home"&&route.view==="upload");
     var action=n.route==="stock"?"A.navStock()":"A.navGo('"+n.route+"')";
     h+='<a class="gnav-item'+(on?' on':'')+'" onclick="'+action+'">'+icon(n.icon,18)+n.label+'</a>';
+    if(n.route==="home")h+=navFoldersHtml();
   });
   return h;
 }
@@ -2491,6 +2623,8 @@ function render(){
   if(route.view==="home")renderHome();
   else if(route.view==="upload")renderUpload();
   else if(route.view==="period")renderPeriod();
+  else if(route.view==="folder")renderFolder();
+  else if(route.view==="transfer")renderTransfer();
   else if(route.view==="baocao")renderBaoCao();
   else if(route.view==="stock")renderStock();
   else if(route.view==="hsd")renderHsd();
@@ -2508,7 +2642,8 @@ var A={
   go:function(v){
     if(v==="upload"){
       var now=new Date();
-      UP={wb:null,sheet:"",rows:null,hr:0,start:1,map:{},branchManual:"",
+      var fromF=(route.view==="folder"&&FD&&FD.name)?FD.name:"";
+      UP={folder:fromF,fromFolder:!!fromF,wb:null,sheet:"",rows:null,hr:0,start:1,map:{},branchManual:"",
         pname:"Kiểm kê "+String(now.getMonth()+1).padStart(2,"0")+"/"+now.getFullYear()};
     }
     route={view:v};render();
@@ -2565,7 +2700,8 @@ var A={
   createPeriod:function(){
     var items=UP._built||buildItems(UP.rows,UP.start,UP.map,UP.branchManual,db.hsd);
     if(UP.map.name===undefined||!items.length){toast("Cần chọn cột Tên vật tư và có dữ liệu");return;}
-    var p={id:Date.now().toString(36),name:(UP.pname||"").trim()||"Kỳ kiểm kê",createdAt:Date.now(),items:items,by:((db.profile&&db.profile.ten)||'')};
+    var p={id:Date.now().toString(36),name:(UP.pname||"").trim()||"Kỳ kiểm kê",createdAt:Date.now(),items:items,folder:UP.folder||'',by:((db.profile&&db.profile.ten)||'')};
+    if(!UP.folder){toast("Chọn thư mục chi nhánh trước");return;}
     db.periods.unshift(p);
     store.save();
     P={id:p.id,q:"",flt:"all",br:"all",limit:80};
@@ -2710,12 +2846,137 @@ var A={
     if(!BCMETA.br[br.name])BCMETA.br[br.name]={thoigian:'',nguoi:defaultNguoi(br.name),giatri:''};
     BCMETA.br[br.name][field]=val;
   },
+  navFoldersToggle:function(){NAV_FOLDERS_OPEN=!NAV_FOLDERS_OPEN;renderNav();},
+  navFolder:function(i){A.drawerClose();A.openFolder(i);},
+  navFolderAdd:function(){A.drawerClose();A.folderAdd();},
+  openFolder:function(i){FD={name:i<0?'':(db.folders[i]||'')};route={view:'folder'};render();},
+  periodExplain:function(){
+    var p=per(P&&P.id);if(!p)return;
+    var diffs=p.items.filter(function(i){return i.counted&&diffOf(i)!==0;});
+    if(!diffs.length){toast('Kỳ này chưa có mã chênh lệch');return;}
+    var old=null;
+    db.explains.forEach(function(v){if(v.periodId===p.id&&!old)old=v;});
+    if(old&&confirm('Kỳ này đã có phiếu giải trình số '+(old.soPhieu||'(chưa đánh số)')+'.\nBấm OK để mở phiếu đó, Huỷ để tạo phiếu mới.')){
+      EX=old;route={view:'explainEdit'};render();return;
+    }
+    var o=newEX(true);
+    var d=new Date(),pad=function(n){return String(n).padStart(2,'0');};
+    o.periodId=p.id;o.folder=p.folder||'';
+    o.phatHien=['Kiểm kê định kỳ'];
+    o.ngayPhatHien='ngày '+pad(d.getDate())+' tháng '+pad(d.getMonth()+1)+' năm '+d.getFullYear();
+    o.canCu='Biên bản kiểm kê: '+p.name;
+    if(p.folder)o.diaDiem=p.folder;
+    o.vanDe='Qua kiểm kê "'+p.name+'", phát hiện '+diffs.length+' mã vật tư chênh lệch giữa sổ sách và thực tế (chi tiết tại bảng dưới).';
+    diffs.forEach(function(i){
+      o.items.push({ma:i.code,ten:i.name,dvt:i.unit,slSoSach:fmt(i.close),slThucTe:fmt(i.countQty),chenh:fmt(diffOf(i)),donGia:'',thanhTien:''});
+    });
+    EX=o;
+    db.explains.unshift(o);store.save();
+    route={view:'explainEdit'};render();
+    toast('Đã tạo phiếu giải trình · '+diffs.length+' mã chênh lệch');
+  },
+  periodTransfer:function(){
+    var p=per(P&&P.id);if(!p)return;
+    TR={pid:p.id,dest:'',destOther:'',q:'',sel:{},qty:{},limit:60};
+    route={view:'transfer'};render();
+  },
+  trBack:function(){var id=TR&&TR.pid;if(id){P={id:id,q:"",flt:"all",br:"all",limit:80};route={view:"period"};render();}else A.go('home');},
+  trDest:function(v){TR.dest=v;renderTransfer();},
+  trQ:function(v){clearTimeout(trT);trT=setTimeout(function(){TR.q=v;TR.limit=60;renderTrList();},150);},
+  trMore:function(){TR.limit+=100;renderTrList();},
+  trToggle:function(id){
+    var p=per(TR.pid),it=null;p.items.forEach(function(x){if(x.id===id)it=x;});
+    if(TR.sel[id]){TR.sel[id]=false;}else{TR.sel[id]=true;if(it&&(TR.qty[id]==null||TR.qty[id]===''))TR.qty[id]=String(trAvail(it));}
+    renderTrList();
+  },
+  trAll:function(){
+    var p=per(TR.pid);
+    trItems(p).forEach(function(i){TR.sel[i.id]=true;if(TR.qty[i.id]==null||TR.qty[i.id]==='')TR.qty[i.id]=String(trAvail(i));});
+    renderTrList();
+  },
+  trNone:function(){TR.sel={};renderTrList();},
+  trCreate:function(){
+    var p=per(TR.pid);if(!p)return;
+    var destName=TR.dest==='HO'?'Văn phòng / HO':(TR.dest==='__other'?(TR.destOther||'').trim():TR.dest);
+    if(!destName){toast('Chọn nơi nhận');return;}
+    var rows=[],bad=null;
+    p.items.forEach(function(i){
+      if(!TR.sel[i.id]||bad)return;
+      var q=parseNum(TR.qty[i.id]),av=trAvail(i);
+      if(!(q>0)){bad=i.name+': nhập số lượng chuyển';return;}
+      if(q>av+1e-9){bad=i.name+': chuyển '+fmt(q)+' nhiều hơn đang có '+fmt(av);return;}
+      rows.push({ma:i.code,ten:i.name,dvt:i.unit,sl:fmt(q),tinhTrang:'',ghiChu:''});
+    });
+    if(bad){toast(bad);return;}
+    if(!rows.length){toast('Chưa chọn vật tư nào');return;}
+    var o=newHV(true);
+    var d=new Date(),pad=function(n){return String(n).padStart(2,'0');};
+    var from=p.folder||o.benGiao.boPhan||'';
+    o.periodId=p.id;
+    o.loai=['Vật tư tiêu hao'];
+    o.lyDo=['Luân chuyển nội bộ'];
+    o.thoiGian='ngày '+pad(d.getDate())+' tháng '+pad(d.getMonth()+1)+' năm '+d.getFullYear();
+    o.diaDiem=from;
+    o.canCu='Điều chuyển vật tư không sử dụng, theo kỳ kiểm kê: '+p.name;
+    if(from){o.boPhan=from;o.benGiao.boPhan=from;}
+    o.benNhan.boPhan=destName;
+    o.items=rows;
+    HV=o;db.handovers.unshift(o);store.save();
+    TR=null;route={view:'handoverEdit'};render();
+    toast('Đã tạo biên bản bàn giao · '+rows.length+' mã');
+  },
+  periodBack:function(){
+    var p=per(P&&P.id);
+    if(p&&p.folder){FD={name:p.folder};route={view:'folder'};render();}else A.go('home');
+  },
+  upBack:function(){
+    if(UP&&UP.fromFolder&&UP.folder&&FD){route={view:'folder'};render();}else A.go('home');
+  },
+  folderAdd:function(){
+    renameModal('Thêm chi nhánh','',function(v){
+      var dup=db.folders.some(function(f){return norm(f)===norm(v);});
+      if(dup){toast('Chi nhánh này đã có');return;}
+      db.folders.push(v);store.save();render();
+      toast('Đã thêm chi nhánh '+v);
+    });
+  },
+  folderRename:function(){
+    if(!FD||!FD.name)return;
+    var old=FD.name;
+    renameModal('Đổi tên chi nhánh',old,function(v){
+      if(v===old)return;
+      var dup=db.folders.some(function(f){return f!==old&&norm(f)===norm(v);});
+      if(dup){toast('Tên này đã có');return;}
+      var i=db.folders.indexOf(old);if(i>=0)db.folders[i]=v;
+      db.periods.forEach(function(p){if(p.folder===old)p.folder=v;});
+      FD.name=v;store.save();render();
+      toast('Đã đổi tên chi nhánh');
+    });
+  },
+  folderDel:function(){
+    if(!FD||!FD.name||periodsIn(FD.name).length)return;
+    if(!confirm('Xóa thư mục "'+FD.name+'"?'))return;
+    db.folders=db.folders.filter(function(f){return f!==FD.name;});
+    store.save();FD=null;A.go('home');
+  },
+  folderNewPeriod:function(){A.go('upload');},
+  periodMove:function(id){var p=per(id);if(p)moveModal(p);},
+  periodMoveSave:function(id){
+    var p=per(id),sel=document.getElementById('mvsel');
+    var v=sel?sel.value:'';
+    if(!p||!v){toast('Chọn chi nhánh');return;}
+    renameClose();
+    p.folder=v;store.save();
+    if(FD&&route.view==='folder'&&FD.name===''&&!periodsIn('').length){FD=null;route={view:'home'};}
+    render();
+    toast('Đã chuyển vào '+v);
+  },
   openPeriod:function(id){P={id:id,q:"",flt:"all",br:"all",limit:80};route={view:"period"};render();},
   renamePeriod:function(id){
     var p=per(id);if(!p)return;
     renameModal('Sửa tên kỳ kiểm kê',p.name,function(v){
       p.name=v;store.save();
-      if(route.view==='period')renderPeriod();else renderHome();
+      if(route.view==='period')renderPeriod();else render();
       toast('Đã đổi tên kỳ kiểm kê');
     });
   },
@@ -2912,6 +3173,8 @@ document.addEventListener('visibilitychange',function(){if(document.visibilitySt
   if(saved&&saved.periods)db=saved;
   if(!db.handovers)db.handovers=[];
   if(!db.explains)db.explains=[];
+  migrateFolders();
+  store.save();
   if(!db.counters)db.counters={};
   if(!db.profile)db.profile={ten:'',chucVu:'',chiNhanh:'',ma:'',maManual:false};
   try{if(navigator.storage&&navigator.storage.persist)navigator.storage.persist();}catch(e){}
