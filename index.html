@@ -2,7 +2,7 @@
 <html lang="vi">
 <head>
 <meta charset="UTF-8">
-<meta name="app-version" content="2026100806">
+<meta name="app-version" content="2026100807">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
 <meta name="theme-color" content="#0f766e">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -96,7 +96,7 @@ button{-webkit-tap-highlight-color:transparent}
 .chip{flex:0 0 auto;border:1px solid var(--line);background:var(--card2);color:var(--mut);border-radius:999px;padding:7px 12px;font:inherit;font-size:13px;font-weight:600;white-space:nowrap;cursor:pointer}
 .chip-on{background:var(--teal);border-color:var(--teal);color:#fff;font-weight:700}
 .chipwrap{display:flex;flex-wrap:wrap;gap:6px;margin:6px 0}
-#sigovl{position:fixed;inset:0;z-index:150;background:rgba(16,24,40,.55);display:flex;align-items:center;justify-content:center;padding:16px}
+#sigovl,#nmovl{position:fixed;inset:0;z-index:150;background:rgba(16,24,40,.55);display:flex;align-items:center;justify-content:center;padding:16px}
 .sigcard{background:#fff;border-radius:18px;width:100%;max-width:480px;padding:16px;box-shadow:0 12px 40px rgba(0,0,0,.25)}
 #sigcv{display:block;width:100%;height:210px;border:1.5px dashed rgba(16,24,40,.25);border-radius:12px;background:#fff;touch-action:none;-webkit-user-select:none;user-select:none}
 select.chip{appearance:auto;color:var(--ink)}
@@ -450,7 +450,7 @@ function buildItems(rows,start,map,branchManual,hsd){
 
 /* ================= Xuất Excel ================= */
 var XLSX_MIME="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
-function fileNameOf(p){return ("KiemKe_"+p.name).replace(/[^\w-]+/g,"_")+".xlsx";}
+function fileNameOf(p){return ("KiemKe_"+p.name).normalize("NFD").replace(/[\u0300-\u036f]/g,"").replace(/đ/g,"d").replace(/Đ/g,"D").replace(/[^\w-]+/g,"_")+".xlsx";}
 function dlAnchor(blob,fname){
   try{
     var url=URL.createObjectURL(blob);
@@ -1164,6 +1164,34 @@ function sigExport(){
   var oc=document.createElement('canvas');oc.width=ow;oc.height=oh;
   oc.getContext('2d').drawImage(cv,x*d,y*d,w*d,h*d,0,0,ow,oh);
   return {url:oc.toDataURL('image/png'),w:ow,h:oh};
+}
+/* ================= Hộp thoại sửa tên (dùng cho tên kỳ kiểm kê) ================= */
+var RENAME_CB=null;
+function renameModal(title,value,cb){
+  RENAME_CB=cb;
+  var o=document.createElement('div');
+  o.id='nmovl';
+  o.innerHTML='<div class="sigcard">'
+    +'<div style="font-weight:800;font-size:16px;margin-bottom:10px">'+esc(title)+'</div>'
+    +'<textarea class="inp" id="nmin" rows="3" style="resize:none">'+esc(value)+'</textarea>'
+    +'<div style="display:flex;gap:8px;margin-top:12px"><button class="btn btn-outline" style="flex:1;padding:12px" onclick="renameClose()">Huỷ</button>'
+    +'<button class="btn btn-primary" style="flex:1;padding:12px" onclick="renameSave()">'+icon('check',16)+'Lưu</button></div>'
+    +'</div>';
+  document.body.appendChild(o);
+  var t=document.getElementById('nmin');
+  if(t&&t.focus){t.focus();if(t.select)t.select();}
+}
+function renameClose(){
+  var o=document.getElementById('nmovl');if(o)o.remove();
+  RENAME_CB=null;
+}
+function renameSave(){
+  var t=document.getElementById('nmin');
+  var v=((t&&t.value)||'').replace(/\s+/g,' ').trim();
+  if(!v){toast('Tên không được để trống');return;}
+  var cb=RENAME_CB;
+  renameClose();
+  if(cb)cb(v);
 }
 function sigConfirm(){
   if(!SIGP)return;
@@ -1932,9 +1960,9 @@ function renderHome(){
       (total>0&&done===total?'<span style="font-weight:700;color:var(--green);display:inline-flex;align-items:center;gap:4px">'+icon('check',14)+'Hoàn tất</span>':'<span style="color:var(--mut2)">Đang kiểm</span>');
     h+='<div class="card per" onclick="A.openPeriod(\''+p.id+'\')">'+
       '<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px">'+
-      '<div style="min-width:0"><div style="font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+esc(p.name)+'</div>'+
+      '<div style="min-width:0"><div style="font-weight:700;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;word-break:break-word">'+esc(p.name)+'</div>'+
       '<div style="font-size:12px;color:var(--mut);margin-top:2px">Tạo '+new Date(p.createdAt).toLocaleDateString("vi-VN")+' · '+total+' mã VT'+(p.by?', bởi '+esc(p.by):'')+'</div></div>'+
-      '<button class="perx" onclick="event.stopPropagation();A.delPeriod(\''+p.id+'\')" title="Xóa kỳ" style="display:flex">'+icon('x',15)+'</button></div>'+
+      '<div style="display:flex;flex:none">'+'<button class="perx" onclick="event.stopPropagation();A.renamePeriod(\''+p.id+'\')" title="Sửa tên kỳ" style="display:flex">'+icon('edit',15)+'</button>'+'<button class="perx" onclick="event.stopPropagation();A.delPeriod(\''+p.id+'\')" title="Xóa kỳ" style="display:flex">'+icon('x',15)+'</button></div></div>'+
       '<div class="bar" style="margin-top:12px"><div class="fill" style="width:'+pct+'%"></div></div>'+
       '<div style="display:flex;justify-content:space-between;font-size:12px;margin-top:6px"><span style="color:var(--mut)">Đã kiểm <b class="tnum" style="color:var(--ink)">'+done+'/'+total+'</b></span>'+right+'</div></div>';
   });
@@ -2054,7 +2082,7 @@ function renderPeriod(){
   if(!p){route={view:"home"};render();return;}
   var h='<div class="topbar"><div class="trow wrap">'+
     '<button class="back" onclick="A.go(\'home\')">‹</button>'+
-    '<div class="ttl">'+esc(p.name)+'</div>'+
+    '<div class="ttl" style="cursor:text" title="Chạm để sửa tên" onclick="A.renamePeriod(\''+p.id+'\')">'+esc(p.name)+'</div>'+
     '<div style="display:flex;gap:6px;flex-shrink:0">'+
     '<button class="pill" title="Gửi email kết quả kiểm kê" style="display:inline-flex" onclick="A.kiemKeEmail()">'+icon('mail',15)+'</button>'+
     '<button class="pill" style="display:inline-flex;align-items:center;gap:5px" onclick="A.exportCur()">'+icon('download',15)+'Excel</button></div></div>'+
@@ -2683,6 +2711,14 @@ var A={
     BCMETA.br[br.name][field]=val;
   },
   openPeriod:function(id){P={id:id,q:"",flt:"all",br:"all",limit:80};route={view:"period"};render();},
+  renamePeriod:function(id){
+    var p=per(id);if(!p)return;
+    renameModal('Sửa tên kỳ kiểm kê',p.name,function(v){
+      p.name=v;store.save();
+      if(route.view==='period')renderPeriod();else renderHome();
+      toast('Đã đổi tên kỳ kiểm kê');
+    });
+  },
   delPeriod:function(id){
     if(!confirm("Xóa kỳ kiểm kê này? Không thể hoàn tác."))return;
     db.periods=db.periods.filter(function(p){return p.id!==id;});
