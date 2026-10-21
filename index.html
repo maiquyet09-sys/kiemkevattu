@@ -2,7 +2,7 @@
 <html lang="vi">
 <head>
 <meta charset="UTF-8">
-<meta name="app-version" content="2026101607">
+<meta name="app-version" content="2026101610">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
 <meta name="theme-color" content="#0f766e">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -249,6 +249,7 @@ var ICONS={
   x:'<path d="M18 6 6 18M6 6l12 12"/>',
   chev:'<path d="m9 18 6-6-6-6"/>',
   folder:'<path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2Z"/>',
+  scan:'<path d="M3 7V5a2 2 0 0 1 2-2h2"/><path d="M17 3h2a2 2 0 0 1 2 2v2"/><path d="M21 17v2a2 2 0 0 1-2 2h-2"/><path d="M7 21H5a2 2 0 0 1-2-2v-2"/><path d="M7 12h10"/>',
   search:'<circle cx="11" cy="11" r="7"/><path d="m21 21-4.35-4.35"/>',
   plus:'<path d="M12 5v14M5 12h14"/>',
   edit:'<path d="M11 4H5a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2h13a2 2 0 0 0 2-2v-6"/><path d="M18.5 2.5a2.12 2.12 0 0 1 3 3L12 15l-4 1 1-4Z"/>',
@@ -691,7 +692,7 @@ function exportExcelBasic(p,fname){
 /* ================= State ================= */
 var DEFAULT_FOLDERS=['Bùi Thị Xuân','Lê Văn Lương','Cát Linh','Quảng Ninh','Ba Đình-Nghĩa Dũng'];
 var FD=null; // thư mục chi nhánh đang mở
-var db={folders:DEFAULT_FOLDERS.slice(),periods:[],hsd:{},handovers:[],explains:[],counters:{},profile:{ten:'',chucVu:'',chiNhanh:'',ma:'',maManual:false}};
+var db={folders:DEFAULT_FOLDERS.slice(),barcodes:{},periods:[],hsd:{},handovers:[],explains:[],counters:{},profile:{ten:'',chucVu:'',chiNhanh:'',ma:'',maManual:false}};
 var route={view:"home"};
 var P=null;   // trạng thái màn hình kiểm kê
 var BC=null;  // trạng thái màn hình tạo báo cáo
@@ -2014,6 +2015,7 @@ function guessFolder(name){
 }
 function migrateFolders(){
   if(!Array.isArray(db.folders))db.folders=DEFAULT_FOLDERS.slice();
+  if(!db.barcodes||typeof db.barcodes!=='object')db.barcodes={};
   db.periods.forEach(function(p){
     if(!p.folder){var g=guessFolder(p.name);if(g)p.folder=g;}
     if(p.folder&&db.folders.indexOf(p.folder)<0)db.folders.push(p.folder);
@@ -2066,6 +2068,215 @@ function renderTransfer(){
   h+='<div class="botbar"><div class="botin"><button class="btn btn-primary" id="trbtn" onclick="A.trCreate()"></button></div></div>';
   document.getElementById('app').innerHTML=h;
   renderTrList();
+}
+
+/* ================= Quét QR / mã vạch để khớp vật tư ================= */
+var ZX_URL='https://cdn.jsdelivr.net/npm/@zxing/library@0.21.3/umd/index.min.js';
+var SC=null;
+function parseGS1(t){
+  var s=String(t||''),out={},m,found=false;
+  if(/^\(\d{2}\)/.test(s)){
+    var re=/\((\d{2,4})\)([^(]*)/g;
+    while((m=re.exec(s))){out[m[1]]=m[2];found=true;}
+  }else if(/^01\d{14}/.test(s)){
+    var i=0;
+    while(i<s.length){
+      var ai=s.substr(i,2);
+      if(ai==='01'){out['01']=s.substr(i+2,14);i+=16;found=true;}
+      else if(ai==='17'||ai==='11'||ai==='15'){out[ai]=s.substr(i+2,6);i+=8;}
+      else if(ai==='10'||ai==='21'){var j=s.indexOf('\u001d',i+2);if(j<0)j=s.length;out[ai]=s.substring(i+2,j);i=j+1;}
+      else break;
+    }
+  }
+  if(!found||!out['01'])return null;
+  var r={gtin:out['01'],lot:out['10']||'',exp:''};
+  var e=out['17']||'';
+  if(e.length===6)r.exp=(2000+parseInt(e.substr(0,2),10))+'-'+e.substr(2,2);
+  return r;
+}
+function scCanon(text){
+  var t=String(text||'').trim(),g=parseGS1(t);
+  if(g)return 'N:'+g.gtin.replace(/^0+/,'');
+  if(/^\d{8,14}$/.test(t))return 'N:'+t.replace(/^0+/,'');
+  return t;
+}
+function scHasCode(low,c){
+  var digits=/^\d+$/.test(c),from=0,i;
+  while((i=low.indexOf(c,from))>=0){
+    var pv=i>0?low.charAt(i-1):'',nx=low.charAt(i+c.length);
+    var bad=digits?(/\d/.test(pv)||/\d/.test(nx)):(/[a-z0-9]/.test(pv)||/[a-z0-9]/.test(nx));
+    if(!bad)return true;
+    from=i+1;
+  }
+  return false;
+}
+function scMatch(p,text){
+  var t=String(text||'').replace(/\u001d/g,' ').trim(),g=parseGS1(text),canon=scCanon(text),byCode={};
+  p.items.forEach(function(i){byCode[String(i.code).trim().toLowerCase()]=i;});
+  var learned=db.barcodes&&db.barcodes[canon];
+  if(learned&&byCode[String(learned).trim().toLowerCase()])return {item:byCode[String(learned).trim().toLowerCase()],how:'learned',gs1:g,canon:canon};
+  var low=t.toLowerCase();
+  if(byCode[low])return {item:byCode[low],how:'code',gs1:g,canon:canon};
+  if(!g){
+    var toks=low.split(/[^a-z0-9]+/).filter(Boolean);
+    for(var k=0;k<toks.length;k++)if(byCode[toks[k]])return {item:byCode[toks[k]],how:'code',gs1:g,canon:canon};
+    /* mã nằm lẫn trong chuỗi, ví dụ VT10000002, CCDC-00123-LVL, {"ma":"10000025"} */
+    var best=null,bl=0;
+    p.items.forEach(function(i){
+      var c=String(i.code).trim().toLowerCase();
+      if(c.length>=5&&c.length>bl&&scHasCode(low,c)){best=i;bl=c.length;}
+    });
+    if(best)return {item:best,how:'code',gs1:g,canon:canon};
+  }
+  return {item:null,gs1:g,canon:canon};
+}
+function scEnsureZx(){
+  return new Promise(function(res){
+    if(window.ZXing){res(true);return;}
+    var sc=document.createElement('script');sc.src=ZX_URL;
+    sc.onload=function(){res(!!window.ZXing);};sc.onerror=function(){res(false);};
+    document.head.appendChild(sc);
+  });
+}
+function scInitDecoder(){
+  if('BarcodeDetector' in window){try{SC.det=new BarcodeDetector();return Promise.resolve(true);}catch(e){SC.det=null;}}
+  return scEnsureZx();
+}
+function scDecodeZx(c){
+  if(!window.ZXing)return null;
+  try{
+    if(!SC.zr){var hints=new Map();hints.set(ZXing.DecodeHintType.TRY_HARDER,true);SC.zr=new ZXing.MultiFormatReader();SC.zr.setHints(hints);}
+    var bmp=new ZXing.BinaryBitmap(new ZXing.HybridBinarizer(new ZXing.HTMLCanvasElementLuminanceSource(c)));
+    return SC.zr.decode(bmp).getText();
+  }catch(e){return null;}
+}
+function scDecode(c){
+  if(SC.det){
+    return SC.det.detect(c).then(function(r){return (r&&r.length)?r[0].rawValue:null;}).catch(function(){
+      SC.det=null;return scEnsureZx().then(function(){return scDecodeZx(c);});
+    });
+  }
+  return Promise.resolve(scDecodeZx(c));
+}
+function scInApp(){
+  var ua=navigator.userAgent||'';
+  if(/FBAN|FBAV|FB_IAB|Instagram|TikTok|musical_ly|Zalo|Line\/|Messenger/i.test(ua))return true;
+  return /iPhone|iPad|iPod/.test(ua)&&!/Safari\//.test(ua)&&!navigator.standalone;
+}
+function scLoadImage(f){
+  return new Promise(function(res,rej){
+    function viaReader(){
+      var fr=new FileReader();
+      fr.onload=function(){var im=new Image();im.onload=function(){res({el:im,w:im.naturalWidth,h:im.naturalHeight});};im.onerror=function(){rej();};im.src=fr.result;};
+      fr.onerror=function(){rej();};
+      fr.readAsDataURL(f);
+    }
+    if(window.createImageBitmap){
+      createImageBitmap(f).then(function(b){res({el:b,w:b.width,h:b.height});}).catch(viaReader);
+    }else viaReader();
+  });
+}
+function scMsg(m){var e=document.getElementById('scmsg');if(e)e.textContent=m;}
+function scMount(){
+  var o=document.createElement('div');o.id='scanovl';
+  o.style.cssText='position:fixed;inset:0;z-index:120;background:#0b0b12;display:flex;flex-direction:column;color:#e5e7eb';
+  o.innerHTML=
+    '<div style="display:flex;align-items:center;justify-content:space-between;padding:calc(env(safe-area-inset-top,0px) + 10px) 16px 10px"><div style="font-weight:800;font-size:16px">Quét mã vật tư</div>'
+    +'<button onclick="A.scClose()" style="background:#23232c;color:#e5e7eb;border:1px solid #33333d;border-radius:999px;width:36px;height:36px;font-size:16px">✕</button></div>'
+    +'<div style="position:relative;flex:1;min-height:120px;overflow:hidden;background:#000"><video id="scvid" playsinline muted autoplay style="width:100%;height:100%;object-fit:cover"></video>'
+    +'<div style="position:absolute;left:12%;right:12%;top:22%;bottom:22%;border:2px solid rgba(77,166,255,.85);border-radius:16px;box-shadow:0 0 0 999px rgba(0,0,0,.35);pointer-events:none"></div>'
+    +'<div id="scmsg" style="position:absolute;left:12px;right:12px;bottom:10px;text-align:center;font-size:13px;color:#e5e7eb;text-shadow:0 1px 3px #000">Đang mở camera…</div></div>'
+    +'<div style="padding:12px 16px calc(env(safe-area-inset-bottom,0px) + 14px);max-height:52%;overflow:auto;background:#12121a">'
+    +'<div id="scwarn"></div><div id="scres"></div>'
+    +'<div style="display:flex;gap:8px;margin-top:8px"><input id="scman" class="inp" inputmode="text" placeholder="Hoặc nhập/dán dãy số, mã VT" style="flex:1;min-width:0;background:#1b1b24;color:#e5e7eb;border-color:#33333d" onkeydown="if(event.key===\'Enter\')A.scManual()"><button class="btn btn-primary" style="width:auto;padding:0 18px" onclick="A.scManual()">Tìm</button></div>'
+    +'<label style="display:flex;align-items:center;justify-content:center;gap:8px;margin-top:8px;padding:11px;border:1px dashed #44444f;border-radius:12px;color:#9ca3af;font-size:13px;cursor:pointer">'+icon('scan',16)+'Chụp ảnh mã (nếu camera trực tiếp không mở được)<input type="file" accept="image/*" capture="environment" style="display:none" onchange="A.scPhoto(this)"></label>'
+    +'</div>';
+  document.body.appendChild(o);
+}
+function scStart(){
+  scInitDecoder().then(function(ok){
+    if(!SC)return;
+    if(!SC.det&&!ok)scMsg('Không tải được bộ đọc mã (cần mạng). Có thể nhập dãy số bên dưới.');
+  });
+  if(scInApp()){
+    var w=document.getElementById('scwarn');
+    if(w)w.innerHTML='<div style="background:#2a1f12;border:1px solid #8a5a1a;border-radius:12px;padding:10px 12px;margin-bottom:8px;font-size:12px;line-height:1.45">'
+      +'Có vẻ bạn đang mở app trong một ứng dụng khác (không phải Safari), nơi camera trực tiếp thường bị chặn. Hãy bấm <b>Chụp ảnh mã</b> bên dưới, hoặc mở link app bằng <b>Safari</b>.'
+      +'<button onclick="A.scCopyLink()" style="display:block;margin-top:8px;padding:8px 12px;border-radius:10px;border:1px solid #8a5a1a;background:transparent;color:#fbbf24;font:inherit;font-size:12px">Sao chép link để dán vào Safari</button></div>';
+  }
+  if(!navigator.mediaDevices||!navigator.mediaDevices.getUserMedia){
+    scMsg('Trình duyệt này không mở được camera trực tiếp. Dùng nút Chụp ảnh mã hoặc nhập số.');return;
+  }
+  navigator.mediaDevices.getUserMedia({video:{facingMode:{ideal:'environment'}},audio:false}).then(function(stream){
+    if(!SC){stream.getTracks().forEach(function(t){t.stop();});return;}
+    SC.stream=stream;
+    var v=document.getElementById('scvid');
+    v.muted=true;v.defaultMuted=true;v.playsInline=true;
+    v.setAttribute('muted','');v.setAttribute('playsinline','');v.setAttribute('webkit-playsinline','');
+    v.srcObject=stream;
+    var play=function(){var pr=v.play();if(pr&&pr.catch)pr.catch(function(){});};
+    v.onloadedmetadata=play;play();
+    scMsg('Đang mở camera…');
+    SC.timer=setInterval(scTick,300);
+    SC.watch=setTimeout(function(){
+      if(!SC)return;
+      if(v.videoWidth>0){scMsg('Hướng camera vào mã QR / mã vạch');}
+      else scMsg('Camera đã được cấp quyền nhưng không có hình. Dùng nút Chụp ảnh mã hoặc mở bằng Safari.');
+    },2500);
+  }).catch(function(e){
+    var n=(e&&e.name)||'lỗi';
+    scMsg('Không mở được camera ('+n+'). '+(n==='NotAllowedError'?'Hãy cho phép camera cho trình duyệt. ':'')+'Dùng nút Chụp ảnh mã hoặc nhập số.');
+  });
+}
+function scTick(){
+  var v=document.getElementById('scvid');
+  if(!SC||SC.busy||SC.hold||!v||v.readyState<2||!v.videoWidth)return;
+  SC.busy=true;
+  var w=v.videoWidth,h=v.videoHeight,k=Math.min(1,1000/Math.max(w,h));
+  var c=SC.canvas||(SC.canvas=document.createElement('canvas'));
+  c.width=Math.round(w*k);c.height=Math.round(h*k);
+  try{c.getContext('2d',{willReadFrequently:true}).drawImage(v,0,0,c.width,c.height);}catch(e){SC.busy=false;return;}
+  scDecode(c).then(function(txt){if(SC){SC.busy=false;if(txt)scOnCode(txt);}}).catch(function(){if(SC)SC.busy=false;});
+}
+function scInfoGs1(g){
+  if(!g||(!g.lot&&!g.exp))return '';
+  return '<div style="font-size:12px;color:#9ca3af;margin-top:4px">'+(g.lot?'Lô '+esc(g.lot):'')+(g.lot&&g.exp?' · ':'')+(g.exp?'HSD '+esc(g.exp):'')+'</div>';
+}
+function scShowMatched(m){
+  var it=m.item,done=it.counted&&it.countQty!==null;
+  SC.hold=true;
+  document.getElementById('scres').innerHTML=
+    '<div style="background:#16231b;border:1px solid #1f6b3a;border-radius:14px;padding:12px 14px">'
+    +'<div style="font-size:11px;font-weight:800;letter-spacing:.08em;color:#4ade80;text-transform:uppercase">'+icon('check',13)+' Đã khớp'+(m.how==='learned'?' (mã vạch đã học)':'')+'</div>'
+    +'<div style="font-weight:700;font-size:16px;margin-top:4px;word-break:break-word">'+esc(it.name)+'</div>'
+    +'<div style="font-size:12px;color:#9ca3af;margin-top:2px">'+esc(it.code)+' · '+esc(it.unit)+' · Tồn sổ sách '+fmt(it.close)+(done?' · Đã kiểm '+fmt(it.countQty):' · Chưa kiểm')+'</div>'
+    +scInfoGs1(m.gs1)
+    +'<div style="display:flex;gap:8px;margin-top:10px"><button class="btn btn-primary" style="flex:1;padding:12px" onclick="A.scOpenItem(\''+it.id+'\')">Nhập số kiểm kê</button>'
+    +'<button class="btn" style="width:auto;padding:12px 16px;background:#23232c;color:#e5e7eb;border:1px solid #33333d" onclick="A.scNext()">Quét tiếp</button></div></div>';
+}
+function scShowUnmatched(text,m){
+  SC.hold=true;SC.pending={text:text,canon:m.canon,gs1:m.gs1};
+  var shown=String(text).replace(/\u001d/g,' ');
+  document.getElementById('scres').innerHTML=
+    '<div style="background:#2a1f12;border:1px solid #8a5a1a;border-radius:14px;padding:12px 14px">'
+    +'<div style="font-size:11px;font-weight:800;letter-spacing:.08em;color:#fbbf24;text-transform:uppercase">Chưa có trong kỳ này</div>'
+    +'<div style="font-size:12px;color:#9ca3af;margin-top:6px">Nội dung đọc được trong mã:</div>'
+    +'<div style="font-family:ui-monospace,Menlo,monospace;font-size:12px;background:#1b1b24;border:1px solid #33333d;border-radius:8px;padding:8px;margin-top:4px;max-height:84px;overflow:auto;word-break:break-all;-webkit-user-select:text;user-select:text">'+esc(shown.length>400?shown.slice(0,400)+'…':shown)+'</div>'
+    +scInfoGs1(m.gs1)
+    +'<div style="font-size:12px;color:#9ca3af;margin-top:6px">Chọn vật tư tương ứng để liên kết. Lần sau quét mã này app tự nhận.</div>'
+    +'<input id="scpick" class="inp" placeholder="Gõ tên hoặc mã vật tư…" style="margin-top:8px;background:#1b1b24;color:#e5e7eb;border-color:#33333d" oninput="A.scPickQ(this.value)">'
+    +'<div id="scpicklist"></div>'
+    +'<button class="btn" style="margin-top:8px;padding:11px;background:#23232c;color:#e5e7eb;border:1px solid #33333d" onclick="A.scNext()">Bỏ qua, quét tiếp</button></div>';
+}
+function scOnCode(text,force){
+  if(!SC)return;
+  var now=Date.now();
+  if(!force&&SC.last===text&&now-SC.lastAt<2500)return;
+  SC.last=text;SC.lastAt=now;
+  var p=per(SC.pid);if(!p)return;
+  try{if(navigator.vibrate)navigator.vibrate(60);}catch(e){}
+  var m=scMatch(p,text);
+  if(m.item)scShowMatched(m);else scShowUnmatched(text,m);
 }
 
 function renderFolder(){
@@ -2302,7 +2513,7 @@ function renderPeriod(){
     '<div class="wrap" style="padding-top:10px"><div class="bar"><div class="fill" id="pfill"></div></div>'+
     '<div class="prow"><span id="pdone"></span><span id="pdiff"></span></div>'+
     '<button class="stklink" style="display:flex;align-items:center;gap:7px" onclick="A.openStock(\''+p.id+'\')">'+icon('grid',16)+'Bảng tồn kho (chỉ mã còn tồn)'+icon('chev',16)+'</button>'+'<button class="stklink" style="display:flex;align-items:center;gap:7px" onclick="A.periodTransfer()">'+icon('users',16)+'Bàn giao vật tư cho HO / cơ sở khác'+icon('chev',16)+'</button>'+'<button class="stklink" id="exlink" style="display:none;align-items:center;gap:7px;color:var(--red)" onclick="A.periodExplain()"></button>'+sigPeriodToggle(p)+'</div>'+
-    '<div class="wrap" style="padding-bottom:8px"><input class="inp" style="background:var(--card)" id="q" placeholder="Tìm tên hoặc mã vật tư (không dấu vẫn ra)…" oninput="A.qInput(this.value)"></div>'+
+    '<div class="wrap" style="padding-bottom:8px;display:flex;gap:8px"><input class="inp" style="background:var(--card);flex:1;min-width:0" id="q" placeholder="Tìm tên hoặc mã vật tư (không dấu vẫn ra)…" oninput="A.qInput(this.value)"><button class="pill" style="display:inline-flex;align-items:center;gap:5px;padding:0 14px;flex:none" onclick="A.scanOpen()">'+icon('scan',18)+'Quét</button></div>'+
     '<div class="chips" id="chips"></div></div>'+
     '<div class="wrap" id="list" style="padding-top:12px;padding-bottom:110px"></div>'+
     '<div class="botbar"><div class="botin"><button class="btn btn-primary" id="seqbtn" onclick="A.seqStart()"></button></div></div>';
@@ -2604,6 +2815,7 @@ function mergeDb(d){
   }
   add(db.periods,d.periods,'p');add(db.handovers,d.handovers,'h');add(db.explains,d.explains,'e');
   (d.folders||[]).forEach(function(f){if(f&&db.folders.indexOf(f)<0)db.folders.push(f);});
+  Object.keys(d.barcodes||{}).forEach(function(k){if(!db.barcodes[k])db.barcodes[k]=d.barcodes[k];});
   migrateFolders();
   Object.keys(d.hsd||{}).forEach(function(k){if(!db.hsd[k])db.hsd[k]=d.hsd[k];});
   Object.keys(d.counters||{}).forEach(function(k){db.counters[k]=Math.max(db.counters[k]||0,d.counters[k]||0);});
@@ -3070,6 +3282,88 @@ var A={
     HV=o;db.handovers.unshift(o);store.save();
     TR=null;route={view:'handoverEdit'};render();
     toast('Đã tạo biên bản bàn giao · '+rows.length+' mã');
+  },
+  scanOpen:function(){
+    var p=per(P&&P.id);if(!p)return;
+    if(SC)A.scClose();
+    SC={pid:p.id,hold:false,busy:false};
+    scMount();scStart();
+  },
+  scClose:function(){
+    if(SC){
+      if(SC.timer)clearInterval(SC.timer);
+      if(SC.watch)clearTimeout(SC.watch);
+      if(SC.stream)SC.stream.getTracks().forEach(function(t){t.stop();});
+    }
+    var o=document.getElementById('scanovl');if(o)o.remove();
+    SC=null;
+  },
+  scNext:function(){
+    if(!SC)return;
+    SC.hold=false;SC.pending=null;SC.last='';
+    document.getElementById('scres').innerHTML='';
+    scMsg('Hướng camera vào mã QR / mã vạch');
+  },
+  scOpenItem:function(id){
+    var pid=SC&&SC.pid;
+    A.scClose();
+    if(pid)openSheet(id,false);
+  },
+  scManual:function(){
+    var e=document.getElementById('scman');var v=e?e.value.trim():'';
+    if(!v)return;
+    scOnCode(v,true);
+  },
+  scPickQ:function(q){
+    var box=document.getElementById('scpicklist');if(!box||!SC)return;
+    var p=per(SC.pid),n=norm(q||''),h='',c=0;
+    if(!n){box.innerHTML='';return;}
+    p.items.forEach(function(i){
+      if(c>=6||norm(i.name+' '+i.code).indexOf(n)<0)return;
+      c++;
+      h+='<button onclick="A.scLink(\''+i.id+'\')" style="display:block;width:100%;text-align:left;margin-top:6px;padding:10px 12px;border-radius:10px;border:1px solid #33333d;background:#1b1b24;color:#e5e7eb;font:inherit;font-size:13px"><b>'+esc(i.name)+'</b><br><span style="color:#9ca3af;font-size:12px">'+esc(i.code)+' · '+esc(i.unit)+'</span></button>';
+    });
+    box.innerHTML=h||'<div style="font-size:12px;color:#9ca3af;margin-top:6px">Không có vật tư phù hợp.</div>';
+  },
+  scLink:function(id){
+    if(!SC||!SC.pending)return;
+    var p=per(SC.pid),it=null;
+    p.items.forEach(function(x){if(x.id===id)it=x;});
+    if(!it)return;
+    db.barcodes[SC.pending.canon]=it.code;store.save();
+    var gs1=SC.pending.gs1;SC.pending=null;
+    scShowMatched({item:it,how:'learned',gs1:gs1});
+    toast('Đã liên kết mã vạch với '+it.name);
+  },
+  scCopyLink:function(){
+    var url=location.href.split('#')[0];
+    var done=function(){toast('Đã sao chép link. Dán vào Safari để mở.');};
+    if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(url).then(done).catch(function(){prompt('Sao chép link này:',url);});}
+    else prompt('Sao chép link này:',url);
+  },
+  scPhoto:function(input){
+    var f=input.files&&input.files[0];input.value='';
+    if(!f||!SC)return;
+    scMsg('Đang đọc ảnh…');
+    var info=(f.type||'không rõ định dạng')+', '+Math.round(f.size/1024)+' KB';
+    scLoadImage(f).then(function(im){
+      if(!SC)return;
+      var go=function(){
+        var tryScale=function(maxSide){
+          var k=Math.min(1,maxSide/Math.max(im.w,im.h));
+          var c=document.createElement('canvas');c.width=Math.max(1,Math.round(im.w*k));c.height=Math.max(1,Math.round(im.h*k));
+          c.getContext('2d').drawImage(im.el,0,0,c.width,c.height);
+          return scDecode(c);
+        };
+        tryScale(1600).then(function(t){return t||tryScale(900);}).then(function(t){return t||tryScale(2400);}).then(function(txt){
+          if(!SC)return;
+          if(txt){scMsg('Đã đọc ảnh');scOnCode(txt,true);}
+          else if(!SC.det&&!window.ZXing)scMsg('Chưa tải được bộ đọc mã (cần mạng hoặc bị chặn). Hãy nhập dãy số.');
+          else scMsg('Không đọc được mã trong ảnh. Chụp gần hơn, đủ sáng, mã nằm gọn giữa ảnh, hoặc nhập số.');
+        });
+      };
+      if(!SC.det&&!window.ZXing)scEnsureZx().then(go);else go();
+    }).catch(function(){scMsg('Không mở được ảnh ('+info+'). Thử chụp lại hoặc nhập số.');});
   },
   periodBack:function(){
     var p=per(P&&P.id);
