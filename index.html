@@ -2,7 +2,7 @@
 <html lang="vi">
 <head>
 <meta charset="UTF-8">
-<meta name="app-version" content="2026102206">
+<meta name="app-version" content="2026102207">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
 <meta name="theme-color" content="#0f766e">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -2585,13 +2585,11 @@ function scOcrRetry(){
   OCR.loading=null;OCR.err='';scOcrStatus('Số: đang tải…');
   ocrWorker().then(function(){if(SC&&!SC.hold)scMsg(scHint());}).catch(scOcrFail);
 }
-/* Đánh giá kết quả đọc: khớp hoàn toàn thì nhảy ngay; lệch 1–2 số mà chỉ có đúng 1 mã phù hợp thì cần thấy 2 lần */
+/* Đánh giá kết quả đọc: chỉ khớp HOÀN TOÀN mới tự nhảy. Lệch dù 1 chữ số cũng không tự khớp (tránh nhầm sang tài sản khác), chỉ ghi nhận để đối chiếu */
 function scJudge(p,lines){
   var r=ocrRank(p,lines);if(!r.length)return null;
   var a=r[0],b=r[1];
   if(a.dist===0&&(!b||b.dist>0))return {it:a.item,line:a.line,dist:0,need:scRisky(p,a.item)?2:1};
-  var maxd=a.line.length>=10?2:1;
-  if(a.dist>0&&a.dist<=maxd&&a.line.length>=6&&r.filter(function(x){return x.dist<=maxd;}).length===1)return {it:a.item,line:a.line,dist:a.dist,need:2};
   return null;
 }
 function scAutoOcr(v){
@@ -4030,11 +4028,14 @@ function scUnmNotice(e,isNew){
   if(!SC||SC.hold)return;
   scUnmChip();
   try{if(navigator.vibrate)navigator.vibrate([30,40,30]);}catch(x){}
+  UNM.pid=SC.pid;
+  var cand=unmCands(per(SC.pid),e).filter(function(x){return /^lệch/.test(x.tag);})[0];
   var ean=eanOk(ocrDigits(e.text)),note=ean===true?' · mã vạch EAN hợp lệ':ean===false?' · ⚠ có thể đọc sai 1–2 số':'';
   document.getElementById('scres').innerHTML='<div style="background:#2a1f12;border:1px solid #8a5a1a;border-radius:14px;padding:10px 12px">'
     +'<div style="font-size:11px;font-weight:800;letter-spacing:.08em;color:#fbbf24;text-transform:uppercase">⚑ Chưa khớp · đã ghi nhận để đối chiếu sau</div>'
     +'<div style="font-family:ui-monospace,Menlo,monospace;font-size:18px;font-weight:700;margin-top:4px;word-break:break-all">'+esc(e.text)+'</div>'
     +'<div style="font-size:12px;color:#9ca3af;margin-top:2px">'+(e.kind==='ocr'?'Đọc số':'Quét mã')+' · thấy '+e.n+' lần'+note+'</div>'
+    +(cand?'<button onclick="unmLink(\''+e.id+'\',\''+cand.item.id+'\')" style="display:block;width:100%;text-align:left;margin-top:8px;padding:9px 12px;border-radius:10px;border:1px solid #33333d;background:#1b1b24;color:#e5e7eb;font:inherit;font-size:13px">Gần giống (<span style="color:#fbbf24">'+cand.tag+'</span>), chạm nếu đúng là:<br><b>'+esc(cand.item.name)+'</b> · '+esc(cand.item.code)+'</button>':'')
     +'<div style="display:flex;gap:8px;margin-top:8px"><button class="btn" style="flex:1;padding:10px;background:#23232c;color:#fbbf24;border:1px solid #8a5a1a" onclick="unmOpen(SC.pid,\''+e.id+'\')">Chọn mã ngay</button>'
     +'<button class="btn" style="width:auto;padding:10px 16px;background:#23232c;color:#e5e7eb;border:1px solid #33333d" onclick="A.scNext()">Quét tiếp</button></div></div>';
 }
