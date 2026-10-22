@@ -4016,10 +4016,11 @@ function asShowMatched(m){
     return;
   }
   var v=asDefaults(p,it),sel=function(arr,s){return arr.map(function(o){return '<option'+(o===s?' selected':'')+'>'+esc(o)+'</option>';}).join('');};
-  document.getElementById('scres').innerHTML='<div style="background:#16231b;border:1px solid #1f6b3a;border-radius:14px;padding:12px 14px">'
-    +'<div style="font-size:11px;font-weight:800;letter-spacing:.08em;color:#4ade80;text-transform:uppercase">'+icon('check',13)+' Đã khớp'+(m.how==='learned'?' (mã đã học)':m.how==='ocr'?' (đọc số)':'')+'</div>'
+  var ex=!!it.extra;
+  document.getElementById('scres').innerHTML='<div style="'+(ex?'background:#2a1f12;border:1px solid #8a5a1a':'background:#16231b;border:1px solid #1f6b3a')+';border-radius:14px;padding:12px 14px">'
+    +(ex?'<div style="font-size:11px;font-weight:800;letter-spacing:.08em;color:#fbbf24;text-transform:uppercase">⚑ Phát hiện tài sản chưa có trong danh mục</div>':'<div style="font-size:11px;font-weight:800;letter-spacing:.08em;color:#4ade80;text-transform:uppercase">'+icon('check',13)+' Đã khớp'+(m.how==='learned'?' (mã đã học)':m.how==='ocr'?' (đọc số)':'')+'</div>')
     +'<div style="font-weight:700;font-size:16px;margin-top:4px;word-break:break-word">'+esc(it.name)+'</div>'
-    +'<div style="font-size:12px;color:#9ca3af;margin-top:2px">'+esc(it.code)+' · '+esc(it.unit)+' · Sổ sách '+fmt(it.qty)+(it.counted?' · <span style="color:#fbbf24">Đã kiểm, lưu sẽ ghi đè</span>':'')+'</div>'
+    +'<div style="font-size:12px;color:#9ca3af;margin-top:2px">'+esc(it.code)+' · '+esc(it.unit)+' · '+(ex?'Không có trong sổ sách':'Sổ sách '+fmt(it.qty))+(it.counted?' · <span style="color:#fbbf24">Đã kiểm, lưu sẽ ghi đè</span>':'')+'</div>'
     +'<input id="asq_room" list="asrooms" placeholder="Phòng sử dụng thực tế" value="'+esc(v.room)+'" style="'+ASD+';margin-top:10px">'
     +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px"><input id="asq_user" placeholder="Người sử dụng" value="'+esc(v.user)+'" style="'+ASD+'"><input id="asq_loc" placeholder="Vị trí" value="'+esc(v.loc)+'" style="'+ASD+'"></div>'
     +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px"><input id="asq_qty" inputmode="decimal" placeholder="SL kiểm kê" value="'+esc(v.cQty)+'" style="'+ASD+'"><select id="asq_quality" style="'+ASD+'">'+sel(ASQ,v.quality)+'</select></div>'
@@ -4388,7 +4389,7 @@ function asAddedNotice(it,isNew){
   try{if(navigator.vibrate)navigator.vibrate([30,40,30]);}catch(x){}
   scBeep();scUnmChip();asRenderBody();
   document.getElementById('scres').innerHTML='<div style="background:#2a1f12;border:1px solid #8a5a1a;border-radius:14px;padding:10px 12px">'
-    +'<div style="font-size:11px;font-weight:800;letter-spacing:.08em;color:#fbbf24;text-transform:uppercase">⚑ '+(isNew?'Chưa có trong sổ · đã thêm vào danh mục':'Đã có trong danh mục phát hiện thêm')+'</div>'
+    +'<div style="font-size:11px;font-weight:800;letter-spacing:.08em;color:#fbbf24;text-transform:uppercase">⚑ '+(isNew?'Phát hiện tài sản chưa có trong danh mục · đã ghi nhận':'Phát hiện tài sản chưa có trong danh mục · đã ghi nhận trước đó')+'</div>'
     +'<div style="font-family:ui-monospace,Menlo,monospace;font-size:18px;font-weight:700;margin-top:4px;word-break:break-all">'+esc(it.code)+'</div>'
     +'<div style="font-size:12px;color:#9ca3af;margin-top:2px">Phát hiện thêm · SL kiểm kê '+fmt(it.cQty)+(it.room?' · '+esc(it.room):'')+' · gắn nhãn “Cần dò tìm”</div>'
     +'<div id="scphn" style="font-size:12px;margin-top:4px;color:'+((it.imgs||[]).some(function(m){return m.k==='tem';})?'#4ade80':'#8ec5ff')+'">'+((it.imgs||[]).some(function(m){return m.k==='tem';})?'📷 Đã lưu ảnh tem vào file kiểm kê':'📷 Đang chụp & lưu ảnh tem…')+'</div>'
