@@ -2623,12 +2623,15 @@ function scAutoOcr(v){
       scMsg('Đang đọc… thấy '+lines[0].digits+' (chưa khớp mã nào)');
       scTrack(lines).forEach(function(c){
         if(c.done)return;
+        if(SC.kind==='asset'){
+          var vv=c.cnt[c.rep]||0,ean=eanOk(c.rep);
+          if(c.rep.length<7||vv<2)return;
+          if(ean===true){c.done=true;var ra=asAutoAdd(p,c.rep,'ocr');asAddedNotice(ra.it,ra.isNew);return;}
+          if(vv<4)return;
+          c.done=true;asConfirmNum(c.rep);return;
+        }
         if(c.n<(eanOk(c.rep)===false?3:2))return;
         c.done=true;
-        if(SC.kind==='asset'){
-          if(c.rep.length<7)return;
-          var ra=asAutoAdd(p,c.rep,'ocr');asAddedNotice(ra.it,ra.isNew);return;
-        }
         var r=unmAdd(p,c.rep,'ocr',c.n);
         scUnmNotice(r.e,r.isNew);
       });
@@ -3999,6 +4002,7 @@ var ASD='background:#1b1b24;color:#e5e7eb;border:1px solid #33333d;border-radius
 function asShowMatched(m){
   var p=per(SC.pid),it=m.item;
   SC.hold=true;scBeep();
+  if(it.counted)return asShowDup(it);
   if(p.cur&&p.cur.auto&&!it.counted){
     var prev=JSON.parse(JSON.stringify(it));
     asApply(p,it,asDefaults(p,it));
@@ -4030,6 +4034,33 @@ function asShowMatched(m){
     +'<button class="btn" style="width:auto;padding:12px 14px;background:#23232c;color:#e5e7eb;border:1px solid #33333d" onclick="ASX.scDetail(\''+it.id+'\')">Chi tiết</button>'
     +'<button class="btn" style="width:auto;padding:12px 14px;background:#23232c;color:#e5e7eb;border:1px solid #33333d" onclick="A.scNext()">Bỏ qua</button></div>'
     +asShootRow(it)+'</div>';
+}
+
+/* ---- Quét trúng tài sản đã kiểm kê: báo trùng, người kiểm tự quyết lưu đè hay không ---- */
+function asShowDup(it){
+  var when=it.at?new Date(it.at).toLocaleString('vi-VN'):'';
+  document.getElementById('scres').innerHTML='<div style="background:#2a1f12;border:1px solid #8a5a1a;border-radius:14px;padding:12px 14px">'
+    +'<div style="font-size:11px;font-weight:800;letter-spacing:.08em;color:#fbbf24;text-transform:uppercase">⚠ Trùng mã · đã kiểm kê</div>'
+    +'<div style="font-weight:700;font-size:16px;margin-top:4px;word-break:break-word">'+esc(it.name)+'</div>'
+    +'<div style="font-size:12px;color:#9ca3af;margin-top:2px">'+esc(it.code)+(it.extra?' · Ngoài danh mục (cần dò tìm)':' · Sổ sách '+fmt(it.qty))+'</div>'
+    +'<div style="font-size:13px;margin-top:6px">Đã kiểm: SL <b>'+fmt(it.cQty)+'</b>'+(it.room?' · '+esc(it.room):'')
+    +(when?'<br><span style="color:#9ca3af;font-size:12px">Lúc '+esc(when)+(it.by?' · '+esc(it.by):'')+'</span>':'')+'</div>'
+    +'<div style="display:flex;gap:8px;margin-top:10px"><button class="btn" style="flex:1;padding:11px;background:#23232c;color:#e5e7eb;border:1px solid #33333d" onclick="A.scNext()">Không lưu, quét tiếp</button>'
+    +'<button class="btn" style="flex:1;padding:11px;background:#23232c;color:#fbbf24;border:1px solid #8a5a1a" onclick="ASX.scDetail(\''+it.id+'\')">Lưu lại / ghi đè</button></div></div>';
+}
+/* ---- Số đọc bằng OCR chưa chắc chắn: hiện số để đối chiếu với tem, sửa nếu sai rồi mới thêm ---- */
+function asConfirmNum(code){
+  if(!SC)return;
+  SC.hold=true;scBeep();
+  phBurst(document.getElementById('scvid'),3,90,1600).then(function(r){
+    if(!SC||!r.cv)return;phSharpen(r.cv,.5);SC.snap={d:r.cv.toDataURL('image/jpeg',.88),w:r.cv.width,h:r.cv.height};
+  });
+  document.getElementById('scres').innerHTML='<div style="background:#2a1f12;border:1px solid #8a5a1a;border-radius:14px;padding:12px 14px">'
+    +'<div style="font-size:11px;font-weight:800;letter-spacing:.08em;color:#fbbf24;text-transform:uppercase">⚑ Số chưa có trong danh mục · kiểm tra số đọc</div>'
+    +'<div style="font-size:12px;color:#9ca3af;margin-top:6px">Đối chiếu với tem, sửa nếu app đọc sai:</div>'
+    +'<input id="scnum" inputmode="numeric" value="'+esc(code)+'" style="'+ASD+';margin-top:6px;font-family:ui-monospace,Menlo,monospace;font-size:20px;font-weight:700">'
+    +'<div style="display:flex;gap:8px;margin-top:10px"><button class="btn btn-primary" style="flex:1;padding:12px" onclick="ASX.confirmNum()">Đúng số — thêm vào danh mục</button>'
+    +'<button class="btn" style="width:auto;padding:12px 14px;background:#23232c;color:#e5e7eb;border:1px solid #33333d" onclick="A.scNext()">Quét lại</button></div></div>';
 }
 function asShowUnmatched(text,m){
   SC.hold=true;SC.pending={text:text,canon:m.canon,gs1:m.gs1};
@@ -4234,6 +4265,14 @@ var ASX={
     SC.undo=null;saveSoon();A.scNext();scLogRender();asRenderBody();toast('Đã hoàn tác');
   },
   scDetail:function(id){asEdit(id);},
+  confirmNum:function(){
+    if(!SC)return;
+    var e=document.getElementById('scnum'),v=e?e.value.replace(/\s+/g,'').trim():'';
+    if(!v){toast('Nhập số trên tem');return;}
+    var p=per(SC.pid),m=scMatch(p,v);
+    if(m.item){scShowMatched(m);return;}
+    var r=asAutoAdd(p,v,'code');asAddedNotice(r.it,r.isNew);
+  },
   phShoot:function(k){
     var it=AP.editing;if(!it)return;
     if((it.imgs||[]).length>=8){toast('Mỗi tài sản tối đa 8 ảnh');return;}
