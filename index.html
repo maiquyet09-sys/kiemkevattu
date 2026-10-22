@@ -2231,9 +2231,10 @@ function scStart(){
   if(!navigator.mediaDevices||!navigator.mediaDevices.getUserMedia){
     scMsg('Trình duyệt này không mở được camera trực tiếp. Dùng nút Chụp ảnh mã hoặc nhập số.');return;
   }
-  navigator.mediaDevices.getUserMedia({video:{facingMode:{ideal:'environment'}},audio:false}).then(function(stream){
+  navigator.mediaDevices.getUserMedia({video:{facingMode:{ideal:'environment'},width:{ideal:1920},height:{ideal:1080}},audio:false}).then(function(stream){
     if(!SC){stream.getTracks().forEach(function(t){t.stop();});return;}
     SC.stream=stream;scTools(stream);
+    try{if(SC.track)SC.track.applyConstraints({advanced:[{focusMode:'continuous'}]}).catch(function(){});}catch(e){}
     var v=document.getElementById('scvid');
     v.muted=true;v.defaultMuted=true;v.playsInline=true;
     v.setAttribute('muted','');v.setAttribute('playsinline','');v.setAttribute('webkit-playsinline','');
@@ -3487,6 +3488,261 @@ function sgCardHtml(){
   h+='<button class="btn btn-outline" style="margin-top:14px;padding:10px;font-size:13px" onclick="SGX.copyHC()">Dùng Phòng Hành chính này cho mọi chi nhánh</button></div>';
   return h;
 }
+/* ================= Ảnh kiểm kê TS & CCDC: chụp nét + tự lưu ảnh tem khi quét không khớp (IndexedDB) ================= */
+var PH={db:null,cache:{},mem:{},busy:{},
+  open:function(){
+    if(PH._o)return PH._o;
+    PH._o=new Promise(function(res){
+      try{
+        var rq=indexedDB.open('kk_photos',1);
+        rq.onupgradeneeded=function(){rq.result.createObjectStore('p');};
+        rq.onsuccess=function(){PH.db=rq.result;res(PH.db);};
+        rq.onerror=function(){res(null);};
+      }catch(e){res(null);}
+    });
+    try{if(navigator.storage&&navigator.storage.persist)navigator.storage.persist();}catch(e){}
+    return PH._o;
+  },
+  put:function(id,d){
+    PH.cache[id]=d;
+    return PH.open().then(function(db){
+      if(!db){PH.mem[id]=d;if(!PH.warned){PH.warned=1;toast('Trình duyệt không lưu ảnh lâu dài được — hãy xuất Excel sớm');}return;}
+      return new Promise(function(res){
+        var tx=db.transaction('p','readwrite');tx.objectStore('p').put(d,id);
+        tx.oncomplete=res;tx.onerror=function(){PH.mem[id]=d;res();};
+      });
+    });
+  },
+  get:function(id){
+    if(PH.cache[id])return Promise.resolve(PH.cache[id]);
+    if(PH.mem[id])return Promise.resolve(PH.mem[id]);
+    return PH.open().then(function(db){
+      if(!db)return null;
+      return new Promise(function(res){
+        var rq=db.transaction('p').objectStore('p').get(id);
+        rq.onsuccess=function(){if(rq.result)PH.cache[id]=rq.result;res(rq.result||null);};
+        rq.onerror=function(){res(null);};
+      });
+    });
+  },
+  del:function(id){
+    delete PH.cache[id];delete PH.mem[id];
+    return PH.open().then(function(db){if(db)try{db.transaction('p','readwrite').objectStore('p').delete(id);}catch(e){}});
+  },
+  preload:function(p){
+    var a=[];p.items.forEach(function(it){(it.imgs||[]).forEach(function(m){a.push(PH.get(m.id));});});
+    return Promise.all(a);
+  }
+};
+function phAdd(it,k,d,w,h){
+  var id='ph_'+Date.now().toString(36)+asRid();
+  PH.put(id,d);
+  it.imgs=(it.imgs||[]).concat([{id:id,k:k,at:Date.now(),w:w||0,h:h||0}]);
+  saveSoon();return id;
+}
+function phDelItem(it){(it.imgs||[]).forEach(function(m){PH.del(m.id);});it.imgs=[];}
+function phFill(root){
+  if(!root)return;
+  Array.prototype.forEach.call(root.querySelectorAll('img[data-ph]'),function(im){
+    PH.get(im.getAttribute('data-ph')).then(function(d){if(d)im.src=d;});
+  });
+}
+/* Độ nét = phương sai Laplacian; ảnh càng nét càng lớn */
+function phSharp(cv){
+  var k=Math.min(1,320/Math.max(cv.width,cv.height)),w=Math.max(8,Math.round(cv.width*k)),h=Math.max(8,Math.round(cv.height*k));
+  var c=PH._sc||(PH._sc=document.createElement('canvas'));c.width=w;c.height=h;
+  var g=c.getContext('2d',{willReadFrequently:true});g.drawImage(cv,0,0,w,h);
+  var d=g.getImageData(0,0,w,h).data,L=new Float32Array(w*h),i,x,y,s=0,s2=0,n=0,v;
+  for(i=0;i<w*h;i++)L[i]=d[i*4]*.3+d[i*4+1]*.59+d[i*4+2]*.11;
+  for(y=1;y<h-1;y++)for(x=1;x<w-1;x++){i=y*w+x;v=4*L[i]-L[i-1]-L[i+1]-L[i-w]-L[i+w];s+=v;s2+=v*v;n++;}
+  return s2/n-(s/n)*(s/n);
+}
+function phSharpen(cv,a){
+  try{
+    var g=cv.getContext('2d'),w=cv.width,h=cv.height,im=g.getImageData(0,0,w,h),s=im.data,o=new Uint8ClampedArray(s),x,y,i,c,v;
+    for(y=1;y<h-1;y++)for(x=1;x<w-1;x++){i=(y*w+x)*4;for(c=0;c<3;c++){v=s[i+c];o[i+c]=v+a*(4*v-s[i+c-4]-s[i+c+4]-s[i+c-w*4]-s[i+c+w*4]);}}
+    im.data.set(o);g.putImageData(im,0,0);
+  }catch(e){}
+}
+function phFrame(v,maxSide){
+  if(!v||!v.videoWidth)return null;
+  var k=Math.min(1,maxSide/Math.max(v.videoWidth,v.videoHeight)),c=document.createElement('canvas');
+  c.width=Math.round(v.videoWidth*k);c.height=Math.round(v.videoHeight*k);
+  try{c.getContext('2d',{willReadFrequently:true}).drawImage(v,0,0,c.width,c.height);}catch(e){return null;}
+  return c;
+}
+/* Chụp liên tiếp n khung, giữ khung nét nhất */
+function phBurst(v,n,gap,maxSide){
+  return new Promise(function(res){
+    var best=null,bs=-1,i=0;
+    (function step(){
+      var c=phFrame(v,maxSide);
+      if(c){var s=phSharp(c);if(s>bs){bs=s;best=c;}}
+      if(++i<n)setTimeout(step,gap);else res({cv:best,score:bs});
+    })();
+  });
+}
+/* Ảnh tĩnh độ phân giải đầy đủ (có tự lấy nét) nếu trình duyệt hỗ trợ ImageCapture */
+function phStill(track){
+  if(!track||typeof ImageCapture==='undefined')return Promise.resolve(null);
+  return new Promise(function(res){
+    var done=false,fin=function(x){if(!done){done=true;res(x);}};
+    setTimeout(function(){fin(null);},5000);
+    try{
+      new ImageCapture(track).takePhoto().then(scLoadImage).then(function(im){
+        var c=document.createElement('canvas');c.width=im.w;c.height=im.h;c.getContext('2d').drawImage(im.el,0,0);fin(c);
+      }).catch(function(){fin(null);});
+    }catch(e){fin(null);}
+  });
+}
+function phShoot(v,track,maxSide){
+  var out=function(cv,sharp){
+    var k=Math.min(1,maxSide/Math.max(cv.width,cv.height));
+    if(k<1){var c=document.createElement('canvas');c.width=Math.round(cv.width*k);c.height=Math.round(cv.height*k);var g=c.getContext('2d');g.imageSmoothingQuality='high';g.drawImage(cv,0,0,c.width,c.height);cv=c;}
+    if(sharp)phSharpen(cv,.5);
+    return {d:cv.toDataURL('image/jpeg',.92),w:cv.width,h:cv.height};
+  };
+  return phStill(track).then(function(cv){
+    if(cv)return out(cv,false);
+    return phBurst(v,5,110,2560).then(function(r){return r.cv?out(r.cv,true):null;});
+  });
+}
+function phNote(){
+  var e=document.getElementById('scphn');if(!e||!SC)return;
+  e.textContent='📷 Đã lưu ảnh tem vào file kiểm kê';e.style.color='#4ade80';
+}
+/* Quét không khớp → tự chụp ảnh tem (khung nét nhất) gắn vào tài sản "Cần dò tìm" */
+function phTemFor(it){
+  if(!SC||SC.kind!=='asset'||PH.busy[it.id])return;
+  if((it.imgs||[]).some(function(m){return m.k==='tem';}))return;
+  PH.busy[it.id]=1;
+  var fin=function(d,w,h){delete PH.busy[it.id];if(d){phAdd(it,'tem',d,w,h);phNote();if(typeof asRenderBody==='function')asRenderBody();}};
+  if(SC.snap){var s=SC.snap;SC.snap=null;fin(s.d,s.w,s.h);return;}
+  phBurst(document.getElementById('scvid'),3,90,1600).then(function(r){
+    if(!r.cv){fin(null);return;}
+    phSharpen(r.cv,.5);fin(r.cv.toDataURL('image/jpeg',.88),r.cv.width,r.cv.height);
+  }).catch(function(){fin(null);});
+}
+/* ---- Màn hình chụp ảnh tài sản (độ phân giải cao, đo độ nét trực tiếp) ---- */
+var PC=null,PH_BTN='border:1px solid #33333d;background:#23232c;color:#e5e7eb;border-radius:12px;padding:12px 16px;font:inherit;font-size:14px;font-weight:700';
+function phCamClose(){
+  if(!PC)return;
+  clearInterval(PC.t);
+  if(PC.stream)PC.stream.getTracks().forEach(function(t){t.stop();});
+  var o=document.getElementById('phcam');if(o)o.remove();
+  PC=null;
+}
+function phCamBar(mode){
+  var b=document.getElementById('phbar');if(!b)return;
+  if(mode==='live')b.innerHTML='<label style="'+PH_BTN+';cursor:pointer;width:96px;text-align:center">Camera máy<input type="file" accept="image/*" capture="environment" style="display:none" onchange="phCamFile(this)"></label>'
+    +'<button id="phshut" onclick="phCamShoot()" style="width:72px;height:72px;border-radius:50%;border:4px solid #fff;background:#e5e7eb;flex:none"></button><span style="width:96px"></span>';
+  else b.innerHTML='<button onclick="phCamRetake()" style="'+PH_BTN+';flex:1">Chụp lại</button><button onclick="phCamUse()" style="'+PH_BTN+';flex:1;background:#2563eb;border-color:#2563eb;color:#fff">Dùng ảnh này</button>';
+}
+function phCam(title,cb){
+  if(PC)phCamClose();
+  PC={cb:cb,max:1,data:null,busy:false};
+  var o=document.createElement('div');o.id='phcam';
+  o.style.cssText='position:fixed;inset:0;z-index:170;background:#000;display:flex;flex-direction:column;color:#e5e7eb';
+  o.innerHTML='<div style="display:flex;align-items:center;justify-content:space-between;padding:calc(env(safe-area-inset-top,0px) + 10px) 16px 10px"><b>'+title+'</b><button onclick="phCamClose()" style="'+PH_BTN+';width:36px;height:36px;padding:0;border-radius:999px">✕</button></div>'
+    +'<div style="position:relative;flex:1;min-height:0;background:#000"><video id="phv" playsinline muted autoplay style="width:100%;height:100%;object-fit:contain"></video>'
+    +'<img id="phprev" alt="" style="display:none;position:absolute;inset:0;width:100%;height:100%;object-fit:contain;background:#000">'
+    +'<div id="phq" style="position:absolute;left:10px;top:10px;font-size:12px;font-weight:700;padding:4px 10px;border-radius:999px;background:rgba(18,18,26,.8);color:#9ca3af">Đang mở camera…</div>'
+    +'<div id="phtools" style="position:absolute;right:10px;top:10px;display:flex;flex-direction:column;gap:8px;align-items:flex-end"></div></div>'
+    +'<div id="phbar" style="display:flex;gap:10px;align-items:center;justify-content:center;padding:14px 16px calc(env(safe-area-inset-bottom,0px) + 16px)"></div>';
+  document.body.appendChild(o);phCamBar('live');
+  var q=function(t,c){var e=document.getElementById('phq');if(e){e.textContent=t;e.style.color=c||'#9ca3af';}};
+  if(!navigator.mediaDevices||!navigator.mediaDevices.getUserMedia){q('Không mở được camera trực tiếp — dùng nút “Camera máy”','#fbbf24');return;}
+  navigator.mediaDevices.getUserMedia({video:{facingMode:{ideal:'environment'},width:{ideal:2560},height:{ideal:1440}},audio:false}).then(function(st){
+    if(!PC){st.getTracks().forEach(function(t){t.stop();});return;}
+    PC.stream=st;PC.track=st.getVideoTracks()[0];
+    var v=document.getElementById('phv');v.muted=true;v.setAttribute('playsinline','');v.srcObject=st;
+    var pl=v.play();if(pl&&pl.catch)pl.catch(function(){});
+    try{PC.track.applyConstraints({advanced:[{focusMode:'continuous'}]}).catch(function(){});}catch(e){}
+    var caps={};try{caps=PC.track.getCapabilities?PC.track.getCapabilities():{};}catch(e){}
+    var h='';
+    if(caps.torch)h+='<button onclick="phCamTorch()" style="width:40px;height:40px;border-radius:50%;border:1px solid #33333d;background:rgba(18,18,26,.75);font-size:18px">🔦</button>';
+    if(caps.zoom&&caps.zoom.max>caps.zoom.min)h+='<input type="range" min="'+caps.zoom.min+'" max="'+Math.min(caps.zoom.max,5)+'" step="'+(caps.zoom.step||0.1)+'" value="'+caps.zoom.min+'" oninput="phCamZoom(this.value)" style="width:110px">';
+    document.getElementById('phtools').innerHTML=h;
+    PC.t=setInterval(function(){
+      if(!PC||PC.busy||PC.data)return;
+      var c=phFrame(v,360);if(!c)return;
+      var s=phSharp(c);PC.max=Math.max(PC.max*0.97,s);var r=s/PC.max;
+      if(r>=.65)q('Độ nét: Nét ✓ — có thể chụp','#4ade80');
+      else if(r>=.35)q('Độ nét: hơi mờ — giữ chắc tay, chờ lấy nét','#fbbf24');
+      else q('Độ nét: mờ — lùi ra xa hơn, chạm/giữ yên để lấy nét','#f87171');
+    },450);
+  }).catch(function(e){q('Không mở được camera ('+((e&&e.name)||'lỗi')+') — dùng nút “Camera máy”','#fbbf24');});
+}
+function phCamTorch(){if(!PC||!PC.track)return;PC.torch=!PC.torch;try{PC.track.applyConstraints({advanced:[{torch:PC.torch}]}).catch(function(){});}catch(e){}}
+function phCamZoom(z){if(!PC||!PC.track)return;try{PC.track.applyConstraints({advanced:[{zoom:parseFloat(z)}]}).catch(function(){});}catch(e){}}
+function phCamReview(r){
+  PC.data=r;var im=document.getElementById('phprev');im.src=r.d;im.style.display='block';phCamBar('review');
+  var e=document.getElementById('phq');if(e){e.textContent='Kiểm tra ảnh đã nét chưa';e.style.color='#9ca3af';}
+}
+function phCamShoot(){
+  if(!PC||PC.busy)return;
+  var v=document.getElementById('phv');if(!v||!v.videoWidth){toast('Camera chưa sẵn sàng');return;}
+  PC.busy=true;var e=document.getElementById('phq');if(e){e.textContent='Đang chụp — giữ yên máy…';e.style.color='#8ec5ff';}
+  phShoot(v,PC.track,2000).then(function(r){if(!PC)return;PC.busy=false;if(!r){toast('Không chụp được ảnh');return;}phCamReview(r);});
+}
+function phCamFile(inp){
+  var f=inp.files&&inp.files[0];inp.value='';if(!f||!PC)return;
+  compressImg(f,2000,0.92,function(d){
+    var im=new Image();im.onload=function(){if(PC)phCamReview({d:d,w:im.naturalWidth,h:im.naturalHeight});};im.src=d;
+  });
+}
+function phCamRetake(){if(!PC)return;PC.data=null;document.getElementById('phprev').style.display='none';phCamBar('live');}
+function phCamUse(){if(!PC||!PC.data)return;var r=PC.data,cb=PC.cb;phCamClose();cb(r.d,r.w,r.h);}
+function phView(id){
+  var o=document.createElement('div');
+  o.style.cssText='position:fixed;inset:0;z-index:180;background:rgba(0,0,0,.92);display:flex;align-items:center;justify-content:center';
+  o.onclick=function(){o.remove();};
+  o.innerHTML='<img alt="" style="max-width:100%;max-height:100%;object-fit:contain"><div style="position:absolute;top:calc(env(safe-area-inset-top,0px) + 12px);right:16px;color:#fff;font-size:22px">✕</div>';
+  document.body.appendChild(o);
+  PH.get(id).then(function(d){var im=o.querySelector('img');if(im&&d)im.src=d;});
+}
+function asPhotoSec(it){
+  var imgs=it.imgs||[],h='<label class="lbl" style="margin-top:12px">Ảnh ('+imgs.length+')</label><div style="display:flex;gap:10px;flex-wrap:wrap">';
+  imgs.forEach(function(m){
+    h+='<div style="position:relative;width:78px;height:78px"><img data-ph="'+m.id+'" alt="" onclick="phView(\''+m.id+'\')" style="width:78px;height:78px;object-fit:cover;border-radius:10px;border:1px solid var(--line);background:#222">'
+      +'<span style="position:absolute;left:4px;bottom:4px;font-size:9px;font-weight:800;background:rgba(0,0,0,.7);color:#fff;border-radius:6px;padding:1px 5px">'+(m.k==='tem'?'TEM':'TÀI SẢN')+'</span>'
+      +'<button onclick="ASX.phDel(\''+m.id+'\')" style="position:absolute;top:-7px;right:-7px;width:22px;height:22px;border-radius:50%;border:none;background:#111;color:#fff;font-size:11px">✕</button></div>';
+  });
+  return h+'</div><div style="display:flex;gap:8px;margin-top:10px"><button class="btn btn-outline" style="flex:1;width:auto;padding:11px;display:flex;align-items:center;justify-content:center;gap:6px" onclick="ASX.phShoot(\'ts\')">'+icon('camera',16)+'Chụp tài sản (nét)</button>'
+    +'<button class="btn btn-outline" style="flex:1;width:auto;padding:11px;display:flex;align-items:center;justify-content:center;gap:6px" onclick="ASX.phShoot(\'tem\')">'+icon('camera',16)+'Chụp tem</button></div>';
+}
+function asPhotoRefresh(){var e=document.getElementById('asphsec');if(!e||!AP.editing)return;e.innerHTML=asPhotoSec(AP.editing);phFill(e);}
+function asShootRow(it){
+  var n=(it.imgs||[]).length;
+  return '<button id="scshoot" class="btn" style="margin-top:8px;padding:10px;background:#16233d;color:#8ec5ff;border:1px solid #2f5aa8;display:flex;align-items:center;justify-content:center;gap:6px" onclick="ASX.scShoot(\''+it.id+'\',\'ts\')">'+icon('camera',16)+(n?'Đã có '+n+' ảnh · chụp thêm':'Chụp ảnh tài sản (nét)')+'</button>';
+}
+/* ---- Thêm ảnh vào sheet riêng của file Excel kiểm kê ---- */
+function addPhotoSheet(wb,p){
+  var rows=[];
+  p.items.forEach(function(it){(it.imgs||[]).forEach(function(m){if(PH.cache[m.id]||PH.mem[m.id])rows.push({it:it,m:m});});});
+  if(!rows.length)return;
+  rows.sort(function(a,b){return (a.m.k===b.m.k?0:a.m.k==='tem'?-1:1)||a.m.at-b.m.at;});
+  var ws=wb.addWorksheet('ẢNH KIỂM KÊ'),F={name:'Times New Roman',size:11};
+  ['STT','Mã / nội dung quét','Tên tài sản','Phòng sử dụng','Loại ảnh','Thời gian chụp','Ảnh'].forEach(function(t,j){
+    var c=ws.getCell(1,j+1);c.value=t;c.font=Object.assign({bold:true},F);c.alignment={horizontal:'center',vertical:'middle',wrapText:true};
+    c.fill={type:'pattern',pattern:'solid',fgColor:{argb:'FFD9E2F3'}};c.border={top:{style:'thin'},left:{style:'thin'},bottom:{style:'thin'},right:{style:'thin'}};
+  });
+  [6,26,34,22,22,18,48].forEach(function(w,i){ws.getColumn(i+1).width=w;});
+  rows.forEach(function(r,k){
+    var it=r.it,m=r.m,row=k+2,vals=[k+1,it.code||'',it.name||'',it.room||'',m.k==='tem'?'Tem quét không khớp':'Ảnh tài sản',new Date(m.at).toLocaleString('vi-VN')];
+    vals.forEach(function(v,j){var c=ws.getCell(row,j+1);c.value=v;c.font=F;c.alignment={vertical:'middle',wrapText:true,horizontal:j===2||j===1?'left':'center'};});
+    var d=PH.cache[m.id]||PH.mem[m.id],b64=d&&d.split(',')[1];
+    if(b64){
+      try{
+        var w=m.w||1600,h=m.h||1200,s=Math.min(330/w,225/h),id=wb.addImage({base64:b64,extension:'jpeg'});
+        ws.addImage(id,{tl:{col:6.05,row:row-1+0.05},ext:{width:Math.round(w*s),height:Math.round(h*s)}});
+      }catch(e){ws.getCell(row,7).value='(không nhúng được ảnh)';}
+    }
+    ws.getRow(row).height=176;
+  });
+  ws.views=[{state:'frozen',ySplit:1}];
+}
+
 /* ================= Kiểm kê CCDC & TSCĐ ================= */
 var ASQ=['Tốt','Trung bình','Kém','Hỏng'];
 var ASST=['Đang sử dụng','Không sử dụng','Chờ thanh lý','Không tìm thấy'];
@@ -3668,6 +3924,7 @@ function asRenderBody(){
     if(it.counted&&it.status&&it.status!=='Đang sử dụng')b+='<span class="bdg bdg-org">'+esc(it.status)+'</span>';
     if(it.extra)b+='<span class="bdg bdg-plus">Phát hiện thêm</span>';
     if(it.trace)b+='<span class="bdg bdg-org">Cần dò tìm</span>';
+    if((it.imgs||[]).length)b+='<span class="bdg" style="font-size:10px;display:inline-flex;align-items:center;gap:3px">'+icon('camera',11)+it.imgs.length+' ảnh</span>';
     var sub=[it.code,it.unit,it.counted&&it.room?it.room:null].filter(function(x){return x;}).map(esc).join(' · ');
     h+='<div class="item" onclick="ASX.edit(\''+it.id+'\')"><div style="flex:1;min-width:0"><div class="iname">'+esc(it.name)+'</div><div class="isub">'+sub+'</div><div class="ibadges">'+b+'</div></div>'
       +'<div class="iright"><div class="iqty tnum">'+fmt(it.counted?it.cQty:it.qty)+'</div><div class="ilab">'+(it.counted?'kiểm kê':'sổ sách')+'</div></div></div>';
@@ -3702,7 +3959,7 @@ function asModal(html){
   if(!o){o=document.createElement('div');o.id='asmodal';o.style.cssText='position:fixed;inset:0;z-index:140;background:rgba(16,24,40,.45);display:flex;align-items:flex-end;justify-content:center';document.body.appendChild(o);}
   o.innerHTML='<div style="background:var(--card);color:var(--ink);width:100%;max-width:560px;max-height:92%;overflow:auto;border-radius:20px 20px 0 0;padding:16px 16px calc(env(safe-area-inset-bottom,0px) + 16px)">'+html+'</div>';
 }
-function asModalClose(){var o=document.getElementById('asmodal');if(o)o.remove();AP.editing=null;}
+function asModalClose(){var o=document.getElementById('asmodal');if(o)o.remove();var p=asPer(AP.pid);if(AP.editNew&&AP.editing&&p&&p.items.indexOf(AP.editing)<0)phDelItem(AP.editing);AP.editing=null;}
 function asEdit(id,seed){
   var p=asPer(AP.pid);if(!p)return;
   var it=null;
@@ -3726,6 +3983,7 @@ function asEdit(id,seed){
     +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px"><div>'+L('Người sử dụng thực tế')+'<input class="inp" id="e_user" value="'+esc(v.user)+'"></div><div>'+L('Vị trí')+'<input class="inp" id="e_loc" value="'+esc(v.loc)+'"></div></div>'
     +L('Đơn vị quản lý')+'<input class="inp" id="e_mgmt" value="'+esc(v.mgmt||'')+'">'
     +L('Ghi chú')+'<textarea class="inp" id="e_note" rows="2">'+esc(n)+'</textarea>'
+    +'<div id="asphsec">'+asPhotoSec(it)+'</div>'
     +'<datalist id="asrooms">'+asRooms(p).map(function(r){return '<option value="'+esc(r)+'">';}).join('')+'</datalist>'
     +'<button class="btn btn-primary" style="margin-top:14px" onclick="ASX.editSave()">Lưu kết quả</button>'
     +'<div style="display:flex;gap:8px;margin-top:8px;flex-wrap:wrap">'
@@ -3733,7 +3991,7 @@ function asEdit(id,seed){
     +(it.counted&&!AP.editNew?'<button class="btn btn-outline" style="flex:1;width:auto;padding:11px" onclick="ASX.editReset()">Bỏ kết quả</button>':'')
     +(it.extra&&!AP.editNew?'<button class="btn btn-outline" style="flex:1;width:auto;padding:11px;color:var(--red)" onclick="ASX.editDel()">Xoá</button>':'')
     +'</div>';
-  asModal(h);
+  asModal(h);phFill(document.getElementById('asphsec'));
 }
 
 /* ---- Quét mã (dùng chung bộ quét của vật tư) ---- */
@@ -3751,7 +4009,8 @@ function asShowMatched(m){
       +'<div style="font-weight:700;font-size:16px;margin-top:4px;word-break:break-word">'+esc(it.name)+'</div>'
       +'<div style="font-size:12px;color:#9ca3af;margin-top:2px">'+esc(it.code)+' · SL '+fmt(it.cQty)+' · '+esc(it.room||'(chưa nhập phòng)')+'</div>'
       +'<div style="display:flex;gap:8px;margin-top:10px"><button class="btn" style="flex:1;padding:10px;background:#23232c;color:#e5e7eb;border:1px solid #33333d" onclick="ASX.scUndo()">Hoàn tác</button>'
-      +'<button class="btn" style="flex:1;padding:10px;background:#23232c;color:#e5e7eb;border:1px solid #33333d" onclick="ASX.scDetail(\''+it.id+'\')">Sửa chi tiết</button></div></div>';
+      +'<button class="btn" style="flex:1;padding:10px;background:#23232c;color:#e5e7eb;border:1px solid #33333d" onclick="ASX.scDetail(\''+it.id+'\')">Sửa chi tiết</button></div>'
+      +asShootRow(it)+'</div>';
     scLogRender();asRenderBody();
     SC.hold=false;SC.last=SC.last||'';
     return;
@@ -3768,7 +4027,8 @@ function asShowMatched(m){
     +'<datalist id="asrooms">'+asRooms(p).map(function(r){return '<option value="'+esc(r)+'">';}).join('')+'</datalist>'
     +'<div style="display:flex;gap:8px;margin-top:10px"><button class="btn btn-primary" style="flex:1;padding:12px" onclick="ASX.scSave(\''+it.id+'\')">Lưu &amp; quét tiếp</button>'
     +'<button class="btn" style="width:auto;padding:12px 14px;background:#23232c;color:#e5e7eb;border:1px solid #33333d" onclick="ASX.scDetail(\''+it.id+'\')">Chi tiết</button>'
-    +'<button class="btn" style="width:auto;padding:12px 14px;background:#23232c;color:#e5e7eb;border:1px solid #33333d" onclick="A.scNext()">Bỏ qua</button></div></div>';
+    +'<button class="btn" style="width:auto;padding:12px 14px;background:#23232c;color:#e5e7eb;border:1px solid #33333d" onclick="A.scNext()">Bỏ qua</button></div>'
+    +asShootRow(it)+'</div>';
 }
 function asShowUnmatched(text,m){
   SC.hold=true;SC.pending={text:text,canon:m.canon,gs1:m.gs1};
@@ -3796,6 +4056,7 @@ function asRowVals(it){
     /* Tài sản phát hiện thêm: không có số liệu kế toán nên để trống Phần I; mã/tên ghi vào Ghi chú */
     var un=String(it.note||'').replace(/^Phát hiện thêm[\s,:.\-–]*/,'').trim(),real=it.name&&it.name.indexOf('(Chưa rõ tên)')!==0,def=/^(Phát hiện thêm|Quét thấy nhưng chưa có trong sổ, cần dò tìm)$/.test(it.note||'');
     var note='Phát hiện thêm'+(it.code?' – mã '+it.code:'')+(real?' – '+it.name+(it.unit?' ('+it.unit+')':''):' – chưa rõ tên, cần dò tìm')+(un&&!def?' – '+un:'');
+    if((it.imgs||[]).length)note+=' – có ảnh (xem sheet ẢNH KIỂM KÊ)';
     return ['','','','','','',it.counted?it.cQty:'',d===null?'':d,it.counted?(it.mgmt||it.unit1||''):'',it.counted?it.room:'',it.counted?it.user:'',it.counted?it.loc:'',it.counted?it.quality:'',it.counted?it.status:'',note];
   }
   return [it.stt,it.code,it.name,it.unit,it.qty,it.unit1||'',it.counted?it.cQty:'',d===null?'':d,it.counted?(it.mgmt||it.unit1||''):'',it.counted?it.room:'',it.counted?it.user:'',it.counted?it.loc:'',it.counted?it.quality:'',it.counted?it.status:'',it.note||''];
@@ -3848,6 +4109,7 @@ function buildAssetXlsx(p){
     ws.mergeCells(b[0]+(r0+1)+':'+b[1]+(r0+1));put(b[0]+(r0+1),'(Ký, ghi rõ họ tên)',{italic:true},{horizontal:'center'});
     ws.mergeCells(b[0]+(r0+5)+':'+b[1]+(r0+5));put(b[0]+(r0+5),b[3]||'',{bold:true},{horizontal:'center'});
   });
+  addPhotoSheet(wb,p);
   addUnmSheet(wb,p);
   return wb;
 }
@@ -3869,6 +4131,7 @@ var ASX={
   delP:function(id){
     var p=asPer(id);if(!p)return;
     if(!confirm('Xoá kỳ "'+p.name+'" và toàn bộ kết quả kiểm kê?'))return;
+    p.items.forEach(phDelItem);
     db.assets=db.assets.filter(function(x){return x.id!==id;});store.save();renderAssets();
   },
   upFile:function(inp){
@@ -3941,7 +4204,7 @@ var ASX={
   editDel:function(){
     var p=asPer(AP.pid),it=AP.editing;if(!p||!it)return;
     if(!confirm('Xoá tài sản ngoài sổ này?'))return;
-    p.items=p.items.filter(function(x){return x!==it;});saveSoon();asModalClose();asRenderBody();
+    phDelItem(it);p.items=p.items.filter(function(x){return x!==it;});saveSoon();asModalClose();asRenderBody();
   },
   scan:function(){
     var p=asPer(AP.pid);if(!p)return;
@@ -3970,8 +4233,35 @@ var ASX={
     SC.undo=null;saveSoon();A.scNext();scLogRender();asRenderBody();toast('Đã hoàn tác');
   },
   scDetail:function(id){asEdit(id);},
+  phShoot:function(k){
+    var it=AP.editing;if(!it)return;
+    if((it.imgs||[]).length>=8){toast('Mỗi tài sản tối đa 8 ảnh');return;}
+    phCam(k==='tem'?'Chụp ảnh tem':'Chụp ảnh tài sản',function(d,w,h){phAdd(it,k,d,w,h);asPhotoRefresh();asRenderBody();toast('Đã lưu ảnh');});
+  },
+  phDel:function(id){
+    var it=AP.editing;if(!it||!confirm('Xoá ảnh này?'))return;
+    it.imgs=(it.imgs||[]).filter(function(m){return m.id!==id;});PH.del(id);saveSoon();asPhotoRefresh();asRenderBody();
+  },
+  scShoot:function(id,k){
+    if(!SC||SC.shooting)return;
+    var p=per(SC.pid),it=null;p.items.forEach(function(x){if(x.id===id)it=x;});if(!it)return;
+    if((it.imgs||[]).length>=8){toast('Mỗi tài sản tối đa 8 ảnh');return;}
+    var v=document.getElementById('scvid'),b=document.getElementById('scshoot');
+    if(!v||!v.videoWidth){toast('Camera chưa sẵn sàng — mở Chi tiết để chụp');return;}
+    SC.shooting=true;if(b)b.textContent='Đang chụp — giữ yên máy…';
+    phShoot(v,SC.track,2000).then(function(r){
+      if(SC)SC.shooting=false;
+      var b2=document.getElementById('scshoot');
+      if(!r){toast('Không chụp được ảnh');if(b2)b2.textContent='Thử chụp lại';return;}
+      phAdd(it,k||'ts',r.d,r.w,r.h);asRenderBody();
+      if(b2)b2.innerHTML=icon('camera',16)+'Đã lưu · chụp thêm ('+it.imgs.length+' ảnh)';
+      if(k==='tem')phNote();
+      toast('Đã lưu ảnh');
+    });
+  },
   autoUndo:function(id){
     var p=asPer((SC&&SC.pid)||AP.pid);if(!p)return;
+    p.items.forEach(function(x){if(x.id===id)phDelItem(x);});
     p.items=p.items.filter(function(x){return x.id!==id;});
     saveSoon();A.scNext();scUnmChip();asRenderBody();toast('Đã hoàn tác');
   },
@@ -4001,7 +4291,7 @@ var ASX={
   exportX:function(){
     var p=asPer(AP.pid);if(!p)return;
     if(typeof ExcelJS==='undefined'){toast('Chưa tải được thư viện Excel — kiểm tra mạng');return;}
-    buildAssetXlsx(p).xlsx.writeBuffer().then(function(buf){shareOrDownload(new Blob([buf],{type:XLSX_MIME}),asFileName(p));}).catch(function(e){console.error(e);toast('Không xuất được file');});
+    PH.preload(p).then(function(){return buildAssetXlsx(p).xlsx.writeBuffer();}).then(function(buf){shareOrDownload(new Blob([buf],{type:XLSX_MIME}),asFileName(p));}).catch(function(e){console.error(e);toast('Không xuất được file');});
   },
   print:function(){
     var p=asPer(AP.pid);if(!p)return;
@@ -4083,13 +4373,13 @@ function scUnmCode(p,text,m){
 function asAutoAdd(p,text,kind){
   var code=String(text).replace(/\u001d/g,' ').trim().slice(0,80),key=unmKeyOf(code),it=null;
   p.items.forEach(function(x){if(!it&&unmKeyOf(x.code)===key)it=x;});
-  if(it)return {it:it,isNew:false};
+  if(it){phTemFor(it);return {it:it,isNew:false};}
   var c=p.cur||{},now=Date.now();
   it={id:'x_'+now.toString(36)+Math.random().toString(36).slice(2,5),stt:String(asNextStt(p)),code:code,name:'(Chưa rõ tên) '+code.slice(0,40),unit:'Cái',qty:0,
     unit1:(p.items[0]&&p.items[0].unit1)||'',counted:true,cQty:1,mgmt:(p.items[0]&&p.items[0].unit1)||'',
     room:c.room||'',user:c.user||'Sử dụng chung',loc:c.loc||asLocOf(c.room),quality:'Tốt',status:'Đang sử dụng',
     note:'Quét thấy nhưng chưa có trong sổ, cần dò tìm',extra:true,trace:true,at:now,by:(db.profile&&db.profile.ten)||''};
-  p.items.push(it);saveSoon();
+  p.items.push(it);saveSoon();phTemFor(it);
   return {it:it,isNew:true};
 }
 function asAddedNotice(it,isNew){
@@ -4101,9 +4391,11 @@ function asAddedNotice(it,isNew){
     +'<div style="font-size:11px;font-weight:800;letter-spacing:.08em;color:#fbbf24;text-transform:uppercase">⚑ '+(isNew?'Chưa có trong sổ · đã thêm vào danh mục':'Đã có trong danh mục phát hiện thêm')+'</div>'
     +'<div style="font-family:ui-monospace,Menlo,monospace;font-size:18px;font-weight:700;margin-top:4px;word-break:break-all">'+esc(it.code)+'</div>'
     +'<div style="font-size:12px;color:#9ca3af;margin-top:2px">Phát hiện thêm · SL kiểm kê '+fmt(it.cQty)+(it.room?' · '+esc(it.room):'')+' · gắn nhãn “Cần dò tìm”</div>'
+    +'<div id="scphn" style="font-size:12px;margin-top:4px;color:'+((it.imgs||[]).some(function(m){return m.k==='tem';})?'#4ade80':'#8ec5ff')+'">'+((it.imgs||[]).some(function(m){return m.k==='tem';})?'📷 Đã lưu ảnh tem vào file kiểm kê':'📷 Đang chụp & lưu ảnh tem…')+'</div>'
     +'<div style="display:flex;gap:8px;margin-top:8px"><button class="btn" style="flex:1;padding:10px;background:#23232c;color:#fbbf24;border:1px solid #8a5a1a" onclick="ASX.scDetail(\''+it.id+'\')">Nhập tên / chi tiết</button>'
     +(isNew?'<button class="btn" style="width:auto;padding:10px 14px;background:#23232c;color:#e5e7eb;border:1px solid #33333d" onclick="ASX.autoUndo(\''+it.id+'\')">Hoàn tác</button>':'')
-    +'<button class="btn" style="width:auto;padding:10px 14px;background:#23232c;color:#e5e7eb;border:1px solid #33333d" onclick="A.scNext()">Quét tiếp</button></div></div>';
+    +'<button class="btn" style="width:auto;padding:10px 14px;background:#23232c;color:#e5e7eb;border:1px solid #33333d" onclick="A.scNext()">Quét tiếp</button></div>'
+    +'<button id="scshoot" class="btn" style="margin-top:8px;padding:10px;background:#16233d;color:#8ec5ff;border:1px solid #2f5aa8;display:flex;align-items:center;justify-content:center;gap:6px" onclick="ASX.scShoot(\''+it.id+'\',\'tem\')">'+icon('camera',16)+'Chụp lại tem (nét)</button></div>';
 }
 function scChipClick(){
   if(SC&&SC.kind==='asset'){AP.pid=SC.pid;AP.flt='trace';AP.q='';A.scClose();route={view:'asset'};render();}
@@ -4572,7 +4864,7 @@ var A={
   },
   scNext:function(){
     if(!SC)return;
-    SC.hold=false;SC.pending=null;SC.last='';
+    SC.hold=false;SC.pending=null;SC.last='';SC.snap=null;
     document.getElementById('scres').innerHTML='';
     scMsg(scHint());
   },
@@ -4685,6 +4977,7 @@ var A={
     var info=(f.type||'không rõ định dạng')+', '+Math.round(f.size/1024)+' KB';
     scLoadImage(f).then(function(im){
       if(!SC)return;
+      try{var kk=Math.min(1,1600/Math.max(im.w,im.h)),sn=document.createElement('canvas');sn.width=Math.round(im.w*kk);sn.height=Math.round(im.h*kk);sn.getContext('2d').drawImage(im.el,0,0,sn.width,sn.height);SC.snap={d:sn.toDataURL('image/jpeg',0.88),w:sn.width,h:sn.height};}catch(e){}
       var go=function(){
         var tryScale=function(maxSide){
           var k=Math.min(1,maxSide/Math.max(im.w,im.h));
