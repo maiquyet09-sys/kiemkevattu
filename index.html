@@ -2,9 +2,12 @@
 <html lang="vi">
 <head>
 <meta charset="UTF-8">
-<meta name="app-version" content="2026102210">
+<meta name="app-version" content="2026102311">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
 <meta name="theme-color" content="#0f766e">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icon-192.png">
+<meta name="apple-mobile-web-app-title" content="Kiểm kê kho">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <title>Kiểm kê kho · MedDental</title>
@@ -637,7 +640,7 @@ function buildBienBan(p){
         var nm=ws.getCell(sr+2,z[0]);
         nm.value=s.ten;nm.font={name:"Times New Roman",size:11,bold:true};nm.alignment={horizontal:"center"};
         var tm=ws.getCell(sr+3,z[0]);
-        tm.value="Ký điện tử "+s.time+" ("+s.dev+")";tm.font={name:"Arial",size:8,italic:true};
+        tm.value="Ký điện tử "+s.time+" ("+s.dev+")"+(s.auth?" · "+s.auth:"");tm.font={name:"Arial",size:8,italic:true};
         tm.alignment={horizontal:"center",vertical:"top",wrapText:true};
         ws.getRow(sr+3).height=24;
       }catch(sigErr){}
@@ -1062,7 +1065,7 @@ function docSignHtml4(cols,subs,sigs,names){
       var hh=56,ww=Math.round(hh*(s.w||300)/(s.h||120));
       if(ww>170){ww=170;hh=Math.round(ww*(s.h||120)/(s.w||300));}
       h+='<img src="'+s.img+'" width="'+ww+'" height="'+hh+'"><br><b>'+esc(s.ten)+'</b>'
-        +'<br><span style="font-size:9pt;font-weight:400;font-style:italic">Ký điện tử '+esc(s.time)+' ('+esc(s.dev)+')</span>';
+        +'<br><span style="font-size:9pt;font-weight:400;font-style:italic">Ký điện tử '+esc(s.time)+' ('+esc(s.dev)+')'+(s.auth?' · '+esc(s.auth):'')+'</span>';
     }else{
       h+='&nbsp;<br>&nbsp;<br>&nbsp;<br>&nbsp;'+(names&&names[k]?'<br><b>'+esc(names[k])+'</b>':'');
     }
@@ -1137,18 +1140,20 @@ function nowLabel(){
   return p(d.getHours())+':'+p(d.getMinutes())+' ngày '+p(d.getDate())+'/'+p(d.getMonth()+1)+'/'+d.getFullYear();
 }
 var SIG_TITLES={'hv.benGiao':'Bên bàn giao','hv.benNhan':'Bên nhận bàn giao','ex.nguoiGiaiTrinh':'Người giải trình','ex.lanhDao':'Lãnh đạo đơn vị','bc.keToan':'Phòng Kế toán HO','bc.hanhChinh':'Phòng Hành chính HO','pe.giamDoc':'Giám đốc cơ sở','pe.thuKho':'Thủ kho cơ sở','pe.hanhChinh':'Phòng Hành chính Hậu cần'};
-var SIG_KEYS={hv:['benGiao','benNhan'],ex:['nguoiGiaiTrinh','lanhDao'],bc:['keToan','hanhChinh'],pe:['giamDoc','thuKho','hanhChinh']};
+var SIG_KEYS={hv:['benGiao','benNhan'],ex:['nguoiGiaiTrinh','lanhDao'],bc:['keToan','hanhChinh'],pe:['giamDoc','thuKho','hanhChinh'],as:['dauMoi','toKiemKe','lanhDao']};
+SIG_TITLES['as.dauMoi']='Đầu mối kiểm kê tại đơn vị';SIG_TITLES['as.toKiemKe']='Tổ kiểm kê';SIG_TITLES['as.lanhDao']='Lãnh đạo đơn vị';
 function sigStore(kind){
   if(kind==='hv')return HV;
   if(kind==='ex')return EX;
   if(kind==='bc'){ensureBCMeta();return BCMETA;}
+  if(kind==='as')return asPer(AP.pid);
   return per(P.id);
 }
 function sigRerender(kind){
-  if(kind==='hv')renderHandoverEdit();else if(kind==='ex')renderExplainEdit();else if(kind==='bc')renderBaoCao();else renderPeriod();
+  if(kind==='hv')renderHandoverEdit();else if(kind==='ex')renderExplainEdit();else if(kind==='bc')renderBaoCao();else if(kind==='as')renderAsset();else renderPeriod();
 }
 function sigPersist(kind){
-  if(kind==='hv')A.hvSave(false);else if(kind==='ex')A.exSave(false);else if(kind==='pe')store.save();
+  if(kind==='hv')A.hvSave(false);else if(kind==='ex')A.exSave(false);else if(kind==='pe'||kind==='as')store.save();
 }
 function sigBoxHtml(kind,key){
   var S=sigStore(kind);S.sig=S.sig||{};
@@ -1157,7 +1162,7 @@ function sigBoxHtml(kind,key){
   h+='<div style="font-weight:700;font-size:13px;margin-bottom:8px">'+label+'</div>';
   if(s){
     h+='<div style="height:84px;display:flex;align-items:center;justify-content:center;background:var(--card2);border-radius:10px"><img src="'+s.img+'" style="max-width:100%;max-height:76px"></div>';
-    h+='<div style="font-size:13px;font-weight:600;margin-top:6px">'+esc(s.ten)+'</div><div style="font-size:11px;color:var(--mut)">'+esc(s.time)+'</div>';
+    h+='<div style="font-size:13px;font-weight:600;margin-top:6px">'+esc(s.ten)+'</div><div style="font-size:11px;color:var(--mut)">'+esc(s.time)+'</div>'+(s.auth?'<div style="font-size:11px;color:var(--green)">🔒 '+esc(s.auth)+'</div>':'');
     h+='<div style="display:flex;gap:14px;margin-top:6px"><button class="addbat" style="color:var(--teal)" onclick="A.sigOpen(\''+kind+'\',\''+key+'\')">Ký lại</button><button class="addbat" style="color:var(--red)" onclick="A.sigClear(\''+kind+'\',\''+key+'\')">Xoá</button></div>';
   }else{
     h+='<div style="height:84px;display:flex;align-items:center;justify-content:center;border:1.5px dashed var(--line);border-radius:10px;color:var(--mut2);font-size:12px">Chưa ký</div>';
@@ -1166,7 +1171,7 @@ function sigBoxHtml(kind,key){
   return h+'</div>';
 }
 function sigSectionHtml(kind){
-  var where=kind==='pe'?'file Excel biên bản (áp dụng cho mọi sheet chi nhánh trong kỳ này)':'file Word và bản in';
+  var where=kind==='pe'?'file Excel biên bản (áp dụng cho mọi sheet chi nhánh trong kỳ này)':kind==='as'?'sheet BBKK của file Excel và bản in':'file Word và bản in';
   var h='<div class="bcsec" style="margin-top:20px">Chữ ký điện tử (tuỳ chọn)</div>';
   h+='<div style="font-size:12px;color:var(--mut);margin-bottom:8px">Ký bằng ngón tay ngay trên màn hình, mực xanh. Chữ ký được chèn vào '+where+', kèm họ tên, thời gian và thiết bị. Không ký thì ô ký vẫn để trống cho ký tay. Nếu sửa nội dung sau khi ký, nên ký lại.</div>';
   h+='<div style="display:flex;gap:10px;flex-wrap:wrap">';
@@ -1189,6 +1194,7 @@ function sigPadOpen(kind,key,title,defName){
     +'<label class="lbl">Họ tên người ký</label><input class="inp" id="signame" value="'+esc(defName||'')+'" style="margin-bottom:10px">'
     +'<canvas id="sigcv"></canvas>'
     +'<div style="font-size:12px;color:var(--mut);margin:6px 0 12px">Dùng ngón tay vẽ chữ ký vào khung. Chữ ký sẽ được lưu kèm họ tên, thời gian và thiết bị.</div>'
+    +(waOk()?'<label style="display:flex;gap:8px;align-items:flex-start;font-size:13px;margin-bottom:12px"><input type="checkbox" id="sigwa" '+(db.waPref!==false?'checked ':'')+'style="margin-top:3px"><span><b>Xác thực bằng Face ID / vân tay</b><br><span style="color:var(--mut);font-size:12px">Chỉ ai mở khoá được thiết bị này mới ký được. Lần đầu app tạo khoá xác thực trên máy.</span></span></label>':'')
     +'<div style="display:flex;gap:8px"><button class="btn btn-outline" style="flex:1;padding:12px" onclick="sigPadClear()">Vẽ lại</button>'
     +'<button class="btn btn-outline" style="flex:1;padding:12px" onclick="sigPadClose()">Huỷ</button>'
     +'<button class="btn btn-primary" style="flex:1.3;padding:12px" onclick="sigConfirm()">'+icon('check',16)+'Xác nhận</button></div>'
@@ -1262,19 +1268,48 @@ function renameSave(){
   renameClose();
   if(cb)cb(v);
 }
+/* ---- Xác thực chữ ký bằng Face ID / vân tay (WebAuthn, khoá nằm trên thiết bị) ---- */
+function waOk(){return !!(window.PublicKeyCredential&&navigator.credentials&&navigator.credentials.create&&window.isSecureContext);}
+function waRand(n){return crypto.getRandomValues(new Uint8Array(n));}
+function waB64(b){var a=new Uint8Array(b),s='',i;for(i=0;i<a.length;i++)s+=String.fromCharCode(a[i]);return btoa(s).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');}
+function waUn(s){s=s.replace(/-/g,'+').replace(/_/g,'/');while(s.length%4)s+='=';var r=atob(s),a=new Uint8Array(r.length),i;for(i=0;i<r.length;i++)a[i]=r.charCodeAt(i);return a;}
+function waEnroll(ten){
+  var nm=ten||'Người kiểm kê';
+  return navigator.credentials.create({publicKey:{challenge:waRand(32),rp:{name:'Kiểm kê kho MedDental',id:location.hostname},user:{id:waRand(16),name:nm,displayName:nm},
+    pubKeyCredParams:[{type:'public-key',alg:-7},{type:'public-key',alg:-257}],authenticatorSelection:{authenticatorAttachment:'platform',userVerification:'required'},timeout:60000,attestation:'none'}})
+    .then(function(c){db.webauthn={id:waB64(c.rawId),at:Date.now()};store.save();});
+}
+function waSign(ten){
+  if(!db.webauthn)return waEnroll(ten);
+  return navigator.credentials.get({publicKey:{challenge:waRand(32),rpId:location.hostname,allowCredentials:[{type:'public-key',id:waUn(db.webauthn.id),transports:['internal']}],userVerification:'required',timeout:60000}});
+}
 function sigConfirm(){
   if(!SIGP)return;
   var ten=(document.getElementById('signame').value||'').trim();
   if(!SIGP.ink){toast('Chưa có chữ ký, hãy vẽ vào khung');return;}
   if(!ten){toast('Nhập họ tên người ký');return;}
-  var ex=sigExport();
-  var sig={img:ex.url,w:ex.w,h:ex.h,ten:ten,time:nowLabel(),dev:deviceLabel()};
-  var kind=SIGP.kind,key=SIGP.key;
-  sigPadClose();
-  var S=sigStore(kind);S.sig=S.sig||{};S.sig[key]=sig;
-  sigPersist(kind);
-  sigRerender(kind);
-  toast('Đã ký xác nhận');
+  var chk=document.getElementById('sigwa'),useWa=!!(chk&&chk.checked);
+  if(chk){db.waPref=useWa;saveSoon();}
+  var fin=function(auth){
+    if(!SIGP)return;
+    var ex=sigExport();
+    var sig={img:ex.url,w:ex.w,h:ex.h,ten:ten,time:nowLabel(),dev:deviceLabel()};
+    if(auth)sig.auth=auth;
+    var kind=SIGP.kind,key=SIGP.key;
+    sigPadClose();
+    var S=sigStore(kind);S.sig=S.sig||{};S.sig[key]=sig;
+    if(kind==='as')asLog(S,'Ký điện tử: '+(SIG_TITLES['as.'+key]||key),null,ten+(auth?' · '+auth:''));
+    sigPersist(kind);
+    sigRerender(kind);
+    toast(auth?'Đã ký và xác thực':'Đã ký xác nhận');
+  };
+  if(!useWa){fin('');return;}
+  waSign(ten).then(function(){db.waFail=0;fin('Xác thực thiết bị (Face ID/vân tay/mã máy)');}).catch(function(e){
+    db.waFail=(db.waFail||0)+1;
+    if(db.waFail>=2){db.webauthn=null;db.waFail=0;}
+    store.save();
+    toast('Chưa xác thực được'+(e&&e.name==='NotAllowedError'?' (đã huỷ hoặc không khớp)':'')+' — thử lại, hoặc bỏ chọn xác thực để ký thường');
+  });
 }
 
 /* ================= Picker: lấy vật tư/tài sản từ kỳ kiểm kê ================= */
@@ -3296,7 +3331,7 @@ function tsLabel(ts){
   return p(d.getHours())+':'+p(d.getMinutes())+' ngày '+p(d.getDate())+'/'+p(d.getMonth()+1)+'/'+d.getFullYear();
 }
 function mergeDb(d){
-  var st={p:0,h:0,e:0};
+  var st={p:0,h:0,e:0,a:0};
   function add(dst,src,k){
     (src||[]).forEach(function(x){
       if(x&&x.id&&!dst.some(function(y){return y.id===x.id;})){dst.push(x);st[k]++;}
@@ -3304,6 +3339,13 @@ function mergeDb(d){
     dst.sort(function(a,b){return (b.createdAt||0)-(a.createdAt||0);});
   }
   add(db.periods,d.periods,'p');add(db.handovers,d.handovers,'h');add(db.explains,d.explains,'e');
+  if(!db.assets)db.assets=[];
+  (d.assets||[]).forEach(function(x){
+    if(!x||!x.id||!Array.isArray(x.items))return;
+    var y=null;db.assets.forEach(function(z){if(z.id===x.id)y=z;});
+    if(!y){db.assets.push(x);st.a++;return;}
+    x.items.forEach(function(it){if(!y.items.some(function(q){return q.id===it.id;}))y.items.push(it);});
+  });
   (d.folders||[]).forEach(function(f){if(f&&db.folders.indexOf(f)<0)db.folders.push(f);});
   Object.keys(d.barcodes||{}).forEach(function(k){if(!db.barcodes[k])db.barcodes[k]=d.barcodes[k];});
   if(!db.ocrfix)db.ocrfix={};
@@ -3324,7 +3366,7 @@ function homeNoticesHtml(){
       +'<div style="flex:1"><div style="font-weight:700;font-size:14px">Thiết lập hồ sơ và người ký</div><div style="font-size:12px;color:var(--mut)">Điền tên bạn và người ký của từng chi nhánh (Giám đốc, Thủ kho, Phòng Hành chính) một lần, app tự điền vào mọi biên bản.</div></div>'
       +'<div style="color:var(--mut2)">'+icon('chev',18)+'</div></div></div>';
   }
-  var any=db.periods.length||db.handovers.length||db.explains.length;
+  var any=db.periods.length||db.handovers.length||db.explains.length||(db.assets||[]).length;
   if(any&&Date.now()>=(db.backupSnooze||0)){
     var last=db.lastBackup||0,days=last?Math.floor((Date.now()-last)/86400000):0;
     if(!last||days>=7){
@@ -3334,6 +3376,10 @@ function homeNoticesHtml(){
         +'<div style="display:flex;gap:16px"><button class="addbat" style="color:var(--teal);font-weight:700" onclick="A.backupNow()">Sao lưu ngay</button><button class="addbat" onclick="A.backupSnooze()">Nhắc sau 3 ngày</button></div></div></div></div>';
     }
   }
+  (db.assets||[]).forEach(function(p){
+    var q=asPending(p);
+    if(q.n&&Date.now()-q.last>30*60000)h+='<div class="wrap mt12"><div class="note-warn" style="display:flex;gap:10px;align-items:center" onclick="ASX.openP(\''+p.id+'\')">'+icon('warn',18)+'<div style="flex:1"><div style="font-weight:700">'+esc(p.name)+': '+q.n+' tài sản chưa xuất Excel</div><div style="font-size:12px">Chạm để mở kỳ kiểm kê và xuất file.</div></div></div></div>';
+  });
   return h;
 }
 
@@ -3541,6 +3587,7 @@ function phAdd(it,k,d,w,h){
   var id='ph_'+Date.now().toString(36)+asRid();
   PH.put(id,d);
   it.imgs=(it.imgs||[]).concat([{id:id,k:k,at:Date.now(),w:w||0,h:h||0}]);
+  asLog(asCurP(),'Thêm ảnh '+(k==='tem'?'tem':'tài sản'),it);
   saveSoon();return id;
 }
 function phDelItem(it){(it.imgs||[]).forEach(function(m){PH.del(m.id);});it.imgs=[];}
@@ -3873,6 +3920,7 @@ function renderAsset(){
     +'<button class="pill" style="display:inline-flex" title="In / PDF" onclick="ASX.print()">'+icon('doc',15)+'</button>'
     +'<button class="pill" style="display:inline-flex;align-items:center;gap:5px" onclick="ASX.exportX()">'+icon('download',15)+'Excel</button></div></div>'
     +'<div class="wrap" style="padding-top:10px"><div class="bar"><div class="fill" id="aspfill"></div></div><div class="prow"><span id="aspdone"></span><span id="aspdiff"></span></div></div></div>';
+  h+='<div class="wrap" id="asxtop" style="padding-top:10px;padding-bottom:0"></div>';
   h+='<div class="wrap" style="padding-top:10px"><div class="card" style="padding:12px">'
     +'<div style="font-size:12px;font-weight:700;color:var(--mut);margin-bottom:8px">ĐANG KIỂM TẠI (tự điền vào các tài sản quét tiếp theo)</div>'
     +'<input class="inp" list="asrooms" placeholder="Phòng sử dụng thực tế, ví dụ: Phòng Implant 1 - Tầng 3" value="'+esc(c.room||'')+'" oninput="ASX.cur(\'room\',this.value)">'
@@ -3893,6 +3941,7 @@ function asRenderBody(){
   var p=asPer(AP.pid);if(!p||!document.getElementById('aslist'))return;
   var s=asStats(p),pct=s.total?Math.round(s.done/s.total*100):0;
   document.getElementById('aspfill').style.width=pct+'%';
+  var xt=document.getElementById('asxtop');if(xt)xt.innerHTML=asExpBanner(p)+asToolsRow(p);
   document.getElementById('aspdone').innerHTML='Đã kiểm <b class="tnum" style="color:var(--ink)">'+s.done+'/'+s.total+'</b> · '+pct+'%';
   document.getElementById('aspdiff').innerHTML=(s.ndiff?'<b style="color:var(--red)">'+s.ndiff+' chênh lệch</b>':'Chưa có chênh lệch')+(s.extra?' · <b style="color:var(--green)">'+s.extra+' phát hiện thêm</b>':'');
   var flts={
@@ -3938,6 +3987,8 @@ function asRenderBody(){
 
 /* ---- Ghi kết quả kiểm kê ---- */
 function asApply(p,it,v){
+  var was=it.counted,oq=it.cQty;
+  asLog(p,v.status==='Không tìm thấy'?'Ghi nhận không tìm thấy':(was?'Ghi đè kiểm kê':'Kiểm kê'),it,(was?'SL '+fmt(oq)+' → ':'SL ')+fmt(v.cQty)+(v.room?' · '+v.room:''));
   it.counted=true;it.cQty=v.cQty;
   it.mgmt=v.mgmt||it.unit1||'';it.room=v.room||'';it.user=v.user||'';
   it.loc=v.loc||asLocOf(v.room);
@@ -4046,7 +4097,8 @@ function asShowDup(it){
     +'<div style="font-size:13px;margin-top:6px">Đã kiểm: SL <b>'+fmt(it.cQty)+'</b>'+(it.room?' · '+esc(it.room):'')
     +(when?'<br><span style="color:#9ca3af;font-size:12px">Lúc '+esc(when)+(it.by?' · '+esc(it.by):'')+'</span>':'')+'</div>'
     +'<div style="display:flex;gap:8px;margin-top:10px"><button class="btn" style="flex:1;padding:11px;background:#23232c;color:#e5e7eb;border:1px solid #33333d" onclick="A.scNext()">Không lưu, quét tiếp</button>'
-    +'<button class="btn" style="flex:1;padding:11px;background:#23232c;color:#fbbf24;border:1px solid #8a5a1a" onclick="ASX.scDetail(\''+it.id+'\')">Lưu lại / ghi đè</button></div></div>';
+    +'<button class="btn" style="flex:1;padding:11px;background:#23232c;color:#fbbf24;border:1px solid #8a5a1a" onclick="ASX.scDetail(\''+it.id+'\')">Lưu lại / ghi đè</button></div>'
+    +'<button class="btn" style="margin-top:8px;padding:10px;background:#16233d;color:#8ec5ff;border:1px solid #2f5aa8" onclick="ASX.dupAdd(\''+it.id+'\')">Cộng thêm +1 (có thêm 1 cái cùng mã)</button></div>';
 }
 /* ---- Số đọc bằng OCR chưa chắc chắn: hiện số để đối chiếu với tem, sửa nếu sai rồi mới thêm ---- */
 function asConfirmNum(code){
@@ -4141,8 +4193,21 @@ function buildAssetXlsx(p){
     ws.mergeCells(b[0]+(r0+1)+':'+b[1]+(r0+1));put(b[0]+(r0+1),'(Ký, ghi rõ họ tên)',{italic:true},{horizontal:'center'});
     ws.mergeCells(b[0]+(r0+5)+':'+b[1]+(r0+5));put(b[0]+(r0+5),b[3]||'',{bold:true},{horizontal:'center'});
   });
-  addPhotoSheet(wb,p);
-  addUnmSheet(wb,p);
+  (function(){
+    var sg=p.sig||{},ends={B:'C',G:'J',L:'O'},cix={B:1,G:6,L:11};
+    [2,3,4].forEach(function(d){ws.getRow(r0+d).height=20;});
+    [['B','dauMoi'],['G','toKiemKe'],['L','lanhDao']].forEach(function(z){
+      var x=sg[z[1]];if(!x||!x.img)return;
+      try{
+        var hh=56,ww=Math.round(hh*(x.w||300)/(x.h||120));if(ww>150){ww=150;hh=Math.round(ww*(x.h||120)/(x.w||300));}
+        var id=wb.addImage({base64:x.img.split(',')[1],extension:'png'});
+        ws.addImage(id,{tl:{col:cix[z[0]]+0.15,row:r0+1.1},ext:{width:ww,height:hh}});
+        ws.mergeCells(z[0]+(r0+6)+':'+ends[z[0]]+(r0+6));
+        var c=ws.getCell(z[0]+(r0+6));c.value='Ký điện tử '+x.time+' ('+x.dev+')'+(x.auth?' · '+x.auth:'');c.font={name:'Arial',size:8,italic:true};c.alignment={horizontal:'center',wrapText:true};
+      }catch(e){}
+    });
+  })();
+  addSummarySheet(wb,p);addPhotoSheet(wb,p);addLogSheet(wb,p);addUnmSheet(wb,p);
   return wb;
 }
 function asPrintHtml(p){
@@ -4150,12 +4215,109 @@ function asPrintHtml(p){
     if(it.sep)return '<tr><td colspan="15" style="background:#fff2cc;font-weight:bold;text-align:left">TÀI SẢN PHÁT HIỆN THÊM KHI KIỂM KÊ (chưa có trong số liệu kế toán)</td></tr>';
     return '<tr>'+asRowVals(it).map(function(v,j){return '<td style="text-align:'+((j===0||j===3||j===4||j===6||j===7)?'center':'left')+'">'+esc(v)+'</td>';}).join('')+'</tr>';
   }).join('');
-  var sig=function(a,b){return '<td style="width:33%;text-align:center"><b>'+a+'</b><br><i>(Ký, ghi rõ họ tên)</i><div style="height:70px"></div><b>'+esc(b||'')+'</b></td>';};
+  var sig=function(a,b,x){return '<td style="width:33%;text-align:center"><b>'+a+'</b><br><i>(Ký, ghi rõ họ tên)</i><div style="height:70px">'+(x&&x.img?'<img src="'+x.img+'" style="max-height:66px;max-width:200px">':'')+'</div><b>'+esc(b||'')+'</b>'+(x&&x.img?'<br><span style="font-size:8pt;font-style:italic">Ký điện tử '+esc(x.time)+' ('+esc(x.dev)+')'+(x.auth?' · '+esc(x.auth):'')+'</span>':'')+'</td>';};
   return '<!doctype html><html><head><meta charset="utf-8"><title>'+esc(asFileName(p).replace('.xlsx',''))+'</title><style>@page{size:A3 landscape;margin:10mm}body{font-family:"Times New Roman",serif;font-size:10pt;margin:0}h1{text-align:center;font-size:16pt;margin:0 0 6px}table.m{border-collapse:collapse;width:100%}table.m th,table.m td{border:1px solid #000;padding:3px 4px;vertical-align:middle}table.m th{background:#d9e2f3}thead{display:table-header-group}tr{page-break-inside:avoid}</style></head><body>'
     +'<h1>BIÊN BẢN KIỂM KÊ TS&amp;CCDC</h1><div><b>Chi nhánh '+esc(p.branch||'')+'</b></div><div>Thời điểm kiểm kê: '+esc(asDate(p.dateCount))+'</div><div>Thời điểm chốt số liệu đến ngày '+esc(asDate(p.cutoff))+'</div>'
     +'<div style="margin:6px 0"><b>Tổng cộng:</b> Số lượng '+fmt(s.qty)+' · Kiểm kê '+fmt(s.cq)+' · Chênh '+fmt(Math.round((s.cq-s.qty)*100)/100)+'</div>'
     +'<table class="m"><thead><tr><th colspan="6">PHẦN I: THÔNG TIN THEO DÕI TRÊN PHẦN MỀM</th><th colspan="9">PHẦN II: DÀNH CHO TỔ KIỂM KÊ</th></tr><tr>'+AS_HEAD.map(function(h){return '<th>'+h+'</th>';}).join('')+'</tr></thead><tbody>'+rows+'</tbody></table>'
-    +'<table style="width:100%;margin-top:18px;page-break-inside:avoid"><tr>'+sig('ĐẦU MỐI KIỂM KÊ TẠI ĐƠN VỊ',t.dauMoi)+sig('TỔ KIỂM KÊ',t.toKiemKe)+sig('LÃNH ĐẠO ĐƠN VỊ',t.lanhDao)+'</tr></table></body></html>';
+    +'<table style="width:100%;margin-top:18px;page-break-inside:avoid"><tr>'+sig('ĐẦU MỐI KIỂM KÊ TẠI ĐƠN VỊ',t.dauMoi,(p.sig||{}).dauMoi)+sig('TỔ KIỂM KÊ',t.toKiemKe,(p.sig||{}).toKiemKe)+sig('LÃNH ĐẠO ĐƠN VỊ',t.lanhDao,(p.sig||{}).lanhDao)+'</tr></table></body></html>';
+}
+
+/* ================= Nhật ký, tổng kết, nhắc xuất Excel (kiểm kê TS & CCDC) ================= */
+function asCurP(){try{return asPer((SC&&SC.pid)||AP.pid);}catch(e){return null;}}
+function asLog(p,a,it,d){
+  if(!p)return;
+  p.log=p.log||[];
+  p.log.push({t:Date.now(),by:(db.profile&&db.profile.ten)||'',a:a,c:it?it.code:'',n:it?it.name:'',d:d||''});
+  if(p.log.length>1500)p.log.splice(0,p.log.length-1500);
+}
+function asPending(p){
+  var n=0,last=0,x=p.lastExport||0;
+  p.items.forEach(function(i){if(i.counted&&(i.at||0)>x){n++;if(i.at>last)last=i.at;}});
+  return {n:n,last:last};
+}
+function asExpBanner(p){
+  var q=asPending(p);if(!q.n)return '';
+  return '<div class="note-warn" style="display:flex;gap:10px;align-items:center;margin-bottom:8px">'+icon('warn',18)
+    +'<div style="flex:1;font-size:13px"><b>'+q.n+' tài sản kiểm mới chưa xuất Excel</b><br><span style="font-size:12px">'+(p.lastExport?'Xuất lần cuối '+tsLabel(p.lastExport)+'. ':'Chưa xuất file lần nào. ')+'Dữ liệu và ảnh chỉ nằm trên trình duyệt này.</span></div>'
+    +'<button class="pill" style="display:inline-flex;align-items:center;gap:5px" onclick="ASX.exportX()">'+icon('download',15)+'Xuất</button></div>';
+}
+function asToolsRow(p){
+  var n=0;SIG_KEYS.as.forEach(function(k){if(p.sig&&p.sig[k])n++;});
+  var b=function(l,f){return '<button class="chip" style="flex:1;justify-content:center;text-align:center" onclick="'+f+'">'+l+'</button>';};
+  return '<div style="display:flex;gap:8px;margin-bottom:8px">'+b('Tổng kết','ASX.sum()')+b('Nhật ký ('+(p.log||[]).length+')','ASX.logView()')+b('Chữ ký ('+n+'/3)','ASX.sigToggle()')+'</div>'
+    +(AP.sigOpen?sigSectionHtml('as'):'');
+}
+function asSummary(p){
+  var s={tot:0,done:0,ok:0,less:0,more:0,miss:0,todo:0,extra:0,trace:0,bad:0},fl={};
+  p.items.forEach(function(i){
+    var f=asLocOf(i.room)||i.loc||'Chưa rõ vị trí',g=fl[f]||(fl[f]={tot:0,done:0,less:0,more:0,miss:0,ext:0});
+    if(i.extra){s.extra++;g.ext++;if(i.trace)s.trace++;return;}
+    s.tot++;g.tot++;
+    if(!i.counted){s.todo++;return;}
+    s.done++;g.done++;
+    if(i.status==='Không tìm thấy'){s.miss++;g.miss++;return;}
+    var d=asDiff(i);
+    if(d===0)s.ok++;else if(d<0){s.less++;g.less++;}else{s.more++;g.more++;}
+    if(i.quality!=='Tốt'||i.status!=='Đang sử dụng')s.bad++;
+  });
+  s.pct=s.tot?Math.round(s.done/s.tot*100):0;
+  s.floors=Object.keys(fl).sort(function(a,b){return a.localeCompare(b,'vi',{numeric:true});}).map(function(k){return [k,fl[k]];});
+  return s;
+}
+function asSumHtml(p){
+  var s=asSummary(p);
+  var card=function(l,v,c,f){return '<div onclick="ASX.sumGo(\''+f+'\')" style="background:var(--card2);border-radius:12px;padding:10px 12px"><div style="font-size:11px;color:var(--mut)">'+l+'</div><div class="tnum" style="font-size:20px;font-weight:800;color:'+(c||'var(--ink)')+'">'+v+'</div></div>';};
+  var h='<div style="display:flex;justify-content:space-between;align-items:center"><div style="font-weight:800;font-size:17px">Tổng kết kiểm kê</div><button class="pill" onclick="asModalClose()">✕</button></div>'
+    +'<div class="bar" style="margin-top:12px"><div class="fill" style="width:'+s.pct+'%"></div></div>'
+    +'<div style="font-size:12px;color:var(--mut);margin:4px 0 10px">Đã kiểm '+s.done+'/'+s.tot+' tài sản theo sổ · '+s.pct+'% · chạm từng ô để xem danh sách</div>'
+    +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">'
+    +card('Khớp',s.ok,'var(--green)','done')+card('Chưa kiểm',s.todo,'','todo')+card('Thiếu',s.less,'var(--red)','diff')+card('Thừa',s.more,'var(--green)','diff')
+    +card('Không tìm thấy',s.miss,'var(--red)','diff')+card('Hỏng / không dùng',s.bad,'#f59e0b','bad')+card('Phát hiện thêm',s.extra,'var(--green)','extra')+card('Cần dò tìm',s.trace,'#f59e0b','trace')+'</div>';
+  if(s.floors.length){
+    h+='<div style="font-weight:700;font-size:13px;margin:14px 0 6px">Theo vị trí</div><div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse;font-size:12px"><tr style="color:var(--mut);text-align:right"><th style="text-align:left;padding:4px">Vị trí</th><th>Tổng</th><th>Đã kiểm</th><th>Thiếu</th><th>Thừa</th><th>K.thấy</th><th>Thêm</th></tr>';
+    s.floors.forEach(function(f){var g=f[1];h+='<tr style="text-align:right;border-top:1px solid var(--line)"><td style="text-align:left;padding:6px 4px">'+esc(f[0])+'</td><td class="tnum">'+g.tot+'</td><td class="tnum">'+g.done+'</td><td class="tnum" style="color:var(--red)">'+(g.less||'')+'</td><td class="tnum" style="color:var(--green)">'+(g.more||'')+'</td><td class="tnum" style="color:var(--red)">'+(g.miss||'')+'</td><td class="tnum">'+(g.ext||'')+'</td></tr>';});
+    h+='</table></div>';
+  }
+  return h;
+}
+function asLogHtml(p){
+  var L=(p.log||[]).slice(-300).reverse(),h='<div style="display:flex;justify-content:space-between;align-items:center"><div style="font-weight:800;font-size:17px">Nhật ký thao tác</div><button class="pill" onclick="asModalClose()">✕</button></div>'
+    +'<div style="font-size:12px;color:var(--mut);margin:4px 0 8px">'+(p.log||[]).length+' thao tác (hiện 300 gần nhất). Đầy đủ nằm trong sheet NHẬT KÝ của file Excel.</div>';
+  if(!L.length)return h+'<div class="empty">Chưa có thao tác nào.</div>';
+  L.forEach(function(e){
+    h+='<div style="padding:8px 0;border-top:1px solid var(--line);font-size:13px"><div style="display:flex;justify-content:space-between;gap:8px"><b>'+esc(e.a)+'</b><span style="color:var(--mut);font-size:11px;white-space:nowrap">'+esc(new Date(e.t).toLocaleString('vi-VN'))+'</span></div>'
+      +(e.n||e.c?'<div>'+esc(e.n||'')+(e.c?' <span style="color:var(--mut)">('+esc(e.c)+')</span>':'')+'</div>':'')
+      +((e.d||e.by)?'<div style="color:var(--mut);font-size:12px">'+esc(e.d||'')+(e.d&&e.by?' · ':'')+esc(e.by||'')+'</div>':'')+'</div>';
+  });
+  return h;
+}
+function asSheetHead(ws,heads,widths){
+  heads.forEach(function(t,j){
+    var c=ws.getCell(1,j+1);c.value=t;c.font={name:'Times New Roman',size:11,bold:true};c.alignment={horizontal:'center',vertical:'middle',wrapText:true};
+    c.fill={type:'pattern',pattern:'solid',fgColor:{argb:'FFD9E2F3'}};c.border={top:{style:'thin'},left:{style:'thin'},bottom:{style:'thin'},right:{style:'thin'}};
+  });
+  widths.forEach(function(w,i){ws.getColumn(i+1).width=w;});
+  ws.views=[{state:'frozen',ySplit:1}];
+}
+function addSummarySheet(wb,p){
+  var s=asSummary(p),ws=wb.addWorksheet('TỔNG KẾT'),F={name:'Times New Roman',size:11},bd={top:{style:'thin'},left:{style:'thin'},bottom:{style:'thin'},right:{style:'thin'}};
+  ws.getColumn(1).width=38;for(var i=2;i<=7;i++)ws.getColumn(i).width=14;
+  var put=function(r,c,v,o){var x=ws.getCell(r,c);x.value=v;x.font=Object.assign({},F,o||{});x.border=bd;x.alignment={vertical:'middle',horizontal:c===1?'left':'center'};return x;};
+  ws.mergeCells('A1:G1');var t=ws.getCell('A1');t.value='TỔNG KẾT KIỂM KÊ — '+p.name;t.font=Object.assign({},F,{bold:true,size:13});
+  var rows=[['Tổng số tài sản theo sổ sách',s.tot],['Đã kiểm kê',s.done+' ('+s.pct+'%)'],['Khớp số lượng',s.ok],['Thiếu (kiểm kê < sổ sách)',s.less],['Thừa (kiểm kê > sổ sách)',s.more],['Không tìm thấy',s.miss],['Chưa kiểm',s.todo],['Hỏng / không sử dụng',s.bad],['Phát hiện thêm ngoài sổ',s.extra],['Trong đó cần dò tìm (chưa rõ tên)',s.trace]];
+  rows.forEach(function(x,k){put(3+k,1,x[0]);put(3+k,2,x[1],{bold:true});});
+  var r=3+rows.length+1;
+  ['Vị trí','Tổng','Đã kiểm','Thiếu','Thừa','Không thấy','Phát hiện thêm'].forEach(function(h,j){var x=put(r,j+1,h,{bold:true});x.fill={type:'pattern',pattern:'solid',fgColor:{argb:'FFD9E2F3'}};});
+  s.floors.forEach(function(f,k){var g=f[1];[f[0],g.tot,g.done,g.less,g.more,g.miss,g.ext].forEach(function(v,j){put(r+1+k,j+1,v);});});
+}
+function addLogSheet(wb,p){
+  if(!(p.log||[]).length)return;
+  var ws=wb.addWorksheet('NHẬT KÝ');
+  asSheetHead(ws,['STT','Thời gian','Người thao tác','Thao tác','Mã','Tên tài sản','Chi tiết'],[6,20,20,34,18,34,44]);
+  p.log.forEach(function(e,k){
+    [k+1,new Date(e.t).toLocaleString('vi-VN'),e.by||'',e.a,e.c||'',e.n||'',e.d||''].forEach(function(v,j){var c=ws.getCell(k+2,j+1);c.value=v;c.font={name:'Times New Roman',size:11};c.alignment={vertical:'middle',wrapText:true,horizontal:j===0?'center':'left'};});
+  });
 }
 
 var ASX={
@@ -4216,7 +4378,7 @@ var ASX={
       if(it.trace&&nm.indexOf('(Chưa rõ tên)')!==0)it.trace=false;
     }
     var qs=g('e_qty');if(qs===''){toast('Nhập số lượng kiểm kê');return;}
-    if(AP.editNew)p.items.push(it);
+    if(AP.editNew){p.items.push(it);asLog(p,'Thêm tài sản ngoài sổ',it);}
     asApply(p,it,{cQty:parseNum(qs)||0,mgmt:g('e_mgmt'),room:g('e_room'),user:g('e_user'),loc:g('e_loc'),quality:g('e_quality'),status:g('e_status'),note:g('e_note')});
     asModalClose();asRenderBody();
     if(SC&&SC.kind==='asset')A.scNext();
@@ -4230,13 +4392,14 @@ var ASX={
   },
   editReset:function(){
     var it=AP.editing;if(!it)return;
+    asLog(asPer(AP.pid),'Bỏ kết quả kiểm kê',it);
     it.counted=false;it.cQty=null;it.mgmt=it.room=it.user=it.loc=it.quality=it.status='';
     saveSoon();asModalClose();asRenderBody();toast('Đã bỏ kết quả kiểm kê');
   },
   editDel:function(){
     var p=asPer(AP.pid),it=AP.editing;if(!p||!it)return;
     if(!confirm('Xoá tài sản ngoài sổ này?'))return;
-    phDelItem(it);p.items=p.items.filter(function(x){return x!==it;});saveSoon();asModalClose();asRenderBody();
+    asLog(p,'Xoá tài sản ngoài sổ',it);phDelItem(it);p.items=p.items.filter(function(x){return x!==it;});saveSoon();asModalClose();asRenderBody();
   },
   scan:function(){
     var p=asPer(AP.pid);if(!p)return;
@@ -4265,6 +4428,17 @@ var ASX={
     SC.undo=null;saveSoon();A.scNext();scLogRender();asRenderBody();toast('Đã hoàn tác');
   },
   scDetail:function(id){asEdit(id);},
+  dupAdd:function(id){
+    if(!SC)return;
+    var p=per(SC.pid),it=null;p.items.forEach(function(x){if(x.id===id)it=x;});if(!it)return;
+    var o=it.cQty||0;it.cQty=o+1;it.at=Date.now();it.by=(db.profile&&db.profile.ten)||'';
+    asLog(p,'Cộng thêm +1 (trùng mã)',it,'SL '+fmt(o)+' → '+fmt(it.cQty));
+    saveSoon();scBeep();A.scNext();asRenderBody();toast('Đã cộng thêm: '+it.name+' → '+fmt(it.cQty));
+  },
+  sum:function(){var p=asPer(AP.pid);if(p)asModal(asSumHtml(p));},
+  sumGo:function(f){AP.flt=f;AP.limit=60;asModalClose();asRenderBody();window.scrollTo(0,0);},
+  logView:function(){var p=asPer(AP.pid);if(p)asModal(asLogHtml(p));},
+  sigToggle:function(){AP.sigOpen=!AP.sigOpen;asRenderBody();},
   confirmNum:function(){
     if(!SC)return;
     var e=document.getElementById('scnum'),v=e?e.value.replace(/\s+/g,'').trim():'';
@@ -4280,7 +4454,7 @@ var ASX={
   },
   phDel:function(id){
     var it=AP.editing;if(!it||!confirm('Xoá ảnh này?'))return;
-    it.imgs=(it.imgs||[]).filter(function(m){return m.id!==id;});PH.del(id);saveSoon();asPhotoRefresh();asRenderBody();
+    it.imgs=(it.imgs||[]).filter(function(m){return m.id!==id;});PH.del(id);asLog(asPer(AP.pid),'Xoá ảnh',it);saveSoon();asPhotoRefresh();asRenderBody();
   },
   scShoot:function(id,k){
     if(!SC||SC.shooting)return;
@@ -4301,7 +4475,7 @@ var ASX={
   },
   autoUndo:function(id){
     var p=asPer((SC&&SC.pid)||AP.pid);if(!p)return;
-    p.items.forEach(function(x){if(x.id===id)phDelItem(x);});
+    p.items.forEach(function(x){if(x.id===id){asLog(p,'Hoàn tác: xoá tài sản phát hiện thêm',x);phDelItem(x);}});
     p.items=p.items.filter(function(x){return x.id!==id;});
     saveSoon();A.scNext();scUnmChip();asRenderBody();toast('Đã hoàn tác');
   },
@@ -4326,12 +4500,13 @@ var ASX={
     var g=function(k){var e=document.getElementById(k);return e?e.value.trim():'';};
     p.name=g('i_name')||p.name;p.branch=g('i_branch');p.dateCount=g('i_date');p.cutoff=g('i_cut');
     p.team={dauMoi:g('i_dm'),toKiemKe:g('i_tk'),lanhDao:g('i_ld')};
+    asLog(p,'Sửa thông tin biên bản');
     store.save();asModalClose();renderAsset();toast('Đã lưu thông tin biên bản');
   },
   exportX:function(){
     var p=asPer(AP.pid);if(!p)return;
     if(typeof ExcelJS==='undefined'){toast('Chưa tải được thư viện Excel — kiểm tra mạng');return;}
-    PH.preload(p).then(function(){return buildAssetXlsx(p).xlsx.writeBuffer();}).then(function(buf){shareOrDownload(new Blob([buf],{type:XLSX_MIME}),asFileName(p));}).catch(function(e){console.error(e);toast('Không xuất được file');});
+    PH.preload(p).then(function(){return buildAssetXlsx(p).xlsx.writeBuffer();}).then(function(buf){shareOrDownload(new Blob([buf],{type:XLSX_MIME}),asFileName(p));p.lastExport=Date.now();asLog(p,'Xuất Excel');store.save();asRenderBody();}).catch(function(e){console.error(e);toast('Không xuất được file');});
   },
   print:function(){
     var p=asPer(AP.pid);if(!p)return;
@@ -4420,6 +4595,7 @@ function asAutoAdd(p,text,kind){
     room:c.room||'',user:c.user||'Sử dụng chung',loc:c.loc||asLocOf(c.room),quality:'Tốt',status:'Đang sử dụng',
     note:'Quét thấy nhưng chưa có trong sổ, cần dò tìm',extra:true,trace:true,at:now,by:(db.profile&&db.profile.ten)||''};
   p.items.push(it);saveSoon();phTemFor(it);
+  asLog(p,'Phát hiện thêm: tem không khớp',it,kind==='ocr'?'đọc số (OCR)':'quét mã');
   return {it:it,isNew:true};
 }
 function asAddedNotice(it,isNew){
@@ -4702,7 +4878,13 @@ var A={
       db.lastBackup=Date.now();db.backupSnooze=0;store.save();
       var d=new Date(),p=function(n){return String(n).padStart(2,'0');};
       var fname='SaoLuu_KiemKe_'+d.getFullYear()+p(d.getMonth()+1)+p(d.getDate())+'_'+p(d.getHours())+p(d.getMinutes())+'.json';
-      shareOrDownload(new Blob([JSON.stringify(db)],{type:'application/json'}),fname);
+      var ids=[];(db.assets||[]).forEach(function(pp){pp.items.forEach(function(it){(it.imgs||[]).forEach(function(m){ids.push(m.id);});});});
+      Promise.all(ids.map(function(id){return PH.get(id).then(function(d){return [id,d];});})).then(function(rs){
+        var out=Object.assign({},db),ph={};rs.forEach(function(r){if(r[1])ph[r[0]]=r[1];});
+        if(Object.keys(ph).length)out.__photos=ph;
+        delete out.webauthn;
+        shareOrDownload(new Blob([JSON.stringify(out)],{type:'application/json'}),fname);
+      }).catch(function(err){console.error(err);toast('Không sao lưu được: '+err.message);});
       if(route.view==='home'||route.view==='settings')render();
     }catch(err){console.error(err);toast('Không sao lưu được: '+err.message);}
   },
@@ -4714,8 +4896,9 @@ var A={
       try{
         var d=JSON.parse(e.target.result);
         if(!d||!Array.isArray(d.periods))throw new Error('không phải file sao lưu của app');
+        Object.keys(d.__photos||{}).forEach(function(k){PH.put(k,d.__photos[k]);});
         var st=mergeDb(d);store.save();render();
-        toast('Đã khôi phục: thêm '+st.p+' kỳ kiểm kê, '+st.h+' biên bản, '+st.e+' phiếu');
+        toast('Đã khôi phục: thêm '+st.p+' kỳ kiểm kê, '+st.a+' kỳ kiểm kê tài sản, '+st.h+' biên bản, '+st.e+' phiếu');
       }catch(err){toast('File không hợp lệ: '+err.message);}
     };
     r.readAsText(f);input.value='';
@@ -4726,6 +4909,7 @@ var A={
     if(kind==='hv'&&HV[key])def=HV[key].ten||'';
     if(kind==='ex'&&key==='nguoiGiaiTrinh')def=EX.nguoiGiaiTrinh.ten||'';
     if(kind==='pe'){var pp=per(P.id);def=sgOf(pp&&pp.folder)[key]||'';}
+    if(kind==='as'){var pa=asPer(AP.pid);def=(pa&&asTeam(pa)[key])||'';}
     if(kind==='ex'&&key==='lanhDao')def=sgOf(EX.boPhan).giamDoc;
     if(!def)def=(db.profile&&db.profile.ten)||'';
     sigPadOpen(kind,key,SIG_TITLES[kind+'.'+key]||'',def);
@@ -5274,6 +5458,16 @@ function checkForUpdate(){
     .catch(function(){});
 }
 try{if('serviceWorker' in navigator&&location.protocol==='https:')navigator.serviceWorker.register('sw.js').catch(function(){});}catch(e){}
+(function(){
+  var oc=A.scClose;
+  A.scClose=function(){
+    var k=SC&&SC.kind,pid=SC&&SC.pid;
+    oc.apply(this,arguments);
+    if(k==='asset'){var p=asPer(pid),q=p&&asPending(p);if(q&&q.n)setTimeout(function(){toast('Còn '+q.n+' tài sản kiểm mới chưa xuất Excel');},400);}
+  };
+  window.addEventListener('offline',function(){toast('Đang offline — vẫn quét và lưu trên máy bình thường');});
+  window.addEventListener('online',function(){toast('Đã có mạng trở lại');});
+})();
 setTimeout(checkForUpdate,4000);
 setInterval(checkForUpdate,5*60*1000);
 document.addEventListener('visibilitychange',function(){if(document.visibilityState==='visible')checkForUpdate();});
