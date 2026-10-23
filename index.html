@@ -2,7 +2,7 @@
 <html lang="vi">
 <head>
 <meta charset="UTF-8">
-<meta name="app-version" content="2026102311">
+<meta name="app-version" content="2026102312">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
 <meta name="theme-color" content="#0f766e">
 <link rel="manifest" href="manifest.webmanifest">
@@ -2435,8 +2435,16 @@ function ocrStripLines(out,w,h){
     }
   }
 }
-/* Tách các dòng chữ: mỗi dòng cắt riêng, đọc nhỏ gọn nên nhanh hơn đọc cả khung rất nhiều */
-function ocrBands(a,w,h){
+function ocrGroup(a,w,st,last,s0,e){
+  var top=-1,bot=-1,ink=0,yy,xx,has;
+  for(yy=st;yy<=last;yy++){has=false;for(xx=s0;xx<=e;xx++)if(a[yy*w+xx]===0){has=true;ink++;}if(has){if(top<0)top=yy;bot=yy;}}
+  var gh=bot-top+1,gw=e-s0+1;
+  return {s:s0,e:e,gw:gw,gh:gh,fill:ink/(gw*gh)};
+}
+/* Nét rác ở hai đầu dòng: thanh dọc mảnh đặc (viền ô) hoặc đốm nhỏ — không phải chữ số */
+function ocrJunk(g,bh){return (g.gw<=Math.max(2,0.09*g.gh)&&g.fill>=0.8)||g.gh<0.3*bh;}
+/* Tách các dòng chữ: bỏ viền dính vào chữ, cắt nét rác hai đầu, ưu tiên dòng giống dãy số nhất (không phải nhiễu/đường kẻ) */
+function ocrBands(a,w,h,raw){
   var rows=new Uint16Array(h),x,y,c,o;
   for(y=0;y<h;y++){c=0;o=y*w;for(x=0;x<w;x++)if(a[o+x]===0)c++;rows[y]=c;}
   var thr=Math.max(3,Math.round(w*0.012)),gap=Math.max(3,Math.round(h*0.012));
@@ -2447,17 +2455,36 @@ function ocrBands(a,w,h){
     else if(st>=0&&(y>=h||y-last>gap)){
       var bh=last-st+1;
       if(bh>=minH&&bh<=maxH){
-        var cc=new Uint16Array(w),ink=0,yy,xx;
-        for(yy=st;yy<=last;yy++){ink+=rows[yy];for(xx=0;xx<w;xx++)if(a[yy*w+xx]===0)cc[xx]++;}
-        var cm=Math.max(2,Math.round(bh*0.06)),x0=0,x1=w-1;
-        while(x0<w&&cc[x0]<cm)x0++;
-        while(x1>x0&&cc[x1]<cm)x1--;
-        if(x1-x0+1>=bh*1.5)bands.push({x0:x0,y0:st,bw:x1-x0+1,bh:bh,ink:ink});
+        var ink=0,yy,xx,u,d2,mid=st+(bh>>1);
+        for(yy=st;yy<=last;yy++)ink+=rows[yy];
+        if(raw){
+          for(xx=0;xx<w;xx++){
+            if(raw[mid*w+xx]!==0)continue;
+            u=mid;while(u>0&&raw[(u-1)*w+xx]===0)u--;
+            d2=mid;while(d2<h-1&&raw[(d2+1)*w+xx]===0)d2++;
+            if(d2-u+1>bh*1.35)for(yy=st;yy<=last;yy++)a[yy*w+xx]=255;
+          }
+        }
+        var cc=new Uint16Array(w),G=[],gs=-1;
+        for(yy=st;yy<=last;yy++)for(xx=0;xx<w;xx++)if(a[yy*w+xx]===0)cc[xx]++;
+        for(xx=0;xx<=w;xx++){
+          if(xx<w&&cc[xx]>0){if(gs<0)gs=xx;}
+          else if(gs>=0){G.push(ocrGroup(a,w,st,last,gs,xx-1));gs=-1;}
+        }
+        while(G.length&&ocrJunk(G[0],bh))G.shift();
+        while(G.length&&ocrJunk(G[G.length-1],bh))G.pop();
+        if(G.length){
+          var x0=G[0].s,bw=G[G.length-1].e-x0+1;
+          if(bw>=bh*1.5){
+            var dens=ink/(bw*bh);
+            bands.push({x0:x0,y0:st,bw:bw,bh:bh,ink:ink,score:ink*((dens>=0.12&&dens<=0.7)?1:0.25)*(bw>=w*0.97?0.3:1)});
+          }
+        }
       }
       st=-1;
     }
   }
-  bands.sort(function(p,q){return q.ink-p.ink;});
+  bands.sort(function(p,q){return q.score-p.score;});
   return bands;
 }
 function ocrCrop(arr,w,x0,y0,bw,bh,scale,pad){
@@ -2506,7 +2533,7 @@ function ocrPrep(el,sx,sy,sw,sh,mode,maxSide){
     return sg;
   };
   var src=mode==='gray'?stretch():out;
-  var bands=ocrBands(out,w,h).map(function(b){
+  var bands=ocrBands(out,w,h,raw).map(function(b){
     var sc=Math.min(3,40/b.bh,1800/b.bw);
     return ocrCrop(src,w,b.x0,b.y0,b.bw,b.bh,sc,10);
   });
@@ -2629,13 +2656,23 @@ function scAutoOcr(v){
   SC.sig=sig;
   /* Đứng yên: vẫn tiếp tục thử nhưng thưa hơn (1,5 giây một lần), không bao giờ dừng hẳn */
   if(diff<4){SC.steady=(SC.steady||0)+1;if(SC.steady>3){if(now-(SC.ocrSlow||0)<1500)return;SC.ocrSlow=now;}}else SC.steady=0;
-  var vars=['bin','gray','bin2'];
-  SC.ocrIdx=((SC.ocrIdx||0)+1)%vars.length;
+  /* Bỏ qua khung hình đang mờ (chưa lấy nét / rung tay) — đọc khung mờ vừa chậm vừa dễ sai */
+  try{
+    var c2=SC.shc||(SC.shc=document.createElement('canvas'));
+    c2.width=320;c2.height=Math.max(8,Math.round(cr.h*320/cr.w));
+    c2.getContext('2d',{willReadFrequently:true}).drawImage(v,cr.x,cr.y,cr.w,cr.h,0,0,c2.width,c2.height);
+    var sh=phSharp(c2);SC.shMax=Math.max((SC.shMax||0)*0.985,sh);
+    if(sh<SC.shMax*0.4&&(SC.blurSkip||0)<2){SC.blurSkip=(SC.blurSkip||0)+1;scOcrStatus('Số: ảnh mờ — giữ yên máy, chờ lấy nét','#fbbf24');return;}
+    SC.blurSkip=0;
+  }catch(e){}
+  /* Luôn dùng cùng một cách xử lý để các lần đọc cho cùng một chuỗi (dễ xác nhận); chỉ đổi cách khác khi lần trước không thấy gì */
+  var mi=SC.ocrMiss||0,mode=mi===0?'bin':(mi%2?'bin2':'gray');
   var t0=now,exact=function(lines){var j=scJudge(p,lines);return !!(j&&j.dist===0&&j.need===1);};
+  var good=function(lines){return exact(lines)||(SC.kind==='asset'&&lines.some(function(l){return l.digits.length>=7;}));};
   SC.autoBusy=true;
-  ocrFrame(v,cr,vars[SC.ocrIdx],800,4,true,exact).then(function(lines){
+  ocrFrame(v,cr,mode,800,3,true,good).then(function(lines){
     if(!SC)return;
-    SC.autoBusy=false;SC.ocrAt=Date.now();
+    SC.autoBusy=false;SC.ocrAt=Date.now();SC.ocrMiss=lines.length?0:mi+1;
     var ms=Date.now()-t0;
     if(SC.hold||SC.ocrBusy||SC.auto===false)return;
     var j=scJudge(p,lines);
@@ -2661,9 +2698,9 @@ function scAutoOcr(v){
         if(SC.kind==='asset'){
           var vv=c.cnt[c.rep]||0,ean=eanOk(c.rep);
           if(c.rep.length<7||vv<2)return;
-          if(ean===true){c.done=true;var ra=asAutoAdd(p,c.rep,'ocr');asAddedNotice(ra.it,ra.isNew);return;}
-          if(vv<4)return;
-          c.done=true;asConfirmNum(c.rep);return;
+          c.done=true;
+          if(ean===true){var ra=asAutoAdd(p,c.rep,'ocr');asAddedNotice(ra.it,ra.isNew);return;}
+          asConfirmNum(c.rep);return;
         }
         if(c.n<(eanOk(c.rep)===false?3:2))return;
         c.done=true;
