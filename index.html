@@ -2,23 +2,26 @@
 <html lang="vi">
 <head>
 <meta charset="UTF-8">
-<meta name="app-version" content="2026102313">
+<meta name="app-version" content="2026102600">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
-<meta name="theme-color" content="#0f766e">
+<meta name="theme-color" content="#0D5DB8">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="apple-touch-icon" href="icon-192.png">
 <meta name="apple-mobile-web-app-title" content="Kiểm kê kho">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
-<title>Kiểm kê kho · MedDental</title>
+<title>Kiểm kê kho · MedDental V2.0</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<script>/* V2.0: chụp bản dự phòng dữ liệu gốc trước khi script chính chạy */
+(function(){try{var r=localStorage.getItem("kk_db_v1");if(r&&!localStorage.getItem("kk_db_v1_preV2")){localStorage.setItem("kk_db_v1_preV2",r);localStorage.setItem("kk_db_v1_preV2_at",String(Date.now()));}}catch(e){window.__preV2Err=String(e&&e.name||e);}})();
+</script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.4.0/exceljs.min.js"></script>
 <style>
 :root{
   --bg:#f3f5f9; --card:#ffffff; --card2:#f3f6fb; --ink:#101828; --mut:rgba(16,24,40,0.58); --mut2:rgba(16,24,40,0.38); --line:rgba(16,24,40,0.1);
-  --teal:#2f6fed; --teal-d:#1d55c9; --teal-bg:rgba(47,111,237,0.08); --teal-ln:rgba(47,111,237,0.28);
+  --teal:#0D5DB8; --teal-d:#0a4a93; --teal-bg:rgba(13,93,184,0.08); --teal-ln:rgba(13,93,184,0.28);
   --red:#e0383d; --red-bg:#fde8e8; --red-ln:rgba(224,56,61,0.28);
   --amber:#b4780a; --amber-bg:#fdf1d6; --amber-ln:rgba(180,120,10,0.28);
   --orange:#c2540d; --orange-bg:#fde8d6; --orange-ln:rgba(194,84,13,0.28);
@@ -76,7 +79,7 @@ body{background:var(--bg);color:var(--ink);font-family:'Inter',system-ui,-apple-
 .card{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:16px}
 .btn{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;border:none;border-radius:14px;padding:14px;font:inherit;font-weight:700;cursor:pointer;text-align:center;transition:transform .12s ease,opacity .12s ease,background-color .15s ease}
 .btn:active{transform:scale(.97);opacity:.9}
-.btn-primary{background:var(--teal);color:#fff;box-shadow:0 4px 16px rgba(47,111,237,.25)}
+.btn-primary{background:var(--teal);color:#fff;box-shadow:0 4px 16px rgba(13,93,184,.25)}
 .btn-outline{background:var(--teal-bg);color:var(--teal);border:1px solid var(--teal-ln)}
 .btn:disabled{background:rgba(16,24,40,.06);color:rgba(16,24,40,.28);border-color:rgba(16,24,40,.06);cursor:default;box-shadow:none;transform:none}
 .inp{width:100%;border:1px solid var(--line);border-radius:12px;padding:11px 12px;font:inherit;background:var(--card2);color:var(--ink);outline:none;transition:border-color .15s ease}
@@ -209,26 +212,51 @@ select.chip{appearance:auto;color:var(--ink)}
 .bcfile{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:10px 12px;margin-bottom:6px;display:flex;align-items:center;gap:10px}
 .bcbtn{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;border:none;border-radius:14px;padding:14px;font:inherit;font-weight:700;cursor:pointer;text-align:center;transition:transform .12s ease,opacity .12s ease}
 .bcbtn:active{transform:scale(.97);opacity:.9}
-.bcok{background:var(--teal);color:#fff;box-shadow:0 4px 16px rgba(47,111,237,.25)}
+.bcok{background:var(--teal);color:#fff;box-shadow:0 4px 16px rgba(13,93,184,.25)}
 .bcsec{font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--mut);margin-bottom:6px}
 .bctbl{width:100%;border-collapse:collapse;font-size:12px}
 .bctbl th{text-align:left;color:var(--mut);padding:5px 6px;border-bottom:1px solid var(--line)}
 .bctbl td{padding:5px 6px;border-bottom:1px solid var(--line);color:var(--ink)}
 .bctbl .r{text-align:right;font-variant-numeric:tabular-nums}
+/* ===== V2.0 ===== */
+:root{--cyan:#1BA7E8;--yellow:#F3D45A;--lblue:#DDEBF8;--bg:#f3f7fb;--ink:#333333}
+#stpill{margin-left:auto;display:flex;align-items:center;gap:6px;font-size:11px;font-weight:600;color:var(--mut);white-space:nowrap}
+#stpill i{width:9px;height:9px;border-radius:50%;background:var(--green);display:inline-block}
+#stpill.err i{background:var(--red)}#stpill.off i{background:var(--amber)}
+#stpill span{display:none}@media(min-width:420px){#stpill span{display:inline}}
+#guser{margin-left:0!important}
+#stbar{display:none;padding:7px 16px;font-size:13px;font-weight:600;line-height:1.35}
+#stbar.off{display:block;background:var(--amber-bg);color:var(--amber)}#stbar.err{display:block;background:var(--red-bg);color:var(--red)}
+#bnav{display:none;position:fixed;left:0;right:0;bottom:0;z-index:45;background:#fff;border-top:1px solid var(--line);padding:6px 4px calc(6px + env(safe-area-inset-bottom));grid-template-columns:repeat(5,1fr);align-items:end}
+#bnav a{display:flex;flex-direction:column;align-items:center;gap:2px;min-height:48px;justify-content:center;font-size:11px;font-weight:700;color:var(--mut);cursor:pointer;text-decoration:none}
+#bnav a.on{color:var(--teal)}
+#bnav a.qr b{width:52px;height:52px;margin-top:-26px;border-radius:50%;background:var(--yellow);color:#0D5DB8;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800;box-shadow:0 4px 14px rgba(13,93,184,.35);border:3px solid #fff}
+#bnav a.qr{color:var(--teal)}
+@media(max-width:899px){#bnav{display:grid}#app{padding-bottom:84px}.botbar{bottom:calc(64px + env(safe-area-inset-bottom))}#toast{bottom:150px}}
+@media(max-width:380px){#gbrand{font-size:15px}}
 </style>
 </head>
 <body>
 <header id="gheader">
   <button id="ghmenu" onclick="A.drawerToggle()"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M3 12h18M3 18h18"/></svg></button>
   <div id="gbrand"><span class="dot">MD</span> MedDental<span class="sep">—</span>Vật tư</div>
+  <div id="stpill" title="Trạng thái lưu"><i></i><span>Chưa lưu</span></div>
   <div id="guser" onclick="A.go('settings')"></div>
 </header>
+<div id="stbar"></div>
 <div id="gshell">
   <nav id="gsidebar"></nav>
   <main id="gmain"><div id="app"></div></main>
 </div>
 <div id="gdrawer-ovl" onclick="A.drawerToggle()"></div>
 <nav id="gdrawer"></nav>
+<nav id="bnav">
+  <a data-r="home" onclick="V2.go('home')"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l9-8 9 8M5 10v10h14V10"/></svg>Trang chủ</a>
+  <a data-r="stock" onclick="V2.go('stock')"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 8l-9-5-9 5v8l9 5 9-5zM3 8l9 5 9-5M12 13v8"/></svg>Vật tư</a>
+  <a class="qr" data-r="scan" onclick="V2.scan()"><b>QR</b>Quét QR</a>
+  <a data-r="reporthub" onclick="V2.go('reporthub')"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3H6v18h12V7zM14 3v4h4M9 13h6M9 17h6"/></svg>Báo cáo</a>
+  <a data-r="more" onclick="V2.more()"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="5" cy="12" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/></svg>Khác</a>
+</nav>
 <div id="modal"></div>
 <div id="toast"><div class="in" id="toastin"></div></div>
 
@@ -5500,9 +5528,9 @@ function showUpdateBanner(newVer){
   UPD_SHOWN=true;
   var d=document.createElement('div');
   d.id='updbanner';
-  d.style.cssText='position:fixed;top:0;left:0;right:0;z-index:200;background:#2f6fed;color:#fff;display:flex;align-items:center;justify-content:center;gap:12px;padding:10px 14px;font-size:14px;font-weight:600;box-shadow:0 2px 12px rgba(0,0,0,.2)';
+  d.style.cssText='position:fixed;top:0;left:0;right:0;z-index:200;background:#0D5DB8;color:#fff;display:flex;align-items:center;justify-content:center;gap:12px;padding:10px 14px;font-size:14px;font-weight:600;box-shadow:0 2px 12px rgba(0,0,0,.2)';
   d.innerHTML='<span>Có bản cập nhật mới</span>'
-    +'<button style="border:none;background:#fff;color:#2f6fed;font:inherit;font-weight:700;border-radius:999px;padding:6px 14px;cursor:pointer" onclick="reloadLatest(\''+newVer+'\')">Tải lại ngay</button>'
+    +'<button style="border:none;background:#fff;color:#0D5DB8;font:inherit;font-weight:700;border-radius:999px;padding:6px 14px;cursor:pointer" onclick="reloadLatest(\''+newVer+'\')">Tải lại ngay</button>'
     +'<button style="border:none;background:none;color:rgba(255,255,255,.8);font:inherit;cursor:pointer" onclick="document.getElementById(\'updbanner\').remove()">Để sau</button>';
   document.body.appendChild(d);
 }
@@ -5565,6 +5593,77 @@ document.addEventListener('visibilitychange',function(){if(document.visibilitySt
     wm.style.cssText='position:fixed;inset:0;z-index:9000;pointer-events:none;background-image:url('+url+');background-repeat:repeat;background-size:'+W+'px '+H+'px';
     document.body.appendChild(wm);
   }catch(e){}
+})();
+</script>
+<script id="v2">
+"use strict";
+var V2=(function(){
+  var lastSave=null,state='ok',offline=!navigator.onLine,errMsg='';
+  function hm(d){return String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0');}
+  function paint(){
+    var pill=document.getElementById('stpill'),bar=document.getElementById('stbar');if(!pill||!bar)return;
+    var cls='',txt='',bt='';
+    if(state==='err'){cls='err';txt='Lỗi lưu';bt='⚠ '+errMsg;}
+    else{txt=lastSave?'Đã lưu '+hm(lastSave):'Sẵn sàng';if(offline){cls='off';bt='Mất kết nối Internet — vẫn kiểm kê và lưu trên máy được. Xuất Excel/đọc số (OCR) cần tải thư viện nên có thể không chạy.';}}
+    pill.className=cls;pill.querySelector('span').textContent=txt;pill.title=txt;
+    bar.className=state==='err'?'err':(offline?'off':'');bar.textContent=bt;
+  }
+  /* Lưu: cùng khóa kk_db_v1, cùng định dạng JSON như bản cũ; chỉ thêm trạng thái + báo lỗi quota rõ ràng */
+  store.save=function(){
+    if(!store.ok){state='err';errMsg='Trình duyệt chặn lưu dữ liệu (chế độ riêng tư?). Hãy sao lưu file ngay.';paint();return;}
+    try{localStorage.setItem('kk_db_v1',JSON.stringify(db));state='ok';lastSave=new Date();}
+    catch(e){console.error(e);state='err';
+      errMsg=(e&&(e.name==='QuotaExceededError'||e.code===22))?'Bộ nhớ trình duyệt đầy — KHÔNG lưu được. Bấm Cài đặt → Sao lưu dữ liệu ngay.':'Không lưu được dữ liệu: '+(e&&e.name||'lỗi');
+      toast(errMsg);}
+    paint();
+  };
+  window.addEventListener('online',function(){offline=false;paint();});
+  window.addEventListener('offline',function(){offline=true;paint();});
+  function curPid(){
+    if(route.view==='period'&&P&&per(P.id))return P.id;
+    if(route.view==='stock'&&ST&&per(ST.id))return ST.id;
+    return null;
+  }
+  function active(){
+    var r=route.view,k=r==='period'||r==='upload'||r==='folder'?'home':r==='asset'?'':r;
+    if(SC)k='scan';
+    [].forEach.call(document.querySelectorAll('#bnav a'),function(a){a.classList.toggle('on',a.getAttribute('data-r')===k);});
+  }
+  var _rn=renderNav;renderNav=function(){_rn();active();};
+  var _rs=renderSettings;renderSettings=function(){_rs();settingsCard();};
+  function settingsCard(){
+    var host=document.getElementById('app');if(!host)return;
+    var at=localStorage.getItem('kk_db_v1_preV2_at'),has=!!localStorage.getItem('kk_db_v1_preV2');
+    var d=document.createElement('div');d.className='card';d.style.margin='0 16px 12px';
+    d.innerHTML='<div style="font-weight:700;margin-bottom:2px">Bản dự phòng trước khi nâng cấp V2.0</div>'
+      +'<div style="font-size:12px;color:var(--mut);margin-bottom:10px">'+(has?'Đã chụp nguyên trạng dữ liệu cũ lúc '+new Date(+at).toLocaleString('vi-VN')+'. Dữ liệu hiện tại không bị thay đổi bởi bản này.':'Chưa tạo được bản dự phòng (bộ nhớ trình duyệt đầy hoặc không có dữ liệu cũ). Hãy sao lưu file ngay.')+'</div>'
+      +(has?'<button class="btn btn-outline" onclick="V2.dlPre()">Tải bản dự phòng (JSON)</button>':'')
+      +'<div style="font-size:12px;color:var(--mut);margin-top:8px">Dữ liệu chỉ lưu trong trình duyệt của máy này, không đồng bộ giữa các máy. Xóa dữ liệu trang/đổi trình duyệt sẽ mất dữ liệu — hãy sao lưu định kỳ.</div>';
+    host.appendChild(d);
+  }
+  function dlPre(){
+    var r=localStorage.getItem('kk_db_v1_preV2');if(!r){toast('Không có bản dự phòng');return;}
+    dlAnchor(new Blob([r],{type:'application/json'}),'MedDental_kiemke_truoc_V2_'+new Date().toISOString().slice(0,10)+'.json');
+  }
+  function go(r){
+    if(SC)A.scClose();
+    if(r==='stock')A.navStock();else A.navGo(r);
+  }
+  function more(){A.drawerToggle();}
+  function scan(){
+    if(SC){return;}
+    var pid=curPid();
+    if(!pid){
+      if(route.view==='asset'){toast('Màn hình CCDC & TSCĐ có nút quét riêng trong kỳ kiểm kê tài sản');return;}
+      if(!db.periods.length){toast('Chưa có kỳ kiểm kê nào — tạo kỳ mới trước khi quét');A.go('home');return;}
+      pid=db.periods[0].id;
+    }
+    if(!(route.view==='period'&&P&&P.id===pid))A.openPeriod(pid);
+    A.scanOpen();
+  }
+  if(window.__preV2Err)setTimeout(function(){state='err';errMsg='Chưa tạo được bản dự phòng trước V2 ('+window.__preV2Err+'). Hãy sao lưu file ngay.';paint();},0);
+  paint();active();
+  return {go:go,more:more,scan:scan,dlPre:dlPre,paint:paint};
 })();
 </script>
 </body>
