@@ -407,7 +407,12 @@ body{background:var(--bg)}
 .h2{position:relative;overflow:hidden;border-radius:22px;background:radial-gradient(120% 100% at 50% 0%,#3f7bf2 0%,#1d5fe0 45%,#0b52cf 100%);color:#fff;text-align:center;padding:8px 14px 16px;box-shadow:0 10px 24px rgba(11,82,207,.32),inset 0 0 0 1px rgba(255,255,255,.2);display:flex;flex-direction:column;align-items:center;animation:h2in .7s cubic-bezier(.2,.8,.2,1) both}
 .h2::before{content:"";position:absolute;inset:-40% -20% auto;height:80%;background:conic-gradient(from 0deg,transparent 0 70%,rgba(255,255,255,.12) 85%,transparent 100%);animation:h2sw 9s linear infinite;pointer-events:none}
 .h2art{width:100%;max-width:210px;height:auto;display:block;position:relative}
-.h2t{display:block;font-size:24px;font-weight:800;letter-spacing:-.02em;margin-top:-2px;background:linear-gradient(90deg,#fff 0%,#d4e4ff 40%,#fff 70%,#fff 100%);background-size:220% 100%;-webkit-background-clip:text;background-clip:text;color:transparent;animation:h2up .6s .15s both,h2sh 5s 1s linear infinite}
+.h2t{position:relative;display:block;font-size:24px;font-weight:800;letter-spacing:-.02em;margin-top:-2px;background:linear-gradient(110deg,#e4eeff 0%,#fff 36%,#8cc4ff 45%,#fff 50%,#fff1bd 55%,#fff 64%,#e4eeff 100%);background-size:250% 100%;background-position:0 0;-webkit-background-clip:text;background-clip:text;color:transparent;animation:h2up .6s .15s both,h4sh 3.4s 1s ease-in-out infinite,h4gl 2.8s ease-in-out infinite alternate}
+.h2k{position:absolute;width:11px;height:11px;background:#fff;pointer-events:none;opacity:0;clip-path:polygon(50% 0,60% 40%,100% 50%,60% 60%,50% 100%,40% 60%,0 50%,40% 40%);animation:h4tw 2.4s ease-in-out infinite}
+.h2k.k1{left:-8px;top:-3px}.h2k.k2{left:30%;top:-9px;width:9px;height:9px;animation-delay:.6s}.h2k.k3{left:64%;bottom:-5px;width:12px;height:12px;animation-delay:1.2s}.h2k.k4{right:-9px;top:1px;width:9px;height:9px;animation-delay:1.8s}
+@keyframes h4sh{0%{background-position:0 0}70%,100%{background-position:100% 0}}
+@keyframes h4gl{from{filter:drop-shadow(0 0 2px rgba(150,205,255,.25))}to{filter:drop-shadow(0 0 9px rgba(170,215,255,.75))}}
+@keyframes h4tw{0%,100%{opacity:0;transform:scale(.2) rotate(0)}50%{opacity:1;transform:scale(1) rotate(45deg)}}
 .h2s{display:block;font-size:14px;font-weight:600;color:#e3edff;margin-top:3px;text-shadow:0 1px 8px rgba(8,40,120,.35);animation:h2up .6s .3s both}
 .h2c{display:flex;gap:5px;margin-top:10px;justify-content:center;width:100%}
 .h2c em{font-style:normal;display:flex;align-items:center;gap:4px;flex:1 1 auto;justify-content:center;min-width:0;padding:6px 4px;border-radius:10px;background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.34);color:#fff;font-size:11.5px;font-weight:600;white-space:nowrap;animation:h2up .55s both,h2fl2 3.6s ease-in-out infinite}
@@ -450,6 +455,28 @@ body{background:var(--bg)}
 @keyframes h2pl2{0%,30%{opacity:0}45%,75%{opacity:.55}90%,100%{opacity:0}}
 @keyframes h2st{0%,80%{transform:scale(0) rotate(0)}90%{transform:scale(1) rotate(45deg)}100%{transform:scale(0) rotate(90deg)}}
 @media(prefers-reduced-motion:reduce){.h2dr,.h2vb,.h2cont,.h2sp,.h2pol,.h2star{animation:none!important}.h2dr{transform:translateX(4px)}.h2star{transform:scale(.8)}}
+
+/* Linh vật răng MedDental */
+.h3pop{transform-origin:120px 106px;animation:h3pop .9s cubic-bezier(.2,1.4,.4,1) both}
+.h3hop{transform-origin:0 88px;animation:h3hop 5.5s ease-in-out 1.4s infinite}.h3hop.b{animation-delay:2.1s}
+.h3br{transform-origin:0 88px;animation:h3br 3.2s ease-in-out infinite}
+.h3wv{transform-origin:-24px 54px;animation:h3wv 1.5s ease-in-out infinite alternate}
+.h3eye{transform-box:fill-box;transform-origin:center;animation:h3bl 4.4s infinite}
+.h3sh{transform-box:fill-box;transform-origin:center;animation:h3sh 5.5s ease-in-out 1.4s infinite}.h3sh.b{animation-delay:2.1s}
+.h3ht{transform-box:fill-box;transform-origin:center;animation:h3ht 1.8s ease-in-out infinite}
+.h3sp{transform-box:fill-box;transform-origin:center;animation:h3tw 2.6s ease-in-out infinite}.h3sp.s2{animation-delay:.7s}.h3sp.s3{animation-delay:1.4s}.h3sp.s4{animation-delay:2s}
+.h3ck{stroke-dasharray:16;animation:h3ck 4.2s ease-in-out infinite}.h3ck.c2{animation-delay:.35s}.h3ck.c3{animation-delay:.7s}
+@keyframes h3ht{0%,100%{transform:translateY(0) scale(.9)}50%{transform:translateY(-3px) scale(1.2)}}
+@keyframes h3pop{from{transform:translateY(16px) scale(.55);opacity:0}to{transform:none;opacity:1}}
+@keyframes h3hop{0%,62%,100%{transform:translateY(0)}70%{transform:translateY(-11px) rotate(-3deg)}78%{transform:translateY(0)}84%{transform:translateY(-5px) rotate(2deg)}90%{transform:translateY(0)}}
+@keyframes h3br{0%,100%{transform:scale(1,1)}50%{transform:scale(1.025,.975)}}
+@keyframes h3wv{from{transform:rotate(-16deg)}to{transform:rotate(14deg)}}
+@keyframes h3bl{0%,92%,100%{transform:scaleY(1)}95%{transform:scaleY(.08)}}
+@keyframes h3sh{0%,62%,100%{transform:scaleX(1);opacity:.28}70%{transform:scaleX(.65);opacity:.14}78%{transform:scaleX(1);opacity:.28}84%{transform:scaleX(.82);opacity:.2}90%{transform:scaleX(1);opacity:.28}}
+@keyframes h3tw{0%,100%{transform:scale(.35) rotate(0);opacity:.25}50%{transform:scale(1.15) rotate(35deg);opacity:1}}
+@keyframes h3ck{0%,8%{stroke-dashoffset:16}30%,80%{stroke-dashoffset:0}95%,100%{stroke-dashoffset:16}}
+@media(prefers-reduced-motion:reduce){.h2k{animation:none!important;opacity:0}.h2t{filter:none!important}}
+@media(prefers-reduced-motion:reduce){.h3pop,.h3hop,.h3br,.h3wv,.h3eye,.h3sh,.h3sp,.h3ck,.h3ht{animation:none!important}.h3ck{stroke-dashoffset:0}.h3wv{transform:rotate(-6deg)}}
 </style>
 </head>
 <body>
@@ -3552,7 +3579,7 @@ function tsLabel(ts){
   return p(d.getHours())+':'+p(d.getMinutes())+' ngày '+p(d.getDate())+'/'+p(d.getMonth()+1)+'/'+d.getFullYear();
 }
 function mergeDb(d){
-  var st={p:0,h:0,e:0,a:0};
+  var st={p:0,h:0,e:0,a:0,u:0};
   function add(dst,src,k){
     (src||[]).forEach(function(x){
       if(x&&x.id&&!dst.some(function(y){return y.id===x.id;})){dst.push(x);st[k]++;}
@@ -3577,6 +3604,20 @@ function mergeDb(d){
   if(d.profile&&d.profile.ten&&!(db.profile&&db.profile.ten))db.profile=d.profile;
   if(!db.signers)db.signers={};
   Object.keys(d.signers||{}).forEach(function(k){if(!db.signers[k])db.signers[k]=d.signers[k];});
+  /* kỳ đã có trên máy: lấy bản đã khoá, hoặc mục đã kiểm mà máy này chưa kiểm */
+  [['periods','periods'],['assets','assets']].forEach(function(pr){
+    (d[pr[0]]||[]).forEach(function(x){
+      if(!x||!x.id||!Array.isArray(x.items))return;
+      var y=null;(db[pr[1]]||[]).forEach(function(z){if(z.id===x.id)y=z;});
+      if(!y||y===x)return;
+      if(x.locked&&!y.locked){Object.keys(y).forEach(function(k){delete y[k];});Object.assign(y,x);st.u++;return;}
+      if(y.locked)return;
+      x.items.forEach(function(it){
+        var q=null;y.items.forEach(function(z){if(z.id===it.id)q=z;});
+        if(q&&it.counted&&!q.counted){Object.keys(q).forEach(function(k){delete q[k];});Object.assign(q,it);st.u++;}
+      });
+    });
+  });
   return st;
 }
 function homeNoticesHtml(){
@@ -3687,6 +3728,15 @@ function renderSettings(){
     +'<input type="file" id="restorein" accept=".json,application/json" style="display:none" onchange="A.restoreFile(this)">'
     +'<button class="btn btn-outline" onclick="document.getElementById(\'restorein\').click()">'+icon('upload',17)+'Khôi phục từ file sao lưu</button>'
     +'<div style="font-size:12px;color:var(--mut);margin-top:8px">Khôi phục chỉ thêm phần còn thiếu vào dữ liệu hiện có, không ghi đè hay xoá gì. Nên sao lưu mỗi tuần và cất file ở Zalo, email hoặc Drive.</div></div>';
+  h+='<div class="card" style="margin-bottom:12px"><div style="font-weight:700;margin-bottom:2px">Khoá dữ liệu đã kiểm kê</div>'
+    +'<div style="font-size:12px;color:var(--mut);margin-bottom:12px">Khoá cùng lúc mọi kỳ đã kiểm xong. Kỳ đã khoá không sửa được, vẫn xuất Excel và in bình thường. Trạng thái khoá đi theo file chuyển máy.</div>'
+    +'<button class="btn btn-outline" onclick="LKX.lockAllDone()">'+icon('lock',17)+'Khoá tất cả kỳ đã kiểm xong</button></div>';
+  h+='<div class="card" style="margin-bottom:12px"><div style="font-weight:700;margin-bottom:2px">Chuyển dữ liệu sang máy khác</div>'
+    +'<div style="font-size:12px;color:var(--mut);margin-bottom:12px">Gói toàn bộ kỳ kiểm kê, biên bản, phiếu, ảnh, chữ ký và trạng thái khoá vào 1 file. Gửi file qua Zalo hoặc email, rồi nhập trên máy mới.</div>'
+    +'<button class="btn btn-primary" style="margin-bottom:8px" onclick="A.syncExport()">'+icon('download',17)+'Xuất 1 file toàn bộ dữ liệu</button>'
+    +'<input type="file" id="replacein" accept=".json,application/json" style="display:none" onchange="A.replaceFile(this)">'
+    +'<button class="btn btn-outline" style="margin-bottom:8px" onclick="document.getElementById(\'replacein\').click()">'+icon('upload',17)+'Nhập file, thay thế toàn bộ (máy mới)</button>'
+    +'<div style="font-size:12px;color:var(--mut)">Muốn giữ dữ liệu đang có trên máy này thì dùng "Khôi phục từ file sao lưu" ở trên: app gộp và ưu tiên mục đã kiểm, kỳ đã khoá.</div></div>';
   h+='<div class="card" style="margin-bottom:12px"><div style="font-weight:700;margin-bottom:4px">Giữ dữ liệu an toàn</div>'
     +'<div style="font-size:13px;color:var(--mut)">Dữ liệu lưu ngay trên trình duyệt của máy này. Safari trên iPhone có thể tự xoá dữ liệu trang web nếu lâu không mở. Hãy thêm app vào Màn hình chính (Chia sẻ, Thêm vào MH chính) và sao lưu định kỳ.</div></div>';
   h+='<div class="card"><div style="font-weight:700;margin-bottom:4px">Về ứng dụng</div><div style="font-size:13px;color:var(--mut)">Kiểm kê kho MedDental, built by Quyet Mai.</div></div>';
@@ -5092,16 +5142,16 @@ var A={
     }
     renderUser();saveSoon();
   },
-  backupNow:function(){
+  backupNow:function(pfx){
     try{
       db.lastBackup=Date.now();db.backupSnooze=0;store.save();
       var d=new Date(),p=function(n){return String(n).padStart(2,'0');};
-      var fname='SaoLuu_KiemKe_'+d.getFullYear()+p(d.getMonth()+1)+p(d.getDate())+'_'+p(d.getHours())+p(d.getMinutes())+'.json';
-      var ids=[];(db.assets||[]).forEach(function(pp){pp.items.forEach(function(it){(it.imgs||[]).forEach(function(m){ids.push(m.id);});});});
+      var fname=(typeof pfx==='string'?pfx:'SaoLuu_KiemKe_')+d.getFullYear()+p(d.getMonth()+1)+p(d.getDate())+'_'+p(d.getHours())+p(d.getMinutes())+'.json';
+      var ids=[];(db.assets||[]).concat(db.periods||[]).forEach(function(pp){(pp.items||[]).forEach(function(it){(it.imgs||[]).forEach(function(m){if(m&&m.id&&ids.indexOf(m.id)<0)ids.push(m.id);});});});
       Promise.all(ids.map(function(id){return PH.get(id).then(function(d){return [id,d];});})).then(function(rs){
         var out=Object.assign({},db),ph={};rs.forEach(function(r){if(r[1])ph[r[0]]=r[1];});
         if(Object.keys(ph).length)out.__photos=ph;
-        delete out.webauthn;
+        delete out.webauthn;out.__sync={v:1,at:Date.now(),by:(db.profile&&db.profile.ten)||''};
         shareOrDownload(new Blob([JSON.stringify(out)],{type:'application/json'}),fname);
       }).catch(function(err){console.error(err);toast('Không sao lưu được: '+err.message);});
       if(route.view==='home'||route.view==='settings')render();
@@ -5117,7 +5167,28 @@ var A={
         if(!d||!Array.isArray(d.periods))throw new Error('không phải file sao lưu của app');
         Object.keys(d.__photos||{}).forEach(function(k){PH.put(k,d.__photos[k]);});
         var st=mergeDb(d);store.save();render();
-        toast('Đã khôi phục: thêm '+st.p+' kỳ kiểm kê, '+st.a+' kỳ kiểm kê tài sản, '+st.h+' biên bản, '+st.e+' phiếu');
+        toast('Đã khôi phục: thêm '+st.p+' kỳ kiểm kê, '+st.a+' kỳ kiểm kê tài sản, '+st.h+' biên bản, '+st.e+' phiếu'+(st.u?', cập nhật '+st.u+' mục/kỳ khoá':''));
+      }catch(err){toast('File không hợp lệ: '+err.message);}
+    };
+    r.readAsText(f);input.value='';
+  },
+  syncExport:function(){A.backupNow('ChuyenMay_KiemKe_');},
+  replaceFile:function(input){
+    var f=input.files&&input.files[0];if(!f)return;
+    var r=new FileReader();
+    r.onload=function(e){
+      try{
+        var d=JSON.parse(e.target.result);
+        if(!d||!Array.isArray(d.periods))throw new Error('không phải file dữ liệu của app');
+        var msg='Thay thế TOÀN BỘ dữ liệu trên máy này bằng file đã chọn?\n\nFile có: '+d.periods.length+' kỳ vật tư, '+(d.assets||[]).length+' kỳ CCDC/TSCĐ, '+(d.handovers||[]).length+' biên bản bàn giao.\nMáy này hiện có: '+db.periods.length+' kỳ vật tư, '+(db.assets||[]).length+' kỳ CCDC/TSCĐ.\n\nDữ liệu hiện tại sẽ bị thay (app giữ 1 bản tạm trên máy phòng nhầm).';
+        if(!confirm(msg))return;
+        var ph=d.__photos||{};delete d.__photos;delete d.__sync;
+        try{localStorage.setItem('kk_db_prev',JSON.stringify(db));}catch(x){}
+        var keep=db.webauthn,nd=Object.assign({},d);if(keep)nd.webauthn=keep;
+        db=nd;
+        Promise.all(Object.keys(ph).map(function(k){return PH.put(k,ph[k]);})).then(function(){
+          store.save();toast('Đã chuyển dữ liệu, đang tải lại…');setTimeout(function(){location.reload();},700);
+        });
       }catch(err){toast('File không hợp lệ: '+err.message);}
     };
     r.readAsText(f);input.value='';
@@ -5753,8 +5824,8 @@ function v2ManualEnter(){
   if(m.item){renameClose();A.openItem(m.item.id,false);}else toast('Không tìm thấy mã này trong đợt kiểm kê');
 }
 function v2Hero(p){
-  return '<div class="h2">'+'<svg class="h2art" viewBox="0 0 240 118" aria-hidden="true"><defs><linearGradient id="h2g1" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#ffffff"/><stop offset="1" stop-color="#a9c8ff"/></linearGradient><radialGradient id="h2g2"><stop offset="0" stop-color="#ffffff" stop-opacity=".38"/><stop offset="1" stop-color="#ffffff" stop-opacity="0"/></radialGradient><filter id="h2gl" x="-40%" y="-40%" width="180%" height="180%"><feGaussianBlur stdDeviation="2.2" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs><g stroke="rgba(255,255,255,.22)" stroke-width="1" fill="none"><path d="M0 92h240M0 102h240M0 114h240"/><path class="h2fl" d="M120 86L-20 118M120 86L40 118M120 86L80 118M120 86L120 118M120 86L160 118M120 86L200 118M120 86L260 118"/></g><circle class="h2glow" cx="120" cy="52" r="62" fill="url(#h2g2)"/><g filter="url(#h2gl)"><path transform="translate(120 52) scale(3.1) translate(-12 -11.5)" d="M7 2.5C4.2 2.5 2.5 4.7 2.5 7.4c0 2 .8 3.4 1.4 5 .7 2 .6 4.6 1.6 7 .4 1 1.7 1.2 2.3.2.9-1.5.9-3.7 2.9-3.7s2 2.2 2.9 3.7c.6 1 1.9.8 2.3-.2 1-2.4.9-5 1.6-7 .6-1.6 1.4-3 1.4-5 0-2.7-1.7-4.9-4.5-4.9-1.9 0-2.7.9-5 .9S8.9 2.5 7 2.5z" fill="rgba(255,255,255,.2)" stroke="url(#h2g1)" stroke-width=".5" stroke-linejoin="round"/></g><path d="M104 42c1.5-6 6-10 11-11" stroke="#fff" stroke-opacity=".75" stroke-width="1.8" stroke-linecap="round" fill="none"/><circle class="h2pol" cx="136" cy="31" r="9" fill="#fff" filter="url(#h2gl)"/><g transform="translate(112 44)"><g class="h2star"><path d="M0-7L1.8-1.8 7 0 1.8 1.8 0 7-1.8 1.8-7 0-1.8-1.8z" fill="#fff" filter="url(#h2gl)"/></g></g><g transform="translate(137 30)"><g class="h2cont"><circle class="h2sp" r="1.3" fill="#fff" style="--dx:9px;--dy:-7px;animation-delay:0s"/><circle class="h2sp" r="1.3" fill="#fff" style="--dx:11px;--dy:3px;animation-delay:0.12s"/><circle class="h2sp" r="1.3" fill="#fff" style="--dx:5px;--dy:9px;animation-delay:0.24s"/><circle class="h2sp" r="1.3" fill="#fff" style="--dx:-4px;--dy:-10px;animation-delay:0.36s"/><circle class="h2sp" r="1.3" fill="#fff" style="--dx:13px;--dy:-2px;animation-delay:0.18s"/></g></g><g transform="translate(137 30) rotate(-22)"><g class="h2dr"><g class="h2vb"><path d="M0 0H9" stroke="#fff" stroke-width="2.2" stroke-linecap="round"/><rect x="9" y="-5" width="13" height="10" rx="3" fill="#fff"/><rect x="12" y="-3" width="2" height="6" rx="1" fill="#8fb4ff"/></g><path d="M22-4L35-3V3L22 4z" fill="#d6e5ff"/><rect x="35" y="-4.5" width="30" height="9" rx="4.5" fill="#fff"/><path d="M46-4.5v9M52-4.5v9" stroke="#a9c8ff" stroke-width="1.4"/></g></g><g stroke="#fff" stroke-opacity=".6" stroke-width="2" stroke-linecap="round" fill="none"><path d="M10 24V10h14M230 24V10h-14M10 94v14h14M230 94v14h-14"/></g><g fill="#fff"><rect class="h2tw" x="34" y="30" width="2.4" height="2.4"/><rect class="h2tw t2" x="204" y="60" width="2.4" height="2.4"/><rect class="h2tw t3" x="196" y="94" width="2" height="2"/><rect class="h2tw t2" x="40" y="84" width="2" height="2"/></g></svg>'
-    +'<b class="h2t">MedDental</b>'+v2HeroInfo(p)+'</div>';
+  return '<div class="h2">'+'<svg class="h2art" viewBox="0 0 240 118" aria-hidden="true"><defs><radialGradient id="h3bg"><stop offset="0" stop-color="#fff" stop-opacity=".4"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></radialGradient><radialGradient id="h3fl" cx=".38" cy=".3" r=".9"><stop offset="0" stop-color="#fff"/><stop offset=".65" stop-color="#f1f6ff"/><stop offset="1" stop-color="#c9ddff"/></radialGradient></defs><circle class="h2glow" cx="120" cy="58" r="64" fill="url(#h3bg)"/><ellipse class="h3sh" cx="88" cy="111" rx="24" ry="3.6" fill="#06307f" opacity=".28"/><ellipse class="h3sh b" cx="156" cy="111" rx="24" ry="3.6" fill="#06307f" opacity=".28"/><g class="h3pop"><g transform="translate(86 20) rotate(-5)"><g class="h3hop "><g class="h3br"><g class="h3wv"><path d="M-24 54Q-38 52-42 40" stroke="#c9ddff" stroke-width="8" stroke-linecap="round" fill="none"/><path d="M-24 54Q-38 52-42 40" stroke="#fff" stroke-width="6" stroke-linecap="round" fill="none"/><circle cx="-43" cy="38" r="5" fill="#fff" stroke="#c9ddff" stroke-width="1.2"/></g><path d="M0 6C-10-1-28 1-31 20C-33 34-24 42-23 57C-22 74-20 88-13 88C-7 88-6 72 0 72C6 72 7 88 13 88C20 88 22 74 23 57C24 42 33 34 31 20C28 1 10-1 0 6Z" fill="url(#h3fl)" stroke="#bcd4ff" stroke-width="1.6" stroke-linejoin="round"/><path d="M-20 18Q-26 27-24 38" stroke="#fff" stroke-width="3" stroke-linecap="round" fill="none" opacity=".9"/><ellipse cx="-15" cy="43" rx="5.5" ry="3.4" fill="#ff8fab" opacity=".6"/><ellipse cx="15" cy="43" rx="5.5" ry="3.4" fill="#ff8fab" opacity=".6"/><g class="h3eye"><ellipse cx="-9" cy="31" rx="3.1" ry="4.2" fill="#183a7a"/><circle cx="-8" cy="29.5" r="1.1" fill="#fff"/></g><g class="h3eye"><ellipse cx="9" cy="31" rx="3.1" ry="4.2" fill="#183a7a"/><circle cx="10" cy="29.5" r="1.1" fill="#fff"/></g><path d="M-5.5 41Q0 49 5.5 41Z" fill="#e8456b" stroke="#c42c52" stroke-width="1" stroke-linejoin="round"/><g transform="translate(-17 5) rotate(-18)"><path d="M0 0L-9-6V6Z" fill="#ff7aa2"/><path d="M0 0L9-6V6Z" fill="#ff7aa2"/><circle r="2.6" fill="#ff4f86"/></g></g></g></g><g transform="translate(154 20) rotate(5)"><g class="h3hop b"><g class="h3br"><path d="M0 6C-10-1-28 1-31 20C-33 34-24 42-23 57C-22 74-20 88-13 88C-7 88-6 72 0 72C6 72 7 88 13 88C20 88 22 74 23 57C24 42 33 34 31 20C28 1 10-1 0 6Z" fill="url(#h3fl)" stroke="#bcd4ff" stroke-width="1.6" stroke-linejoin="round"/><path d="M-20 18Q-26 27-24 38" stroke="#fff" stroke-width="3" stroke-linecap="round" fill="none" opacity=".9"/><ellipse cx="-15" cy="43" rx="5.5" ry="3.4" fill="#ff8fab" opacity=".6"/><ellipse cx="15" cy="43" rx="5.5" ry="3.4" fill="#ff8fab" opacity=".6"/><path d="M-9 30Q-6 26-3 30M3 30Q6 26 9 30" stroke="#183a7a" stroke-width="2.2" stroke-linecap="round" fill="none"/><path d="M-6 40Q0 50 6 40Z" fill="#e8456b" stroke="#c42c52" stroke-width="1" stroke-linejoin="round"/><path d="M21 54Q27 60 33 57" stroke="#c9ddff" stroke-width="8" stroke-linecap="round" fill="none"/><path d="M21 54Q27 60 33 57" stroke="#fff" stroke-width="6" stroke-linecap="round" fill="none"/><g transform="translate(29 38) rotate(8)"><rect width="31" height="42" rx="5" fill="#fff" stroke="#c9ddff" stroke-width="1.2"/><rect x="9.5" y="-3.5" width="12" height="7" rx="2.5" fill="#4d8dff"/><rect x="13" y="12" width="14" height="3" rx="1.5" fill="#d6e5ff"/><rect x="13" y="22" width="14" height="3" rx="1.5" fill="#d6e5ff"/><rect x="13" y="32" width="14" height="3" rx="1.5" fill="#d6e5ff"/><g fill="none" stroke="#16a34a" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path class="h3ck" d="M4 13l2.6 2.6L11 9.8"/><path class="h3ck c2" d="M4 23l2.6 2.6L11 19.8"/><path class="h3ck c3" d="M4 33l2.6 2.6L11 29.8"/></g></g></g></g></g></g><g transform="translate(120 13)"><path class="h3ht" d="M0 6C-10-3-9-11-3.5-11C-1.5-11 0-9.5 0-8C0-9.5 1.5-11 3.5-11C9-11 10-3 0 6Z" fill="#ff7aa2"/></g><g transform="translate(44 18)"><path class="h3sp " d="M0-6 L1.5-1.5 6 0 1.5 1.5 0 6 -1.5 1.5 -6 0 -1.5 -1.5 Z" fill="#fff"/></g><g transform="translate(208 18)"><path class="h3sp s2" d="M0-5 L1.2-1.2 5 0 1.2 1.2 0 5 -1.2 1.2 -5 0 -1.2 -1.2 Z" fill="#fff"/></g><g transform="translate(34 92)"><path class="h3sp s3" d="M0-4 L1.0-1.0 4 0 1.0 1.0 0 4 -1.0 1.0 -4 0 -1.0 -1.0 Z" fill="#fff"/></g><g transform="translate(222 90)"><path class="h3sp s4" d="M0-4 L1.0-1.0 4 0 1.0 1.0 0 4 -1.0 1.0 -4 0 -1.0 -1.0 Z" fill="#fff"/></g></svg>'
+    +'<b class="h2t">MedDental<i class="h2k k1"></i><i class="h2k k2"></i><i class="h2k k3"></i><i class="h2k k4"></i></b>'+v2HeroInfo(p)+'</div>';
 }
 function v2HeroInfo(){
   return '<strong class="h2s">Kho chuẩn từng mã.</strong>'
@@ -6000,6 +6071,16 @@ var LKX={
     delete p.locked;
     (p.lockLog=p.lockLog||[]).push('Mở khoá '+new Date().toLocaleString('vi-VN')+((db.profile&&db.profile.ten)?' · '+db.profile.ten:''));
     store.save();render();toast('Đã mở khoá');
+  },
+  lockAllDone:function(){
+    var who=(db.profile&&db.profile.ten)||'',list=[];
+    (db.periods||[]).forEach(function(p){if(!p.locked&&p.items&&p.items.length&&!p.items.filter(needsCount).length)list.push(p);});
+    (db.assets||[]).forEach(function(p){if(!p.locked&&p.items&&p.items.length&&!p.items.filter(function(i){return !i.counted;}).length)list.push(p);});
+    if(!list.length){toast('Không có kỳ nào đã kiểm xong mà chưa khoá');return;}
+    if(!confirm('Khoá '+list.length+' kỳ đã kiểm xong?\n\n'+list.slice(0,8).map(function(p){return '• '+p.name;}).join('\n')+(list.length>8?'\n…':'')+'\n\nCó thể mở khoá từng kỳ khi cần.'))return;
+    var at=Date.now(),tx=new Date(at).toLocaleString('vi-VN');
+    list.forEach(function(p){p.locked={at:at,by:who};(p.lockLog=p.lockLog||[]).push('Khoá '+tx+(who?' · '+who:''));});
+    store.save();render();toast('Đã khoá '+list.length+' kỳ kiểm kê');
   },
   guard:function(obj,names,getP){
     names.forEach(function(n){
