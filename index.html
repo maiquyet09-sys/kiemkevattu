@@ -2,7 +2,7 @@
 <html lang="vi">
 <head>
 <meta charset="UTF-8">
-<meta name="app-version" content="2026102703">
+<meta name="app-version" content="2026102704">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
 <meta name="theme-color" content="#0b4fc4">
 <link rel="manifest" href="manifest.webmanifest">
@@ -372,6 +372,22 @@ body{background:var(--bg)}
 .sline{animation:sl 3s ease-in-out infinite alternate}
 @keyframes sl{from{transform:translateY(0)}to{transform:translateY(112px)}}
 @media(prefers-reduced-motion:reduce){.orb,.sline{animation:none}.sline{transform:translateY(50px)}}
+/* gọn lại cho vừa một màn hình iPhone */
+.hub{padding-top:12px}
+.hsel{padding:10px 12px}
+.hsel .hic{width:36px;height:36px}
+.hsel select{font-size:15px}
+.hrow2{margin-top:8px}
+.scancard{margin-top:10px;padding:10px;border-radius:18px}
+.scancard .flash{top:8px;right:8px;width:38px;height:38px}
+.scframe{margin:12px auto 10px;width:min(44%,160px)}
+.scframe i{width:26px;height:26px;border-width:3px}
+.scframe svg.ic{width:60px;height:60px}
+.sccap{font-size:14px;padding:4px 4px 4px 14px}
+.sccap button{width:38px;height:38px}
+.hbig{margin-top:10px;padding:14px;font-size:16px}
+.hrow3{margin-top:8px}
+.hrow3 .btn{padding:12px 6px;font-size:14px}
 </style>
 </head>
 <body>
@@ -5702,7 +5718,7 @@ function v2Hub(){
   if(areas.indexOf(HS.area)<0)HS.area='all';
   var sel=function(ic,lab,opts,fn){return '<label class="hsel"><span class="hic">'+icon(ic,20)+'</span><span class="htx"><small>'+lab+'</small><select onchange="'+fn+'">'+opts+'</select></span><span class="hch">'+icon('chev',16)+'</span></label>';};
   var po='';v2Periods().forEach(function(x){po+='<option value="'+esc(x.id)+'"'+(x.id===p.id?' selected':'')+'>'+esc(x.name)+'</option>';});
-  var fo='<option value="">Tất cả cơ sở</option>';folders.forEach(function(f){fo+='<option value="'+esc(f)+'"'+(HS.folder===f?' selected':'')+'>'+esc(f)+'</option>';});
+  var fo='<option value="">Tất cả</option>';folders.forEach(function(f){fo+='<option value="'+esc(f)+'"'+(HS.folder===f?' selected':'')+'>'+esc(f)+'</option>';});
   var ao='<option value="all">Tất cả</option>';areas.forEach(function(a){ao+='<option value="'+esc(a)+'"'+(HS.area===a?' selected':'')+'>'+esc(a)+'</option>';});
   h+=sel('file','Đợt kiểm kê',po,'HS.pid=this.value;HS.area=\'all\';renderHome()');
   h+='<div class="hrow2">'+sel('building','Cơ sở / Kho',fo,'HS.folder=this.value;HS.pid=\'\';HS.area=\'all\';renderHome()')+sel('layers','Khu vực',ao,'HS.area=this.value')+'</div>';
