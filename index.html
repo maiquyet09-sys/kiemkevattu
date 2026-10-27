@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="app-version" content="2026102706">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
-<meta name="theme-color" content="#0b4fc4">
+<meta name="theme-color" content="#eef3fb">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="apple-touch-icon" href="icon-192.png">
 <meta name="apple-mobile-web-app-title" content="Kiểm kê kho">
@@ -477,12 +477,61 @@ body{background:var(--bg)}
 @keyframes h3ck{0%,8%{stroke-dashoffset:16}30%,80%{stroke-dashoffset:0}95%,100%{stroke-dashoffset:16}}
 @media(prefers-reduced-motion:reduce){.h2k{animation:none!important;opacity:0}.h2t{filter:none!important}}
 @media(prefers-reduced-motion:reduce){.h3pop,.h3hop,.h3br,.h3wv,.h3eye,.h3sh,.h3sp,.h3ck,.h3ht{animation:none!important}.h3ck{stroke-dashoffset:0}.h3wv{transform:rotate(-6deg)}}
+
+/* ===== Màn hình chính: tối giản, ít màu (v4) ===== */
+.v2hd{background:linear-gradient(180deg,#123f9e,#0d3585)}
+.h2{background:linear-gradient(#2f6fed,#2f6fed) bottom/100% 0 no-repeat,radial-gradient(120% 100% at 50% 0%,#2c61d1 0%,#183f9d 55%,#0f3182 100%);box-shadow:0 12px 28px rgba(15,49,130,.28),inset 0 0 0 1px rgba(255,255,255,.14)}
+.h2c{display:none}
+.h3sp.s3,.h3sp.s4{display:none}
+.hsdcard{background:#fff!important;border:1px solid var(--line)!important;color:var(--ink)!important;box-shadow:0 1px 2px rgba(16,24,40,.04),0 6px 16px rgba(16,24,40,.05)}
+.hsdcard.c-red{--dc:var(--red)}.hsdcard.c-org{--dc:var(--orange)}.hsdcard.c-amb{--dc:var(--amber)}.hsdcard.c-green{--dc:var(--green)}
+.hsdcard .n{color:var(--dc)}
+.hsdcard.z .n{color:var(--mut2)}
+.hsdcard .t{color:var(--mut);font-weight:600}
+.hsdcard .t::before{content:"";display:inline-block;width:7px;height:7px;border-radius:50%;margin-right:7px;vertical-align:1px;background:var(--dc)}
+.hsdcard.z .t::before{background:var(--mut2)}
+.tile{background:#fff!important;color:var(--ink)!important;border:1px solid var(--line)!important;border-radius:18px;font-weight:700;box-shadow:0 1px 2px rgba(16,24,40,.04),0 8px 20px rgba(16,24,40,.06)!important}
+.tile .tic{display:grid;place-items:center;width:48px;height:48px;border-radius:15px;background:var(--teal-bg);color:var(--teal)}
+
+/* ===== Logo MedDental Prime (v5) ===== */
+:root{--header-h:86px}
+#gheader{background:var(--bg)!important;color:#0f2f7a}
+#gbrand{color:#0f2f7a;gap:10px}
+#gbrand .bt{display:flex;flex-direction:column;line-height:1.1;gap:3px}
+.h5row{display:flex;align-items:center;gap:10px}
+.h5nm{position:relative;display:inline-block;padding-top:6px}
+.h5nm .h5c{position:absolute;left:1px;top:-8px;width:24px;height:15px}
+#gbrand b.h5t{position:relative;display:inline-block;font-size:27px;font-weight:800;letter-spacing:-.025em;line-height:1.05;color:transparent;-webkit-background-clip:text;background-clip:text;
+ background-image:linear-gradient(110deg,#0f2f7a 0%,#0f2f7a 38%,#3d7bf0 46%,#f2c14e 50%,#3d7bf0 54%,#0f2f7a 62%,#0f2f7a 100%);background-size:250% 100%;animation:h4sh 3.6s 1s ease-in-out infinite,h4gl2 2.8s ease-in-out infinite alternate}
+#gbrand .h2k{background:#f2c14e}
+#gbrand small{font-size:10.5px;font-weight:600;letter-spacing:.2em;color:rgba(15,47,122,.62);opacity:1;text-transform:uppercase;margin-top:0}
+.h5p{display:inline-flex;align-items:center;gap:5px;padding:4px 13px 4px 9px;border-radius:999px;font-weight:800;font-size:14px;color:#4b3208;
+ background:linear-gradient(100deg,#f7e3a1 0%,#e8c262 40%,#fff3c4 50%,#e8c262 60%,#d9a93f 100%);background-size:230% 100%;box-shadow:0 2px 10px rgba(217,169,63,.4),inset 0 1px 0 rgba(255,255,255,.6);animation:h5pg 3.4s ease-in-out infinite}
+.h5p .h5c{width:15px;height:10px;position:static}
+.h5c{display:block;animation:h5cr 2.6s ease-in-out infinite}
+#guser{color:#0f2f7a}#guser .gearb{color:#0f2f7a;background:rgba(15,91,216,.1)}
+.h2.h5{display:grid;grid-template-columns:1fr 1fr;gap:0;align-items:center;text-align:left;padding:18px 8px 18px 20px;
+ background:radial-gradient(130% 120% at 15% 0%,#1b4fc0 0%,#0f3590 48%,#0a2670 100%);box-shadow:0 12px 28px rgba(10,38,112,.3),inset 0 0 0 1px rgba(255,255,255,.12)}
+.h5wv{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
+.h5wa{animation:h5wv 8s ease-in-out infinite alternate}.h5wa.w2{animation-duration:11s}.h5wa.w3{animation-duration:9s}
+.h5l{position:relative;z-index:1;min-width:0}
+.h5l>.h5c{width:30px;height:19px;margin:0 0 -2px 2px}
+.h5l .h2t{display:inline-block;font-size:30px;margin:0;line-height:1.1}
+.h5l .h5p{margin-top:9px}
+.h5l .h2s{margin-top:9px;font-size:15px;font-weight:500}
+.h5w{display:block;font-style:normal;font-size:9px;font-weight:600;letter-spacing:.16em;color:rgba(255,255,255,.78);margin-top:9px;white-space:nowrap}
+.h5r{position:relative;z-index:1;margin-left:-6px}.h5r .h2art{max-width:none;width:112%;margin-left:-6%}
+@keyframes h5pg{0%{background-position:0 0}60%,100%{background-position:100% 0}}
+@keyframes h5cr{0%,100%{filter:drop-shadow(0 0 0 rgba(242,193,78,0))}50%{filter:drop-shadow(0 0 5px rgba(242,193,78,.9))}}
+@keyframes h5wv{from{transform:translateX(-12px)}to{transform:translateX(12px)}}
+@keyframes h4gl2{from{filter:drop-shadow(0 0 0 rgba(61,123,240,0))}to{filter:drop-shadow(0 0 6px rgba(61,123,240,.35))}}
+@media(prefers-reduced-motion:reduce){.h5p,.h5c,.h5wa,#gbrand b.h5t{animation:none!important}}
 </style>
 </head>
 <body>
 <header id="gheader">
   <button id="ghmenu" onclick="A.drawerToggle()"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M3 12h18M3 18h18"/></svg></button>
-  <div id="gbrand"><svg class="tooth" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 2.5C4.2 2.5 2.5 4.7 2.5 7.4c0 2 .8 3.4 1.4 5 .7 2 .6 4.6 1.6 7 .4 1 1.7 1.2 2.3.2.9-1.5.9-3.7 2.9-3.7s2 2.2 2.9 3.7c.6 1 1.9.8 2.3-.2 1-2.4.9-5 1.6-7 .6-1.6 1.4-3 1.4-5 0-2.7-1.7-4.9-4.5-4.9-1.9 0-2.7.9-5 .9S8.9 2.5 7 2.5z"/></svg><span class="bt"><b>MedDental</b><small>Kiểm kê kho vật tư</small></span></div>
+  <svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs><linearGradient id="h5g" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff3c4"/><stop offset=".5" stop-color="#f2c14e"/><stop offset="1" stop-color="#b9852a"/></linearGradient></defs></svg><div id="gbrand"><div class="bt"><div class="h5row"><span class="h5nm"><svg class="h5c" viewBox="0 0 32 20" aria-hidden="true"><path d="M3 18L1 5l8.5 6L16 2l6.5 9L31 5l-2 13z" fill="url(#h5g)" stroke="#b9852a" stroke-width=".8" stroke-linejoin="round"/><circle cx="1" cy="4.5" r="1.6" fill="#f7e3a1"/><circle cx="16" cy="1.8" r="1.7" fill="#fff3c4"/><circle cx="31" cy="4.5" r="1.6" fill="#f7e3a1"/><path d="M4 19.2h24" stroke="#b9852a" stroke-width="1.6" stroke-linecap="round"/></svg><b class="h5t">MedDental<i class="h2k k1"></i><i class="h2k k2"></i><i class="h2k k3"></i><i class="h2k k4"></i></b></span><span class="h5p"><svg class="h5c s" viewBox="0 0 32 20" aria-hidden="true"><path d="M3 18L1 5l8.5 6L16 2l6.5 9L31 5l-2 13z" fill="url(#h5g)" stroke="#b9852a" stroke-width=".8" stroke-linejoin="round"/><circle cx="1" cy="4.5" r="1.6" fill="#f7e3a1"/><circle cx="16" cy="1.8" r="1.7" fill="#fff3c4"/><circle cx="31" cy="4.5" r="1.6" fill="#f7e3a1"/><path d="M4 19.2h24" stroke="#b9852a" stroke-width="1.6" stroke-linecap="round"/></svg>Prime</span></div><small>Quản lý kho thông minh</small></div></div>
   <div id="guser" onclick="A.go('settings')"></div>
 </header>
 <div id="gshell">
@@ -608,7 +657,8 @@ function branchCode(name){
   return words.map(function(w){return w[0];}).join('').toUpperCase();
 }
 function diffOf(it){return (it.counted&&it.countQty!==null)?Math.round((it.countQty-it.close)*100)/100:null;}
-function needsCount(it){return !it.counted;} /* mọi mã đều phải kiểm, kể cả mã tồn sổ sách = 0 */
+function needsCount(it){return !it.counted&&it.close!==0;} /* tab Chưa kiểm, kiểm tuần tự: không gồm mã tồn 0 */
+function zeroPending(it){return !it.counted&&it.close===0;} /* mã tồn 0 chưa kiểm: chỉ nhắc khi khoá kỳ */
 
 var BUCKETS=[
   {k:"expired",label:"Đã hết hạn",cls:"c-red",strong:"var(--red)",test:function(d){return d<0;}},
@@ -3173,15 +3223,15 @@ function renderHomeOld(){
   h+='<div class="wrap mt20"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px"><span class="sec" style="margin:0">Cảnh báo hạn sử dụng</span><div style="display:flex;gap:14px;align-items:center"><button class="addbat" style="color:var(--teal);display:flex;align-items:center;gap:5px" onclick="showHsdEmailPicker()">'+icon('mail',15)+'Email</button><button class="addbat" style="display:flex;align-items:center;gap:3px" onclick="A.go(\'hsd\')">Xem chi tiết'+icon('chev',15)+'</button></div></div><div class="hsdgrid">';
   BUCKETS.forEach(function(b){
     var n=entries.filter(function(e){return b.test(e.days);}).length;
-    h+='<div class="hsdcard '+b.cls+'" onclick="A.go(\'hsd\')"><div class="n tnum">'+n+'</div><div class="t">'+b.label+'</div></div>';
+    h+='<div class="hsdcard '+b.cls+(n?'':' z')+'" onclick="A.go(\'hsd\')"><div class="n tnum">'+n+'</div><div class="t">'+b.label+'</div></div>';
   });
   h+='</div></div>';
   var tileL='display:flex;flex-direction:column;gap:8px;padding:18px 8px;line-height:1.25;font-size:14px';
   var tileS='display:flex;flex-direction:column;gap:7px;padding:14px 4px;line-height:1.25;font-size:13px';
   h+='<div class="wrap mt24"><div class="sec">Kiểm kê</div>';
   h+='<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">';
-  h+='<button class="btn btn-primary" style="'+tileL+'" onclick="A.go(\'upload\')">'+icon('box',26)+'Kiểm kê vật tư</button>';
-  h+='<button class="btn btn-outline" style="'+tileL+'" onclick="A.go(\'assets\')">'+icon('monitor',26)+'Kiểm kê CCDC &amp; TSCĐ</button>';
+  h+='<button class="btn tile" style="'+tileL+'" onclick="A.go(\'upload\')"><span class="tic">'+icon('box',24)+'</span>Kiểm kê vật tư</button>';
+  h+='<button class="btn tile" style="'+tileL+'" onclick="A.go(\'assets\')"><span class="tic">'+icon('monitor',24)+'</span>Kiểm kê CCDC &amp; TSCĐ</button>';
   h+='</div>';
   h+='<div style="height:24px"></div></div>';
   document.getElementById("app").innerHTML=h;
@@ -5832,8 +5882,9 @@ function v2ManualEnter(){
   if(m.item){renameClose();A.openItem(m.item.id,false);}else toast('Không tìm thấy mã này trong đợt kiểm kê');
 }
 function v2Hero(p){
-  return '<div class="h2">'+'<svg class="h2art" viewBox="0 0 240 118" aria-hidden="true"><defs><radialGradient id="h3bg"><stop offset="0" stop-color="#fff" stop-opacity=".4"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></radialGradient><radialGradient id="h3fl" cx=".38" cy=".3" r=".9"><stop offset="0" stop-color="#fff"/><stop offset=".65" stop-color="#f1f6ff"/><stop offset="1" stop-color="#c9ddff"/></radialGradient></defs><circle class="h2glow" cx="120" cy="58" r="64" fill="url(#h3bg)"/><ellipse class="h3sh" cx="88" cy="111" rx="24" ry="3.6" fill="#06307f" opacity=".28"/><ellipse class="h3sh b" cx="156" cy="111" rx="24" ry="3.6" fill="#06307f" opacity=".28"/><g class="h3pop"><g transform="translate(86 20) rotate(-5)"><g class="h3hop "><g class="h3br"><g class="h3wv"><path d="M-24 54Q-38 52-42 40" stroke="#c9ddff" stroke-width="8" stroke-linecap="round" fill="none"/><path d="M-24 54Q-38 52-42 40" stroke="#fff" stroke-width="6" stroke-linecap="round" fill="none"/><circle cx="-43" cy="38" r="5" fill="#fff" stroke="#c9ddff" stroke-width="1.2"/></g><path d="M0 6C-10-1-28 1-31 20C-33 34-24 42-23 57C-22 74-20 88-13 88C-7 88-6 72 0 72C6 72 7 88 13 88C20 88 22 74 23 57C24 42 33 34 31 20C28 1 10-1 0 6Z" fill="url(#h3fl)" stroke="#bcd4ff" stroke-width="1.6" stroke-linejoin="round"/><path d="M-20 18Q-26 27-24 38" stroke="#fff" stroke-width="3" stroke-linecap="round" fill="none" opacity=".9"/><ellipse cx="-15" cy="43" rx="5.5" ry="3.4" fill="#ff8fab" opacity=".6"/><ellipse cx="15" cy="43" rx="5.5" ry="3.4" fill="#ff8fab" opacity=".6"/><g class="h3eye"><ellipse cx="-9" cy="31" rx="3.1" ry="4.2" fill="#183a7a"/><circle cx="-8" cy="29.5" r="1.1" fill="#fff"/></g><g class="h3eye"><ellipse cx="9" cy="31" rx="3.1" ry="4.2" fill="#183a7a"/><circle cx="10" cy="29.5" r="1.1" fill="#fff"/></g><path d="M-5.5 41Q0 49 5.5 41Z" fill="#e8456b" stroke="#c42c52" stroke-width="1" stroke-linejoin="round"/><g transform="translate(-17 5) rotate(-18)"><path d="M0 0L-9-6V6Z" fill="#ff7aa2"/><path d="M0 0L9-6V6Z" fill="#ff7aa2"/><circle r="2.6" fill="#ff4f86"/></g></g></g></g><g transform="translate(154 20) rotate(5)"><g class="h3hop b"><g class="h3br"><path d="M0 6C-10-1-28 1-31 20C-33 34-24 42-23 57C-22 74-20 88-13 88C-7 88-6 72 0 72C6 72 7 88 13 88C20 88 22 74 23 57C24 42 33 34 31 20C28 1 10-1 0 6Z" fill="url(#h3fl)" stroke="#bcd4ff" stroke-width="1.6" stroke-linejoin="round"/><path d="M-20 18Q-26 27-24 38" stroke="#fff" stroke-width="3" stroke-linecap="round" fill="none" opacity=".9"/><ellipse cx="-15" cy="43" rx="5.5" ry="3.4" fill="#ff8fab" opacity=".6"/><ellipse cx="15" cy="43" rx="5.5" ry="3.4" fill="#ff8fab" opacity=".6"/><path d="M-9 30Q-6 26-3 30M3 30Q6 26 9 30" stroke="#183a7a" stroke-width="2.2" stroke-linecap="round" fill="none"/><path d="M-6 40Q0 50 6 40Z" fill="#e8456b" stroke="#c42c52" stroke-width="1" stroke-linejoin="round"/><path d="M21 54Q27 60 33 57" stroke="#c9ddff" stroke-width="8" stroke-linecap="round" fill="none"/><path d="M21 54Q27 60 33 57" stroke="#fff" stroke-width="6" stroke-linecap="round" fill="none"/><g transform="translate(29 38) rotate(8)"><rect width="31" height="42" rx="5" fill="#fff" stroke="#c9ddff" stroke-width="1.2"/><rect x="9.5" y="-3.5" width="12" height="7" rx="2.5" fill="#4d8dff"/><rect x="13" y="12" width="14" height="3" rx="1.5" fill="#d6e5ff"/><rect x="13" y="22" width="14" height="3" rx="1.5" fill="#d6e5ff"/><rect x="13" y="32" width="14" height="3" rx="1.5" fill="#d6e5ff"/><g fill="none" stroke="#16a34a" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path class="h3ck" d="M4 13l2.6 2.6L11 9.8"/><path class="h3ck c2" d="M4 23l2.6 2.6L11 19.8"/><path class="h3ck c3" d="M4 33l2.6 2.6L11 29.8"/></g></g></g></g></g></g><g transform="translate(120 13)"><path class="h3ht" d="M0 6C-10-3-9-11-3.5-11C-1.5-11 0-9.5 0-8C0-9.5 1.5-11 3.5-11C9-11 10-3 0 6Z" fill="#ff7aa2"/></g><g transform="translate(44 18)"><path class="h3sp " d="M0-6 L1.5-1.5 6 0 1.5 1.5 0 6 -1.5 1.5 -6 0 -1.5 -1.5 Z" fill="#fff"/></g><g transform="translate(208 18)"><path class="h3sp s2" d="M0-5 L1.2-1.2 5 0 1.2 1.2 0 5 -1.2 1.2 -5 0 -1.2 -1.2 Z" fill="#fff"/></g><g transform="translate(34 92)"><path class="h3sp s3" d="M0-4 L1.0-1.0 4 0 1.0 1.0 0 4 -1.0 1.0 -4 0 -1.0 -1.0 Z" fill="#fff"/></g><g transform="translate(222 90)"><path class="h3sp s4" d="M0-4 L1.0-1.0 4 0 1.0 1.0 0 4 -1.0 1.0 -4 0 -1.0 -1.0 Z" fill="#fff"/></g></svg>'
-    +'<b class="h2t">MedDental<i class="h2k k1"></i><i class="h2k k2"></i><i class="h2k k3"></i><i class="h2k k4"></i></b>'+v2HeroInfo(p)+'</div>';
+  return '<div class="h2 h5">'+'<svg class="h5wv" viewBox="0 0 400 180" preserveAspectRatio="none" aria-hidden="true"><path d="M-20 175C100 160 200 190 420 140L420 190L-20 190Z" fill="rgba(90,150,255,.14)"/><path class="h5wa" d="M-20 150C60 120 120 170 200 140S340 90 420 110" stroke="#f2d27a" stroke-opacity=".6" stroke-width="1.2" fill="none"/><path class="h5wa w2" d="M-20 165C80 135 150 175 230 150S350 110 420 130" stroke="#9cc3ff" stroke-opacity=".45" stroke-width="1" fill="none"/><path class="h5wa w3" d="M180 -10C250 40 330 20 420 70" stroke="#9cc3ff" stroke-opacity=".35" stroke-width="1" fill="none"/></svg>'+'<div class="h5l"><svg class="h5c" viewBox="0 0 32 20" aria-hidden="true"><path d="M3 18L1 5l8.5 6L16 2l6.5 9L31 5l-2 13z" fill="url(#h5g)" stroke="#b9852a" stroke-width=".8" stroke-linejoin="round"/><circle cx="1" cy="4.5" r="1.6" fill="#f7e3a1"/><circle cx="16" cy="1.8" r="1.7" fill="#fff3c4"/><circle cx="31" cy="4.5" r="1.6" fill="#f7e3a1"/><path d="M4 19.2h24" stroke="#b9852a" stroke-width="1.6" stroke-linecap="round"/></svg><b class="h2t">MedDental<i class="h2k k1"></i><i class="h2k k2"></i><i class="h2k k3"></i><i class="h2k k4"></i></b>'
+    +'<span class="h5p"><svg class="h5c s" viewBox="0 0 32 20" aria-hidden="true"><path d="M3 18L1 5l8.5 6L16 2l6.5 9L31 5l-2 13z" fill="url(#h5g)" stroke="#b9852a" stroke-width=".8" stroke-linejoin="round"/><circle cx="1" cy="4.5" r="1.6" fill="#f7e3a1"/><circle cx="16" cy="1.8" r="1.7" fill="#fff3c4"/><circle cx="31" cy="4.5" r="1.6" fill="#f7e3a1"/><path d="M4 19.2h24" stroke="#b9852a" stroke-width="1.6" stroke-linecap="round"/></svg>Prime</span><strong class="h2s">Kho chuẩn từng mã.</strong><em class="h5w">CHÍNH XÁC · AN TOÀN · HIỆU QUẢ</em></div>'
+    +'<div class="h5r"><svg class="h2art" viewBox="34 0 192 118" aria-hidden="true"><defs><radialGradient id="h3bg"><stop offset="0" stop-color="#fff" stop-opacity=".4"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></radialGradient><radialGradient id="h3fl" cx=".38" cy=".3" r=".9"><stop offset="0" stop-color="#fff"/><stop offset=".65" stop-color="#f1f6ff"/><stop offset="1" stop-color="#c9ddff"/></radialGradient></defs><circle class="h2glow" cx="120" cy="58" r="64" fill="url(#h3bg)"/><ellipse class="h3sh" cx="88" cy="111" rx="24" ry="3.6" fill="#06307f" opacity=".28"/><ellipse class="h3sh b" cx="156" cy="111" rx="24" ry="3.6" fill="#06307f" opacity=".28"/><g class="h3pop"><g transform="translate(86 20) rotate(-5)"><g class="h3hop "><g class="h3br"><g class="h3wv"><path d="M-24 54Q-38 52-42 40" stroke="#c9ddff" stroke-width="8" stroke-linecap="round" fill="none"/><path d="M-24 54Q-38 52-42 40" stroke="#fff" stroke-width="6" stroke-linecap="round" fill="none"/><circle cx="-43" cy="38" r="5" fill="#fff" stroke="#c9ddff" stroke-width="1.2"/></g><path d="M0 6C-10-1-28 1-31 20C-33 34-24 42-23 57C-22 74-20 88-13 88C-7 88-6 72 0 72C6 72 7 88 13 88C20 88 22 74 23 57C24 42 33 34 31 20C28 1 10-1 0 6Z" fill="url(#h3fl)" stroke="#bcd4ff" stroke-width="1.6" stroke-linejoin="round"/><path d="M-20 18Q-26 27-24 38" stroke="#fff" stroke-width="3" stroke-linecap="round" fill="none" opacity=".9"/><ellipse cx="-15" cy="43" rx="5.5" ry="3.4" fill="#ff8fab" opacity=".6"/><ellipse cx="15" cy="43" rx="5.5" ry="3.4" fill="#ff8fab" opacity=".6"/><g class="h3eye"><ellipse cx="-9" cy="31" rx="3.1" ry="4.2" fill="#183a7a"/><circle cx="-8" cy="29.5" r="1.1" fill="#fff"/></g><g class="h3eye"><ellipse cx="9" cy="31" rx="3.1" ry="4.2" fill="#183a7a"/><circle cx="10" cy="29.5" r="1.1" fill="#fff"/></g><path d="M-5.5 41Q0 49 5.5 41Z" fill="#e8456b" stroke="#c42c52" stroke-width="1" stroke-linejoin="round"/><g transform="translate(-17 5) rotate(-18)"><path d="M0 0L-9-6V6Z" fill="#ff7aa2"/><path d="M0 0L9-6V6Z" fill="#ff7aa2"/><circle r="2.6" fill="#ff4f86"/></g></g></g></g><g transform="translate(154 20) rotate(5)"><g class="h3hop b"><g class="h3br"><path d="M0 6C-10-1-28 1-31 20C-33 34-24 42-23 57C-22 74-20 88-13 88C-7 88-6 72 0 72C6 72 7 88 13 88C20 88 22 74 23 57C24 42 33 34 31 20C28 1 10-1 0 6Z" fill="url(#h3fl)" stroke="#bcd4ff" stroke-width="1.6" stroke-linejoin="round"/><path d="M-20 18Q-26 27-24 38" stroke="#fff" stroke-width="3" stroke-linecap="round" fill="none" opacity=".9"/><ellipse cx="-15" cy="43" rx="5.5" ry="3.4" fill="#ff8fab" opacity=".6"/><ellipse cx="15" cy="43" rx="5.5" ry="3.4" fill="#ff8fab" opacity=".6"/><path d="M-9 30Q-6 26-3 30M3 30Q6 26 9 30" stroke="#183a7a" stroke-width="2.2" stroke-linecap="round" fill="none"/><path d="M-6 40Q0 50 6 40Z" fill="#e8456b" stroke="#c42c52" stroke-width="1" stroke-linejoin="round"/><path d="M21 54Q27 60 33 57" stroke="#c9ddff" stroke-width="8" stroke-linecap="round" fill="none"/><path d="M21 54Q27 60 33 57" stroke="#fff" stroke-width="6" stroke-linecap="round" fill="none"/><g transform="translate(29 38) rotate(8)"><rect width="31" height="42" rx="5" fill="#fff" stroke="#c9ddff" stroke-width="1.2"/><rect x="9.5" y="-3.5" width="12" height="7" rx="2.5" fill="#4d8dff"/><rect x="13" y="12" width="14" height="3" rx="1.5" fill="#d6e5ff"/><rect x="13" y="22" width="14" height="3" rx="1.5" fill="#d6e5ff"/><rect x="13" y="32" width="14" height="3" rx="1.5" fill="#d6e5ff"/><g fill="none" stroke="#16a34a" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path class="h3ck" d="M4 13l2.6 2.6L11 9.8"/><path class="h3ck c2" d="M4 23l2.6 2.6L11 19.8"/><path class="h3ck c3" d="M4 33l2.6 2.6L11 29.8"/></g></g></g></g></g></g><g transform="translate(120 13)"><path class="h3ht" d="M0 6C-10-3-9-11-3.5-11C-1.5-11 0-9.5 0-8C0-9.5 1.5-11 3.5-11C9-11 10-3 0 6Z" fill="#ff7aa2"/></g><g transform="translate(44 18)"><path class="h3sp " d="M0-6 L1.5-1.5 6 0 1.5 1.5 0 6 -1.5 1.5 -6 0 -1.5 -1.5 Z" fill="#fff"/></g><g transform="translate(208 18)"><path class="h3sp s2" d="M0-5 L1.2-1.2 5 0 1.2 1.2 0 5 -1.2 1.2 -5 0 -1.2 -1.2 Z" fill="#fff"/></g><g transform="translate(34 92)"><path class="h3sp s3" d="M0-4 L1.0-1.0 4 0 1.0 1.0 0 4 -1.0 1.0 -4 0 -1.0 -1.0 Z" fill="#fff"/></g><g transform="translate(222 90)"><path class="h3sp s4" d="M0-4 L1.0-1.0 4 0 1.0 1.0 0 4 -1.0 1.0 -4 0 -1.0 -1.0 Z" fill="#fff"/></g></svg></div></div>';
 }
 function v2HeroInfo(){
   return '<strong class="h2s">Kho chuẩn từng mã.</strong>'
@@ -6072,9 +6123,12 @@ var LKX={
   lock:function(kind,id){
     var p=LKX.get(kind,id);if(!p||p.locked)return;
     var left=kind==='as'?p.items.filter(function(i){return !i.counted;}).length:p.items.filter(needsCount).length;
+    var zp=kind==='as'?0:p.items.filter(zeroPending).length;
     var msg='Khoá kỳ "'+p.name+'"?\n\n'+(left?'Còn '+left+(kind==='as'?' tài sản':' mã')+' chưa kiểm.\n':'Đã kiểm xong toàn bộ.\n')
       +'Sau khi khoá sẽ không sửa được số liệu, quét, xoá hay đổi tên kỳ. Vẫn xuất Excel, in và gửi email bình thường. Có thể mở khoá khi cần.';
+    if(zp)msg+='\n\n⚠ Còn '+zp+' mã tồn sổ sách = 0 chưa kiểm. Bấm OK sẽ ghi nhận thực tế = 0 (khớp sổ) cho các mã này. Nếu cần đếm lại, bấm Huỷ rồi kiểm ở tab Tất cả.';
     if(!confirm(msg))return;
+    if(zp)p.items.forEach(function(i){if(zeroPending(i)){i.counted=true;i.countQty=0;}});
     p.locked={at:Date.now(),by:(db.profile&&db.profile.ten)||''};
     (p.lockLog=p.lockLog||[]).push('Khoá '+new Date().toLocaleString('vi-VN')+((db.profile&&db.profile.ten)?' · '+db.profile.ten:''));
     store.save();render();toast('Đã khoá dữ liệu kỳ kiểm kê');
@@ -6091,9 +6145,10 @@ var LKX={
     (db.periods||[]).forEach(function(p){if(!p.locked&&p.items&&p.items.length&&!p.items.filter(needsCount).length)list.push(p);});
     (db.assets||[]).forEach(function(p){if(!p.locked&&p.items&&p.items.length&&!p.items.filter(function(i){return !i.counted;}).length)list.push(p);});
     if(!list.length){toast('Không có kỳ nào đã kiểm xong mà chưa khoá');return;}
-    if(!confirm('Khoá '+list.length+' kỳ đã kiểm xong?\n\n'+list.slice(0,8).map(function(p){return '• '+p.name;}).join('\n')+(list.length>8?'\n…':'')+'\n\nCó thể mở khoá từng kỳ khi cần.'))return;
+    var zpAll=0;list.forEach(function(p){zpAll+=p.items.filter(zeroPending).length;});
+    if(!confirm('Khoá '+list.length+' kỳ đã kiểm xong?\n\n'+list.slice(0,8).map(function(p){return '• '+p.name;}).join('\n')+(list.length>8?'\n…':'')+(zpAll?'\n\n⚠ Còn '+zpAll+' mã tồn sổ sách = 0 chưa kiểm. Bấm OK sẽ ghi nhận thực tế = 0 (khớp sổ) cho các mã này.':'')+'\n\nCó thể mở khoá từng kỳ khi cần.'))return;
     var at=Date.now(),tx=new Date(at).toLocaleString('vi-VN');
-    list.forEach(function(p){p.locked={at:at,by:who};(p.lockLog=p.lockLog||[]).push('Khoá '+tx+(who?' · '+who:''));});
+    list.forEach(function(p){p.items.forEach(function(i){if(zeroPending(i)){i.counted=true;i.countQty=0;}});p.locked={at:at,by:who};(p.lockLog=p.lockLog||[]).push('Khoá '+tx+(who?' · '+who:''));});
     store.save();render();toast('Đã khoá '+list.length+' kỳ kiểm kê');
   },
   guard:function(obj,names,getP){
