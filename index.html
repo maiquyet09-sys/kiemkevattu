@@ -2,7 +2,7 @@
 <html lang="vi">
 <head>
 <meta charset="UTF-8">
-<meta name="app-version" content="2026102706">
+<meta name="app-version" content="2026102707">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
 <meta name="theme-color" content="#eef3fb">
 <link rel="manifest" href="manifest.webmanifest">
@@ -532,6 +532,74 @@ body{background:var(--bg)}
 @keyframes h5wv{from{transform:translateX(-12px)}to{transform:translateX(12px)}}
 @keyframes h4gl2{from{filter:drop-shadow(0 0 0 rgba(61,123,240,0))}to{filter:drop-shadow(0 0 6px rgba(61,123,240,.35))}}
 @media(prefers-reduced-motion:reduce){.h5p,.h5c,.h5wa,#gbrand b.h5t{animation:none!important}}
+
+/* ===== MedDental Prime V2.1 — Executive Minimal Premium (chỉ lớp trình bày; không đổi dữ liệu/logic) ===== */
+:root{
+  --teal:#0D5DB8;--teal-d:#0a4a94;--teal-bg:rgba(13,93,184,.07);--teal-ln:rgba(13,93,184,.26);
+  --bg:#f4f8fc;--card2:#eef4fa;--ink:#1f2937;--blue-m:#1E7DD9;--cyan:#1BA7E8;--blue-soft:#DDEBF8;--gold:#F3D45A;
+  --red:#d92d20;--amber:#b4780a;--orange:#c2540d;--header-h:64px;--nav-h:64px
+}
+/* Đầu trang: cùng một trục, gọn hơn */
+#gheader{height:64px;padding:0 16px;gap:10px;background:#fff!important;border-bottom:1px solid var(--line)}
+#gbrand{gap:8px}#gbrand .bt{gap:2px}.h5row{gap:8px}
+#gbrand b.h5t{font-size:22px;background-image:none!important;color:#0D5DB8!important;-webkit-text-fill-color:#0D5DB8;animation:none!important;filter:none!important}
+#gbrand small{font-size:9px;letter-spacing:.18em;color:rgba(31,41,55,.45)}
+.h5p{padding:2px 10px;font-size:12px;border-radius:999px;color:#5c4710;background:var(--gold)!important;box-shadow:none!important;animation:none!important}
+.h5c,.h5p .h5c{animation:none!important;filter:none!important}
+#guser .gearb{width:44px;height:44px;display:flex;align-items:center;justify-content:center;border-radius:12px;background:var(--blue-soft);color:#0D5DB8}
+/* Banner: phẳng, tương phản cao, ít họa tiết */
+.h2.h5{background:#0D5DB8!important;box-shadow:none!important;border-radius:20px;padding:14px 8px 14px 18px}
+.h2::before,.h5wv{display:none!important}
+.h5l .h2t{font-size:26px}.h5l .h2s{font-size:21px;line-height:1.2;color:#fff}
+.h5l .h5p{margin-top:8px}
+.h5w{font-size:8.5px;margin-top:10px;color:rgba(255,255,255,.6)}
+.h5r .h2art{width:100%;margin-left:0;max-width:100%;height:auto}
+.h2.h5{overflow:hidden}.h5l{min-width:0}.h5l .h2s{overflow-wrap:anywhere}
+.h2k,.h2glow,.h2rip,.h2orb,.h2scan,.h2tw,.h2fl,.h3sp,.h3ht{display:none!important}
+.h2tooth,.h3hop,.h3br,.h3wv,.h3eye,.h3sh,.h3ck{animation:none!important}.h3ck{stroke-dashoffset:0}.h3wv{transform:rotate(-6deg)}
+.h2t,.h2s{animation:none!important;opacity:1!important;filter:none!important}
+.h2.h5,.h2.h5 *{animation-iteration-count:1!important}
+/* Nhịp khoảng cách */
+.hub{padding-top:12px}.mt20{margin-top:20px}.mt24{margin-top:22px}
+.sec{font-size:18px;font-weight:700;margin-bottom:10px}
+.wrap .addbat{font-size:14px;min-height:44px;padding:0 4px}
+/* Thẻ cảnh báo hạn dùng: thấp hơn ~18%, số liệu nổi bật */
+.hsdgrid{gap:8px}
+.hsdcard{padding:10px 12px!important;border-radius:16px!important;box-shadow:none!important;min-height:0;display:flex;flex-direction:column;justify-content:center}
+.hsdcard .n{font-size:28px;line-height:1;font-weight:800}
+.hsdcard .t{font-size:13px;line-height:1.25;margin-top:0}
+.hsdcard.c-red{--dc:#d92d20;border-color:rgba(217,45,32,.35)!important;background:#fff5f4!important}
+.hsdcard.c-org,.hsdcard.c-amb{--dc:#b4620a;border-color:rgba(180,98,10,.32)!important;background:#fff9ec!important}
+.hsdcard.c-green{--dc:#667085}
+.hsdcard.z{background:#fff!important;border-color:var(--line)!important}.hsdcard.z .n{color:#98a2b3}
+/* Thẻ Kiểm kê: gọn, đồng bộ icon/bo góc */
+.tile{padding:14px 8px!important;gap:8px!important;border-radius:16px!important;box-shadow:none!important;min-height:92px;font-size:14px!important}
+.tile .tic{width:44px;height:44px;border-radius:14px;background:var(--blue-soft);color:#0D5DB8}
+/* Nút/thẻ chung */
+.btn{border-radius:14px;min-height:44px}.btn-primary{background:#0D5DB8;box-shadow:none}
+.card{border-radius:18px}
+/* Thanh điều hướng dưới: trung tính + 1 màu xanh, vùng an toàn iPhone */
+#bnav{border-radius:20px 20px 0 0;box-shadow:0 -2px 12px rgba(15,40,90,.07);border-top:1px solid var(--line);padding-bottom:env(safe-area-inset-bottom,0px)}
+#bnav button{color:#667085;font-size:11px;gap:3px;min-height:48px;padding:8px 0 8px;white-space:nowrap}
+#bnav button.on{color:#0D5DB8;font-weight:700}
+#bnav .fab{color:#0D5DB8;font-weight:700}
+#bnav .fab i{width:56px;height:56px;margin-top:-26px;background:#0D5DB8;box-shadow:0 0 0 4px #fff,0 3px 8px rgba(13,93,184,.22)}
+#app{padding-bottom:calc(var(--nav-h) + 20px + env(safe-area-inset-bottom,0px))}
+#toast{bottom:calc(var(--nav-h) + 38px + env(safe-area-inset-bottom,0px))}
+@media(max-width:360px){.h5l .h2s{font-size:18px}#gbrand b.h5t{font-size:19px}.h5p{font-size:11px}}
+
+/* hiệu chỉnh sau kiểm thử hiển thị */
+:root{--header-h:72px}
+#gheader{height:72px;padding-bottom:0}
+#gmain{margin-top:0;border-radius:0}
+.h2.h5{grid-template-columns:1.12fr .88fr}
+.h5l .h2s{font-size:20px}
+.h5w{white-space:normal;letter-spacing:.05em;line-height:1.4;font-size:8.5px}
+.addbat{white-space:nowrap}
+.wrap>div[style*="justify-content:space-between"]{gap:8px}
+.wrap>div[style*="justify-content:space-between"]>div{gap:10px!important;flex:none}
+@media(max-width:420px){.sec{font-size:17px;line-height:1.25}.wrap .addbat{font-size:13.5px;padding:0}}
+@media(min-width:900px){#gheader{height:64px}}
 </style>
 </head>
 <body>
