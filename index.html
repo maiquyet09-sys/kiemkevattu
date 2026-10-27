@@ -608,7 +608,7 @@ function branchCode(name){
   return words.map(function(w){return w[0];}).join('').toUpperCase();
 }
 function diffOf(it){return (it.counted&&it.countQty!==null)?Math.round((it.countQty-it.close)*100)/100:null;}
-function needsCount(it){return !it.counted&&it.close!==0;} /* mã tồn cuối = 0 thì mặc định không cần kiểm tay */
+function needsCount(it){return !it.counted;} /* mọi mã đều phải kiểm, kể cả mã tồn sổ sách = 0 */
 
 var BUCKETS=[
   {k:"expired",label:"Đã hết hạn",cls:"c-red",strong:"var(--red)",test:function(d){return d<0;}},
@@ -711,12 +711,12 @@ function buildItems(rows,start,map,branchManual,hsd){
     var close=map.close!==undefined?parseNum(get(row,"close")):open+inn-outn;
     var branch=(map.branch!==undefined?String(get(row,"branch")==null?"":get(row,"branch")).trim():"")||branchManual.trim()||"Kho chính";
     var reg=hsd[normKey(branch,code,name)];
-    var zeroStock=close===0; /* mã tồn cuối = 0: mặc định coi như đã kiểm khớp, khỏi cần đếm tay */
+    
     out.push({
       id:"i"+r+"_"+out.length,branch:branch,code:code,name:name,
       unit:String(get(row,"unit")==null?"":get(row,"unit")).trim(),
       open:open,"in":inn,out:outn,close:close,
-      counted:zeroStock,countQty:zeroStock?0:null,note:"",
+      counted:false,countQty:null,note:"",
       batches:reg?reg.batches.map(function(b){return {qty:b.qty,exp:b.exp};}):[]
     });
   }
@@ -3344,7 +3344,7 @@ function renderPeriod(){
     '<button class="pill" style="display:inline-flex;align-items:center;gap:5px" onclick="A.exportCur()">'+icon('download',15)+'Excel</button></div></div>'+
     '<div class="wrap" style="padding-top:10px"><div class="bar"><div class="fill" id="pfill"></div></div>'+
     '<div class="prow"><span id="pdone"></span><span id="pdiff"></span></div>'+
-    '<button class="stklink" style="display:flex;align-items:center;gap:7px" onclick="A.openStock(\''+p.id+'\')">'+icon('grid',16)+'Bảng tồn kho (chỉ mã còn tồn)'+icon('chev',16)+'</button>'+'<button class="stklink" style="display:flex;align-items:center;gap:7px" onclick="A.periodTransfer()">'+icon('users',16)+'Bàn giao vật tư cho HO / cơ sở khác'+icon('chev',16)+'</button>'+'<button class="stklink" id="exlink" style="display:none;align-items:center;gap:7px;color:var(--red)" onclick="A.periodExplain()"></button>'+sigPeriodToggle(p)+lockBarHtml(p,'vt')+'</div>'+
+    '<button class="stklink" style="display:flex;align-items:center;gap:7px" onclick="A.openStock(\''+p.id+'\')">'+icon('grid',16)+'Bảng tồn kho (chỉ mã còn tồn)'+icon('chev',16)+'</button>'+'<button class="stklink" style="display:flex;align-items:center;gap:7px" onclick="A.periodTransfer()">'+icon('users',16)+'Bàn giao vật tư cho HO / cơ sở khác'+icon('chev',16)+'</button>'+'<button class="stklink" id="exlink" style="display:none;align-items:center;gap:7px;color:var(--red)" onclick="A.periodExplain()"></button>'+sigPeriodToggle(p)+lockBarHtml(p,'vt')+zeroResetHtml(p)+'</div>'+
     unmBannerHtml(p)+
     '<div class="wrap" style="padding-bottom:8px;display:flex;gap:8px"><input class="inp" style="background:var(--card);flex:1;min-width:0" id="q" placeholder="Tìm tên hoặc mã vật tư (không dấu vẫn ra)…" oninput="A.qInput(this.value)"><button class="pill" style="display:inline-flex;align-items:center;gap:5px;padding:0 14px;flex:none" onclick="A.scanOpen()">'+icon('scan',18)+'Quét</button></div>'+
     '<div class="chips" id="chips"></div></div>'+
@@ -5172,6 +5172,14 @@ var A={
     };
     r.readAsText(f);input.value='';
   },
+  zeroReset:function(id){
+    var p=per(id);if(!p||p.locked)return;
+    var l=p.items.filter(function(i){return i.close===0&&i.counted&&i.countQty===0;});
+    if(!l.length)return;
+    if(!confirm('Đưa '+l.length+' mã có tồn sổ sách = 0 về trạng thái chưa kiểm?\n\nCác mã này trước đây được app tự đánh dấu đã kiểm (thực tế 0). Mã nào bạn đã kiểm tay và nhập 0 cũng sẽ về chưa kiểm, cần kiểm lại.'))return;
+    l.forEach(function(i){i.counted=false;i.countQty=null;});
+    store.save();render();toast('Đã đưa '+l.length+' mã về chưa kiểm');
+  },
   syncExport:function(){A.backupNow('ChuyenMay_KiemKe_');},
   replaceFile:function(input){
     var f=input.files&&input.files[0];if(!f)return;
@@ -6040,6 +6048,12 @@ function renderLists(){
 }
 
 /* ================= Khoá dữ liệu kỳ kiểm kê ================= */
+function zeroResetHtml(p){
+  if(!p||p.locked)return '';
+  var n=p.items.filter(function(i){return i.close===0&&i.counted&&i.countQty===0;}).length;
+  if(!n)return '';
+  return '<button class="stklink" style="display:flex;align-items:center;gap:7px;color:var(--red)" onclick="A.zeroReset(\''+p.id+'\')">'+icon('box',16)+'Đưa '+n+' mã tồn 0 về chưa kiểm'+icon('chev',16)+'</button>';
+}
 function lockTagHtml(p){
   return p&&p.locked?'<div style="display:inline-flex;align-items:center;gap:4px;font-size:11px;font-weight:700;color:var(--green);margin-bottom:3px">'+icon('lock',12)+'Đã khoá</div>':'';
 }
