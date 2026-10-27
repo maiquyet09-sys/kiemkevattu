@@ -2,7 +2,7 @@
 <html lang="vi">
 <head>
 <meta charset="UTF-8">
-<meta name="app-version" content="2026102704">
+<meta name="app-version" content="2026102705">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
 <meta name="theme-color" content="#0b4fc4">
 <link rel="manifest" href="manifest.webmanifest">
@@ -388,6 +388,11 @@ body{background:var(--bg)}
 .hbig{margin-top:10px;padding:14px;font-size:16px}
 .hrow3{margin-top:8px}
 .hrow3 .btn{padding:12px 6px;font-size:14px}
+.hpill{display:flex;align-items:center;gap:8px;margin-top:14px;max-width:100%;padding:10px 14px;border-radius:14px;background:rgba(80,160,255,.14);border:1px solid rgba(125,243,255,.45);color:#9ff3ff;box-shadow:0 0 14px rgba(80,170,255,.25)}
+.hpill select{appearance:none;-webkit-appearance:none;border:0;background:transparent;color:#fff;font:inherit;font-weight:700;font-size:15px;min-width:0;max-width:62vw;outline:none;text-overflow:ellipsis}
+.hpill select option{color:#0f172a}
+.hpill .dn{transform:rotate(90deg)}
+.hero span{font-size:14px}
 </style>
 </head>
 <body>
@@ -5705,26 +5710,21 @@ function v2ManualEnter(){
   var m=scMatch(p,i.value);
   if(m.item){renameClose();A.openItem(m.item.id,false);}else toast('Không tìm thấy mã này trong đợt kiểm kê');
 }
-function v2Hero(){
+function v2Hero(p){
   return '<div class="hero">'+'<svg class="hart" viewBox="0 0 360 230" aria-hidden="true"><defs><linearGradient id="hg1" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#7df3ff"/><stop offset="1" stop-color="#3a7bff"/></linearGradient><radialGradient id="hg2"><stop offset="0" stop-color="#2d8cff" stop-opacity=".55"/><stop offset="1" stop-color="#2d8cff" stop-opacity="0"/></radialGradient><filter id="hgl" x="-30%" y="-30%" width="160%" height="160%"><feGaussianBlur stdDeviation="3.2" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter><clipPath id="htc"><path transform="translate(180 98) scale(4.4) translate(-12 -11.5)" d="M7 2.5C4.2 2.5 2.5 4.7 2.5 7.4c0 2 .8 3.4 1.4 5 .7 2 .6 4.6 1.6 7 .4 1 1.7 1.2 2.3.2.9-1.5.9-3.7 2.9-3.7s2 2.2 2.9 3.7c.6 1 1.9.8 2.3-.2 1-2.4.9-5 1.6-7 .6-1.6 1.4-3 1.4-5 0-2.7-1.7-4.9-4.5-4.9-1.9 0-2.7.9-5 .9S8.9 2.5 7 2.5z"/></clipPath></defs><g stroke="rgba(110,190,255,.28)" stroke-width="1" fill="none"><path d="M0 168h360M0 184h360M0 204h360M0 230h360"/><path d="M180 150L-60 230M180 150L20 230M180 150L100 230M180 150L180 230M180 150L260 230M180 150L340 230M180 150L420 230"/></g><circle cx="180" cy="98" r="100" fill="url(#hg2)"/><g class="orb"><ellipse cx="180" cy="98" rx="124" ry="36" transform="rotate(-18 180 98)" fill="none" stroke="#6fd8ff" stroke-opacity=".7" stroke-dasharray="3 7" stroke-width="1.4"/><circle cx="62" cy="128" r="3.6" fill="#7df3ff" filter="url(#hgl)"/></g><g class="orb r"><ellipse cx="180" cy="98" rx="108" ry="30" transform="rotate(24 180 98)" fill="none" stroke="#8aa8ff" stroke-opacity=".55" stroke-width="1"/><circle cx="276" cy="60" r="3" fill="#a6b9ff" filter="url(#hgl)"/></g><g filter="url(#hgl)"><path transform="translate(180 98) scale(4.4) translate(-12 -11.5)" d="M7 2.5C4.2 2.5 2.5 4.7 2.5 7.4c0 2 .8 3.4 1.4 5 .7 2 .6 4.6 1.6 7 .4 1 1.7 1.2 2.3.2.9-1.5.9-3.7 2.9-3.7s2 2.2 2.9 3.7c.6 1 1.9.8 2.3-.2 1-2.4.9-5 1.6-7 .6-1.6 1.4-3 1.4-5 0-2.7-1.7-4.9-4.5-4.9-1.9 0-2.7.9-5 .9S8.9 2.5 7 2.5z" fill="rgba(70,150,255,.16)" stroke="url(#hg1)" stroke-width=".45" stroke-linejoin="round"/></g><g clip-path="url(#htc)"><rect class="sline" x="120" y="40" width="120" height="14" fill="#7df3ff" opacity=".55" filter="url(#hgl)"/></g><g stroke="#7df3ff" stroke-opacity=".75" stroke-width="1" fill="none"><path d="M158 70h18l8 12h16M170 104h22l6 10M162 126v-14h12M196 70v-10"/></g><g fill="#bff8ff"><circle cx="184" cy="82" r="2"/><circle cx="214" cy="82" r="2"/><circle cx="198" cy="114" r="2"/><circle cx="174" cy="112" r="2"/><circle cx="196" cy="60" r="2"/></g><g stroke="#7df3ff" stroke-opacity=".7" stroke-width="2.4" stroke-linecap="round" fill="none"><path d="M16 38V18h20M344 38V18h-20M16 192v20h20M344 192v20h-20"/></g><g fill="#7df3ff" opacity=".7"><rect x="52" y="52" width="3" height="3"/><rect x="312" y="96" width="3" height="3"/><rect x="300" y="170" width="2.5" height="2.5"/><rect x="48" y="150" width="2.5" height="2.5"/></g></svg>'
-    +'<b>MedDental</b><span>Kiểm kê kho thông minh bằng mã QR</span>'
-    +'<div class="hchips"><i>'+icon('qr',22)+'</i><i>'+icon('box',22)+'</i><i>'+icon('check',22)+'</i></div></div>';
+    +'<b>MedDental</b>'+v2HeroInfo(p)+'</div>';
+}
+function v2HeroInfo(p){
+  if(!p)return '<span>Kiểm kê kho thông minh bằng mã QR</span><div class="hchips"><i>'+icon('qr',22)+'</i><i>'+icon('box',22)+'</i><i>'+icon('check',22)+'</i></div>';
+  var tot=p.items.length,done=p.items.filter(function(i){return i.counted;}).length,pct=tot?Math.round(done/tot*100):0;
+  var o='';db.periods.forEach(function(x){o+='<option value="'+esc(x.id)+'"'+(x.id===p.id?' selected':'')+'>'+esc((x.folder?x.folder+' · ':'')+x.name)+'</option>';});
+  return '<span>Đã kiểm '+done+'/'+tot+' mã · '+pct+'%</span>'
+    +'<label class="hpill">'+icon('file',18)+'<select onchange="HS.pid=this.value;renderHome()" aria-label="Chọn đợt kiểm kê">'+o+'</select>'+icon('chev',16,'dn')+'</label>';
 }
 function v2Hub(){
   var p=v2Cur(),h='<div class="wrap hub">';
-  if(!p)return h+v2Hero()+'</div>';
-  var folders=db.folders.filter(function(f){return periodsIn(f).length;});
-  var areas=[];p.items.forEach(function(i){if(i.branch&&areas.indexOf(i.branch)<0)areas.push(i.branch);});
-  if(areas.indexOf(HS.area)<0)HS.area='all';
-  var sel=function(ic,lab,opts,fn){return '<label class="hsel"><span class="hic">'+icon(ic,20)+'</span><span class="htx"><small>'+lab+'</small><select onchange="'+fn+'">'+opts+'</select></span><span class="hch">'+icon('chev',16)+'</span></label>';};
-  var po='';v2Periods().forEach(function(x){po+='<option value="'+esc(x.id)+'"'+(x.id===p.id?' selected':'')+'>'+esc(x.name)+'</option>';});
-  var fo='<option value="">Tất cả</option>';folders.forEach(function(f){fo+='<option value="'+esc(f)+'"'+(HS.folder===f?' selected':'')+'>'+esc(f)+'</option>';});
-  var ao='<option value="all">Tất cả</option>';areas.forEach(function(a){ao+='<option value="'+esc(a)+'"'+(HS.area===a?' selected':'')+'>'+esc(a)+'</option>';});
-  h+=sel('file','Đợt kiểm kê',po,'HS.pid=this.value;HS.area=\'all\';renderHome()');
-  h+='<div class="hrow2">'+sel('building','Cơ sở / Kho',fo,'HS.folder=this.value;HS.pid=\'\';HS.area=\'all\';renderHome()')+sel('layers','Khu vực',ao,'HS.area=this.value')+'</div>';
-  h+='<div class="scancard" onclick="v2Scan()"><button class="flash" onclick="event.stopPropagation();v2Scan()" aria-label="Bật đèn">'+icon('bolt',20)+'</button>'
-    +'<div class="scframe"><i></i><i></i><i></i><i></i>'+icon('qr',96)+'<b></b></div>'
-    +'<div class="sccap"><span>Đưa mã QR vào khung để quét</span><button onclick="event.stopPropagation();v2Scan()" aria-label="Chọn ảnh">'+icon('image',22)+'</button></div></div>';
+  if(!p)return h+v2Hero(null)+'</div>';
+  h+=v2Hero(p);
   h+='<button class="btn btn-primary hbig" onclick="v2Scan()">'+icon('scan',22)+'Quét mã QR</button>';
   h+='<div class="hrow3"><button class="btn" onclick="v2Manual()">'+icon('keyboard',20)+'Nhập mã thủ công</button><button class="btn" onclick="v2Scan()">'+icon('camera',20)+'Chụp ảnh</button></div></div>';
   return h;
