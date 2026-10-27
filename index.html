@@ -2,7 +2,7 @@
 <html lang="vi">
 <head>
 <meta charset="UTF-8">
-<meta name="app-version" content="2026102705">
+<meta name="app-version" content="2026102706">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
 <meta name="theme-color" content="#0b4fc4">
 <link rel="manifest" href="manifest.webmanifest">
@@ -393,6 +393,15 @@ body{background:var(--bg)}
 .hpill select option{color:#0f172a}
 .hpill .dn{transform:rotate(90deg)}
 .hero span{font-size:14px}
+.hero{justify-content:center;padding:14px 16px 24px}
+@media(max-width:899px){.hero{min-height:calc(100svh - var(--header-h) - var(--nav-h) - 56px - env(safe-area-inset-bottom,0px))}}
+.hslog{display:block;font-size:20px;font-weight:800;line-height:1.3;margin-top:8px;color:#eaf7ff;text-shadow:0 0 18px rgba(125,243,255,.45)}
+.hero span{max-width:290px;line-height:1.45;margin-top:8px}
+.hchips{gap:8px;margin-top:20px;flex-wrap:wrap;justify-content:center}
+.hchips em{font-style:normal;display:flex;align-items:center;gap:6px;padding:9px 12px;border-radius:12px;background:rgba(80,160,255,.12);border:1px solid rgba(125,243,255,.4);color:#bff8ff;font-size:13px;font-weight:600;box-shadow:0 0 12px rgba(80,170,255,.2)}
+.hchips{gap:6px;flex-wrap:nowrap}
+.hchips em{padding:8px 9px;font-size:12px;gap:4px;white-space:nowrap}
+.hchips em svg{width:16px;height:16px}
 </style>
 </head>
 <body>
@@ -3543,12 +3552,6 @@ function mergeDb(d){
 }
 function homeNoticesHtml(){
   var h='',pr=db.profile||{};
-  if(!pr.ten||!sgConfigured()){
-    h+='<div class="wrap mt12"><div class="card" style="display:flex;gap:12px;align-items:center" onclick="A.go(\'settings\')">'
-      +'<div style="width:38px;height:38px;flex:none;border-radius:11px;background:var(--teal-bg);color:var(--teal);display:flex;align-items:center;justify-content:center">'+icon('users',20)+'</div>'
-      +'<div style="flex:1"><div style="font-weight:700;font-size:14px">Thiết lập hồ sơ và người ký</div><div style="font-size:12px;color:var(--mut)">Điền tên bạn và người ký của từng chi nhánh (Giám đốc, Thủ kho, Phòng Hành chính) một lần, app tự điền vào mọi biên bản.</div></div>'
-      +'<div style="color:var(--mut2)">'+icon('chev',18)+'</div></div></div>';
-  }
   var any=db.periods.length||db.handovers.length||db.explains.length||(db.assets||[]).length;
   if(any&&Date.now()>=(db.backupSnooze||0)){
     var last=db.lastBackup||0,days=last?Math.floor((Date.now()-last)/86400000):0;
@@ -5668,6 +5671,7 @@ ICONS.back='<path d="m15 18-6-6 6-6"/>';
 ICONS.save='<path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><path d="M17 21v-8H7v8M7 3v5h8"/>';
 
 var HS={pid:'',folder:'',area:'all'};
+(function(){var o=A.openPeriod;A.openPeriod=function(id){HS.pid=id;return o.apply(this,arguments);};})();
 function v2Periods(){return db.periods.filter(function(p){return !HS.folder||(p.folder||'')===HS.folder;});}
 function v2Cur(){
   var l=v2Periods(),p=per(HS.pid);
@@ -5714,20 +5718,15 @@ function v2Hero(p){
   return '<div class="hero">'+'<svg class="hart" viewBox="0 0 360 230" aria-hidden="true"><defs><linearGradient id="hg1" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#7df3ff"/><stop offset="1" stop-color="#3a7bff"/></linearGradient><radialGradient id="hg2"><stop offset="0" stop-color="#2d8cff" stop-opacity=".55"/><stop offset="1" stop-color="#2d8cff" stop-opacity="0"/></radialGradient><filter id="hgl" x="-30%" y="-30%" width="160%" height="160%"><feGaussianBlur stdDeviation="3.2" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter><clipPath id="htc"><path transform="translate(180 98) scale(4.4) translate(-12 -11.5)" d="M7 2.5C4.2 2.5 2.5 4.7 2.5 7.4c0 2 .8 3.4 1.4 5 .7 2 .6 4.6 1.6 7 .4 1 1.7 1.2 2.3.2.9-1.5.9-3.7 2.9-3.7s2 2.2 2.9 3.7c.6 1 1.9.8 2.3-.2 1-2.4.9-5 1.6-7 .6-1.6 1.4-3 1.4-5 0-2.7-1.7-4.9-4.5-4.9-1.9 0-2.7.9-5 .9S8.9 2.5 7 2.5z"/></clipPath></defs><g stroke="rgba(110,190,255,.28)" stroke-width="1" fill="none"><path d="M0 168h360M0 184h360M0 204h360M0 230h360"/><path d="M180 150L-60 230M180 150L20 230M180 150L100 230M180 150L180 230M180 150L260 230M180 150L340 230M180 150L420 230"/></g><circle cx="180" cy="98" r="100" fill="url(#hg2)"/><g class="orb"><ellipse cx="180" cy="98" rx="124" ry="36" transform="rotate(-18 180 98)" fill="none" stroke="#6fd8ff" stroke-opacity=".7" stroke-dasharray="3 7" stroke-width="1.4"/><circle cx="62" cy="128" r="3.6" fill="#7df3ff" filter="url(#hgl)"/></g><g class="orb r"><ellipse cx="180" cy="98" rx="108" ry="30" transform="rotate(24 180 98)" fill="none" stroke="#8aa8ff" stroke-opacity=".55" stroke-width="1"/><circle cx="276" cy="60" r="3" fill="#a6b9ff" filter="url(#hgl)"/></g><g filter="url(#hgl)"><path transform="translate(180 98) scale(4.4) translate(-12 -11.5)" d="M7 2.5C4.2 2.5 2.5 4.7 2.5 7.4c0 2 .8 3.4 1.4 5 .7 2 .6 4.6 1.6 7 .4 1 1.7 1.2 2.3.2.9-1.5.9-3.7 2.9-3.7s2 2.2 2.9 3.7c.6 1 1.9.8 2.3-.2 1-2.4.9-5 1.6-7 .6-1.6 1.4-3 1.4-5 0-2.7-1.7-4.9-4.5-4.9-1.9 0-2.7.9-5 .9S8.9 2.5 7 2.5z" fill="rgba(70,150,255,.16)" stroke="url(#hg1)" stroke-width=".45" stroke-linejoin="round"/></g><g clip-path="url(#htc)"><rect class="sline" x="120" y="40" width="120" height="14" fill="#7df3ff" opacity=".55" filter="url(#hgl)"/></g><g stroke="#7df3ff" stroke-opacity=".75" stroke-width="1" fill="none"><path d="M158 70h18l8 12h16M170 104h22l6 10M162 126v-14h12M196 70v-10"/></g><g fill="#bff8ff"><circle cx="184" cy="82" r="2"/><circle cx="214" cy="82" r="2"/><circle cx="198" cy="114" r="2"/><circle cx="174" cy="112" r="2"/><circle cx="196" cy="60" r="2"/></g><g stroke="#7df3ff" stroke-opacity=".7" stroke-width="2.4" stroke-linecap="round" fill="none"><path d="M16 38V18h20M344 38V18h-20M16 192v20h20M344 192v20h-20"/></g><g fill="#7df3ff" opacity=".7"><rect x="52" y="52" width="3" height="3"/><rect x="312" y="96" width="3" height="3"/><rect x="300" y="170" width="2.5" height="2.5"/><rect x="48" y="150" width="2.5" height="2.5"/></g></svg>'
     +'<b>MedDental</b>'+v2HeroInfo(p)+'</div>';
 }
-function v2HeroInfo(p){
-  if(!p)return '<span>Kiểm kê kho thông minh bằng mã QR</span><div class="hchips"><i>'+icon('qr',22)+'</i><i>'+icon('box',22)+'</i><i>'+icon('check',22)+'</i></div>';
-  var tot=p.items.length,done=p.items.filter(function(i){return i.counted;}).length,pct=tot?Math.round(done/tot*100):0;
-  var o='';db.periods.forEach(function(x){o+='<option value="'+esc(x.id)+'"'+(x.id===p.id?' selected':'')+'>'+esc((x.folder?x.folder+' · ':'')+x.name)+'</option>';});
-  return '<span>Đã kiểm '+done+'/'+tot+' mã · '+pct+'%</span>'
-    +'<label class="hpill">'+icon('file',18)+'<select onchange="HS.pid=this.value;renderHome()" aria-label="Chọn đợt kiểm kê">'+o+'</select>'+icon('chev',16,'dn')+'</label>';
+function v2HeroInfo(){
+  return '<strong class="hslog">Kho chuẩn từng mã,<br>nụ cười trọn vẹn.</strong>'
+    +'<span>Kiểm kê vật tư nha khoa thông minh, chính xác đến từng con số.</span>'
+    +'<div class="hchips"><em>'+icon('qr',18)+'Quét nhanh</em><em>'+icon('check',18)+'Kiểm chuẩn</em><em>'+icon('box',18)+'Kho vững</em></div>';
 }
 function v2Hub(){
   var p=v2Cur(),h='<div class="wrap hub">';
   if(!p)return h+v2Hero(null)+'</div>';
-  h+=v2Hero(p);
-  h+='<button class="btn btn-primary hbig" onclick="v2Scan()">'+icon('scan',22)+'Quét mã QR</button>';
-  h+='<div class="hrow3"><button class="btn" onclick="v2Manual()">'+icon('keyboard',20)+'Nhập mã thủ công</button><button class="btn" onclick="v2Scan()">'+icon('camera',20)+'Chụp ảnh</button></div></div>';
-  return h;
+  return h+v2Hero(p)+'</div>';
 }
 function renderHome(){
   renderHomeOld();
