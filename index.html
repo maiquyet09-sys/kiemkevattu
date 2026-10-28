@@ -2,7 +2,7 @@
 <html lang="vi">
 <head>
 <meta charset="UTF-8">
-<meta name="app-version" content="2026102801">
+<meta name="app-version" content="2026102804">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
 <meta name="theme-color" content="#eef3fb">
 <link rel="manifest" href="manifest.webmanifest">
@@ -532,6 +532,17 @@ body{background:var(--bg)}
 @keyframes h5wv{from{transform:translateX(-12px)}to{transform:translateX(12px)}}
 @keyframes h4gl2{from{filter:drop-shadow(0 0 0 rgba(61,123,240,0))}to{filter:drop-shadow(0 0 6px rgba(61,123,240,.35))}}
 @media(prefers-reduced-motion:reduce){.h5p,.h5c,.h5wa,#gbrand b.h5t{animation:none!important}}
+#mcard{margin:12px 16px 0;background:#fff;border-radius:18px;padding:14px 16px;box-shadow:0 1px 3px rgba(15,40,90,.06)}
+#mcard .mh{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+#mcard .mt{font-weight:800;font-size:16px}
+#mcard .mn{display:flex;align-items:center;gap:6px;font-size:13px;font-weight:700;color:var(--mut)}
+#mcard .mn button{width:30px;height:30px;border-radius:50%;border:1px solid #dbe5f5;background:#fff;color:var(--ink);font-size:16px;line-height:1;padding:0}
+#mcard .mn button:disabled{opacity:.35}
+#mcard .rg{display:flex;align-items:center;gap:18px}
+#mcard dl{flex:1;margin:0;display:grid;gap:8px}
+#mcard dl div{display:flex;justify-content:space-between;font-size:14px}
+#mcard dt{color:var(--ink)}#mcard dd{margin:0;font-weight:700;font-variant-numeric:tabular-nums}
+#mcard .sub{margin-top:10px;padding-top:10px;border-top:1px solid #e8eef8;font-size:12px;color:var(--mut);line-height:1.5}
 </style>
 </head>
 <body>
@@ -2812,12 +2823,12 @@ function ocrWorker(){
   return OCR.loading;
 }
 function ocrParse(r){
-  var out=[];
+  var out=[],cf=(r.data&&typeof r.data.confidence==='number')?r.data.confidence:0;
   String((r.data&&r.data.text)||'').split(/\n+/).forEach(function(t){
     var dg=t.replace(/\D/g,'');
-    if(dg.length>=3)out.push({raw:t.trim(),digits:dg});
+    if(dg.length>=3)out.push({raw:t.trim(),digits:dg,conf:cf});
     var toks=t.split(/\s+/).map(function(x){return x.replace(/\D/g,'');}).filter(function(x){return x.length>=3;});
-    if(toks.length>1)toks.forEach(function(x){if(!out.some(function(o){return o.digits===x;}))out.push({raw:x,digits:x});});
+    if(toks.length>1)toks.forEach(function(x){if(!out.some(function(o){return o.digits===x;}))out.push({raw:x,digits:x,conf:cf});});
   });
   return out;
 }
@@ -2944,12 +2955,32 @@ function ocrCrop(arr,w,x0,y0,bw,bh,scale,pad){
   return f;
 }
 /* Tiền xử lý: cắt vùng khung → xám → tách nét chữ (ngưỡng thích ứng) → bỏ đường kẻ → tách dòng */
-function ocrPrep(el,sx,sy,sw,sh,mode,maxSide){
-  var k=Math.min(2.5,(maxSide||1400)/Math.max(sw,sh)),w=Math.max(8,Math.round(sw*k)),h=Math.max(8,Math.round(sh*k));
+/* Ước lượng độ nghiêng của các dòng số (độ): thử nhiều góc, chọn góc làm các dòng chữ "dồn" vào ít hàng nhất */
+function ocrSkew(a,w,h){
+  var pts=[],step=Math.max(1,Math.floor(Math.sqrt(w*h/6000))),x,y;
+  for(y=0;y<h;y+=step)for(x=0;x<w;x+=step)if(a[y*w+x]===0)pts.push(x-w/2,y-h/2);
+  if(pts.length<160)return 0;
+  var best=0,bs=-1,s0=0,ang,A,c,s,bins,i,yy,sc,cnt=Math.ceil(Math.hypot(w,h)/step)+4,off=cnt>>1;
+  for(ang=-14;ang<=14;ang+=1){
+    A=ang*Math.PI/180;c=Math.cos(A);s=Math.sin(A);bins=new Uint16Array(cnt);
+    for(i=0;i<pts.length;i+=2){yy=Math.floor((pts[i]*s+pts[i+1]*c)/step)+off;if(yy>=0&&yy<cnt)bins[yy]++;}
+    sc=0;for(i=0;i<cnt;i++)sc+=bins[i]*bins[i];
+    if(ang===0)s0=sc;
+    if(sc>bs){bs=sc;best=ang;}
+  }
+  return (Math.abs(best)>=2&&bs>s0*1.08)?best:0;
+}
+function ocrPrep(el,sx,sy,sw,sh,mode,maxSide,rot,skew){
+  rot=rot||0;
+  var sw0=(rot===90||rot===270)?sh:sw,sh0=(rot===90||rot===270)?sw:sh;
+  var k=Math.min(2.5,(maxSide||1400)/Math.max(sw,sh)),w=Math.max(8,Math.round(sw0*k)),h=Math.max(8,Math.round(sh0*k));
   var c=document.createElement('canvas');c.width=w;c.height=h;
   var g=c.getContext('2d',{willReadFrequently:true});
   g.imageSmoothingQuality='low';
-  g.drawImage(el,sx,sy,sw,sh,0,0,w,h);
+  g.fillStyle='#fff';g.fillRect(0,0,w,h);
+  g.save();g.translate(w/2,h/2);g.rotate((rot+(skew||0))*Math.PI/180);
+  if(rot===90||rot===270)g.drawImage(el,sx,sy,sw,sh,-h/2,-w/2,h,w);else g.drawImage(el,sx,sy,sw,sh,-w/2,-h/2,w,h);
+  g.restore();
   var d=g.getImageData(0,0,w,h).data,n=w*h,gray=new Uint8ClampedArray(n),out=new Uint8ClampedArray(n),i,x,y;
   for(i=0;i<n;i++)gray[i]=(d[i*4]*0.299+d[i*4+1]*0.587+d[i*4+2]*0.114)|0;
   var ratio=mode==='bin2'?0.84:0.91,W=w+1,S=new Uint32Array(W*(h+1)),row;
@@ -2966,6 +2997,7 @@ function ocrPrep(el,sx,sy,sw,sh,mode,maxSide){
   var raw=out.slice();
   ocrStripLines(out,w,h);
   ocrKeep(out,w,h);
+  if(skew===undefined){var sk=ocrSkew(out,w,h);if(sk)return ocrPrep(el,sx,sy,sw,sh,mode,maxSide,rot,sk);}
   var stretch=function(){
     var hist=new Uint32Array(256),lo=0,hi=255,acc=0,q,sg=new Uint8ClampedArray(n);
     for(q=0;q<n;q++)hist[gray[q]]++;
@@ -2986,13 +3018,13 @@ function ocrPrep(el,sx,sy,sw,sh,mode,maxSide){
   return {bands:bands,full:function(){return ocrCrop(mode==='gray'?src:stretch(),w,0,0,w,h,1,24);}};
 }
 /* Đọc một khung hình: các dòng chữ được đọc song song, dừng ngay khi stopFn báo đã khớp */
-function ocrFrame(el,crop,mode,maxSide,maxBands,fallbackFull,stopFn){
+function ocrFrame(el,crop,mode,maxSide,maxBands,fallbackFull,stopFn,rot){
   var prep;
-  try{prep=ocrPrep(el,crop.x,crop.y,crop.w,crop.h,mode,maxSide);}catch(e){return Promise.reject(e);}
+  try{prep=ocrPrep(el,crop.x,crop.y,crop.w,crop.h,mode,maxSide,rot||0);}catch(e){return Promise.reject(e);}
   var jobs=prep.bands.slice(0,maxBands).map(function(c){return {cv:c,psm:7};}),all=[],i=0,usedFull=false;
   return new Promise(function(res,rej){
     var done=false,active=0,conc=Math.max(1,OCR.pool.length);
-    function add(lines){lines.forEach(function(L){if(!all.some(function(a){return a.digits===L.digits;}))all.push(L);});}
+    function add(lines){lines.forEach(function(L){L.rot=rot||0;var e=null;all.forEach(function(a){if(a.digits===L.digits)e=a;});if(!e)all.push(L);else if((L.conf||0)>(e.conf||0))e.conf=L.conf;});}
     function finish(){if(!done){done=true;res(all);}}
     function launch(){
       while(!done&&active<conc&&i<jobs.length){
@@ -3014,6 +3046,8 @@ function ocrFrame(el,crop,mode,maxSide,maxBands,fallbackFull,stopFn){
     launch();
   });
 }
+var OCR_CONF=70; /* ngưỡng tin cậy tối thiểu (0–100) để coi một dãy số là "đọc rõ" */
+function ocrLooksDate(d){return d.length===8&&+d.slice(0,2)>=1&&+d.slice(0,2)<=31&&+d.slice(2,4)>=1&&+d.slice(2,4)<=12&&+d.slice(4,6)>=19&&+d.slice(4,6)<=21;}
 function ocrDigits(s){return String(s||'').replace(/\D/g,'');}
 function ocrLev(a,b,max){
   if(Math.abs(a.length-b.length)>max)return max+1;
@@ -3036,15 +3070,15 @@ function ocrRank(p,lines){
   p.items.forEach(function(it){
     var cd=ocrDigits(it.code);
     if(cd.length<4)return;
-    var best=99,bl='';
+    var best=99,bl='',bc=0;
     lines.forEach(function(L){
       var d=L.digits,max=d.length>=9?3:d.length>=6?2:1,dist=(d===cd||(fx[d]&&String(fx[d]).toLowerCase()===String(it.code).toLowerCase()))?0:ocrLev(d,cd,max);
-      if(dist<best){best=dist;bl=d;}
+      if(dist<best){best=dist;bl=d;bc=L.conf||0;}
     });
     if(best<=3&&best<99){
       var L0=lines.filter(function(L){return L.digits===bl;})[0];
       var mx=bl.length>=9?3:bl.length>=6?2:1;
-      if(best<=mx)res.push({item:it,dist:best,line:bl});
+      if(best<=mx)res.push({item:it,dist:best,line:bl,conf:bc});
     }
   });
   res.sort(function(a,b){return a.dist-b.dist||String(a.item.code).localeCompare(String(b.item.code));});
@@ -3091,7 +3125,7 @@ function scOcrRetry(){
 function scJudge(p,lines){
   var r=ocrRank(p,lines);if(!r.length)return null;
   var a=r[0],b=r[1];
-  if(a.dist===0&&(!b||b.dist>0))return {it:a.item,line:a.line,dist:0,need:scRisky(p,a.item)?2:1};
+  if(a.dist===0&&(!b||b.dist>0))return {it:a.item,line:a.line,dist:0,need:(scRisky(p,a.item)||a.conf<OCR_CONF||ocrDigits(a.item.code).length<7)?2:1};
   return null;
 }
 function scAutoOcr(v){
@@ -3116,13 +3150,17 @@ function scAutoOcr(v){
   var t0=now,exact=function(lines){var j=scJudge(p,lines);return !!(j&&j.dist===0&&j.need===1);};
   var good=function(lines){return exact(lines)||(SC.kind==='asset'&&lines.some(function(l){return l.digits.length>=7;}));};
   SC.autoBusy=true;
-  ocrFrame(v,cr,mode,800,4,true,good).then(function(lines){
+  var rot=SC.rot||0;
+  ocrFrame(v,cr,mode,800,4,true,good,rot).then(function(lines){
     if(!SC)return;
     SC.autoBusy=false;SC.ocrAt=Date.now();SC.ocrMiss=lines.length?0:mi+1;
+    var rel=lines.filter(function(L){return L.digits.length>=6&&(L.conf||0)>=OCR_CONF;}).sort(function(a,b){return b.digits.length-a.digits.length||b.conf-a.conf;});
     var ms=Date.now()-t0;
     if(SC.hold||SC.ocrBusy||SC.auto===false)return;
     var j=scJudge(p,lines);
-    scOcrStatus('Số: '+(lines.length?lines[0].digits:'chưa thấy số')+' · '+ms+' ms',lines.length?'#8ec5ff':'#9ca3af');
+    /* hướng đọc: giữ hướng đã đọc rõ; chưa đọc rõ thì lần sau thử hướng kế tiếp (0 → 180 → 90 → 270) */
+    if(rel.length||j){SC.rot=rot;}else{var ORD=[0,180,90,270];SC.rot=ORD[(ORD.indexOf(rot)+1)%4];}
+    scOcrStatus('Số: '+(rel.length?rel[0].digits:'chưa đọc rõ')+' · '+ms+' ms'+(rot?' · xoay '+rot+'°':''),rel.length?'#8ec5ff':'#9ca3af');
     if(j){
       var vt=SC.vote;
       if(vt&&vt.id===j.it.id&&Date.now()-vt.t<5000)vt.n++;else vt=SC.vote={id:j.it.id,n:1,t:0};
@@ -3137,9 +3175,9 @@ function scAutoOcr(v){
         SC.steady=0;
         scMsg('Đang xác nhận '+j.line+'…');
       }
-    }else if(lines.length){
-      scMsg('Đang đọc… thấy '+lines[0].digits+' (chưa khớp mã nào)');
-      scTrack(lines).forEach(function(c){
+    }else if(rel.length){
+      scMsg('Đọc rõ '+rel[0].digits+' nhưng chưa có trong danh mục');
+      scTrack(rel.filter(function(L){return !ocrLooksDate(L.digits);})).forEach(function(c){
         if(c.done)return;
         if(SC.kind==='asset'){
           var vv=c.cnt[c.rep]||0,ean=eanOk(c.rep);
@@ -3153,7 +3191,7 @@ function scAutoOcr(v){
         var r=unmAdd(p,c.rep,'ocr',c.n);
         scUnmNotice(r.e,r.isNew);
       });
-    }else scMsg(scHint());
+    }else scMsg(lines.length?'Chưa đọc rõ — giữ yên máy, đủ sáng, để tem nằm gọn trong khung':scHint());
   }).catch(function(e){if(SC){SC.autoBusy=false;SC.ocrAt=Date.now()+4000;scOcrStatus('Số: lỗi đọc · '+((e&&e.message)||'?'),'#f87171');}});
 }
 var RISK={key:'',set:null};
@@ -3232,7 +3270,7 @@ function scOcrProcess(src,crop){
   var p=per(SC.pid);if(!p)return;
   SC.hold=true;SC.ocrBusy=true;SC.pending=null;
   document.getElementById('scres').innerHTML='';
-  var variants=[['bin',6],['gray',6],['bin2',11]],all=[],idx=0;
+  var variants=[['bin',6,0],['gray',6,0],['bin2',11,0]],all=[],idx=0,rotAdded=false;
   scMsg('Đang chuẩn bị bộ đọc số…');
   function finish(r){
     if(!SC)return;
@@ -3243,16 +3281,20 @@ function scOcrProcess(src,crop){
       scShowMatched({item:r[0].item,how:'ocr',qty:ocrQtyCands(all,r[0].line)});
     }else{
       scMsg(all.length?'Đã đọc được số, hãy kiểm tra lại bên dưới.':'Không thấy chữ số nào trong khung.');
-      SC.lastLines=all;
-      scShowOcr(all,r);
+      var rl=all.filter(function(L){return (L.conf||0)>=OCR_CONF;});
+      SC.lastLines=rl.length?rl:all;
+      scShowOcr(SC.lastLines,r);
     }
   }
   function next(){
     if(!SC)return;
-    if(idx>=variants.length)return finish();
+    if(idx>=variants.length){
+      if(!rotAdded&&!all.some(function(L){return L.digits.length>=6&&(L.conf||0)>=OCR_CONF;})){rotAdded=true;variants.push(['bin',6,180],['bin',6,90],['bin',6,270]);}
+      else return finish();
+    }
     var v=variants[idx++];
     scMsg('Đang đọc số… (lần '+idx+'/'+variants.length+')');
-    ocrFrame(src,crop,v[0],1400,5,true,function(lines){var r=ocrRank(p,lines);return r.length&&r[0].dist===0;}).then(function(lines){
+    ocrFrame(src,crop,v[0],1400,5,true,function(lines){var r=ocrRank(p,lines);return r.length&&r[0].dist===0;},v[2]||0).then(function(lines){
       if(!SC)return;
       lines.forEach(function(L){if(!all.some(function(a){return a.digits===L.digits;}))all.push(L);});
       var r=ocrRank(p,all);
@@ -6349,6 +6391,79 @@ var LKX={
 (function(){
   var og=A.go;A.go=function(v){if(v!=='upload')LS.back=false;if(v==='assets')AP.pre=null;return og.apply(this,arguments);};
   var of=A.openFolder;A.openFolder=function(){LS.back=false;return of.apply(this,arguments);};
+})();
+/* Thẻ tỷ lệ kiểm kê theo tháng (màn hình chính): tổng SL kiểm kê thực tế / tổng SL cuối kỳ (tồn sổ sách) của các kỳ vật tư tạo trong tháng */
+var HM={m:null};
+function hmKey(d){return d.getFullYear()*12+d.getMonth();}
+function hmStats(m){
+  var ps=db.periods.filter(function(p){return p.createdAt&&hmKey(new Date(p.createdAt))===m;}),act=0,exp=0,codes=0,done=0;
+  ps.forEach(function(p){p.items.forEach(function(i){
+    exp+=Number(i.close)||0;codes++;
+    if(i.counted&&i.countQty!==null&&i.countQty!==undefined){act+=Number(i.countQty)||0;done++;}
+  });});
+  return {kyN:ps.length,act:Math.round(act*100)/100,exp:Math.round(exp*100)/100,codes:codes,done:done,pct:exp>0?act/exp*100:null};
+}
+/* Biểu đồ đường cong mềm 6 tháng: % kiểm kê (thực tế / cuối kỳ) theo tháng; chạm vào điểm để xem tháng đó */
+function hmChart(m,cur){
+  var st=Math.min(cur-5,m),W=320,H=118,L=34,R=28,T=22,B=24,pts=[],i,k,s,lo=0,hi=110,vs=[];
+  var N=['T1','T2','T3','T4','T5','T6','T7','T8','T9','T10','T11','T12'];
+  var data=[];for(i=0;i<6;i++){s=hmStats(st+i);data.push({m:st+i,pct:s.pct});if(s.pct!==null)vs.push(s.pct);}
+  if(vs.length){hi=Math.ceil((Math.max(100,Math.max.apply(null,vs))+5)/10)*10;lo=Math.max(0,Math.floor((Math.min(100,Math.min.apply(null,vs))-10)/10)*10);}
+  var X=function(i){return L+i*(W-L-R)/5;},Y=function(v){return T+(H-T-B)*(1-(Math.max(lo,Math.min(v,hi))-lo)/(hi-lo));};
+  data.forEach(function(d,i){if(d.pct!==null)pts.push({x:X(i),y:Y(d.pct),m:d.m,pct:d.pct,i:i});});
+  var out='<svg viewBox="0 0 '+W+' '+H+'" style="width:100%;height:auto;display:block;margin-top:12px" role="img" aria-label="Biểu đồ tỷ lệ kiểm kê theo tháng">'
+    +'<defs><linearGradient id="hmg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#1d4ed8" stop-opacity=".28"/><stop offset="1" stop-color="#1d4ed8" stop-opacity="0"/></linearGradient></defs>'
+    +'<line x1="'+L+'" x2="'+(W-R)+'" y1="'+Y(100)+'" y2="'+Y(100)+'" stroke="#9fb3d6" stroke-width="1" stroke-dasharray="4 4"/>'
+    +'<text x="2" y="'+(Y(100)+3)+'" font-size="9" fill="#7a8aa8">100%</text>'
+    +'<text x="2" y="'+(H-B+3)+'" font-size="9" fill="#9aa8c2">'+lo+'%</text>';
+  /* đường cong Catmull-Rom → Bézier, chỉ nối các tháng liền nhau có dữ liệu */
+  var segs=pts.length?[pts]:[];
+  var cl=function(v){return Math.max(T,Math.min(H-B,v));};
+  segs.forEach(function(sg){
+    if(sg.length<2)return;
+    var d='M'+sg[0].x+' '+sg[0].y;
+    for(k=0;k<sg.length-1;k++){
+      var p0=sg[k-1]||sg[k],p1=sg[k],p2=sg[k+1],p3=sg[k+2]||p2;
+      d+=' C'+(p1.x+(p2.x-p0.x)/6).toFixed(1)+' '+cl(p1.y+(p2.y-p0.y)/6).toFixed(1)+' '+(p2.x-(p3.x-p1.x)/6).toFixed(1)+' '+cl(p2.y-(p3.y-p1.y)/6).toFixed(1)+' '+p2.x+' '+p2.y;
+    }
+    out+='<path d="'+d+' L'+sg[sg.length-1].x+' '+(H-B)+' L'+sg[0].x+' '+(H-B)+' Z" fill="url(#hmg)"/><path d="'+d+'" fill="none" stroke="#1d4ed8" stroke-width="2.5" stroke-linecap="round"/>';
+  });
+  pts.forEach(function(p){
+    var sel=p.m===m,lb=(Math.round(p.pct*10)/10).toLocaleString('vi-VN')+'%';
+    out+='<circle cx="'+p.x+'" cy="'+p.y+'" r="'+(sel?5.5:3.5)+'" fill="'+(sel?'#1d4ed8':'#fff')+'" stroke="#1d4ed8" stroke-width="2"/>'
+      +'<text x="'+p.x+'" y="'+(p.y-9)+'" text-anchor="middle" font-size="'+(sel?11:9.5)+'" font-weight="'+(sel?800:600)+'" fill="'+(sel?'#1d4ed8':'#5b6b8a')+'">'+lb+'</text>';
+  });
+  data.forEach(function(d,i){
+    var mm=((d.m%12)+12)%12,sel=d.m===m;
+    out+='<text x="'+X(i)+'" y="'+(H-7)+'" text-anchor="middle" font-size="10" font-weight="'+(sel?800:500)+'" fill="'+(sel?'#1d4ed8':'#7a8aa8')+'">'+N[mm]+'</text>'
+      +'<rect x="'+(X(i)-24)+'" y="0" width="48" height="'+H+'" fill="transparent" onclick="A.hmSet('+d.m+')"/>';
+  });
+  return out+'</svg>';
+}
+function homeMonthCard(){
+  var cur=hmKey(new Date()),m=HM.m===null?cur:Math.min(HM.m,cur),y=Math.floor(m/12),mo=m%12,s=hmStats(m),c=2*Math.PI*36;
+  var pc=s.pct===null?0:Math.min(100,s.pct),lab=s.pct===null?'–':(Math.round(s.pct*10)/10).toLocaleString('vi-VN')+'%';
+  var h='<div id="mcard"><div class="mh"><div class="mt">Tỷ lệ kiểm kê</div><div class="mn"><button aria-label="Tháng trước" onclick="A.hmGo(-1)">‹</button>'+(mo+1)+'/'+y+'<button aria-label="Tháng sau" onclick="A.hmGo(1)"'+(m>=cur?' disabled':'')+'>›</button></div></div>';
+  h+='<div class="rg"><div class="ring"><svg viewBox="0 0 88 88"><circle class="rb" cx="44" cy="44" r="36"/><circle class="rf" cx="44" cy="44" r="36" stroke-dasharray="'+(c*pc/100)+' '+c+'" transform="rotate(-90 44 44)"/></svg><b style="font-size:'+(lab.length>4?20:25)+'px">'+lab+'</b></div>'
+    +'<dl><div><dt>SL kiểm kê thực tế</dt><dd style="color:#1d4ed8">'+fmt(s.act)+'</dd></div><div><dt>SL cuối kỳ (sổ sách)</dt><dd>'+fmt(s.exp)+'</dd></div><div><dt>Chênh lệch</dt><dd style="color:'+(s.act-s.exp<0?'#d92d20':'#16a34a')+'">'+(s.act-s.exp>0?'+':'')+fmt(Math.round((s.act-s.exp)*100)/100)+'</dd></div></dl></div>';
+  h+=hmChart(m,cur);
+  h+='<div class="sub">'+(s.kyN?s.kyN+' kỳ vật tư · '+s.done+'/'+s.codes+' mã đã kiểm'+(s.pct!==null&&s.pct>100?' · thực tế vượt sổ sách':''):'Chưa có kỳ kiểm kê vật tư nào tạo trong tháng này')+'</div></div>';
+  return h;
+}
+A.hmSet=function(m){
+  HM.m=Math.min(hmKey(new Date()),m);var e=document.getElementById('mcard');if(e)e.outerHTML=homeMonthCard();
+};
+A.hmGo=function(d){
+  var cur=hmKey(new Date());HM.m=Math.min(cur,(HM.m===null?cur:HM.m)+d);
+  var e=document.getElementById('mcard');if(e)e.outerHTML=homeMonthCard();
+};
+(function(){
+  var rh=renderHome;
+  renderHome=function(){
+    rh.apply(this,arguments);
+    var s=[].slice.call(document.querySelectorAll('#app .sec')).filter(function(e){return e.textContent.trim()==='Kiểm kê';})[0];
+    if(s&&s.parentNode&&!document.getElementById('mcard'))s.parentNode.insertAdjacentHTML('beforebegin',homeMonthCard());
+  };
 })();
 (function(){
   var ol=LKX.lock,ou=LKX.unlock,od=A.delPeriod;
