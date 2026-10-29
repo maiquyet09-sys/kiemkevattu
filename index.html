@@ -2,7 +2,7 @@
 <html lang="vi">
 <head>
 <meta charset="UTF-8">
-<meta name="app-version" content="2026102901">
+<meta name="app-version" content="2026102902">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
 <meta name="theme-color" content="#eef3fb">
 <link rel="manifest" href="manifest.webmanifest">
@@ -2607,17 +2607,31 @@ function scInitDecoder(){
   if('BarcodeDetector' in window){try{SC.det=new BarcodeDetector();return Promise.resolve(true);}catch(e){SC.det=null;}}
   return scEnsureZx();
 }
+var SCFMT='';
+/* Vùng ngắm: quy khung xanh trên màn hình về toạ độ khung hình video (object-fit:cover cắt bớt hình).
+   full=true: toàn bộ vùng đang nhìn thấy. Không bao giờ đọc phần bị cắt khỏi màn hình. */
+function scRoi(v,full){
+  var vw=v.videoWidth,vh=v.videoHeight,cw=v.clientWidth||vw,ch=v.clientHeight||vh;
+  var s=Math.max(cw/vw,ch/vh),ox=(cw-vw*s)/2,oy=(ch-vh*s)/2;
+  var a=full?0:cw*.06,b=full?cw:cw*.94,c=full?0:ch*.14,d=full?ch:ch*.86;
+  var x0=Math.max(0,(a-ox)/s),y0=Math.max(0,(c-oy)/s),x1=Math.min(vw,(b-ox)/s),y1=Math.min(vh,(d-oy)/s);
+  return {x:x0,y:y0,w:Math.max(16,x1-x0),h:Math.max(16,y1-y0)};
+}
 function scDecodeZx(c){
   if(!window.ZXing)return null;
   try{
-    if(!SC.zr){var hints=new Map();hints.set(ZXing.DecodeHintType.TRY_HARDER,true);SC.zr=new ZXing.MultiFormatReader();SC.zr.setHints(hints);}
+    if(!SC.zr){var hints=new Map();hints.set(ZXing.DecodeHintType.TRY_HARDER,true);try{var F=ZXing.BarcodeFormat,fm=['QR_CODE','DATA_MATRIX','AZTEC','PDF_417','EAN_13','EAN_8','UPC_A','UPC_E','CODE_128','CODE_39','CODE_93','ITF'].map(function(n){return F[n];}).filter(function(x){return x!==undefined;});if(fm.length>4)hints.set(ZXing.DecodeHintType.POSSIBLE_FORMATS,fm);}catch(e){}SC.zr=new ZXing.MultiFormatReader();SC.zr.setHints(hints);}
     var bmp=new ZXing.BinaryBitmap(new ZXing.HybridBinarizer(new ZXing.HTMLCanvasElementLuminanceSource(c)));
-    return SC.zr.decode(bmp).getText();
+    var zr=SC.zr.decode(bmp);try{SCFMT=String(ZXing.BarcodeFormat[zr.getBarcodeFormat()]||'').toLowerCase();}catch(e){SCFMT='';}return zr.getText();
   }catch(e){return null;}
 }
 function scDecode(c){
   if(SC.det){
-    return SC.det.detect(c).then(function(r){return (r&&r.length)?r[0].rawValue:null;}).catch(function(){
+    return SC.det.detect(c).then(function(r){
+      if(!r||!r.length)return null;
+      var cx=c.width/2,cy=c.height/2,b=r[0],bd=1e18;
+      r.forEach(function(d){var bb=d.boundingBox;if(!bb)return;var dd=Math.pow(bb.x+bb.width/2-cx,2)+Math.pow(bb.y+bb.height/2-cy,2);if(dd<bd){bd=dd;b=d;}});
+      SCFMT=String(b.format||'').toLowerCase();return b.rawValue;}).catch(function(){
       SC.det=null;return scEnsureZx().then(function(){return scDecodeZx(c);});
     });
   }
@@ -2700,7 +2714,7 @@ function scStart(){
     var play=function(){var pr=v.play();if(pr&&pr.catch)pr.catch(function(){});};
     v.onloadedmetadata=play;play();
     scMsg('Đang mở camera…');
-    SC.timer=setInterval(scTick,150);
+    SC.timer=setInterval(scTick,90);
     SC.watch=setTimeout(function(){
       if(!SC)return;
       if(v.videoWidth>0){scMsg(scHint());}
@@ -2716,14 +2730,18 @@ function scTick(){
   var v=document.getElementById('scvid');
   if(!SC||SC.busy||SC.hold||!v||v.readyState<2||!v.videoWidth)return;
   SC.busy=true;
-  var w=v.videoWidth,h=v.videoHeight,k=Math.min(1,900/Math.max(w,h));
+  SC.n=(SC.n||0)+1;
+  var roi=scRoi(v,SC.n%3===0),k=Math.min(1,1100/Math.max(roi.w,roi.h));
   var c=SC.canvas||(SC.canvas=document.createElement('canvas'));
-  c.width=Math.round(w*k);c.height=Math.round(h*k);
-  try{c.getContext('2d',{willReadFrequently:true}).drawImage(v,0,0,c.width,c.height);}catch(e){SC.busy=false;return;}
+  c.width=Math.round(roi.w*k);c.height=Math.round(roi.h*k);
+  try{c.getContext('2d',{willReadFrequently:true}).drawImage(v,roi.x,roi.y,roi.w,roi.h,0,0,c.width,c.height);}catch(e){SC.busy=false;return;}
   scDecode(c).then(function(txt){
     if(!SC)return;
     SC.busy=false;
-    if(txt){scOnCode(txt);return;}
+    if(txt){
+      if(/^(code_39|code_93|itf|codabar)$/.test(SCFMT)){var now=Date.now();if(SC.cand===txt&&now-SC.candAt<1500){SC.cand=null;scOnCode(txt);}else{SC.cand=txt;SC.candAt=now;}return;}
+      scOnCode(txt);return;
+    }
     if(SC.auto!==false&&OCR.worker&&!SC.hold&&!SC.autoBusy&&!SC.ocrBusy&&Date.now()-(SC.ocrAt||0)>50)scAutoOcr(v);
   }).catch(function(){if(SC)SC.busy=false;});
 }
