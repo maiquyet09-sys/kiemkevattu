@@ -2,7 +2,7 @@
 <html lang="vi">
 <head>
 <meta charset="UTF-8">
-<meta name="app-version" content="2026102804">
+<meta name="app-version" content="2026102901">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
 <meta name="theme-color" content="#eef3fb">
 <link rel="manifest" href="manifest.webmanifest">
@@ -613,10 +613,10 @@ function parseNum(v){
     else s=s.replace(/,/g,"");
   }else if(hasC){
     var p=s.split(",");
-    s=(p.length===2&&p[1].length<=2)?s.replace(",","."):s.replace(/,/g,"");
+    s=(p.length===2&&(p[1].length<=2||/^-?0+$/.test(p[0])))?s.replace(",","."):s.replace(/,/g,"");
   }else if(hasD){
     var q=s.split(".");
-    if(q.length>2||(q.length===2&&q[1].length===3))s=s.replace(/\./g,"");
+    if(q.length>2||(q.length===2&&q[1].length===3&&!/^-?0+$/.test(q[0])))s=s.replace(/\./g,"");
   }
   var n=parseFloat(s);
   return isNaN(n)?0:n;
@@ -2579,14 +2579,19 @@ function scMatch(p,text){
   var low=t.toLowerCase();
   if(r0=look(low))return Object.assign(r0,{how:'code'});
   if(!g){
-    var toks=low.split(/[^a-z0-9]+/).filter(Boolean);
-    for(var k=0;k<toks.length;k++)if(r0=look(toks[k]))return Object.assign(r0,{how:'code'});
-    /* mã nằm lẫn trong chuỗi, ví dụ VT10000002, CCDC-00123-LVL, {"ma":"10000025"} */
+    /* mã nằm lẫn trong chuỗi, ví dụ VT10000002, CCDC-00123-LVL, {"ma":"10000025"}: ưu tiên mã DÀI nhất (đặc trưng nhất) */
     var best=null,bl=0;
     Object.keys(ix).forEach(function(c){
       if(c.length>=5&&c.length>bl&&scHasCode(low,c)){best=c;bl=c.length;}
     });
     if(best&&(r0=look(best)))return Object.assign(r0,{how:'code'});
+    var toks=low.split(/[^a-z0-9]+/).filter(Boolean);
+    for(var k=0;k<toks.length;k++)if(r0=look(toks[k]))return Object.assign(r0,{how:'code'});
+    /* mã số khác nhau chỉ ở số 0 đầu (GTIN-14 / UPC / Excel làm mất số 0) */
+    if(/^\d{8,14}$/.test(low)){
+      var nz=low.replace(/^0+/,''),ks=Object.keys(ix);
+      for(var z=0;z<ks.length;z++)if(/^\d{8,14}$/.test(ks[z])&&ks[z].replace(/^0+/,'')===nz&&(r0=look(ks[z])))return Object.assign(r0,{how:'code'});
+    }
   }
   return {item:null,gs1:g,canon:canon};
 }
@@ -2673,7 +2678,7 @@ function scStart(){
   setTimeout(function(){if(SC&&!OCR.worker&&!OCR.err)scOcrStatus('Số: tải chậm · chạm để thử lại','#fbbf24');},40000);
   scInitDecoder().then(function(ok){
     if(!SC)return;
-    if(!SC.det&&!ok)scMsg('Không tải được bộ đọc mã (cần mạng). Có thể nhập dãy số bên dưới.');
+    if(!SC.det&&!ok&&!SC.camErr)scMsg('Không tải được bộ đọc mã (cần mạng). Có thể nhập dãy số bên dưới.');
   });
   if(scInApp()){
     var w=document.getElementById('scwarn');
@@ -2703,6 +2708,7 @@ function scStart(){
     },2500);
   }).catch(function(e){
     var n=(e&&e.name)||'lỗi';
+    if(SC)SC.camErr=true;
     scMsg('Không mở được camera ('+n+'). '+(n==='NotAllowedError'?'Hãy cho phép camera cho trình duyệt. ':'')+'Dùng nút Chụp ảnh mã hoặc nhập số.');
   });
 }
@@ -3114,7 +3120,7 @@ function scOcrStatus(t,col){var e=document.getElementById('scst');if(!e)return;e
 function scOcrFail(e){
   OCR.err=(e&&e.message)||String(e||'lỗi');
   scOcrStatus('Số: lỗi tải · chạm để thử lại','#f87171');
-  if(SC)scMsg('Không tải được bộ đọc số ('+OCR.err+'). Kiểm tra mạng rồi chạm ô “Số” góc trái camera để thử lại. QR / mã vạch vẫn quét được.');
+  if(SC&&!SC.camErr)scMsg('Không tải được bộ đọc số ('+OCR.err+'). Kiểm tra mạng rồi chạm ô “Số” góc trái camera để thử lại. QR / mã vạch vẫn quét được.');
 }
 function scOcrRetry(){
   if(OCR.worker){scOcrStatus('Số: sẵn sàng ✓','#4ade80');return;}
@@ -3633,7 +3639,7 @@ function renderList(){
     if(it.photo)badges+='<span class="bdg" style="font-size:10px;display:inline-flex;align-items:center;gap:3px">'+icon('camera',11)+'Có ảnh</span>';
     var st=!it.counted?'<span class="pl">Chưa kiểm</span>':d===0?'<span class="pl pl-ok">Khớp</span>':d>0?'<span class="pl pl-plus">Thừa '+fmt(d)+'</span>':'<span class="pl pl-minus">Thiếu '+fmt(Math.abs(d))+'</span>';
     var hs=(worst!==null&&worst<=90)?'<span class="hs'+(worst<0?' r':'')+'">HSD '+(worst<0?'quá hạn':'còn '+worst+' ngày')+'</span>':'';
-    h+='<div class="item v2i" onclick="A.openItem(\''+it.id+'\',false)"><div class="thumb">'+(it.photo?'<img src="'+it.photo+'" alt="">':icon('box',26))+'</div>'
+    h+='<div class="item v2i" onclick="A.openItem(\''+it.id+'\',false)"><div class="thumb">'+(it.photo?'<img src="'+esc(it.photo)+'" alt="">':icon('box',26))+'</div>'
       +'<div class="im"><div class="ihd"><b>'+esc(it.code||it.name)+'</b>'+st+'</div><div class="inm">'+esc(it.name)+'</div>'
       +'<div class="ift"><span>ĐVT: '+esc(it.unit)+(branchesMulti?' · '+esc(it.branch):'')+'</span><span>Tồn: '+fmt(it.close)+' <i>|</i> Thực tế: '+(it.counted?fmt(it.countQty):'-')+'</span></div>'+hs+'</div>'
       +'<span class="ich">'+icon('chev',18)+'</span></div>';
@@ -5918,7 +5924,14 @@ var A={
   photoTake:function(input){
     var f=input.files&&input.files[0];if(!f)return;
     input.value="";
-    compressImg(f,1600,0.9,function(b64){SB.photo=b64;renderPhotoSec();});
+    var room=function(b){return JSON.stringify(db).length+b.length<4300000;};
+    compressImg(f,1280,0.8,function(b64){
+      if(!room(b64))compressImg(f,800,0.6,function(b2){
+        if(!room(b2)){toast('Bộ nhớ app gần đầy, không thêm ảnh được. Hãy sao lưu và dọn bớt ảnh/kỳ cũ.');return;}
+        SB.photo=b2;renderPhotoSec();
+      });
+      else{SB.photo=b64;renderPhotoSec();}
+    });
   },
   photoClear:function(){SB.photo=null;renderPhotoSec();},
   sheetSave:function(advance){
@@ -5964,6 +5977,7 @@ var A={
   },
   sheetReset:function(){
     if(!SB)return;
+    if(!confirm('Xoá kết quả kiểm của mã này và đưa về "chưa kiểm"?\nThay đổi được ghi vào nhật ký.'))return;
     var p=per(P.id);if(!p)return;
     var it=null;
     for(var i=0;i<p.items.length;i++)if(p.items[i].id===SB.itemId){it=p.items[i];break;}
@@ -6153,7 +6167,7 @@ function openSheet(itemId,seq){
     +'<div class="v2tt">Thông tin vật tư'+(seq?'<small>Kiểm tuần tự · '+done+'/'+total+'</small>':'')+'</div>'
     +'<button class="v2bk" onclick="A.closeSheet()" aria-label="Trang chủ">'+icon('home',24)+'</button></div>'
     +'<div class="v2bd">'
-    +'<div class="v2it"><div class="thumb">'+(it.photo?'<img src="'+it.photo+'" alt="">':icon('box',32))+'</div>'
+    +'<div class="v2it"><div class="thumb">'+(it.photo?'<img src="'+esc(it.photo)+'" alt="">':icon('box',32))+'</div>'
     +'<div class="v2in"><b>'+esc(it.name)+'</b>Mã: '+esc(it.code)+'<br>Kho: '+esc(it.branch)+'<br>Đơn vị tính: '+u+'</div>'
     +'<span class="stbadge'+(it.counted?' ok':'')+'">'+(it.counted?'Đã kiểm':'Chưa kiểm')+'</span></div>'
     +'<div class="v2st"><div><small>Tồn hệ thống</small><b>'+fmt(it.close)+'</b><em>'+u+'</em></div>'
