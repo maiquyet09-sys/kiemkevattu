@@ -2,7 +2,7 @@
 <html lang="vi">
 <head>
 <meta charset="UTF-8">
-<meta name="app-version" content="2026110107">
+<meta name="app-version" content="2026110108">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
 <meta name="theme-color" content="#eef3fb">
 <link rel="manifest" href="manifest.webmanifest">
@@ -1451,10 +1451,12 @@ function docStyle(ori){
     +'.sign td{border:none;text-align:center;font-weight:bold;padding-top:8pt;}';
 }
 /* bảng in nhanh: tiêu đề + bảng + khối ký, theo cài đặt in */
-function printTableHtml(title,subs,heads,rows,sigs,ori){
-  var h='<h1>'+esc(title)+'</h1>'+(subs||[]).map(function(x){return '<div style="text-align:center">'+esc(x)+'</div>';}).join('')
-    +'<table><thead><tr>'+heads.map(function(x){return '<th>'+esc(x)+'</th>';}).join('')+'</tr></thead><tbody>'
-    +rows.map(function(r){return '<tr>'+r.map(function(v,i){return '<td style="text-align:'+(i===0?'center':'left')+'">'+esc(v)+'</td>';}).join('')+'</tr>';}).join('')
+function printTableHtml(title,subs,heads,rows,sigs,ori,widths){
+  var cg=widths?'<colgroup>'+widths.map(function(w){return '<col style="width:'+w+'%">';}).join('')+'</colgroup>':'';
+  var h='<style>@page{margin:10mm 12mm;}table.lst{table-layout:fixed;margin:6pt 0 8pt;}table.lst th,table.lst td{font-size:9pt;line-height:1.2;padding:2pt 4pt;word-wrap:break-word;}h1.lst{margin-top:0;}</style>'
+    +'<h1 class="lst">'+esc(title)+'</h1>'+(subs||[]).map(function(x){return '<div style="text-align:center">'+esc(x)+'</div>';}).join('')
+    +'<table class="lst">'+cg+'<thead><tr>'+heads.map(function(x){return '<th>'+esc(x)+'</th>';}).join('')+'</tr></thead><tbody>'
+    +rows.map(function(r){return '<tr>'+r.map(function(v,i){var c=(i===0||/^[+\-−]?[\d.,]+$/.test(String(v))||String(v).length<=4);return '<td style="text-align:'+(c?'center':'left')+'">'+esc(v)+'</td>';}).join('')+'</tr>';}).join('')
     +'</tbody></table>';
   if(sigs)h+=docSignHtml(sigs);
   return docWrap(title,h,ori);
@@ -6240,13 +6242,16 @@ Object.assign(A,{
     var rows=e.map(function(x,i){var bk='Còn > 6 tháng';BUCKETS.forEach(function(b){if(b.test(x.days))bk=b.label;});
       return [String(i+1),x.branch,x.code,x.name+(x.label?' ['+x.label+']':''),x.lot||'',(x.qty===null||x.qty===undefined?'':fmt(x.qty))+' '+(x.unit||''),fmtDate(x.exp),String(x.days),bk];});
     var d=new Date();
-    printPreviewHtml(printTableHtml('Danh sách cảnh báo hạn sử dụng',['Ngày lập: '+d.getDate()+'/'+(d.getMonth()+1)+'/'+d.getFullYear()],['STT','Kho','Mã','Tên vật tư','Lô','SL','HSD','Còn (ngày)','Mức'],rows,['Người lập','Thủ kho','Lãnh đạo'],'landscape'));
+    printPreviewHtml(printTableHtml('Danh sách cảnh báo hạn sử dụng',['Ngày lập: '+d.getDate()+'/'+(d.getMonth()+1)+'/'+d.getFullYear()],['STT','Kho','Mã','Tên vật tư','Lô','SL','HSD','Còn (ngày)','Mức'],rows,['Người lập','Thủ kho','Lãnh đạo'],'landscape',[4,13,10,29,10,8,9,7,10]));
   },
   printCur:function(){
     var p=per(P&&P.id);if(!p)return;
+    var br={};p.items.forEach(function(it){br[it.branch]=1;});var bl=Object.keys(br),one=bl.length===1;
     var rows=p.items.map(function(it,i){var df=diffOf(it);
-      return [String(i+1),it.branch,it.code,it.name,it.unit,fmt(it.close),it.counted&&it.countQty!==null?fmt(it.countQty):'',df===null?'':(df>0?'+':'')+fmt(df),it.note||''];});
-    printPreviewHtml(printTableHtml('Biên bản kiểm kê vật tư',[p.name],['STT','Kho','Mã','Tên vật tư','ĐVT','Tồn sổ sách','Kiểm kê','Chênh lệch','Ghi chú'],rows,['Người kiểm kê','Thủ kho','Lãnh đạo'],'landscape'));
+      var r=[String(i+1)];if(!one)r.push(it.branch);
+      return r.concat([it.code,it.name,it.unit,fmt(it.close),it.counted&&it.countQty!==null?fmt(it.countQty):'',df===null?'':(df>0?'+':'')+fmt(df),it.note||'']);});
+    var heads=['STT'].concat(one?[]:['Kho'],['Mã','Tên vật tư','ĐVT','Tồn sổ sách','Kiểm kê','Chênh lệch','Ghi chú']);
+    printPreviewHtml(printTableHtml('Biên bản kiểm kê vật tư',[p.name].concat(one?['Kho: '+bl[0]]:[]),heads,rows,['Người kiểm kê','Thủ kho','Lãnh đạo'],'landscape',one?[4,11,32,6,8,8,8,23]:[4,12,10,30,6,8,7,8,15]));
   }
 });
 
