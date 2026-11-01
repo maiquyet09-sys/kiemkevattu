@@ -2,7 +2,7 @@
 <html lang="vi">
 <head>
 <meta charset="UTF-8">
-<meta name="app-version" content="2026110101">
+<meta name="app-version" content="2026110102">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
 <meta name="theme-color" content="#eef3fb">
 <link rel="manifest" href="manifest.webmanifest">
@@ -2812,6 +2812,20 @@ function scShowUnmatched(text,m){
     +'<div id="scpicklist"></div>'
     +'<button class="btn" style="margin-top:8px;padding:11px;background:#23232c;color:#e5e7eb;border:1px solid #33333d" onclick="A.scNext()">Bỏ qua, quét tiếp</button></div>';
 }
+function scBindCode(p,text){
+  var it=p.items.filter(function(x){return x.id===SC.bind;})[0],g=parseGS1(text),el=document.getElementById('scres');
+  if(!it||!el)return;
+  SC.hold=true;
+  var nx='<div style="display:flex;gap:8px;margin-top:10px"><button class="btn" style="flex:1;padding:10px;background:#23232c;color:#e5e7eb;border:1px solid #33333d" onclick="A.scNext()">Quét tiếp</button><button class="btn btn-primary" style="flex:1;padding:10px" onclick="A.scClose()">Xong</button></div>';
+  function W(t){el.innerHTML='<div style="background:#2a1f12;border:1px solid #8a5a1a;border-radius:14px;padding:12px 14px;color:#fbbf24;font-size:13px">'+t+'</div>'+nx;}
+  if(p.locked)return W('Kỳ này đã khoá, không ghi thêm hộp.');
+  if(!g)return W('Không đọc được lô/HSD từ mã này (không phải mã GS1). Bấm Xong rồi dùng “+ Thêm tay”.');
+  var canon=scCanon(text),old=db.barcodes[canon];
+  if(old&&String(old).trim().toLowerCase()!==String(it.code).trim().toLowerCase())return W('Mã hộp này đã gắn với vật tư <b>'+esc(old)+'</b>, không ghi vào '+esc(it.code)+'.');
+  if(!old){db.barcodes[canon]=it.code;}
+  var bx=bxRecord(it,g);scBeep();
+  el.innerHTML=scBoxHtml(it,bx)+nx;
+}
 function scOnCode(text,force){
   if(!SC)return;
   if(!force&&SC.hold)return; /* đang xử lý một mã khác: bỏ qua kết quả đọc đến muộn */
@@ -2820,6 +2834,7 @@ function scOnCode(text,force){
   SC.last=text;SC.lastAt=now;
   var p=per(SC.pid);if(!p)return;
   try{if(navigator.vibrate)navigator.vibrate(60);}catch(e){}
+  if(SC.bind)return scBindCode(p,text);
   var m=scMatch(p,text);
   if(m.item)scShowMatched(m);
   else if(m.ambig||m.other)scShowKho(m,text);
@@ -3811,7 +3826,7 @@ function renderBoxes(){
   var e=document.getElementById('sbox');if(!e||!SB)return;
   var p=per(P.id),it=p&&p.items.filter(function(x){return x.id===SB.itemId;})[0];if(!it)return;
   var l=bxList(it),h='';
-  if(!l.length){e.innerHTML='<div class="v2mt" style="margin-top:0">Chưa có hộp nào. Quét QR trên vỏ hộp ở màn hình quét: app tự ghi lô + HSD và nhớ sang kỳ sau.</div>';return;}
+  if(!l.length){e.innerHTML='<div class="v2mt" style="margin-top:0">Chưa có hộp nào. Bấm “Quét QR trên hộp”: app tự ghi lô + HSD và nhớ sang kỳ sau.</div>';return;}
   l.forEach(function(b,i){
     var gone=b.st==='out',pend=!gone&&!b.seen;
     h+='<div class="bxrow'+(gone?' gone':'')+'"><div class="bxtop"><input class="sinp" placeholder="Nhãn / kích thước" value="'+esc(b.label)+'" onchange="A.boxSet('+i+',\'label\',this.value)"><span class="bxst '+(gone?'o':pend?'p':'k')+'">'+(gone?'Đã xuất':pend?'Chưa quét':'Đã quét')+'</span></div>'
@@ -5729,7 +5744,9 @@ var A={
       try{if(SC.actx&&SC.actx.close)SC.actx.close();}catch(e){}
     }
     var o=document.getElementById('scanovl');if(o)o.remove();
+    var wasBind=SC&&SC.bind;
     SC=null;
+    if(wasBind&&SB){try{renderBoxes();}catch(e){}}
   },
   scNext:function(){
     if(!SC)return;
@@ -6100,6 +6117,15 @@ Object.assign(A,{
   boxKeep:function(i){var it=bxCur();if(!it||!it.boxes[i])return;it.boxes[i].seen=true;it.boxes[i].last=Date.now();saveSoon();renderBoxes();},
   boxDel:function(i){var it=bxCur();if(!it||!it.boxes[i])return;if(!confirm('Xoá hộp này khỏi theo dõi?'))return;var b=it.boxes.splice(i,1)[0];audit('Xoá hộp QR',it.code,b.lot||b.gtin,null);saveSoon();renderBoxes();},
   boxAdd:function(){var it=bxCur();if(!it)return;var n=Date.now();bxList(it).push({k:'m'+n.toString(36),gtin:'',lot:'',ser:'',exp:'',label:'',qty:1,st:'in',seen:true,first:n,last:n});saveSoon();renderBoxes();},
+  boxScan:function(){
+    var it=bxCur();if(!it)return;
+    if(SC)A.scClose();
+    SC={pid:per(P.id).id,bind:it.id,hold:false,busy:false,auto:false};
+    try{var AC=window.AudioContext||window.webkitAudioContext;if(AC){SC.actx=new AC();if(SC.actx.resume)SC.actx.resume();}}catch(e){}
+    scMount();scStart();
+    var w=document.getElementById('scwarn');
+    if(w)w.innerHTML='<div style="font-size:12px;padding:8px 10px;border-radius:10px;background:#1b1b24;border:1px solid #33333d;margin-bottom:8px">Quét từng hộp cho: <b>'+esc(it.name)+'</b> ('+esc(it.code)+')</div>';
+  },
   boxUseQty:function(){var it=bxCur();if(!it)return;SB.qtyStr=String(bxSeenQty(it));A.calc();},
   scBoxLabel:function(id,i,v){
     var p=per(SC&&SC.pid),it=p&&p.items.filter(function(x){return x.id===id;})[0];
@@ -6299,7 +6325,8 @@ function openSheet(itemId,seq){
     +'<div id="sban"></div>'
     +'<div class="v2lb">Thông tin lô hàng <span>(nếu có)</span><button class="addbat" onclick="A.batAdd()">+ Thêm lô</button></div>'
     +'<div id="sbat"></div><div class="v2mt" style="margin-top:0">Hạn sử dụng được lưu và tự kế thừa sang kỳ sau.</div>'
-    +'<div class="v2lb">Hộp / mã QR nhà sản xuất <span>(theo dõi HSD)</span><button class="addbat" onclick="A.boxAdd()">+ Thêm tay</button></div><div id="sbox"></div>'
+    +'<div class="v2lb">Hộp / QR nhà sản xuất<button class="addbat" onclick="A.boxAdd()">+ Thêm tay</button></div>'
+    +'<button class="matchbtn" style="margin-top:0" onclick="A.boxScan()">'+icon('scan',20)+' Quét QR trên hộp</button><div id="sbox" style="margin-top:10px"></div>'
     +'<div class="v2lb" id="snotelbl">Ghi chú</div><div class="qchips">'+quickNoteChipsHtml()+'</div>'
     +'<textarea class="sinp" id="snote" rows="3" maxlength="200" placeholder="Nhập ghi chú (nếu có)..." oninput="A.calc()">'+esc(it.note||"")+'</textarea>'
     +'<div class="v2mt" id="snc" style="text-align:right">0/200</div><div id="snotehint"></div>'
