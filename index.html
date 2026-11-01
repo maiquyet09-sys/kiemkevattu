@@ -2,7 +2,7 @@
 <html lang="vi">
 <head>
 <meta charset="UTF-8">
-<meta name="app-version" content="2026110104">
+<meta name="app-version" content="2026110107">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
 <meta name="theme-color" content="#eef3fb">
 <link rel="manifest" href="manifest.webmanifest">
@@ -931,7 +931,7 @@ function buildBienBan(p){
     var base=sname,k=2;
     while(used[sname.toLowerCase()]){sname=base.substring(0,28)+" "+k;k++;}
     used[sname.toLowerCase()]=1;
-    var ws=wb.addWorksheet(sname,{views:[{state:"frozen",ySplit:4}]});
+    var ws=wb.addWorksheet(sname,{views:[{state:"frozen",ySplit:4}]});xlPrint(ws,null,true);
     if(wmId!==null)try{ws.addBackgroundImage(wmId);}catch(e){}
     var cwArr=[4.43,14.57,52,12.29,14.57,14.57,14.57,14.57,11.43,11.43,49.29,13];
     cwArr.forEach(function(w,i){ws.getColumn(i+1).width=w;});
@@ -1055,7 +1055,7 @@ function buildBienBan(p){
   });
   var hsd=hsdRowsOf(p);
   if(hsd.length){
-    var ws2=wb.addWorksheet("HẠN SỬ DỤNG",{views:[{state:"frozen",ySplit:1}]});
+    var ws2=wb.addWorksheet("HẠN SỬ DỤNG",{views:[{state:"frozen",ySplit:1}]});xlPrint(ws2,"1:1",true);
     if(wmId!==null)try{ws2.addBackgroundImage(wmId);}catch(e){}
     [18,14.57,45,10,10,14,14,18,20,30].forEach(function(w,i){ws2.getColumn(i+1).width=w;});
     ["Chi nhánh/Kho","Mã hàng","Tên hàng","ĐVT","Số lượng","Hạn sử dụng","Còn lại (ngày)","Cảnh báo","Nhãn / Kích thước","Lô · Seri · Mã NSX (GTIN)"].forEach(function(t,i){
@@ -1280,7 +1280,7 @@ function generateBaoCao(){
       +'<head><meta charset="utf-8"><title>Báo cáo kiểm kê</title>'
       +'<!--[if gte mso 9]><xml><w:WordDocument><w:View>Print</w:View><w:Zoom>100</w:Zoom></w:WordDocument></xml><![endif]-->'
       +'<style>'
-      +'@page{size:21cm 29.7cm;margin:2cm;}'
+      +'@page{size:'+prPage().w+'cm '+prPage().h+'cm;margin:'+(PR().margin||20)+'mm;}'
       +'body{font-family:"Times New Roman",serif;font-size:13pt;}'
       +'h1{font-size:16pt;text-align:center;text-transform:uppercase;margin-top:18pt;margin-bottom:2pt;}'
       +'h2{font-size:13pt;margin-top:16pt;}'
@@ -1430,17 +1430,44 @@ function renderBaoCao(){
 }
 
 /* ================= Mẫu biểu dùng chung (xuất Word / xem trước & in) ================= */
-var DOC_STYLE=''
-  +'@page{size:21cm 29.7cm;margin:2cm;}'
-  +'body{font-family:"Times New Roman",serif;font-size:13pt;}'
-  +'h1{font-size:16pt;text-align:center;text-transform:uppercase;margin-top:18pt;margin-bottom:2pt;}'
-  +'h2{font-size:13pt;margin-top:16pt;}'
-  +'table{border-collapse:collapse;width:100%;margin:8pt 0 12pt;}'
-  +'th,td{border:1px solid #000;padding:4pt 6pt;font-size:11pt;}'
-  +'th{background:#dbe5f1;font-weight:bold;text-align:center;text-transform:uppercase;}'
-  +'.hdrtbl td{border:none;padding:0;vertical-align:top;}'
-  +'.center{text-align:center;}'
-  +'.sign td{border:none;text-align:center;font-weight:bold;padding-top:8pt;}';
+/* ===== Cài đặt in: khổ giấy, lề, phông chữ, kiểu tiêu đề (lưu trong db.print) ===== */
+var PR_DEF={paper:'A4',orient:'portrait',margin:20,font:'Times New Roman',size:13,title:'center'};
+var PAPER={A3:{w:29.7,h:42,xl:8},A4:{w:21,h:29.7,xl:9},A5:{w:14.8,h:21,xl:11}};
+function PR(){return Object.assign({},PR_DEF,db.print||{});}
+function prPage(ori){var o=PR(),pp=PAPER[o.paper]||PAPER.A4,l=ori==='landscape';return {w:l?pp.h:pp.w,h:l?pp.w:pp.h,xl:pp.xl};}
+function docStyle(ori){
+  var o=PR(),pg=prPage(ori),sz=+o.size||13;
+  var t={center:'text-align:center;text-transform:uppercase;',left:'text-align:left;text-transform:uppercase;',box:'text-align:center;text-transform:uppercase;border:2px solid #000;padding:6pt;'}[o.title]||'text-align:center;text-transform:uppercase;';
+  return '@page{size:'+pg.w+'cm '+pg.h+'cm;margin:'+(+o.margin||20)+'mm;}'
+    +'body{font-family:"'+o.font+'",serif;font-size:'+sz+'pt;}'
+    +'h1{font-size:'+(sz+3)+'pt;'+t+'margin-top:18pt;margin-bottom:2pt;}'
+    +'h2{font-size:'+sz+'pt;margin-top:16pt;}'
+    +'table{border-collapse:collapse;width:100%;margin:8pt 0 12pt;}'
+    +'th,td{border:1px solid #000;padding:4pt 6pt;font-size:'+Math.max(8,sz-2)+'pt;}'
+    +'thead{display:table-header-group;}tr{page-break-inside:avoid;}'
+    +'th{background:#dbe5f1;font-weight:bold;text-align:center;text-transform:uppercase;}'
+    +'.hdrtbl td{border:none;padding:0;vertical-align:top;}'
+    +'.center{text-align:center;}'
+    +'.sign td{border:none;text-align:center;font-weight:bold;padding-top:8pt;}';
+}
+/* bảng in nhanh: tiêu đề + bảng + khối ký, theo cài đặt in */
+function printTableHtml(title,subs,heads,rows,sigs,ori){
+  var h='<h1>'+esc(title)+'</h1>'+(subs||[]).map(function(x){return '<div style="text-align:center">'+esc(x)+'</div>';}).join('')
+    +'<table><thead><tr>'+heads.map(function(x){return '<th>'+esc(x)+'</th>';}).join('')+'</tr></thead><tbody>'
+    +rows.map(function(r){return '<tr>'+r.map(function(v,i){return '<td style="text-align:'+(i===0?'center':'left')+'">'+esc(v)+'</td>';}).join('')+'</tr>';}).join('')
+    +'</tbody></table>';
+  if(sigs)h+=docSignHtml(sigs);
+  return docWrap(title,h,ori);
+}
+/* Excel: khổ giấy, lề, lặp dòng tiêu đề, số trang → mở file là in được ngay */
+function xlPrint(ws,titleRows,wide){
+  try{
+    var o=PR(),pg=prPage(),m=(+o.margin||20)/25.4;
+    ws.pageSetup=Object.assign(ws.pageSetup||{},{paperSize:pg.xl,orientation:wide?'landscape':'portrait',fitToPage:true,fitToWidth:1,fitToHeight:0,horizontalCentered:true,margins:{left:m,right:m,top:m,bottom:m,header:0.3,footer:0.3}});
+    if(titleRows)ws.pageSetup.printTitlesRow=titleRows;
+    ws.headerFooter={oddFooter:'&C&8Trang &P / &N&R&8In ngày &D'};
+  }catch(e){}
+}
 function docHeaderHtml(diaDiem,soVanBan,loaiVanBan){
   var today=new Date();
   var ngay=today.getDate()+'/'+(today.getMonth()+1)+'/'+today.getFullYear();
@@ -1482,11 +1509,11 @@ function docHeaderHtmlBP(boPhan,soVanBan,loaiVanBan){
     +'<td width="50%" class="center"><b>CỘNG HÒA XÃ HỘI CHỦ NGHĨA VIỆT NAM</b><br><b>Độc lập – Tự do – Hạnh phúc</b></td>'
     +'</tr></table>';
 }
-function docWrap(title,bodyHtml){
+function docWrap(title,bodyHtml,ori){
   return '<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:w="urn:schemas-microsoft-com:office:word" xmlns="http://www.w3.org/TR/REC-html40">'
     +'<head><meta charset="utf-8"><title>'+esc(title)+'</title>'
     +'<!--[if gte mso 9]><xml><w:WordDocument><w:View>Print</w:View><w:Zoom>100</w:Zoom></w:WordDocument></xml><![endif]-->'
-    +'<style>'+DOC_STYLE+'</style></head><body>'+bodyHtml+'</body></html>';
+    +'<style>'+docStyle(ori)+'</style></head><body>'+bodyHtml+'</body></html>';
 }
 function toMhtml(html){
   var imgs=[];
@@ -1521,7 +1548,10 @@ function exportDocHtml(html,fname){
 }
 function printPreviewHtml(html){
   try{
-    var printable=html.replace('<style>'+DOC_STYLE,'<style>body{margin:24px auto;max-width:21cm;}@media print{body{margin:0}}'+DOC_STYLE);
+    var mw=html.match(/@page\{size:([\d.]+)cm/),pg={w:mw?mw[1]:prPage().w};
+    var mst=html.match(/<style>(@page[^<]*)<\/style>/),st=mst?mst[1]:docStyle();
+    var bar='<div class="noprint" style="position:sticky;top:0;background:#fff;padding:8px;text-align:center;border-bottom:1px solid #ddd"><button onclick="window.print()" style="font:inherit;font-size:16px;font-weight:700;padding:10px 18px;border-radius:10px;border:none;background:#2f6fed;color:#fff">In / Lưu PDF</button></div>';
+    var printable=html.replace('<style>'+st,'<style>body{margin:0 auto;max-width:'+pg.w+'cm;padding:0 8px;}@media print{body{padding:0;max-width:none}.noprint{display:none!important}}'+st).replace('<body>','<body>'+bar);
     var blob=new Blob([printable],{type:'text/html;charset=utf-8'});
     var url=URL.createObjectURL(blob);
     var w=window.open(url,'_blank');
@@ -2269,7 +2299,7 @@ function exportHsdAlert(filterBranch){
     return;
   }
   var wb=new ExcelJS.Workbook();
-  var ws=wb.addWorksheet("Cảnh báo HSD");
+  var ws=wb.addWorksheet("Cảnh báo HSD");xlPrint(ws,"3:3",true);
   [22,14,45,8,10,14,16,18,20,30].forEach(function(w,i){ws.getColumn(i+1).width=w;});
   var thin={style:"thin"},bAll={top:thin,left:thin,bottom:thin,right:thin};
   /* Tiêu đề */
@@ -3613,7 +3643,7 @@ function renderPeriod(){
     '<div class="ttl" style="cursor:text" title="Chạm để sửa tên" onclick="A.renamePeriod(\''+p.id+'\')">'+esc(p.name)+'</div>'+
     '<div style="display:flex;gap:6px;flex-shrink:0">'+
     '<button class="pill" title="Gửi email kết quả kiểm kê" style="display:inline-flex" onclick="A.kiemKeEmail()">'+icon('mail',15)+'</button>'+
-    '<button class="pill" style="display:inline-flex;align-items:center;gap:5px" onclick="A.exportCur()">'+icon('download',15)+'Excel</button></div></div>'+
+    '<button class="pill" style="display:inline-flex;align-items:center;gap:5px" onclick="A.exportCur()">'+icon('download',15)+'Excel</button><button class="pill" style="margin-left:6px" onclick="A.printCur()">In</button></div></div>'+
     '<div class="wrap" style="padding-top:10px"><div class="bar"><div class="fill" id="pfill"></div></div>'+
     '<div class="prow"><span id="pdone"></span><span id="pdiff"></span></div>'+
     '<button class="stklink" style="display:flex;align-items:center;gap:7px" onclick="A.openStock(\''+p.id+'\')">'+icon('grid',16)+'Bảng tồn kho (chỉ mã còn tồn)'+icon('chev',16)+'</button>'+'<button class="stklink" style="display:flex;align-items:center;gap:7px" onclick="A.periodTransfer()">'+icon('users',16)+'Bàn giao vật tư cho HO / cơ sở khác'+icon('chev',16)+'</button>'+'<button class="stklink" id="exlink" style="display:none;align-items:center;gap:7px;color:var(--red)" onclick="A.periodExplain()"></button>'+sigPeriodToggle(p)+lockBarHtml(p,'vt')+zeroResetHtml(p)+'</div>'+
@@ -3898,7 +3928,7 @@ function applyItem(item){
 /* ================= Dashboard HSD ================= */
 function renderHsd(){
   var entries=hsdEntries();
-  var h='<div class="topbar"><div class="trow wrap"><button class="back" onclick="A.go(\'home\')">‹</button><div class="ttl">Cảnh báo hạn sử dụng</div><button class="pill" onclick="showHsdEmailPicker()">✉ Gửi cảnh báo</button></div><div style="height:10px"></div></div>';
+  var h='<div class="topbar"><div class="trow wrap"><button class="back" onclick="A.go(\'home\')">‹</button><div class="ttl">Cảnh báo hạn sử dụng</div><button class="pill" onclick="A.hsdPrint()">In</button><button class="pill" onclick="showHsdEmailPicker()">✉ Gửi cảnh báo</button></div><div style="height:10px"></div></div>';
   h+='<div class="wrap" style="padding-top:16px;padding-bottom:40px">';
   if(!entries.length){
     h+='<div class="empty">Chưa có dữ liệu HSD. Nhập hạn sử dụng khi kiểm kê — hệ thống sẽ lưu và cảnh báo tại đây.</div>';
@@ -3955,6 +3985,7 @@ function mergeDb(d){
   migrateFolders();
   Object.keys(d.hsd||{}).forEach(function(k){if(!db.hsd[k])db.hsd[k]=d.hsd[k];});
   Object.keys(d.counters||{}).forEach(function(k){db.counters[k]=Math.max(db.counters[k]||0,d.counters[k]||0);});
+  if(d.print&&!db.print)db.print=d.print;
   if(d.profile&&d.profile.ten&&!(db.profile&&db.profile.ten))db.profile=d.profile;
   if(!db.signers)db.signers={};
   Object.keys(d.signers||{}).forEach(function(k){if(!db.signers[k])db.signers[k]=d.signers[k];});
@@ -4065,6 +4096,19 @@ function renderReportHub(){
   h+='</div>';
   document.getElementById("app").innerHTML=h;
 }
+function prCardHtml(){
+  var o=PR();
+  function sel(k,opts){return '<select class="inp" style="margin-bottom:10px" onchange="A.prSet(\''+k+'\',this.value)">'+opts.map(function(x){return '<option value="'+x[0]+'"'+(String(o[k])===String(x[0])?' selected':'')+'>'+x[1]+'</option>';}).join('')+'</select>';}
+  return '<div class="card" style="margin-bottom:12px"><div style="font-weight:700;margin-bottom:2px">Cài đặt in</div>'
+    +'<div style="font-size:12px;color:var(--mut);margin-bottom:12px">Biên bản kiểm kê in ngang; biên bản bàn giao, giải trình, báo cáo kiểm kê in dọc. Khổ giấy, lề, phông chữ áp dụng cho tất cả.</div>'
+    +'<label class="lbl">Khổ giấy</label>'+sel('paper',[['A4','A4'],['A5','A5'],['A3','A3']])
+    +'<label class="lbl">Căn lề</label>'+sel('margin',[[10,'Hẹp (10 mm)'],[15,'Vừa (15 mm)'],[20,'Chuẩn (20 mm)'],[25,'Rộng (25 mm)']])
+    +'<label class="lbl">Phông chữ</label>'+sel('font',[['Times New Roman','Times New Roman'],['Arial','Arial'],['Tahoma','Tahoma']])
+    +'<label class="lbl">Cỡ chữ</label>'+sel('size',[[11,'11 pt'],[12,'12 pt'],[13,'13 pt'],[14,'14 pt']])
+    +'<label class="lbl">Kiểu tiêu đề</label>'+sel('title',[['center','Giữa, IN HOA'],['left','Trái, IN HOA'],['box','Giữa, có khung']])
+    +'<button class="btn btn-outline" onclick="A.prTest()">In thử trang mẫu</button>'
+    +'<div style="font-size:12px;color:var(--mut);margin-top:8px">Kết nối máy in: app chạy trên trình duyệt nên không ghép trực tiếp với máy in. Bấm “In / Lưu PDF” rồi chọn máy in trong hộp thoại của điện thoại (AirPrint trên iPhone, dịch vụ in trên Android), hoặc chọn Lưu PDF.</div></div>';
+}
 function renderSettings(){
   var pr=db.profile||{};
   var h='<div class="topbar"><div class="trow wrap"><button class="back" onclick="A.go(\'home\')">‹</button><div class="ttl">Cài đặt</div></div><div style="height:10px"></div></div>';
@@ -4076,6 +4120,7 @@ function renderSettings(){
     +'<label class="lbl">Chi nhánh, bộ phận (VD: Kho Cát Linh)</label><input class="inp" id="pf_cn" value="'+esc(pr.chiNhanh)+'" oninput="A.pfSet(\'chiNhanh\',this.value)" style="margin-bottom:10px">'
     +'<label class="lbl">Mã chi nhánh trong số biên bản (VD: CL)</label><input class="inp" id="pf_ma" value="'+esc(pr.ma)+'" oninput="A.pfSet(\'ma\',this.value)">'
     +'<div style="font-size:12px;color:var(--mut);margin-top:6px">Số biên bản sẽ có dạng 01/BBBG/'+esc(pr.ma||'CL')+'/'+new Date().getFullYear()+', mỗi chi nhánh đếm riêng nên không bị trùng số.</div></div>';
+  h+=prCardHtml();
   h+=sgCardHtml();
   h+='<div class="card" style="margin-bottom:12px"><div style="font-weight:700;margin-bottom:2px">Sao lưu và khôi phục</div>'
     +'<div style="font-size:12px;color:var(--mut);margin-bottom:12px">'+db.periods.length+' kỳ kiểm kê, '+db.handovers.length+' biên bản bàn giao, '+db.explains.length+' phiếu giải trình. '+(db.lastBackup?'Sao lưu gần nhất lúc '+tsLabel(db.lastBackup)+'.':'Chưa sao lưu lần nào.')+'</div>'
@@ -4776,7 +4821,7 @@ function asOrdered(p){
 var AS_HEAD=['STT','Mã CCDC','TÊN CCDC','ĐVT','SỐ LƯỢNG','ĐƠN VỊ CẤP 1','SỐ LƯỢNG KIỂM KÊ','CHÊNH','ĐƠN VỊ QUẢN LÝ','PHÒNG SỬ DỤNG THỰC TẾ','NGƯỜI SỬ DỤNG THỰC TẾ','VỊ TRÍ','PHẨM CHẤT TS/CCDC','TÌNH TRẠNG','GHI CHÚ'];
 function buildAssetXlsx(p){
   var wb=new ExcelJS.Workbook(),s=asStats(p);
-  var ws=wb.addWorksheet('BBKK',{pageSetup:{paperSize:8,orientation:'landscape',fitToPage:true,fitToWidth:1,fitToHeight:0,margins:{left:0.4,right:0.4,top:0.5,bottom:0.5,header:0.2,footer:0.2}}});
+  var ws=wb.addWorksheet('BBKK',{pageSetup:{paperSize:prPage().xl,orientation:'landscape',fitToPage:true,fitToWidth:1,fitToHeight:0,margins:{left:0.4,right:0.4,top:0.5,bottom:0.5,header:0.2,footer:0.2}}});
   var F=function(o){return Object.assign({name:'Times New Roman',size:11},o||{});},thin={style:'thin'},bAll={top:thin,left:thin,bottom:thin,right:thin};
   [7,18,42,8,10,24,12,9,24,30,22,14,14,16,40].forEach(function(w,i){ws.getColumn(i+1).width=w;});
   var put=function(addr,val,font,al){var c=ws.getCell(addr);c.value=val;c.font=F(font);if(al)c.alignment=al;return c;};
@@ -4839,7 +4884,7 @@ function asPrintHtml(p){
     return '<tr>'+asRowVals(it).map(function(v,j){return '<td style="text-align:'+((j===0||j===3||j===4||j===6||j===7)?'center':'left')+'">'+esc(v)+'</td>';}).join('')+'</tr>';
   }).join('');
   var sig=function(a,b,x){return '<td style="width:33%;text-align:center"><b>'+a+'</b><br><i>(Ký, ghi rõ họ tên)</i><div style="height:70px">'+(x&&x.img?'<img src="'+x.img+'" style="max-height:66px;max-width:200px">':'')+'</div><b>'+esc(b||'')+'</b>'+(x&&x.img?'<br><span style="font-size:8pt;font-style:italic">Ký điện tử '+esc(x.time)+' ('+esc(x.dev)+')'+(x.auth?' · '+esc(x.auth):'')+'</span>':'')+'</td>';};
-  return '<!doctype html><html><head><meta charset="utf-8"><title>'+esc(asFileName(p).replace('.xlsx',''))+'</title><style>@page{size:A3 landscape;margin:10mm}body{font-family:"Times New Roman",serif;font-size:10pt;margin:0}h1{text-align:center;font-size:16pt;margin:0 0 6px}table.m{border-collapse:collapse;width:100%}table.m th,table.m td{border:1px solid #000;padding:3px 4px;vertical-align:middle}table.m th{background:#d9e2f3}thead{display:table-header-group}tr{page-break-inside:avoid}</style></head><body>'
+  return '<!doctype html><html><head><meta charset="utf-8"><title>'+esc(asFileName(p).replace('.xlsx',''))+'</title><style>@page{size:'+(PR().paper||'A4')+' landscape;margin:10mm}body{font-family:"Times New Roman",serif;font-size:10pt;margin:0}h1{text-align:center;font-size:16pt;margin:0 0 6px}table.m{border-collapse:collapse;width:100%}table.m th,table.m td{border:1px solid #000;padding:3px 4px;vertical-align:middle}table.m th{background:#d9e2f3}thead{display:table-header-group}tr{page-break-inside:avoid}</style></head><body>'
     +'<h1>BIÊN BẢN KIỂM KÊ TS&amp;CCDC</h1><div><b>Chi nhánh '+esc(p.branch||'')+'</b></div><div>Thời điểm kiểm kê: '+esc(asDate(p.dateCount))+'</div><div>Thời điểm chốt số liệu đến ngày '+esc(asDate(p.cutoff))+'</div>'
     +'<div style="margin:6px 0"><b>Tổng cộng:</b> Số lượng '+fmt(s.qty)+' · Kiểm kê '+fmt(s.cq)+' · Chênh '+fmt(Math.round((s.cq-s.qty)*100)/100)+'</div>'
     +'<table class="m"><thead><tr><th colspan="6">PHẦN I: THÔNG TIN THEO DÕI TRÊN PHẦN MỀM</th><th colspan="9">PHẦN II: DÀNH CHO TỔ KIỂM KÊ</th></tr><tr>'+AS_HEAD.map(function(h){return '<th>'+h+'</th>';}).join('')+'</tr></thead><tbody>'+rows+'</tbody></table>'
@@ -6181,6 +6226,27 @@ Object.assign(A,{
     var p=per(SC&&SC.pid),it=p&&p.items.filter(function(x){return x.id===id;})[0];
     if(!it||!it.boxes||!it.boxes[i])return;
     it.boxes[i].label=v.trim();bxSaveLabel(it.boxes[i],v.trim());saveSoon();toast('Đã nhớ nhãn cho mã hộp này');
+  }
+});
+
+Object.assign(A,{
+  prSet:function(k,v){db.print=db.print||{};db.print[k]=(k==='margin'||k==='size')?+v:v;saveSoon();},
+  prTest:function(){
+    var rows=[];for(var i=1;i<=5;i++)rows.push([String(i),'Vật tư mẫu '+i,'Cái',String(i*10),String(i*10)]);
+    printPreviewHtml(printTableHtml('Trang in thử',['Kiểm tra căn lề, phông chữ, kiểu tiêu đề'],['STT','Tên vật tư','ĐVT','Tồn','Kiểm'],rows,['Người lập','Thủ kho','Lãnh đạo']));
+  },
+  hsdPrint:function(){
+    var e=hsdEntries();if(!e.length){toast('Chưa có dữ liệu HSD để in');return;}
+    var rows=e.map(function(x,i){var bk='Còn > 6 tháng';BUCKETS.forEach(function(b){if(b.test(x.days))bk=b.label;});
+      return [String(i+1),x.branch,x.code,x.name+(x.label?' ['+x.label+']':''),x.lot||'',(x.qty===null||x.qty===undefined?'':fmt(x.qty))+' '+(x.unit||''),fmtDate(x.exp),String(x.days),bk];});
+    var d=new Date();
+    printPreviewHtml(printTableHtml('Danh sách cảnh báo hạn sử dụng',['Ngày lập: '+d.getDate()+'/'+(d.getMonth()+1)+'/'+d.getFullYear()],['STT','Kho','Mã','Tên vật tư','Lô','SL','HSD','Còn (ngày)','Mức'],rows,['Người lập','Thủ kho','Lãnh đạo'],'landscape'));
+  },
+  printCur:function(){
+    var p=per(P&&P.id);if(!p)return;
+    var rows=p.items.map(function(it,i){var df=diffOf(it);
+      return [String(i+1),it.branch,it.code,it.name,it.unit,fmt(it.close),it.counted&&it.countQty!==null?fmt(it.countQty):'',df===null?'':(df>0?'+':'')+fmt(df),it.note||''];});
+    printPreviewHtml(printTableHtml('Biên bản kiểm kê vật tư',[p.name],['STT','Kho','Mã','Tên vật tư','ĐVT','Tồn sổ sách','Kiểm kê','Chênh lệch','Ghi chú'],rows,['Người kiểm kê','Thủ kho','Lãnh đạo'],'landscape'));
   }
 });
 
