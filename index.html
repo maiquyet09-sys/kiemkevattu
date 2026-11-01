@@ -2,7 +2,7 @@
 <html lang="vi">
 <head>
 <meta charset="UTF-8">
-<meta name="app-version" content="2026110102">
+<meta name="app-version" content="2026110104">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
 <meta name="theme-color" content="#eef3fb">
 <link rel="manifest" href="manifest.webmanifest">
@@ -752,7 +752,7 @@ function audit(type,target,before,after){
 /* làm sạch dữ liệu đọc từ máy/file: thiếu trường, sai kiểu */
 function sanitizeDb(d){
   if(!Array.isArray(d.folders))d.folders=DEFAULT_FOLDERS.slice();
-  ["barcodes","hsd","counters","boxref"].forEach(function(k){if(!d[k]||typeof d[k]!=="object"||Array.isArray(d[k]))d[k]={};});
+  ["barcodes","hsd","counters","boxref","track"].forEach(function(k){if(!d[k]||typeof d[k]!=="object"||Array.isArray(d[k]))d[k]={};});
   ["periods","handovers","explains"].forEach(function(k){if(!Array.isArray(d[k]))d[k]=[];d[k]=d[k].filter(function(x){return x&&typeof x==="object";});});
   d.periods=d.periods.filter(function(p){return typeof p.id==="string"&&Array.isArray(p.items);});
   d.periods.forEach(function(p){p.items=p.items.filter(function(i){return i&&typeof i==="object"&&i.id!=null;});});
@@ -1104,7 +1104,7 @@ function exportExcelBasic(p,fname){
 /* ================= State ================= */
 var DEFAULT_FOLDERS=['Bùi Thị Xuân','Lê Văn Lương','Cát Linh','Quảng Ninh','Ba Đình-Nghĩa Dũng'];
 var FD=null; // thư mục chi nhánh đang mở
-var db={folders:DEFAULT_FOLDERS.slice(),barcodes:{},boxref:{},periods:[],hsd:{},handovers:[],explains:[],counters:{},profile:{ten:'',chucVu:'',chiNhanh:'',ma:'',maManual:false}};
+var db={folders:DEFAULT_FOLDERS.slice(),barcodes:{},boxref:{},track:{},periods:[],hsd:{},handovers:[],explains:[],counters:{},profile:{ten:'',chucVu:'',chiNhanh:'',ma:'',maManual:false}};
 var route={view:"home"};
 var P=null;   // trạng thái màn hình kiểm kê
 var BC=null;  // trạng thái màn hình tạo báo cáo
@@ -2772,14 +2772,14 @@ function scInfoGs1(g){
 function scShowMatched(m){
   if(SC&&SC.kind==='asset')return asShowMatched(m);
   var it=m.item,done=it.counted&&it.countQty!==null;
-  var sp=per(SC.pid),bx=(m.gs1&&sp&&!sp.locked)?bxRecord(it,m.gs1):null;
-  SC.hold=true;scBeep();
+  var sp=per(SC.pid),bx=(m.gs1&&sp&&!sp.locked&&isTracked(it))?bxRecord(it,m.gs1):null;
+  SC.hold=true;SC.mgs=m.gs1;scBeep();
   document.getElementById('scres').innerHTML=
     '<div style="background:#16231b;border:1px solid #1f6b3a;border-radius:14px;padding:12px 14px">'
     +'<div style="font-size:11px;font-weight:800;letter-spacing:.08em;color:#4ade80;text-transform:uppercase">'+icon('check',13)+' Đã khớp'+(m.how==='learned'?' (mã vạch đã học)':m.how==='ocr'?' (đọc số)':'')+'</div>'
     +'<div style="font-weight:700;font-size:16px;margin-top:4px;word-break:break-word">'+esc(it.name)+'</div>'
     +'<div style="font-size:12px;color:#9ca3af;margin-top:2px">'+esc(it.code)+' · '+esc(it.unit)+' · Tồn sổ sách '+fmt(it.close)+(done?' · Đã kiểm '+fmt(it.countQty):' · Chưa kiểm')+'</div>'
-    +scInfoGs1(m.gs1)+scBoxHtml(it,bx)
+    +scInfoGs1(m.gs1)+(bx?scBoxHtml(it,bx):(m.gs1&&!isTracked(it)?'<button onclick="A.scTrackOn(\''+it.id+'\')" style="margin-top:6px;padding:7px 10px;border-radius:999px;border:1px solid #2f5aa8;background:#16233d;color:#8ec5ff;font:inherit;font-size:12px;font-weight:700">+ Theo dõi từng hộp (vật tư đắt / tồn lâu)</button>':''))
     +'<div style="display:flex;gap:8px;margin-top:10px"><input id="scqty" class="inp" inputmode="decimal" placeholder="Số kiểm kê" style="flex:1;min-width:0;background:#1b1b24;color:#e5e7eb;border-color:#33333d" onkeydown="if(event.key===\'Enter\')A.scQtySave(\''+it.id+'\')">'
     +'<button class="btn btn-primary" style="width:auto;padding:0 14px" onclick="A.scQtySave(\''+it.id+'\')">Lưu &amp; quét tiếp</button></div>'
     +'<div style="display:flex;flex-wrap:wrap;gap:6px;margin-top:8px"><button onclick="A.scQtyMatch(\''+it.id+'\')" style="padding:8px 12px;border-radius:999px;border:1px solid #1f6b3a;background:#16231b;color:#4ade80;font:inherit;font-size:13px;font-weight:700">✓ Đủ '+fmt(it.close)+'</button>'
@@ -2819,7 +2819,12 @@ function scBindCode(p,text){
   var nx='<div style="display:flex;gap:8px;margin-top:10px"><button class="btn" style="flex:1;padding:10px;background:#23232c;color:#e5e7eb;border:1px solid #33333d" onclick="A.scNext()">Quét tiếp</button><button class="btn btn-primary" style="flex:1;padding:10px" onclick="A.scClose()">Xong</button></div>';
   function W(t){el.innerHTML='<div style="background:#2a1f12;border:1px solid #8a5a1a;border-radius:14px;padding:12px 14px;color:#fbbf24;font-size:13px">'+t+'</div>'+nx;}
   if(p.locked)return W('Kỳ này đã khoá, không ghi thêm hộp.');
-  if(!g)return W('Không đọc được lô/HSD từ mã này (không phải mã GS1). Bấm Xong rồi dùng “+ Thêm tay”.');
+  SC.bindText=text;
+  if(!g){
+    var tx=String(text).replace(/[\u001d\s]+/g,' ').trim();
+    if(!tx||tx.length>80)return W('Mã quá dài hoặc không hợp lệ. Bấm Xong rồi dùng “+ Thêm tay”.');
+    g={gtin:tx,lot:'',ser:'',expIso:'',plain:true,force:!!SC.forceNew};SC.forceNew=false;
+  }
   var canon=scCanon(text),old=db.barcodes[canon];
   if(old&&String(old).trim().toLowerCase()!==String(it.code).trim().toLowerCase())return W('Mã hộp này đã gắn với vật tư <b>'+esc(old)+'</b>, không ghi vào '+esc(it.code)+'.');
   if(!old){db.barcodes[canon]=it.code;}
@@ -3798,6 +3803,14 @@ function bxExpHtml(b){
 function bxRecord(it,g){
   var l=bxList(it),k=[g.gtin,g.lot,g.ser].join('|'),b=null,now=Date.now();
   l.forEach(function(x){if(x.k===k)b=x;});
+  if(g.plain){
+    var c=l.filter(function(x){return x.gtin===g.gtin&&x.st!=='out';}),u=c.filter(function(x){return !x.seen;})[0];
+    if(!u&&!c.length)u=l.filter(function(x){return x.gtin===g.gtin;})[0];
+    if(u){u.st='in';u.seen=true;u.last=now;delete u.outAt;saveSoon();return {box:u,isNew:false,dup:false};}
+    if(c.length&&!g.force)return {box:c[c.length-1],isNew:false,dup:true};
+    b={k:g.gtin+(c.length?'#'+now.toString(36):''),gtin:g.gtin,lot:'',ser:'',exp:'',label:(db.boxref&&db.boxref[g.gtin])||'',qty:1,st:'in',seen:true,plain:true,first:now,last:now};
+    l.push(b);audit('Thêm hộp (mã vạch)',it.code,null,g.gtin);saveSoon();return {box:b,isNew:true,dup:false};
+  }
   var res={box:b,isNew:!b,dup:!!(b&&b.seen&&b.st!=='out')};
   if(!b){
     b={k:k,gtin:g.gtin,lot:g.lot,ser:g.ser,exp:g.expIso,label:(db.boxref&&db.boxref[g.gtin])||'',qty:1,st:'in',seen:true,first:now,last:now};
@@ -3819,25 +3832,37 @@ function scBoxHtml(it,bx){
     +(bx.dup?'<b style="color:#fbbf24">Hộp này đã quét rồi</b>':'<b style="color:#4ade80">'+(bx.isNew?'Ghi nhận hộp mới':'Hộp cũ còn tồn')+'</b>')
     +' · '+(b.label?esc(b.label)+' · ':'')+(b.lot?'Lô '+esc(b.lot)+' · ':'')+bxExpHtml(b)
     +'<div style="color:#9ca3af;margin-top:3px">Kỳ này đã quét '+bxSeenQty(it)+' / '+bxLeft(it).length+' hộp đang theo dõi</div>'
+    +(b.plain?'<div style="color:#9ca3af;margin-top:6px">Mã vạch '+esc(b.gtin)+' · nhập HSD 1 lần, kỳ sau quét lại app tự điền:</div><input type="date" class="inp" value="'+esc(b.exp)+'" style="margin-top:4px;padding:8px 10px;background:#23232c;color:#e5e7eb;border-color:#33333d" onchange="A.scBoxExp(\''+it.id+'\','+i+',this.value)">':'')
+    +(bx.dup&&b.plain?'<button onclick="A.scBoxNew()" style="margin-top:6px;padding:7px 10px;border-radius:999px;border:1px solid #8a5a1a;background:#2a1f12;color:#fbbf24;font:inherit;font-size:12px;font-weight:700">Đây là hộp khác (HSD khác)</button>':'')
     +(b.label?'':'<input class="inp" placeholder="Nhãn / kích thước (VD 3.5×11) — nhớ cho lần sau" style="margin-top:6px;padding:8px 10px;background:#23232c;color:#e5e7eb;border-color:#33333d" onchange="A.scBoxLabel(\''+it.id+'\','+i+',this.value)">')
     +'</div>';
 }
-function renderBoxes(){
-  var e=document.getElementById('sbox');if(!e||!SB)return;
-  var p=per(P.id),it=p&&p.items.filter(function(x){return x.id===SB.itemId;})[0];if(!it)return;
+function isTracked(it){return !!(db.track&&db.track[normKey(it.branch,it.code,it.name)]);}
+function bxListHtml(it){
   var l=bxList(it),h='';
-  if(!l.length){e.innerHTML='<div class="v2mt" style="margin-top:0">Chưa có hộp nào. Bấm “Quét QR trên hộp”: app tự ghi lô + HSD và nhớ sang kỳ sau.</div>';return;}
+  if(!l.length){return '<div class="v2mt" style="margin-top:0">Chưa có hộp nào. Bấm “Quét QR trên hộp”: app tự ghi lô + HSD và nhớ sang kỳ sau.</div>';}
   l.forEach(function(b,i){
     var gone=b.st==='out',pend=!gone&&!b.seen;
     h+='<div class="bxrow'+(gone?' gone':'')+'"><div class="bxtop"><input class="sinp" placeholder="Nhãn / kích thước" value="'+esc(b.label)+'" onchange="A.boxSet('+i+',\'label\',this.value)"><span class="bxst '+(gone?'o':pend?'p':'k')+'">'+(gone?'Đã xuất':pend?'Chưa quét':'Đã quét')+'</span></div>'
-      +'<div class="bxmeta">'+(b.lot?'Lô '+esc(b.lot)+' · ':'')+(b.ser?'Seri '+esc(b.ser)+' · ':'')+esc(b.gtin||'nhập tay')+'</div>'
+      +'<div class="bxmeta">'+(b.lot?'Lô '+esc(b.lot)+' · ':'')+(b.ser?'Seri '+esc(b.ser)+' · ':'')+esc(b.gtin||'nhập tay')+' · theo dõi '+Math.max(0,Math.round((Date.now()-(b.first||Date.now()))/86400000))+' ngày</div>'
       +'<div class="bxbot"><input class="sinp" type="date" value="'+esc(b.exp)+'" onchange="A.boxSet('+i+',\'exp\',this.value)"><span class="bxd">'+bxExpHtml(b)+'</span>'
       +(pend?'<button class="batx" title="Vẫn còn" onclick="A.boxKeep('+i+')">✓</button>':'')+'<button class="batx" onclick="A.boxDel('+i+')">✕</button></div></div>';
   });
   var n=bxSeenQty(it);
   h+='<div class="v2mt" style="margin-top:0">Đã quét '+n+' hộp kỳ này. Hộp "Chưa quét" sẽ tự ghi nhận <b>đã xuất</b> khi lưu, nếu số kiểm = số hộp đã quét. Bấm ✓ nếu hộp vẫn còn.</div>'
     +(n?'<button class="addbat" style="margin-bottom:8px" onclick="A.boxUseQty()">Dùng số hộp đã quét ('+n+') làm số kiểm</button>':'');
-  e.innerHTML=h;
+  return h;
+}
+function renderBoxes(){
+  var e=document.getElementById('sbox');if(!e||!SB)return;
+  var p=per(P.id),it=p&&p.items.filter(function(x){return x.id===SB.itemId;})[0];if(!it)return;
+  if(!isTracked(it)){
+    e.innerHTML='<button class="matchbtn" onclick="A.boxTrack()">'+icon('scan',20)+' Bật theo dõi từng hộp (vật tư đắt / tồn lâu)</button>';return;
+  }
+  e.innerHTML='<div class="v2lb">Theo dõi từng hộp<button class="addbat" onclick="A.boxAdd()">+ Thêm tay</button></div>'
+    +'<button class="matchbtn" style="margin-top:0" onclick="A.boxScan()">'+icon('scan',20)+' Quét QR trên hộp</button>'
+    +'<div style="margin-top:10px">'+bxListHtml(it)+'</div>'
+    +'<button class="addbat" style="margin:4px 0 8px;color:var(--mut)" onclick="A.boxTrack()">Tắt theo dõi vật tư này</button>';
 }
 function renderBatches(){
   var h="";
@@ -3921,6 +3946,8 @@ function mergeDb(d){
   });
   (d.folders||[]).forEach(function(f){if(f&&db.folders.indexOf(f)<0)db.folders.push(f);});
   Object.keys(d.barcodes||{}).forEach(function(k){if(!db.barcodes[k])db.barcodes[k]=d.barcodes[k];});
+  if(!db.track)db.track={};
+  Object.keys(d.track||{}).forEach(function(k){db.track[k]=1;});
   if(!db.boxref)db.boxref={};
   Object.keys(d.boxref||{}).forEach(function(k){if(!db.boxref[k])db.boxref[k]=d.boxref[k];});
   if(!db.ocrfix)db.ocrfix={};
@@ -6123,10 +6150,33 @@ Object.assign(A,{
     SC={pid:per(P.id).id,bind:it.id,hold:false,busy:false,auto:false};
     try{var AC=window.AudioContext||window.webkitAudioContext;if(AC){SC.actx=new AC();if(SC.actx.resume)SC.actx.resume();}}catch(e){}
     scMount();scStart();
+    var ab=document.getElementById('scautobtn');if(ab)ab.textContent='Tự đọc số: TẮT';
     var w=document.getElementById('scwarn');
     if(w)w.innerHTML='<div style="font-size:12px;padding:8px 10px;border-radius:10px;background:#1b1b24;border:1px solid #33333d;margin-bottom:8px">Quét từng hộp cho: <b>'+esc(it.name)+'</b> ('+esc(it.code)+')</div>';
   },
+  boxTrack:function(){
+    var it=bxCur();if(!it)return;
+    var k=normKey(it.branch,it.code,it.name);if(!db.track)db.track={};
+    if(db.track[k]){if(bxLeft(it).length&&!confirm('Tắt theo dõi? Các hộp đã ghi vẫn được giữ và vẫn cảnh báo HSD.'))return;delete db.track[k];}
+    else db.track[k]=1;
+    saveSoon();renderBoxes();
+  },
+  scTrackOn:function(id){
+    var p=per(SC&&SC.pid),it=p&&p.items.filter(function(x){return x.id===id;})[0];
+    if(!it)return;if(!db.track)db.track={};
+    db.track[normKey(it.branch,it.code,it.name)]=1;saveSoon();
+    scShowMatched({item:it,how:'code',gs1:SC.mgs});
+  },
   boxUseQty:function(){var it=bxCur();if(!it)return;SB.qtyStr=String(bxSeenQty(it));A.calc();},
+  scBoxExp:function(id,i,v){
+    var p=per(SC&&SC.pid),it=p&&p.items.filter(function(x){return x.id===id;})[0];
+    if(!it||!it.boxes||!it.boxes[i])return;
+    it.boxes[i].exp=v;saveSoon();toast(v?'Đã lưu HSD '+fmtDate(v):'Đã xoá HSD');
+  },
+  scBoxNew:function(){
+    if(!SC||!SC.bindText)return;
+    SC.forceNew=true;scBindCode(per(SC.pid),SC.bindText);
+  },
   scBoxLabel:function(id,i,v){
     var p=per(SC&&SC.pid),it=p&&p.items.filter(function(x){return x.id===id;})[0];
     if(!it||!it.boxes||!it.boxes[i])return;
@@ -6325,8 +6375,7 @@ function openSheet(itemId,seq){
     +'<div id="sban"></div>'
     +'<div class="v2lb">Thông tin lô hàng <span>(nếu có)</span><button class="addbat" onclick="A.batAdd()">+ Thêm lô</button></div>'
     +'<div id="sbat"></div><div class="v2mt" style="margin-top:0">Hạn sử dụng được lưu và tự kế thừa sang kỳ sau.</div>'
-    +'<div class="v2lb">Hộp / QR nhà sản xuất<button class="addbat" onclick="A.boxAdd()">+ Thêm tay</button></div>'
-    +'<button class="matchbtn" style="margin-top:0" onclick="A.boxScan()">'+icon('scan',20)+' Quét QR trên hộp</button><div id="sbox" style="margin-top:10px"></div>'
+    +'<div id="sbox"></div>'
     +'<div class="v2lb" id="snotelbl">Ghi chú</div><div class="qchips">'+quickNoteChipsHtml()+'</div>'
     +'<textarea class="sinp" id="snote" rows="3" maxlength="200" placeholder="Nhập ghi chú (nếu có)..." oninput="A.calc()">'+esc(it.note||"")+'</textarea>'
     +'<div class="v2mt" id="snc" style="text-align:right">0/200</div><div id="snotehint"></div>'
