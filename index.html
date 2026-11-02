@@ -7055,6 +7055,7 @@ function renderRecon(){
   var R=rcDb(),h='<div class="topbar"><div class="trow wrap"><button class="back" onclick="A.go(\'home\')">‹</button><div class="ttl">Đối chiếu doanh thu – xuất kho</div></div><div style="height:10px"></div></div><div class="wrap" style="padding-top:12px;padding-bottom:50px">';
   RC_RES=rcCompute();
   h+='<div style="display:flex;gap:6px;overflow-x:auto;margin-bottom:12px">'+RC_TABS.map(function(t,i){return '<button class="pill'+(RC.tab===i?' on':'')+'" style="white-space:nowrap'+(RC.tab===i?';background:var(--teal);color:#fff':'')+'" onclick="A.rcTab('+i+')">'+t[1]+'</button>';}).join('')+'</div>';
+  h+='<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:6px"><button class="btn btn-outline" style="padding:10px" onclick="A.rcRefresh()">↻ Đối chiếu lại</button><label class="btn btn-primary" style="padding:10px;margin:0">'+icon("upload",16)+'Cập nhật từ file<input type="file" accept=".xlsx,.xls" style="display:none" onchange="A.rcQuick(this)"></label></div><div class="rcnote" style="margin-bottom:12px;font-size:12px">“Cập nhật từ file” dùng chế độ <b>Bổ sung / điều chỉnh</b>: sửa dòng đã có, thêm dòng mới, giữ nguyên giải trình và duyệt; tự so sánh trước → sau và có Hoàn tác. File cần có sheet DOANH_THU và/hoặc XUAT_KHO (như file mẫu).</div>';
   if(!R.dt.length&&!R.xk.length&&(RC.tab<2||RC.tab===5))h+='<div class="card" style="margin-bottom:12px"><div style="font-weight:700;margin-bottom:4px">Chưa có dữ liệu</div><div style="font-size:13px;color:var(--mut);margin-bottom:10px">Vào tab Nhập/Xuất: tải file mẫu chuẩn, điền doanh thu + xuất kho rồi nhập vào.</div><button class="btn btn-primary" onclick="A.rcTab(4)">Nhập dữ liệu</button></div>';
   else if(RC.tab===0)h+=rcViewSum();else if(RC.tab===1)h+=rcViewList();else if(RC.tab===2)h+=rcViewChk();else if(RC.tab===3)h+=rcViewMap();else if(RC.tab===4)h+=rcViewImp();else if(RC.tab===5)h+=rcViewApx();
   document.getElementById("app").innerHTML=h+'</div>';
@@ -7086,6 +7087,7 @@ function rcViewList(){
   var Z=RC_RES,R=rcDb(),h=rcFilter(),side=RC.side,q=rcK(RC.q);
   h+='<div style="display:flex;gap:8px;margin-bottom:8px">'+rcSel(3,[["0","Phía doanh thu"],["1","Phía xuất kho"]],side)+rcSel(4,[["1","Chỉ ca chưa duyệt"],["0","Tất cả ca lệch"],["3","Ca đã duyệt cần xem lại"],["2","Tất cả dòng dữ liệu"]],RC.only)+'</div>'
     +'<button class="btn btn-primary" style="margin-bottom:10px" onclick="A.rcRow('+side+',-1)">'+icon("plus",16)+'Thêm dòng '+(side?"xuất kho":"doanh thu")+'</button>'
+    +'<button class="btn btn-outline" style="margin-bottom:10px" onclick="A.rcExportDiff()">'+icon("download",16)+'Xuất Excel ca chênh lệch (DT + xuất kho)</button>'
     +'<input class="inp" placeholder="Tìm PID, khách hàng, vật tư, số CT…" value="'+esc(RC.q)+'" onchange="A.rcS(2,this.value)" style="margin-bottom:12px">';
   var rows=(RC.only==2?(side==0?Z.dt:Z.xk):(side==0?Z.dt.filter(function(o){return o.first&&o.bad;}):Z.xk.filter(function(x){return x.bad;}))).filter(function(o){return rcIn(o)&&(RC.only!=1||o.need)&&(RC.only!=3||(R.notes[o.nid]&&R.notes[o.nid].chg))&&(!q||rcK(JSON.stringify(o.r)+" "+o.pid+" "+(o.ten||"")+" "+(o.vt||"")+" "+(o.P||"")+" "+(o.T||"")+" "+(o.why||"")).indexOf(q)>=0);});
   h+='<div style="font-size:13px;color:var(--mut);margin-bottom:8px">'+rows.length+' ca</div>';
@@ -7214,7 +7216,7 @@ function rcViewImp(){
     +'<label class="btn btn-primary" style="margin-top:10px">'+icon("upload",17)+'File mẫu chuẩn (cả 2 sheet)<input type="file" accept=".xlsx,.xls,.csv" style="display:none" onchange="A.rcFile(this,0)"></label>'
     +'<label class="btn btn-outline" style="margin-top:8px">Chỉ Doanh thu<input type="file" accept=".xlsx,.xls,.csv" style="display:none" onchange="A.rcFile(this,1)"></label>'
     +'<label class="btn btn-outline" style="margin-top:8px">Chỉ Xuất kho<input type="file" accept=".xlsx,.xls,.csv" style="display:none" onchange="A.rcFile(this,2)"></label></div>'+rcImpCard()
-    +'<div class="card"><div class="sec">3. Xuất kết quả</div><button class="btn btn-primary" style="margin-bottom:8px" onclick="A.rcExport()">'+icon("download",17)+'Tải Excel kết quả đối chiếu</button><button class="btn btn-outline" onclick="A.rcPrint()">'+icon("file",17)+'Biên bản (in / PDF)</button>'
+    +'<div class="card"><div class="sec">3. Xuất kết quả</div><button class="btn btn-primary" style="margin-bottom:8px" onclick="A.rcExport()">'+icon("download",17)+'Tải Excel kết quả đối chiếu</button><button class="btn btn-primary" style="margin-bottom:8px" onclick="A.rcExportDiff()">'+icon("download",17)+'Xuất Excel ca chênh lệch (để giải trình)</button><button class="btn btn-outline" onclick="A.rcPrint()">'+icon("file",17)+'Biên bản (in / PDF)</button>'
     +'<div style="font-size:12px;color:var(--mut);margin-top:8px">Biên bản và Phụ lục theo bộ lọc Cơ sở / Tháng (Phụ lục có thêm bộ lọc Năm, xem tab Phụ lục).</div>'
     +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px"><button class="btn btn-outline" style="padding:10px" onclick="A.rcApxXlsx()">'+icon("download",16)+'Phụ lục từng kho (Excel)</button><button class="btn btn-outline" style="padding:10px" onclick="A.rcApxPrint()">'+icon("file",16)+'Phụ lục từng kho (in / PDF)</button></div></div>'+rcBackupCard()
     +'<div class="card" style="margin-top:12px"><div class="sec">Dán dữ liệu từ MISA / Excel</div><div style="font-size:12px;color:var(--mut);margin-bottom:8px">Copy vùng dữ liệu KÈM DÒNG TIÊU ĐỀ (đúng tên cột như file mẫu) rồi dán vào ô dưới. Không kèm tiêu đề thì app hiểu theo thứ tự cột MISA cũ. Dùng chế độ Thay thế / Nối thêm ở trên.</div><textarea id="rcpaste" class="inp" rows="5"></textarea><div style="display:flex;gap:8px;margin-top:8px"><button class="btn btn-primary" onclick="A.rcPaste(0)">Dán vào Doanh thu</button><button class="btn btn-primary" onclick="A.rcPaste(1)">Dán vào Xuất kho</button></div><div style="display:flex;gap:8px;margin-top:8px"><button class="btn btn-outline" style="color:var(--red)" onclick="A.rcClear(0)">Xóa hết doanh thu</button><button class="btn btn-outline" style="color:var(--red)" onclick="A.rcClear(1)">Xóa hết xuất kho</button></div></div>';
@@ -7649,6 +7651,154 @@ Object.assign(A,{
     Z.xk.forEach(function(x){var n=R.notes[x.nid]||{};b.push([x.cs,x.ma,x.ten,x.r.ngay,x.r.so,x.r.dg,x.r.dvt||"",x.r.ct||"",x.sl,x.vname||"",x.pid,x.val,x.P,x.fin,x.vt,n.r||"",n.g||"",n.st||""]);});
     XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet(a),"DOANH_THU");XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet(b),"XUAT_KHO");
     rcWbOut(wb,"DoiChieu_DT_XuatKho.xlsx");
+  },
+  /* ----- Cập nhật nhanh: đối chiếu lại + nhập bổ sung/điều chỉnh từ file bên ngoài ----- */
+  rcRefresh:function(){
+    try{
+      store.flush();
+      renderRecon();
+      var s=rcSum();
+      toast("Đã đối chiếu lại: "+s.needD.length+" ca doanh thu và "+s.needX.length+" phiếu xuất cần xử lý");
+    }catch(e){console.error(e);toast("Không cập nhật được: "+e.message);}
+  },
+  rcQuick:function(inp){
+    var f=inp.files&&inp.files[0];if(!f)return;
+    if(typeof XLSX==="undefined"){toast("Chưa tải được thư viện Excel — kiểm tra kết nối mạng");inp.value="";return;}
+    var fr=new FileReader();
+    fr.onload=function(){
+      try{
+        var wb=XLSX.read(fr.result,{type:"array"}),has=function(n){return !!wb.Sheets[n];};
+        var kind=has("DOANH_THU")&&has("XUAT_KHO")?0:has("DOANH_THU")?1:has("XUAT_KHO")?2:-1;
+        if(kind<0){toast("File không có sheet DOANH_THU / XUAT_KHO. Vào tab Nhập/Xuất để chọn “Chỉ Doanh thu” hoặc “Chỉ Xuất kho”.");RC.tab=4;renderRecon();}
+        else{
+          RC.mode="update";
+          rcRunImport(f.name,function(){
+            var o={},n1={},n2={};
+            if(kind===0||kind===1)o.dt=rcApply("dt",rcMk(rcRows(wb,"DOANH_THU"),"dt",kind===0,n1),n1);
+            if(kind===0||kind===2)o.xk=rcApply("xk",rcMk(rcRows(wb,"XUAT_KHO"),"xk",kind===0,n2),n2);
+            return o;
+          });
+        }
+      }catch(e){console.error(e);toast("Không đọc được file: "+e.message);}
+      inp.value="";
+    };
+    fr.readAsArrayBuffer(f);
+  },
+  /* ----- Xuất Excel các ca CHÊNH LỆCH (doanh thu + xuất kho) làm cơ sở để cơ sở giải trình ----- */
+  rcExportDiff:function(){
+    if(typeof ExcelJS==="undefined"){toast("Chưa tải được thư viện Excel — kiểm tra kết nối mạng");return;}
+    try{
+      RC_RES=rcCompute();
+      var Z=RC_RES,R=rcDb(),N=R.notes||{};
+      var byCs=function(a,b){return String(a.cs||"").localeCompare(String(b.cs||""),"vi");};
+      var D=Z.dt.filter(function(o){return o.first&&o.bad&&rcIn(o);}).sort(byCs);
+      var X=Z.xk.filter(function(x){return x.bad&&rcIn(x);}).sort(byCs);
+      if(!D.length&&!X.length){toast("Không có ca chênh lệch nào theo bộ lọc hiện tại");return;}
+      var wb=new ExcelJS.Workbook(),thin={style:"thin",color:{argb:"FF8C96A8"}},bd={top:thin,left:thin,bottom:thin,right:thin};
+      var F=function(o){return Object.assign({name:"Times New Roman",size:10},o||{});};
+      var fill=function(a){return {type:"pattern",pattern:"solid",fgColor:{argb:a}};};
+      var per="Cơ sở: "+RC.cs+"  |  Kỳ: "+(RC.th==="Tất cả"?"Tất cả các tháng":"Tháng "+RC.th)+"  |  Xuất ngày "+rcToday();
+      var xl=prPage("landscape").xl;
+      var nlines=function(v,w){return Math.max(1,Math.ceil(String(v==null?"":v).length/Math.max(1,w*1.05)));};
+      var MONEY="#,##0;[Red]-#,##0";
+      /* tổng doanh thu của cả nhóm (khi nhiều dòng DT cùng khách + cùng vật tư được gộp) */
+      var rev={},seenG={};
+      Z.dt.forEach(function(c){if(!c.g)return;var k=c.g.k,sn=seenG[k]=seenG[k]||{};if(sn[c.i])return;sn[c.i]=1;rev[k]=(rev[k]||0)+rcNum(c.r.dt);});
+      function dtDesc(o){
+        var t=o.T,vt=o.ten||"vật tư theo định mức";
+        if(t==="CHƯA XUẤT KHO")return "Có doanh thu nhưng chưa có phiếu xuất kho «"+vt+"» (cần "+o.O+").";
+        if(t==="XUẤT SAI VẬT TƯ")return "Đã xuất vật tư khác ("+(o.wrong||[]).map(function(w){return (w.ten||w.ma||"")+" · SL "+w.sl;}).join("; ")+") thay vì «"+vt+"» (cần "+o.O+").";
+        return "Cần "+o.O+" «"+vt+"», thực xuất "+o.P+" → "+(o.Q<0?"THIẾU ":"THỪA ")+Math.abs(o.Q)+".";
+      }
+      function xkDesc(x){
+        var t=x.P;
+        if(t==="XUẤT CHƯA CÓ DOANH THU")return "Có phiếu xuất kho nhưng không tìm thấy doanh thu tương ứng"+(x.pid?" của "+x.pid:"")+".";
+        if(t==="TRÙNG/THỪA XUẤT")return "Tổng xuất vượt số lượng cần theo doanh thu"+(x.g?" (cần "+x.g.need+", đã xuất "+x.g.got+")":"")+".";
+        if(t==="XUẤT SAI VẬT TƯ")return (x.vt||"Vật tư xuất không đúng định mức của dịch vụ").replace(/^✗\s*/,"")+".";
+        return "Phiếu xuất chưa có mã KH (PID) nên không đối chiếu được với doanh thu.";
+      }
+      /* dựng 1 sheet dạng bảng: rows = [{v:[...],ok:bool}] */
+      function mkSheet(name,title,heads,widths,rows,o){
+        var ws=wb.addWorksheet(name,{pageSetup:{paperSize:xl,orientation:"landscape",fitToPage:true,fitToWidth:1,fitToHeight:0,margins:{left:0.4,right:0.4,top:0.5,bottom:0.5,header:0.2,footer:0.2}}});
+        var n=heads.length,HR=4,c;
+        widths.forEach(function(w,i){ws.getColumn(i+1).width=w;});
+        ws.mergeCells(1,1,1,n);c=ws.getCell(1,1);c.value=title;c.font=F({size:14,bold:true});c.alignment={horizontal:"center"};
+        ws.mergeCells(2,1,2,n);c=ws.getCell(2,1);c.value=per;c.font=F({italic:true});c.alignment={horizontal:"center"};
+        heads.forEach(function(t,j){c=ws.getCell(HR,j+1);c.value=t;c.font=F({bold:true,color:{argb:"FFFFFFFF"}});c.fill=fill("FF1F4E5F");c.border=bd;c.alignment={horizontal:"center",vertical:"middle",wrapText:true};});
+        ws.getRow(HR).height=32;
+        rows.forEach(function(w,i){
+          var r=HR+1+i,ln=1;
+          w.v.forEach(function(v,j){
+            c=ws.getCell(r,j+1);c.value=(v===""||v==null)?null:v;c.font=F();c.border=bd;
+            var isM=o.money.indexOf(j+1)>=0;
+            c.alignment={vertical:"middle",wrapText:true,horizontal:isM?"right":(o.left.indexOf(j+1)>=0?"left":"center")};
+            if(isM)c.numFmt=MONEY;
+            if(o.note.indexOf(j+1)>=0&&!w.ok&&(v===""||v==null))c.fill=fill("FFFFF2CC");   /* ô cần cơ sở điền */
+            ln=Math.max(ln,nlines(v,widths[j]));
+          });
+          o.kind.forEach(function(k){var kc=ws.getCell(r,k);kc.fill=fill(w.ok?"FFE2F0D9":"FFFCE4E4");kc.font=F({bold:true,color:{argb:w.ok?"FF15803D":"FFC00000"}});});
+          ws.getRow(r).height=Math.max(16,ln*13);
+        });
+        ws.autoFilter={from:{row:HR,column:1},to:{row:HR+Math.max(1,rows.length),column:n}};
+        ws.views=[{state:"frozen",ySplit:HR}];
+        ws.pageSetup.printTitlesRow=HR+":"+HR;
+        return ws;
+      }
+      /* --- TONG_HOP --- */
+      var ts=wb.addWorksheet("TONG_HOP",{pageSetup:{paperSize:xl,orientation:"landscape",fitToPage:true,fitToWidth:1,fitToHeight:0}});
+      [26,14,14,18,14,14,18,16].forEach(function(w,i){ts.getColumn(i+1).width=w;});
+      var tc=ts.getCell(1,1);ts.mergeCells(1,1,1,8);tc.value="TỔNG HỢP CÁC CA CHÊNH LỆCH DOANH THU – XUẤT KHO CẦN GIẢI TRÌNH";tc.font=F({size:14,bold:true});tc.alignment={horizontal:"center"};
+      tc=ts.getCell(2,1);ts.mergeCells(2,1,2,8);tc.value=per;tc.font=F({italic:true});tc.alignment={horizontal:"center"};
+      var csSet={};D.concat(X).forEach(function(o){csSet[o.cs||"(chưa rõ cơ sở)"]=1;});
+      var csL=Object.keys(csSet).sort(function(a,b){return a.localeCompare(b,"vi");});
+      var H1=["Cơ sở","Ca lệch phía doanh thu","…chưa xử lý","Giá trị lệch DT (VND)","Phiếu xuất lệch","…chưa xử lý","Giá trị phiếu xuất lệch (VND)","Tổng ca cần giải trình"];
+      H1.forEach(function(t,j){var c=ts.getCell(4,j+1);c.value=t;c.font=F({bold:true,color:{argb:"FFFFFFFF"}});c.fill=fill("FF1F4E5F");c.border=bd;c.alignment={horizontal:"center",vertical:"middle",wrapText:true};});
+      ts.getRow(4).height=34;
+      var tot=[0,0,0,0,0,0,0];
+      csL.forEach(function(cs,i){
+        var d=D.filter(function(o){return (o.cs||"(chưa rõ cơ sở)")===cs;}),x=X.filter(function(o){return (o.cs||"(chưa rõ cơ sở)")===cs;});
+        var vd=0,vx=0;d.forEach(function(o){vd+=Math.abs(o.R||0);});x.forEach(function(o){vx+=o.val||0;});
+        var nd=d.filter(function(o){return o.need;}).length,nx=x.filter(function(o){return o.need;}).length;
+        var vals=[d.length,nd,vd,x.length,nx,vx,nd+nx];
+        vals.forEach(function(v,k){tot[k]+=v;});
+        [cs].concat(vals).forEach(function(v,j){var c=ts.getCell(5+i,j+1);c.value=v;c.font=F();c.border=bd;c.alignment={horizontal:j?"center":"left",vertical:"middle"};if(j===3||j===6)c.numFmt=MONEY;});
+        if(nd+nx)ts.getCell(5+i,8).font=F({bold:true,color:{argb:"FFC00000"}});
+      });
+      var rt=5+csL.length;
+      ["Tổng cộng"].concat(tot).forEach(function(v,j){var c=ts.getCell(rt,j+1);c.value=v;c.font=F({bold:true});c.border=bd;c.fill=fill("FFD9E2F3");c.alignment={horizontal:j?"center":"left",vertical:"middle"};if(j===3||j===6)c.numFmt=MONEY;});
+      /* phân loại theo trạng thái */
+      var r0=rt+2,c0=ts.getCell(r0,1);c0.value="Phân loại theo loại chênh lệch";c0.font=F({bold:true,size:11});
+      ["Loại chênh lệch","Nguồn","Số ca","Chưa xử lý"].forEach(function(t,j){var c=ts.getCell(r0+1,j+1);c.value=t;c.font=F({bold:true,color:{argb:"FFFFFFFF"}});c.fill=fill("FF1F4E5F");c.border=bd;c.alignment={horizontal:"center",vertical:"middle"};});
+      var kinds={};
+      D.forEach(function(o){var k="DT|"+o.T;kinds[k]=kinds[k]||{t:o.T,s:"Doanh thu",n:0,u:0};kinds[k].n++;kinds[k].u+=o.need?1:0;});
+      X.forEach(function(x){var k="XK|"+x.P;kinds[k]=kinds[k]||{t:x.P,s:"Xuất kho",n:0,u:0};kinds[k].n++;kinds[k].u+=x.need?1:0;});
+      Object.keys(kinds).forEach(function(k,i){var q=kinds[k];[q.t,q.s,q.n,q.u].forEach(function(v,j){var c=ts.getCell(r0+2+i,j+1);c.value=v;c.font=F();c.border=bd;c.alignment={horizontal:j<2?"left":"center",vertical:"middle"};});});
+      var nr=r0+3+Object.keys(kinds).length;
+      ts.mergeCells(nr,1,nr,8);var nc=ts.getCell(nr,1);
+      nc.value="Ghi chú: ô màu vàng ở sheet chi tiết là phần cơ sở cần điền (mã lý do / giải trình / trạng thái xử lý). “Chưa xử lý” = ca lệch chưa được duyệt.";
+      nc.font=F({italic:true});nc.alignment={wrapText:true,vertical:"top"};ts.getRow(nr).height=30;
+      /* --- chi tiết doanh thu --- */
+      if(D.length)mkSheet("CHENH_LECH_DOANH_THU","CÁC CA CHÊNH LỆCH PHÍA DOANH THU (có doanh thu – xuất kho không khớp)",
+        ["STT","Cơ sở","Mã KH (PID)","Khách hàng","Bác sĩ","Ngày DV","Dịch vụ","SL DV","Doanh thu (VND)","Vật tư theo định mức","SL cần","SL thực xuất","Chênh SL","Giá trị lệch (VND)","Loại chênh lệch","Diễn giải chênh lệch","Kết quả","Mã lý do","Giải trình của cơ sở","Trạng thái xử lý"],
+        [6,16,14,22,14,12,40,8,15,28,9,10,9,15,24,48,16,16,36,14],
+        D.map(function(o,i){var n=N[o.nid]||{},r=o.r;
+          return {ok:!!o.ok,v:[i+1,o.cs,o.pid,r.kh,r.bs||"",r.ngay,r.dv,rcNum(r.sl)||1,(o.g&&rev[o.g.k]!==undefined)?rev[o.g.k]:rcNum(r.dt),o.ten||"",o.O,o.P,o.Q,o.R,o.T+(o.g&&o.g.n>1?" (gộp "+o.g.n+" dòng DT)":""),dtDesc(o),o.fin,n.r||"",n.g||"",n.st||""]};}),
+        {money:[9,14],left:[2,4,5,7,10,16,17,19],kind:[15,17],note:[18,19,20]});
+      /* --- chi tiết xuất kho --- */
+      if(X.length)mkSheet("CHENH_LECH_XUAT_KHO","CÁC CA CHÊNH LỆCH PHÍA XUẤT KHO (phiếu xuất không khớp doanh thu / định mức)",
+        ["STT","Cơ sở","Mã KH (PID)","Ngày xuất","Số CT","Diễn giải phiếu xuất","Mã hàng","Tên vật tư","ĐVT","SL xuất","Giá trị (VND)","Loại chênh lệch","Diễn giải chênh lệch","Kết quả","Mã lý do","Giải trình của cơ sở","Trạng thái xử lý"],
+        [6,16,14,12,14,44,12,30,8,9,15,26,48,16,16,36,14],
+        X.map(function(x,i){var n=N[x.nid]||{},r=x.r;
+          return {ok:!!x.ok,v:[i+1,x.cs,x.pid||"",r.ngay,r.so,r.dg,x.ma,x.ten,r.dvt||"",x.sl,x.val||0,x.P,xkDesc(x),x.fin,n.r||"",n.g||"",n.st||""]};}),
+        {money:[11],left:[2,6,8,12,13,14,16],kind:[12,14],note:[15,16,17]});
+      var d=new Date(),p=function(n){return String(n).padStart(2,"0");};
+      var tag=(RC.cs==="Tất cả"?"":"_"+RC.cs)+(RC.th==="Tất cả"?"":"_T"+RC.th);
+      var fname=("ChenhLech_DT_XuatKho"+tag).normalize("NFD").replace(/[\u0300-\u036f]/g,"").replace(/đ/g,"d").replace(/Đ/g,"D").replace(/[^\w-]+/g,"_")+"_"+d.getFullYear()+p(d.getMonth()+1)+p(d.getDate())+".xlsx";
+      wb.xlsx.writeBuffer().then(function(buf){
+        shareOrDownload(new Blob([buf],{type:"application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"}),fname);
+        toast("Đã xuất "+D.length+" ca lệch doanh thu + "+X.length+" phiếu xuất lệch");
+      }).catch(function(e){console.error(e);toast("Không tạo được file: "+e.message);});
+    }catch(err){console.error(err);toast("Không xuất được: "+err.message);}
   },
   rcPrint:function(){
     var s=rcSum(),Z=RC_RES,R=rcDb(),k="Cơ sở: "+esc(RC.cs)+" | Kỳ: "+(RC.th==="Tất cả"?"Tất cả các tháng":"Tháng "+RC.th);
