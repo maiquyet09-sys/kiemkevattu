@@ -6927,7 +6927,7 @@ function rcCompute(){
   var xbyPid={};
   var xk=R.xk.map(function(r,i){
     var d=rcDate(r.ngay),G=String(r.dg||""),p=G.toLowerCase().indexOf("pid"),pid="",mm;
-    if(p>=0){mm=G.slice(p+3,p+18).replace(/[\s\t]/g,"").match(/^\d{1,12}/);if(mm)pid=cpid(mm[0]);}
+    if(p>=0){mm=G.slice(p+3,p+18).replace(/^[\s:\-.#=]+/,"").replace(/[\s\t]/g,"").match(/^\d{1,12}/);if(mm)pid=cpid(mm[0]);}
     if(r.pid)pid=cpid(r.pid)||pid;
     if(r.pidm)pid=cpid(r.pidm)||pid;
     var ma=String(r.ma||"").trim(),ten=String(r.ten||"").trim(),tok={};
