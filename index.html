@@ -2,7 +2,7 @@
 <html lang="vi">
 <head>
 <meta charset="UTF-8">
-<meta name="app-version" content="2026110202">
+<meta name="app-version" content="2026110203">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
 <meta name="theme-color" content="#eef3fb">
 <link rel="manifest" href="manifest.webmanifest">
@@ -550,6 +550,50 @@ body{background:var(--bg)}
 .bxst.k{background:var(--green-bg);color:var(--green)}.bxst.p{background:var(--amber-bg);color:var(--amber)}.bxst.o{background:var(--red-bg);color:var(--red)}
 .rct{width:100%;border-collapse:collapse;font-size:12.5px}.rct th,.rct td{padding:6px 8px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}.rct th{color:var(--mut);font-weight:700;white-space:nowrap}.rct .n{text-align:right;font-variant-numeric:tabular-nums}
 .rcb{display:inline-block;padding:2px 8px;border-radius:99px;font-size:11.5px;font-weight:700;white-space:nowrap}.rcb-green{background:var(--green-bg);color:var(--green)}.rcb-red{background:var(--red-bg);color:var(--red)}.rcb-amber{background:var(--amber-bg);color:var(--amber)}
+.rcg>summary{list-style:none;position:relative;padding-right:30px!important}.rcg>summary::-webkit-details-marker{display:none}.rcg>summary:after{content:"▾";position:absolute;right:12px;top:10px;font-size:16px;color:var(--mut);transition:transform .15s}.rcg[open]>summary:after{transform:rotate(180deg)}
+/* ===== V6 · Cấu hình dịch vụ → vật tư: tiêu đề nổi bật, nội dung nhỏ gọn, tách khối rõ ===== */
+.rcsec{font-size:15px;font-weight:800;color:var(--ink);padding-left:10px;border-left:4px solid var(--teal);line-height:1.25;margin:0 0 8px}
+.rcnote{font-size:11.5px;color:var(--mut);line-height:1.5}
+.rcl{display:flex;flex-direction:column;gap:14px}
+.rcg{background:#fff;border:1px solid var(--line);border-left:6px solid var(--hc,#2f6fed);border-radius:14px;overflow:hidden;box-shadow:0 2px 6px rgba(15,40,90,.09)}
+.rcg>summary{padding:12px 34px 12px 12px!important;background:var(--hbg,#eef3fb);cursor:pointer}
+.rcg[open]>summary{border-bottom:2px solid var(--hc,#2f6fed)}
+.rcg-top{display:flex;gap:10px;align-items:flex-start}
+.rcg-no{flex:0 0 auto;min-width:30px;height:30px;padding:0 6px;border-radius:9px;background:var(--hc,#2f6fed);color:#fff;font-size:13px;font-weight:800;display:flex;align-items:center;justify-content:center}
+.rcg-t{font-size:15.5px;font-weight:800;line-height:1.35;color:var(--ink);word-break:break-word}
+.rcg-sub{margin-top:8px;display:flex;flex-wrap:wrap;align-items:center;gap:4px 6px;font-size:11px;color:var(--mut)}
+.rcg-chip{display:inline-block;padding:1px 8px;border-radius:99px;background:#fff;border:1px solid var(--hc,#2f6fed);font-size:11px;font-weight:600;color:var(--ink)}
+.rcg-body{padding:10px;background:#fff}
+.rcg-vt{background:var(--card2);border:1px solid var(--line);border-radius:10px;padding:8px 9px}
+.rcg-vt+.rcg-vt{margin-top:8px}
+.rcg-vh{font-size:10.5px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;color:var(--hc-d,#1d55c9);margin-bottom:6px}
+.rcgrid{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.rcf .l{font-size:10.5px;color:var(--mut2);margin-bottom:2px;font-weight:600}
+.rcf input{width:100%;border:1px solid var(--line);border-radius:8px;padding:6px 8px;font:inherit;font-size:12px;background:#fff;color:var(--ink);outline:none}
+.rcf input:focus{border-color:var(--teal)}
+.rcg-act{display:flex;gap:6px;margin-top:10px;padding-top:8px;border-top:1px solid var(--line)}
+.rcg-act button{flex:1;padding:6px 8px;font:inherit;font-size:12px;font-weight:600;border-radius:9px;border:1px solid var(--line);background:#fff;color:var(--ink);cursor:pointer}
+.rcb-sky{background:var(--sky-bg);color:var(--sky)}.rcb-gray{background:#eef0f4;color:var(--mut)}
+/* ===== V6 · Phụ lục 01 theo từng cơ sở ===== */
+.apxk{background:#fff;border:1px solid var(--line);border-left:6px solid var(--teal);border-radius:14px;overflow:hidden;box-shadow:0 2px 6px rgba(15,40,90,.09);margin-bottom:14px}
+.apxk>summary{list-style:none;position:relative;padding:12px 34px 12px 12px;background:var(--teal-bg);cursor:pointer}
+.apxk>summary::-webkit-details-marker{display:none}
+.apxk>summary:after{content:"▾";position:absolute;right:12px;top:12px;font-size:16px;color:var(--mut);transition:transform .15s}
+.apxk[open]>summary:after{transform:rotate(180deg)}
+.apxk[open]>summary{border-bottom:2px solid var(--teal)}
+.apxk-t{font-size:15.5px;font-weight:800;color:var(--ink)}
+.apxk-s{margin-top:6px;display:flex;flex-wrap:wrap;gap:5px}
+.apxk-b{padding:8px 10px 10px}
+.apxh2{font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:.04em;color:var(--teal-d);margin:12px 0 6px;padding-bottom:4px;border-bottom:1px solid var(--line)}
+.apxr{border:1px solid var(--line);border-radius:10px;padding:8px 9px;margin-bottom:8px;background:#fff;font-size:12px}
+.apxr-h{display:flex;gap:8px;align-items:flex-start}
+.apxr-n{flex:0 0 auto;min-width:22px;height:22px;border-radius:7px;background:var(--card2);color:var(--mut);font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center}
+.apxr-h b{font-size:13px}
+.apxr-m{font-size:11px;color:var(--mut)}
+.apxr-dv{margin:6px 0;font-size:12px;line-height:1.4}
+.apxr-g{display:grid;grid-template-columns:1fr 1fr;gap:4px 10px;background:var(--card2);border-radius:8px;padding:6px 8px}
+.apxr-g i{display:block;font-style:normal;font-size:10px;font-weight:600;color:var(--mut2)}
+.apxr-gt{margin-top:6px;font-size:11.5px;color:var(--mut)}
 </style>
 </head>
 <body>
@@ -3989,6 +4033,7 @@ function mergeDb(d){
   migrateFolders();
   Object.keys(d.hsd||{}).forEach(function(k){if(!db.hsd[k])db.hsd[k]=d.hsd[k];});
   Object.keys(d.counters||{}).forEach(function(k){db.counters[k]=Math.max(db.counters[k]||0,d.counters[k]||0);});
+  st.rc=0;try{if(d.recon&&typeof rcMergeRecon==="function")st.rc=rcMergeRecon(d.recon);}catch(e){console.error(e);}
   if(d.print&&!db.print)db.print=d.print;
   if(d.profile&&d.profile.ten&&!(db.profile&&db.profile.ten))db.profile=d.profile;
   if(!db.signers)db.signers={};
@@ -4137,7 +4182,7 @@ function renderSettings(){
     +'<div style="font-size:12px;color:var(--mut);margin-bottom:12px">Khoá cùng lúc mọi kỳ đã kiểm xong. Kỳ đã khoá không sửa được, vẫn xuất Excel và in bình thường. Trạng thái khoá đi theo file chuyển máy.</div>'
     +'<button class="btn btn-outline" onclick="LKX.lockAllDone()">'+icon('lock',17)+'Khoá tất cả kỳ đã kiểm xong</button></div>';
   h+='<div class="card" style="margin-bottom:12px"><div style="font-weight:700;margin-bottom:2px">Chuyển dữ liệu sang máy khác</div>'
-    +'<div style="font-size:12px;color:var(--mut);margin-bottom:12px">Gói toàn bộ kỳ kiểm kê, biên bản, phiếu, ảnh, chữ ký và trạng thái khoá vào 1 file. Gửi file qua Zalo hoặc email, rồi nhập trên máy mới.</div>'
+    +'<div style="font-size:12px;color:var(--mut);margin-bottom:12px">Gói toàn bộ kỳ kiểm kê, biên bản, phiếu, ảnh, chữ ký, trạng thái khoá và dữ liệu đối chiếu DT – xuất kho vào 1 file. Gửi file qua Zalo hoặc email, rồi nhập trên máy mới.</div>'
     +'<button class="btn btn-primary" style="margin-bottom:8px" onclick="A.syncExport()">'+icon('download',17)+'Xuất 1 file toàn bộ dữ liệu</button>'
     +'<input type="file" id="replacein" accept=".json,application/json" style="display:none" onchange="A.replaceFile(this)">'
     +'<button class="btn btn-outline" style="margin-bottom:8px" onclick="document.getElementById(\'replacein\').click()">'+icon('upload',17)+'Nhập file, thay thế toàn bộ (máy mới)</button>'
@@ -5587,7 +5632,7 @@ var A={
         }
         audit('Khôi phục (gộp)',f.name,null,{kyVatTu:st.p,kyTaiSan:st.a,bienBan:st.h,phieu:st.e,capNhat:st.u,xungDot:st.c});
         store.save();render();
-        toast('Đã khôi phục và kiểm tra lại: thêm '+st.p+' kỳ kiểm kê, '+st.a+' kỳ tài sản, '+st.h+' biên bản, '+st.e+' phiếu'+(st.u?', cập nhật '+st.u+' mục/kỳ khoá':'')+(st.c?'. '+st.c+' mục khác số đã kiểm: GIỮ số trên máy này':'')+(lost?'. '+lost+' ảnh không lưu được':''));
+        toast('Đã khôi phục và kiểm tra lại: thêm '+st.p+' kỳ kiểm kê, '+st.a+' kỳ tài sản, '+st.h+' biên bản, '+st.e+' phiếu'+(st.rc?', đối chiếu DT–xuất kho: thêm '+st.rc+' mục':'')+(st.u?', cập nhật '+st.u+' mục/kỳ khoá':'')+(st.c?'. '+st.c+' mục khác số đã kiểm: GIỮ số trên máy này':'')+(lost?'. '+lost+' ảnh không lưu được':''));
       });
     };
     r.readAsText(f);input.value='';
@@ -6812,8 +6857,8 @@ var RC_SEED={"dv":[["Osstem","Trụ Osstem (Hàn)","TRỤ OSSTEM (HÀN)"],["Hios
 var RC_LD=["Muộn kỳ","Liên cơ sở","Bảo hành","Phác đồ duyệt","Sai PID","Ký gửi","Khác"];
 var RC_LX=["Xuất trước - DT sau","Xuất nhầm","Ký gửi","Hao hụt/hỏng","Chưa gắn PID","Bảo hành","Khác"];
 var RC_ST=["Chờ duyệt","Đã duyệt","Không duyệt"];
-var RC_TABS=[["sum","Tổng quan"],["list","Ca lệch"],["chk","Kiểm tra DL"],["map","Cấu hình"],["imp","Nhập/Xuất"]];
-var RC_KEYS=["cs","th","q","side","only","mode","map"];
+var RC_TABS=[["sum","Tổng quan"],["list","Ca lệch"],["chk","Kiểm tra DL"],["map","Cấu hình"],["imp","Nhập/Xuất"],["apx","Phụ lục"]];
+var RC_KEYS=["cs","th","q","side","only","mode","map","yr","ap"];
 /* V5: bỏ "nhóm vật tư". Cấu hình chính = bảng cfg (dịch vụ → vật tư xuất + định mức + mã/tên thay thế). dm = định mức theo từ khóa (ghi đè SL cần). cs = chuẩn hóa cơ sở */
 var RC_MAPS={cfg:["Định mức dịch vụ → vật tư xuất"],dm:["Định mức theo từ khóa (ghi đè SL cần)","Từ khóa dịch vụ","Số lượng"],cs:["Chuẩn hóa cơ sở","Tên gốc","Tên chuẩn"]};
 var RC_CF=[["dv","Dịch vụ (tên đầy đủ hoặc từ khóa)"],["ma","Mã vật tư xuất"],["ten","Tên vật tư xuất"],["dm","Định mức (SL / 1 dịch vụ)"],["alt","Mã / tên thay thế (cách nhau bằng ;)"],["gia","Đơn giá VND (tuỳ chọn)"]];
@@ -6822,7 +6867,7 @@ var RC_HD={
   dt:{cs:["co so","chi nhanh","don vi"],pid:["ma kh","ma khach hang","pid","ma kh (pid)","ma benh nhan"],kh:["khach hang","ten khach hang","ten kh","benh nhan"],bs:["bac si"],ngay:["ngay dv","ngay dich vu","ngay","ngay thuc hien"],dv:["dich vu","ten dich vu"],mvt:["ma vat tu"],sl:["sl dich vu","so luong dich vu","so luong","sl"],dt:["doanh thu","doanh thu (vnd)","gia tri dt","gia tri doanh thu","thanh tien"]},
   xk:{cs:["co so","chi nhanh","don vi","kho"],pid:["ma kh","ma khach hang","pid","ma kh (pid)"],ma:["ma vat tu","ma hang","ma vt"],ten:["ten vat tu","ten hang","ten vt"],ngay:["ngay xuat","ngay hach toan","ngay"],so:["so ct","so chung tu","so phieu"],dg:["dien giai","dien giai chung","noi dung"],dvt:["dvt","don vi tinh"],ct:["loai ct","loai chung tu"],sl:["sl xuat","so luong xuat","so luong","sl"]}
 };
-var RC={tab:0,cs:"Tất cả",th:"Tất cả",q:"",lim:40,side:0,only:1,mode:"replace",map:"cfg"};
+var RC={tab:0,cs:"Tất cả",th:"Tất cả",q:"",lim:40,side:0,only:1,mode:"replace",map:"cfg",co:{},cfgG:[],apxK:[],yr:"Tất cả",ap:"mat"};
 var RC_RES=null;
 /* ----- Dữ liệu & cấu hình ----- */
 function rcSeedCfg(M){
@@ -6907,10 +6952,10 @@ function rcCompute(){
       if(ix)list=ix.map(function(ci){return {c:cfg[ci],ci:ci};});
       else{svcMiss[svc]=(svcMiss[svc]||0)+1;ph("CHƯA CẤU HÌNH DỊCH VỤ","Dịch vụ này chưa có trong Cấu hình → thêm dịch vụ và vật tư xuất.");return;}
     }else{ph("KHÔNG CÓ DỊCH VỤ","Dòng không ghi tên dịch vụ.");return;}
-    var q=r.ov?0:kwQty(svc),sl=rcNum(r.sl)||1,k=0;
+    var q=r.ov?0:kwQty(svc),sl=rcNum(r.sl)||1,k=0,anyV=list.some(function(x){return rcVid(x.c);}),noneDone=false;
     list.forEach(function(x){
       var rule=x.c,vid=rcVid(rule);
-      if(!vid){ph("KHÔNG DÙNG VẬT TƯ","Dịch vụ được cấu hình không đối chiếu vật tư.");return;}
+      if(!vid){if(!anyV&&!noneDone){noneDone=true;ph("KHÔNG DÙNG VẬT TƯ","Dịch vụ được cấu hình không đối chiếu vật tư.");}return;}
       var need=q>1?q:rcDm(rule)*sl;
       var gk=(O.cs?rcK(cs):"")+"|"+pid+"|"+vid+"|"+(O.th?mo:"");
       var g=gmap[gk];
@@ -6918,7 +6963,7 @@ function rcCompute(){
       if(!vidName[vid])vidName[vid]=rule.ten||rule.ma;
       for(var t in rcTok(rule))g.tok[t]=1;
       g.need+=need;g.n++;
-      var c={i:i,r:r,cs:cs,pid:pid,mo:mo,g:g,ri:x.ci,ten:g.ten,first:!g.head,bad:false,need:0,ok:false,T:"",why:"",nid:r.id+(k>0?"|"+vid:""),fin:"",O:0,P:0,Q:0,R:0,rowFirst:k===0};
+      var c={i:i,r:r,cs:cs,pid:pid,mo:mo,g:g,ri:x.ci,ten:g.ten,nd:need,first:!g.head,bad:false,need:0,ok:false,T:"",why:"",nid:r.id+(k>0?"|"+vid:""),fin:"",O:0,P:0,Q:0,R:0,rowFirst:k===0};
       if(!g.head)g.head=c;
       cases.push(c);k++;
     });
@@ -6954,7 +6999,7 @@ function rcCompute(){
   heads.forEach(function(g){
     var c=g.head,s=g.got,Q=s-g.need,wrong=[],sw={};
     if(s===0&&(xbyPid[g.pid]||[]).length)(xbyPid[g.pid]).forEach(function(x){
-      if(x.g||!okOpt(g,x))return;var k=norm(x.ma)+"|"+norm(x.ten);if(sw[k])return;sw[k]=1;wrong.push({ma:x.ma,ten:x.ten,sl:x.sl});});
+      if(x.g||!okOpt(g,x))return;x.inWrong=1;var k=norm(x.ma)+"|"+norm(x.ten);if(sw[k])return;sw[k]=1;wrong.push({ma:x.ma,ten:x.ten,sl:x.sl,so:x.r.so});});
     c.O=g.need;c.P=s;c.Q=Q;c.R=Q*g.price;c.wrong=wrong.slice(0,5);
     c.T=s===0?(wrong.length?"XUẤT SAI VẬT TƯ":"CHƯA XUẤT KHO"):Math.abs(Q)<eps?"KHỚP":Q>0?"XUẤT SAI SỐ LƯỢNG (THỪA)":"XUẤT SAI SỐ LƯỢNG (THIẾU)";
     c.bad=c.T!=="KHỚP";c.ok=c.bad&&appr(c.nid);c.need=c.bad&&!c.ok?1:0;
@@ -7010,8 +7055,8 @@ function renderRecon(){
   var R=rcDb(),h='<div class="topbar"><div class="trow wrap"><button class="back" onclick="A.go(\'home\')">‹</button><div class="ttl">Đối chiếu doanh thu – xuất kho</div></div><div style="height:10px"></div></div><div class="wrap" style="padding-top:12px;padding-bottom:50px">';
   RC_RES=rcCompute();
   h+='<div style="display:flex;gap:6px;overflow-x:auto;margin-bottom:12px">'+RC_TABS.map(function(t,i){return '<button class="pill'+(RC.tab===i?' on':'')+'" style="white-space:nowrap'+(RC.tab===i?';background:var(--teal);color:#fff':'')+'" onclick="A.rcTab('+i+')">'+t[1]+'</button>';}).join('')+'</div>';
-  if(!R.dt.length&&!R.xk.length&&RC.tab<2)h+='<div class="card" style="margin-bottom:12px"><div style="font-weight:700;margin-bottom:4px">Chưa có dữ liệu</div><div style="font-size:13px;color:var(--mut);margin-bottom:10px">Vào tab Nhập/Xuất: tải file mẫu chuẩn, điền doanh thu + xuất kho rồi nhập vào.</div><button class="btn btn-primary" onclick="A.rcTab(4)">Nhập dữ liệu</button></div>';
-  else if(RC.tab===0)h+=rcViewSum();else if(RC.tab===1)h+=rcViewList();else if(RC.tab===2)h+=rcViewChk();else if(RC.tab===3)h+=rcViewMap();else if(RC.tab===4)h+=rcViewImp();
+  if(!R.dt.length&&!R.xk.length&&(RC.tab<2||RC.tab===5))h+='<div class="card" style="margin-bottom:12px"><div style="font-weight:700;margin-bottom:4px">Chưa có dữ liệu</div><div style="font-size:13px;color:var(--mut);margin-bottom:10px">Vào tab Nhập/Xuất: tải file mẫu chuẩn, điền doanh thu + xuất kho rồi nhập vào.</div><button class="btn btn-primary" onclick="A.rcTab(4)">Nhập dữ liệu</button></div>';
+  else if(RC.tab===0)h+=rcViewSum();else if(RC.tab===1)h+=rcViewList();else if(RC.tab===2)h+=rcViewChk();else if(RC.tab===3)h+=rcViewMap();else if(RC.tab===4)h+=rcViewImp();else if(RC.tab===5)h+=rcViewApx();
   document.getElementById("app").innerHTML=h+'</div>';
 }
 function rcViewSum(){
@@ -7093,46 +7138,65 @@ function rcViewChk(){
 /* ----- Cấu hình ----- */
 function rcViewMap(){
   var m=RC.map;if(!RC_MAPS[m])m=RC.map="cfg";
-  var h='<div class="card" style="margin-bottom:12px"><div class="sec">Cấu hình đối chiếu</div>'+rcSel(6,Object.keys(RC_MAPS).map(function(k){return [k,RC_MAPS[k][0]];}),m)+'</div>';
+  var h='<div class="card" style="margin-bottom:12px"><div class="rcsec">Cấu hình đối chiếu</div>'+rcSel(6,Object.keys(RC_MAPS).map(function(k){return [k,RC_MAPS[k][0]];}),m)+'</div>';
   return h+(m==="cfg"?rcViewCfg():rcViewMapGen());
 }
 function rcViewCfg(){
   var R=rcDb(),Z=RC_RES,O=R.opt,q=rcK(RC.q),h='';
-  h+='<div class="card" style="margin-bottom:12px"><div class="sec">Quy tắc khớp</div><div style="font-size:12.5px;color:var(--mut);line-height:1.6">Một ca <b>KHỚP</b> khi đủ 3 điều kiện:<br>① đúng <b>mã khách hàng (PID)</b><br>② đúng <b>vật tư xuất</b> — mã hoặc tên đã cấu hình cho dịch vụ đó (kể cả mã/tên thay thế)<br>③ đúng <b>số lượng</b> = định mức × SL dịch vụ</div>'
+  h+='<div class="card" style="margin-bottom:12px"><div class="rcsec">Quy tắc khớp</div><div class="rcnote" style="line-height:1.6">Một ca <b>KHỚP</b> khi đủ 3 điều kiện:<br>① đúng <b>mã khách hàng (PID)</b><br>② đúng <b>vật tư xuất</b> — mã hoặc tên đã cấu hình cho dịch vụ đó (kể cả mã/tên thay thế)<br>③ đúng <b>số lượng</b> = định mức × SL dịch vụ</div>'
     +'<label style="display:flex;align-items:center;gap:8px;padding:8px 0 0"><input type="checkbox" onchange="A.rcOpt(\'cs\',this.checked)"'+(O.cs?' checked':'')+'><span style="font-size:13px">Yêu cầu thêm: cùng cơ sở</span></label>'
     +'<label style="display:flex;align-items:center;gap:8px;padding:6px 0 0"><input type="checkbox" onchange="A.rcOpt(\'th\',this.checked)"'+(O.th?' checked':'')+'><span style="font-size:13px">Yêu cầu thêm: cùng tháng</span></label></div>';
-  h+='<div class="card" style="margin-bottom:12px"><div class="sec">Định mức dịch vụ → vật tư xuất ('+R.cfg.length+' dòng)</div>'
-    +'<div style="font-size:12px;color:var(--mut);margin-bottom:8px">Dịch vụ giống tên đầy đủ thì ưu tiên; không thì lấy từ khóa dài nhất nằm trong tên dịch vụ. Một dịch vụ cần nhiều vật tư → thêm nhiều dòng cùng dịch vụ. Để trống mã + tên vật tư = dịch vụ không đối chiếu vật tư.</div>'
+  h+='<div class="card" style="margin-bottom:12px"><div class="rcsec">Định mức dịch vụ → vật tư xuất ('+R.cfg.length+' dòng)</div>'
+    +'<div class="rcnote" style="margin-bottom:8px">Dịch vụ giống tên đầy đủ thì ưu tiên; không thì lấy từ khóa dài nhất nằm trong tên dịch vụ. Một dịch vụ cần nhiều vật tư → thêm nhiều dòng cùng dịch vụ. Để trống mã + tên vật tư = dịch vụ không đối chiếu vật tư.</div>'
     +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px"><button class="btn btn-outline" onclick="A.rcCfgTpl()">'+icon("download",16)+'Tải file mẫu / xuất cấu hình</button><label class="btn btn-outline">'+icon("upload",16)+'Nhập – thay thế<input type="file" accept=".xlsx,.xls,.csv" style="display:none" onchange="A.rcCfgFile(this,\'replace\')"></label></div>'
     +'<label class="btn btn-outline" style="margin-bottom:12px">'+icon("upload",16)+'Nhập – nối thêm (bỏ dòng trùng)<input type="file" accept=".xlsx,.xls,.csv" style="display:none" onchange="A.rcCfgFile(this,\'append\')"></label>';
   /* form thêm */
   h+='<div style="font-weight:700;font-size:13px;margin-bottom:6px">Thêm dòng cấu hình</div>';
-  RC_CF.forEach(function(f,i){
-    h+='<label class="lbl" style="margin-bottom:3px;font-size:12px">'+esc(f[1])+'</label><input class="inp" id="rcm'+i+'" style="margin-bottom:8px"'+(f[0]==="dm"?' inputmode="decimal" placeholder="1"':f[0]==="gia"?' inputmode="decimal"':'')+(f[0]==="dv"?' list="rcdl-dv"':f[0]==="ten"?' list="rcdl-vt"':'')+'>';
+  h+='<div class="rcgrid" style="margin-bottom:10px">';
+  [[0,2],[2,2],[1,1],[3,1],[4,2],[5,1]].forEach(function(o){
+    var i=o[0],f=RC_CF[i];
+    h+='<div class="rcf" style="grid-column:span '+o[1]+'"><div class="l">'+esc(f[1])+'</div><input id="rcm'+i+'" style="padding:8px 10px;font-size:13px"'+(f[0]==="dm"?' inputmode="decimal" placeholder="1"':f[0]==="gia"?' inputmode="decimal"':'')+(f[0]==="dv"?' list="rcdl-dv"':f[0]==="ten"?' list="rcdl-vt"':'')+'></div>';
   });
+  h+='</div>';
   h+='<datalist id="rcdl-dv">'+Z.svcMiss.slice(0,60).map(function(m){return '<option value="'+esc(m[0])+'">';}).join('')+'</datalist><datalist id="rcdl-vt">'+rcNames().map(function(n){return '<option value="'+esc(n)+'">';}).join('')+'</datalist>';
   h+='<button class="btn btn-primary" onclick="A.rcCfgAdd()">'+icon("plus",16)+'Thêm vào cấu hình</button></div>';
   if(Z.svcMiss.length){
-    h+='<div class="card" style="margin-bottom:12px"><div class="sec">Dịch vụ trong doanh thu chưa có định mức ('+Z.svcMiss.length+')</div><div style="font-size:12px;color:var(--mut);margin-bottom:8px">Bấm để điền sẵn vào ô “Dịch vụ” ở form thêm phía trên.</div><div style="display:flex;flex-wrap:wrap;gap:6px">'
+    h+='<div class="card" style="margin-bottom:12px"><div class="rcsec">Dịch vụ trong doanh thu chưa có định mức ('+Z.svcMiss.length+')</div><div class="rcnote" style="margin-bottom:8px">Bấm để điền sẵn vào ô “Dịch vụ” ở form thêm phía trên.</div><div style="display:flex;flex-wrap:wrap;gap:6px">'
       +Z.svcMiss.slice(0,15).map(function(m,k){return '<button class="pill" style="white-space:normal;text-align:left;font-size:12px" onclick="A.rcPick('+k+')">'+esc(m[0].length>60?m[0].slice(0,58)+'…':m[0])+' ('+m[1]+')</button>';}).join('')+'</div></div>';
   }
-  h+='<div class="card"><div class="sec">Danh sách cấu hình</div><input class="inp" placeholder="Lọc theo dịch vụ / vật tư…" value="'+esc(RC.q)+'" onchange="A.rcS(2,this.value)" style="margin-bottom:10px">';
-  var list=[];R.cfg.forEach(function(c,i){if(!q||rcK([c.dv,c.ma,c.ten,c.alt].join(" ")).indexOf(q)>=0)list.push(i);});
-  h+='<div style="font-size:12px;color:var(--mut);margin-bottom:6px">'+list.length+' dòng</div>';
-  list.slice(0,RC.lim).forEach(function(i){
-    var c=R.cfg[i];
-    function fld(f,lab,full,extra){return '<div'+(full?' style="grid-column:1/3"':'')+'><div style="font-size:11px;color:var(--mut2);margin-bottom:2px">'+lab+'</div><input class="inp" style="padding:8px 10px;font-size:13px" value="'+esc(c[f]==null?"":c[f])+'" '+(extra||'')+' onchange="A.rcCfgEdit('+i+',\''+f+'\',this.value)"></div>';}
-    h+='<div style="border:1px solid var(--line);border-radius:14px;padding:10px;margin-bottom:8px"><div style="display:grid;grid-template-columns:1fr 1fr;gap:6px">'
-      +fld("dv","Dịch vụ / từ khóa",1)+fld("ma","Mã vật tư")+fld("ten","Tên vật tư xuất")+fld("dm","Định mức",0,'inputmode="decimal"')+fld("gia","Đơn giá",0,'inputmode="decimal"')+fld("alt","Mã / tên thay thế (cách nhau bằng ;)",1)
-      +'</div><div style="text-align:right;margin-top:6px"><a onclick="A.rcCfgDel('+i+')" style="color:var(--red);font-size:13px">Xóa dòng</a></div></div>';
+  var HUES=[210,150,28,280,350,175,45,320],G=[],gm={};
+  R.cfg.forEach(function(c,i){var k=norm(c.dv)||"(trống)";if(!gm[k]){gm[k]={k:k,dv:c.dv||"(chưa có tên)",ix:[]};G.push(gm[k]);}gm[k].ix.push(i);});
+  RC.cfgG=G.map(function(g){return g.k;});
+  var vis=G.filter(function(g){return !q||g.ix.some(function(i){var c=R.cfg[i];return rcK([c.dv,c.ma,c.ten,c.alt].join(" ")).indexOf(q)>=0;});});
+  h+='<div class="card" style="margin-bottom:14px"><div class="rcsec">Danh sách dịch vụ · '+G.length+' dịch vụ / '+R.cfg.length+' dòng vật tư</div>'
+    +'<div class="rcnote" style="margin-bottom:8px">Mỗi khối = 1 dịch vụ (tiêu đề đậm, có số thứ tự). Bấm vào tiêu đề để mở và sửa vật tư xuất của dịch vụ đó.</div>'
+    +'<input class="inp" placeholder="Lọc theo dịch vụ / vật tư…" value="'+esc(RC.q)+'" onchange="A.rcS(2,this.value)" style="margin-bottom:8px">'
+    +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px"><button class="btn btn-outline" style="padding:8px" onclick="A.rcCfgAll(true)">Mở tất cả</button><button class="btn btn-outline" style="padding:8px" onclick="A.rcCfgAll(false)">Thu gọn tất cả</button></div></div>';
+  h+='<div class="rcl">';
+  vis.slice(0,RC.lim).forEach(function(g){
+    var gi=G.indexOf(g),hue=HUES[gi%HUES.length],open=!!RC.co[g.k]||(!!q&&vis.length<=8);
+    var chips=g.ix.map(function(i){var c=R.cfg[i],nm=c.ten||c.ma;return '<span class="rcg-chip">'+(nm?esc(nm)+' ×'+rcDm(c):'<i style="font-weight:500">không dùng vật tư</i>')+'</span>';}).join('');
+    function fld(i,f,lab,span,extra,st){var c=R.cfg[i];return '<div class="rcf" style="grid-column:span '+span+'"><div class="l">'+lab+'</div><input style="'+(st||'')+'" value="'+esc(c[f]==null?"":c[f])+'" '+(extra||'')+' onchange="A.rcCfgEdit('+i+',\''+f+'\',this.value)"></div>';}
+    h+='<details class="rcg"'+(open?' open':'')+' ontoggle="A.rcCfgOpen('+gi+',this.open)" style="--hc:hsl('+hue+',68%,44%);--hc-d:hsl('+hue+',55%,34%);--hbg:hsla('+hue+',75%,50%,.12)">'
+      +'<summary><div class="rcg-top"><span class="rcg-no">'+(gi+1)+'</span><div class="rcg-t">'+esc(g.dv)+'</div></div><div class="rcg-sub"><span>Vật tư xuất:</span>'+chips+'</div></summary>'
+      +'<div class="rcg-body">';
+    g.ix.forEach(function(i,n){
+      h+='<div class="rcg-vt"><div class="rcg-vh">Vật tư xuất '+(n+1)+'/'+g.ix.length+'</div><div class="rcgrid">'
+        +fld(i,"ten","Tên vật tư xuất",2,'','font-weight:700')+fld(i,"ma","Mã vật tư",1)+fld(i,"dm","Định mức (SL / 1 dịch vụ)",1,'inputmode="decimal"')
+        +fld(i,"alt","Mã / tên thay thế (cách nhau bằng ;)",2)+fld(i,"gia","Đơn giá (tuỳ chọn)",1,'inputmode="decimal"')
+        +'<div style="display:flex;align-items:flex-end;justify-content:flex-end"><a onclick="A.rcCfgDel('+i+')" style="color:var(--red);font-size:12px;padding:6px 0">Xóa vật tư này</a></div></div></div>';
+    });
+    h+='<div class="rcg-act"><button onclick="A.rcCfgAddIn('+gi+')">+ Thêm vật tư</button><button onclick="A.rcCfgRen('+gi+')">✎ Đổi tên</button><button style="color:var(--red)" onclick="A.rcCfgDelG('+gi+')">Xóa dịch vụ</button></div></div></details>';
   });
-  if(list.length>RC.lim)h+='<button class="btn btn-outline" onclick="A.rcMore()">Xem thêm</button>';
-  h+='<button class="btn btn-outline" style="margin-top:12px" onclick="A.rcCfgReset()">Khôi phục cấu hình mặc định</button></div>';
+  h+='</div>';
+  if(!vis.length)h+='<div class="empty">Không có dịch vụ nào khớp bộ lọc.</div>';
+  if(vis.length>RC.lim)h+='<button class="btn btn-outline" onclick="A.rcMore()">Xem thêm</button>';
+  h+='<button class="btn btn-outline" style="margin-top:14px" onclick="A.rcCfgReset()">Khôi phục cấu hình mặc định</button>';
   return h;
 }
 function rcViewMapGen(){
-  var R=rcDb(),m=RC.map,L=RC_MAPS[m],q=rcK(RC.q),h='<div class="card"><div class="sec">'+esc(L[0])+'</div>'
-    +(m==="dm"?'<div style="font-size:12px;color:var(--mut);margin:0 0 8px">Dịch vụ chứa từ khóa → SL cần = số này (ví dụ All-on-4 = 4 trụ), thay cho định mức × SL dịch vụ. Dòng nằm DƯỚI thắng.</div>':'<div style="font-size:12px;color:var(--mut);margin:0 0 8px">Gộp các cách viết khác nhau của cơ sở về một tên chuẩn.</div>')
+  var R=rcDb(),m=RC.map,L=RC_MAPS[m],q=rcK(RC.q),h='<div class="card"><div class="rcsec">'+esc(L[0])+'</div>'
+    +(m==="dm"?'<div class="rcnote" style="margin:0 0 8px">Dịch vụ chứa từ khóa → SL cần = số này (ví dụ All-on-4 = 4 trụ), thay cho định mức × SL dịch vụ. Dòng nằm DƯỚI thắng.</div>':'<div class="rcnote" style="margin:0 0 8px">Gộp các cách viết khác nhau của cơ sở về một tên chuẩn.</div>')
     +'<div style="display:grid;grid-template-columns:repeat('+(L.length-1)+',1fr);gap:6px;margin-bottom:8px">';
   for(var i=1;i<L.length;i++)h+='<input class="inp" id="rcm'+(i-1)+'" placeholder="'+L[i]+'">';
   h+='</div><button class="btn btn-primary" style="margin-bottom:12px" onclick="A.rcMapAdd()">'+icon("plus",16)+'Thêm dòng</button><input class="inp" placeholder="Lọc…" value="'+esc(RC.q)+'" onchange="A.rcS(2,this.value)" style="margin-bottom:8px">';
@@ -7148,8 +7212,9 @@ function rcViewImp(){
     +'<label class="btn btn-primary" style="margin-top:10px">'+icon("upload",17)+'File mẫu chuẩn (cả 2 sheet)<input type="file" accept=".xlsx,.xls,.csv" style="display:none" onchange="A.rcFile(this,0)"></label>'
     +'<label class="btn btn-outline" style="margin-top:8px">Chỉ Doanh thu<input type="file" accept=".xlsx,.xls,.csv" style="display:none" onchange="A.rcFile(this,1)"></label>'
     +'<label class="btn btn-outline" style="margin-top:8px">Chỉ Xuất kho<input type="file" accept=".xlsx,.xls,.csv" style="display:none" onchange="A.rcFile(this,2)"></label></div>'
-    +'<div class="card"><div class="sec">3. Xuất kết quả</div><button class="btn btn-primary" style="margin-bottom:8px" onclick="A.rcExport()">'+icon("download",17)+'Tải Excel kết quả đối chiếu</button><button class="btn btn-outline" onclick="A.rcPrint()">'+icon("file",17)+'Biên bản & phụ lục (in / PDF)</button>'
-    +'<div style="font-size:12px;color:var(--mut);margin-top:8px">Biên bản theo bộ lọc Cơ sở / Tháng ở tab Tổng quan.</div></div>'
+    +'<div class="card"><div class="sec">3. Xuất kết quả</div><button class="btn btn-primary" style="margin-bottom:8px" onclick="A.rcExport()">'+icon("download",17)+'Tải Excel kết quả đối chiếu</button><button class="btn btn-outline" onclick="A.rcPrint()">'+icon("file",17)+'Biên bản (in / PDF)</button>'
+    +'<div style="font-size:12px;color:var(--mut);margin-top:8px">Biên bản và Phụ lục theo bộ lọc Cơ sở / Tháng (Phụ lục có thêm bộ lọc Năm, xem tab Phụ lục).</div>'
+    +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px"><button class="btn btn-outline" style="padding:10px" onclick="A.rcApxXlsx()">'+icon("download",16)+'Phụ lục từng kho (Excel)</button><button class="btn btn-outline" style="padding:10px" onclick="A.rcApxPrint()">'+icon("file",16)+'Phụ lục từng kho (in / PDF)</button></div></div>'+rcBackupCard()
     +'<div class="card" style="margin-top:12px"><div class="sec">Dán dữ liệu từ MISA / Excel</div><div style="font-size:12px;color:var(--mut);margin-bottom:8px">Copy vùng dữ liệu KÈM DÒNG TIÊU ĐỀ (đúng tên cột như file mẫu) rồi dán vào ô dưới. Không kèm tiêu đề thì app hiểu theo thứ tự cột MISA cũ. Dùng chế độ Thay thế / Nối thêm ở trên.</div><textarea id="rcpaste" class="inp" rows="5"></textarea><div style="display:flex;gap:8px;margin-top:8px"><button class="btn btn-primary" onclick="A.rcPaste(0)">Dán vào Doanh thu</button><button class="btn btn-primary" onclick="A.rcPaste(1)">Dán vào Xuất kho</button></div><div style="display:flex;gap:8px;margin-top:8px"><button class="btn btn-outline" style="color:var(--red)" onclick="A.rcClear(0)">Xóa hết doanh thu</button><button class="btn btn-outline" style="color:var(--red)" onclick="A.rcClear(1)">Xóa hết xuất kho</button></div></div>';
 }
 /* ----- Nhập file (đọc theo TÊN CỘT; không có tiêu đề thì theo bố cục MISA cũ) ----- */
@@ -7233,7 +7298,7 @@ Object.assign(A,{
     var R=rcDb(),v=RC_CF.map(function(f,i){return document.getElementById("rcm"+i).value.trim();});
     if(!v[0]){toast("Nhập tên dịch vụ / từ khóa");return;}
     var row={dv:v[0],ma:v[1],ten:v[2],dm:v[3]===""?1:rcNum(v[3]),alt:v[4],gia:rcNum(v[5])};
-    R.cfg.push(row);audit("recon-cfg","add",null,row.dv+" → "+(row.ma||row.ten||"(không dùng vật tư)"));saveSoon();renderRecon();
+    R.cfg.push(row);RC.co[norm(row.dv)]=true;audit("recon-cfg","add",null,row.dv+" → "+(row.ma||row.ten||"(không dùng vật tư)"));saveSoon();renderRecon();
     toast(row.ma||row.ten?"Đã thêm vào cấu hình":"Đã thêm: dịch vụ này không đối chiếu vật tư");
   },
   rcCfgEdit:function(i,f,v){
@@ -7288,6 +7353,25 @@ Object.assign(A,{
       inp.value="";
     };
     fr.readAsArrayBuffer(f);
+  },
+  rcCfgOpen:function(gi,o){var k=RC.cfgG[gi];if(k!=null)RC.co[k]=!!o;},
+  rcCfgAll:function(o){RC.cfgG.forEach(function(k){RC.co[k]=!!o;});renderRecon();},
+  rcCfgRows:function(gi){var k=RC.cfgG[gi],a=[];rcDb().cfg.forEach(function(c,i){if((norm(c.dv)||"(trống)")===k)a.push(i);});return a;},
+  rcCfgAddIn:function(gi){
+    var R=rcDb(),ix=A.rcCfgRows(gi);if(!ix.length)return;
+    R.cfg.splice(ix[ix.length-1]+1,0,{dv:R.cfg[ix[0]].dv,ma:"",ten:"",dm:1,alt:"",gia:0});
+    RC.co[RC.cfgG[gi]]=true;audit("recon-cfg","addIn",null,R.cfg[ix[0]].dv);saveSoon();renderRecon();toast("Đã thêm dòng vật tư mới — điền mã/tên vật tư");
+  },
+  rcCfgRen:function(gi){
+    var R=rcDb(),ix=A.rcCfgRows(gi);if(!ix.length)return;
+    var cur=R.cfg[ix[0]].dv,nv=prompt("Tên dịch vụ / từ khóa mới:",cur);if(nv===null)return;nv=nv.trim();
+    if(!nv){toast("Tên dịch vụ không được để trống");return;}if(nv===cur)return;
+    ix.forEach(function(i){R.cfg[i].dv=nv;});RC.co[norm(nv)]=true;audit("recon-cfg","rename",cur,nv);saveSoon();renderRecon();
+  },
+  rcCfgDelG:function(gi){
+    var R=rcDb(),ix=A.rcCfgRows(gi);if(!ix.length)return;
+    if(!confirm('Xóa dịch vụ "'+R.cfg[ix[0]].dv+'" cùng '+ix.length+' dòng vật tư của nó?'))return;
+    audit("recon-cfg","delGroup",R.cfg[ix[0]].dv,ix.length);R.cfg=R.cfg.filter(function(c,i){return ix.indexOf(i)<0;});saveSoon();renderRecon();
   },
   /* ----- bảng phụ: định mức theo từ khóa, chuẩn hóa cơ sở ----- */
   rcMapAdd:function(){
@@ -7363,7 +7447,7 @@ Object.assign(A,{
     var ex=s.needD.map(function(o){var n=R.notes[o.nid]||{};return ["Doanh thu",esc(o.cs),esc(o.pid),esc(o.r.dv+" → "+o.ten),esc(o.T),esc(n.g||"")];}).concat(s.needX.map(function(x){var n=R.notes[x.nid]||{};return ["Xuất kho",esc(x.cs),esc(x.pid),esc(x.ten+" – "+x.r.so),esc(x.P),esc(n.g||"")];}));
     var body='<p style="text-align:center;font-weight:bold">CÔNG TY CỔ PHẦN NỤ CƯỜI MỚI VIỆT NAM</p><h2 style="text-align:center">BIÊN BẢN XÁC NHẬN SẢN LƯỢNG DỊCH VỤ VÀ VẬT TƯ XUẤT KHO</h2><p style="text-align:center">'+k+'</p>'
       +'<p>Tổng doanh thu: <b>'+rcF(s.rev)+'</b> đ · Giá trị xuất kho: <b>'+rcF(s.val)+'</b> đ · Tỷ lệ khớp: <b>'+(s.F.length?(s.ok/s.F.length*100).toFixed(1):0)+'%</b></p>'
-      +tb(["STT","Vật tư","Số ca","SL cần","SL xuất","Chênh","Đánh giá"],g)+'<p><b>Phụ lục: các ca chưa xử lý ('+ex.length+')</b></p>'+(ex.length?tb(["Nguồn","Cơ sở","PID","Dịch vụ / Vật tư","Trạng thái","Giải trình"],ex):'<p>Không có.</p>')
+      +tb(["STT","Vật tư","Số ca","SL cần","SL xuất","Chênh","Đánh giá"],g)+'<p><i>Kèm theo: Phụ lục 01 – Chi tiết đối chiếu dịch vụ và phiếu xuất kho của từng cơ sở (in riêng, khổ ngang).</i></p><p><b>Phụ lục 02: các ca chưa xử lý ('+ex.length+')</b></p>'+(ex.length?tb(["Nguồn","Cơ sở","PID","Dịch vụ / Vật tư","Trạng thái","Giải trình"],ex):'<p>Không có.</p>')
       +'<table style="width:100%;margin-top:30px;text-align:center"><tr><td><b>THỦ KHO</b><br><i>(Ký, ghi rõ họ tên)</i></td><td><b>PHÒNG HÀNH CHÍNH</b><br><i>(Ký, ghi rõ họ tên)</i></td><td><b>GIÁM ĐỐC CƠ SỞ</b><br><i>(Ký, đóng dấu)</i></td></tr></table>';
     printPreviewHtml(docWrap("Biên bản đối chiếu",body,"portrait"));
   }
@@ -7401,6 +7485,309 @@ Object.assign(A,{
     saveSoon();RC.tab=0;renderRecon();toast("Đã dán "+n+" dòng");
   },
   rcClear:function(kind){if(!confirm("Xóa toàn bộ dữ liệu "+(kind?"xuất kho":"doanh thu")+"? Giải trình đã nhập vẫn được giữ."))return;rcDb()[kind?"xk":"dt"]=[];saveSoon();renderRecon();}
+});
+
+/* ===== V6 · PHỤ LỤC 01 THEO TỪNG CƠ SỞ (lấy DỊCH VỤ làm gốc) + SAO LƯU / CHUYỂN MÁY dữ liệu đối chiếu ===== */
+var RC_KQ={"KHỚP":"Khớp","CHƯA XUẤT KHO":"Chưa xuất kho","XUẤT SAI VẬT TƯ":"Xuất sai vật tư","XUẤT SAI SỐ LƯỢNG (THIẾU)":"Xuất thiếu","XUẤT SAI SỐ LƯỢNG (THỪA)":"Xuất thừa","CHƯA CẤU HÌNH DỊCH VỤ":"Chưa cấu hình DV","THIẾU MÃ KH (PID)":"Thiếu mã KH","KHÔNG CÓ DỊCH VỤ":"Thiếu tên DV","KHÔNG DÙNG VẬT TƯ":"Không dùng vật tư"};
+var RC_KQX={"XUẤT CHƯA CÓ DOANH THU":"Xuất chưa có DT","TRÙNG/THỪA XUẤT":"Trùng/thừa xuất","XUẤT SAI VẬT TƯ":"Xuất sai vật tư"};
+var RC_APX_HEAD=["STT","Mã BN","Họ tên khách hàng","Ngày điều trị","Dịch vụ","Phiếu xuất kho","Vật tư","SL định mức","SL xuất thực","Kết quả","Giải trình","Đã xác nhận"];
+var RC_APX_CLS={g:["#E2F0D9","#15803d","green"],b:["#DDEBF7","#0B5394","sky"],r:["#FCE4E4","#C00000","red"],n:["#F2F2F2","#595959","gray"]};
+function rcYears(){var a=[];RC_RES.rows.forEach(function(o){var d=rcDate(o.r.ngay);if(d&&a.indexOf(d.y)<0)a.push(d.y);});return a.sort(function(x,y){return y-x;});}
+function rcYrOk(v){if(!RC.yr||RC.yr==="Tất cả")return true;var d=rcDate(v);return !!d&&String(d.y)===String(RC.yr);}
+/* 1 dòng phụ lục = 1 dịch vụ × 1 vật tư theo định mức. Các dịch vụ cùng khách + cùng vật tư được gộp: SL xuất tính ở dòng đầu. */
+function rcApxRow(o,N){
+  var r=o.r,n=N[o.nid]||{},d=rcDate(r.ngay),g=o.g,gt=[n.r,n.g].filter(Boolean).join(" – ");
+  var row={pid:o.pid||"",kh:r.kh||"",ngay:rcDStr(r.ngay)||"",dk:d?d.y*10000+d.m*100+d.d:0,dv:r.dv||"",so:"—",vt:"—",nd:"",xt:"",kq:"",cls:"n",gt:gt,lech:false,cnt:false,j:o.j};
+  if(o.none){
+    row.cnt=true;row.kq=RC_KQ[o.T]||o.T;row.lech=o.T!=="KHÔNG DÙNG VẬT TƯ";row.cls=row.lech?"r":"n";
+    if(!row.lech)row.vt="(dịch vụ không đối chiếu vật tư)";
+    return row;
+  }
+  var hd=g.head;
+  row.vt=o.ten||"";row.lech=hd.T!=="KHỚP";
+  var kq=hd.T==="KHỚP"?"Khớp":hd.ok?"Hợp lệ (đã duyệt)":(RC_KQ[hd.T]||hd.T),cls=hd.T==="KHỚP"?"g":hd.ok?"b":"r";
+  row.cls=cls;
+  if(o.first){
+    row.cnt=true;row.nd=g.need;row.xt=g.got;row.kq=kq;
+    var sos=[];
+    g.xs.forEach(function(x){var s=String(x.r.so||"").trim()||"(không số CT)";if(sos.indexOf(s)<0)sos.push(s);});
+    if(!sos.length&&o.wrong&&o.wrong.length)o.wrong.forEach(function(w){var s=String(w.so||"").trim()||"(không số CT)";if(sos.indexOf(s)<0)sos.push(s);});
+    row.so=sos.length?sos.join("; "):"(chưa xuất)";
+    if(o.wrong&&o.wrong.length){var au="Đã xuất vật tư khác: "+o.wrong.map(function(w){return (w.ten||w.ma)+" ×"+w.sl;}).join("; ");row.gt=row.gt?row.gt+" | "+au:au;}
+    if(g.n>1)row.vt+=" (gộp "+g.n+" dòng DV)";
+  }else{
+    row.nd=o.nd;row.xt="↑";row.so="↑ tính ở dòng gộp";row.kq=kq+" (gộp)";row.gt="";
+  }
+  return row;
+}
+function rcApxBuild(){
+  var Z=RC_RES,N=rcDb().notes,mode=RC.ap||"mat",by={};
+  function box(cs){var B=by[cs];if(!B)B=by[cs]={cs:cs,rows:[],orph:[],st:{tot:0,ok:0,ap:0,bad:0,nov:0,orph:0}};return B;}
+  Z.dt.forEach(function(o){
+    if(!rcIn(o)||!rcYrOk(o.r.ngay))return;
+    var row=rcApxRow(o,N);
+    if(mode==="mat"&&o.none&&!row.lech)return;
+    if(mode==="bad"&&!row.lech)return;
+    box(o.cs||"(chưa rõ cơ sở)").rows.push(row);
+  });
+  /* phiếu xuất không gắn được dịch vụ nào (xuất chưa có DT, trùng/thừa, thiếu PID) */
+  Z.xk.forEach(function(x){
+    if(!rcIn(x)||!rcYrOk(x.r.ngay)||!x.bad||(x.P==="XUẤT SAI VẬT TƯ"&&x.inWrong))return;
+    var n=N[x.nid]||{},d=rcDate(x.r.ngay);
+    box(x.cs||"(chưa rõ cơ sở)").orph.push({ngay:rcDStr(x.r.ngay)||"",dk:d?d.y*10000+d.m*100+d.d:0,so:String(x.r.so||"").trim(),pid:x.pid||"",vt:x.ten||x.ma||"",sl:x.sl,
+      kq:x.ok?"Hợp lệ (đã duyệt)":(RC_KQX[x.P]||(String(x.P).indexOf("THIẾU MÃ KH")===0?"Thiếu mã KH":x.P)),cls:x.ok?"b":"r",gt:[n.r,n.g].filter(Boolean).join(" – "),i:x.i});
+  });
+  var list=[],seen={},yrs={};
+  function push(cs){if(by[cs]&&!seen[cs]){seen[cs]=1;list.push(by[cs]);}}
+  rcCsList().forEach(push);Object.keys(by).forEach(push);
+  list.forEach(function(B){
+    B.rows.sort(function(a,b){return (a.dk-b.dk)||(a.pid<b.pid?-1:a.pid>b.pid?1:0)||(a.j-b.j);});
+    B.orph.sort(function(a,b){return (a.dk-b.dk)||(a.i-b.i);});
+    B.rows.forEach(function(w){
+      if(w.dk)yrs[Math.floor(w.dk/10000)]=1;
+      if(!w.cnt)return;
+      B.st.tot++;
+      if(w.kq==="Khớp")B.st.ok++;else if(w.cls==="b")B.st.ap++;else if(w.cls==="r")B.st.bad++;else B.st.nov++;
+    });
+    B.st.orph=B.orph.length;
+  });
+  var yk=Object.keys(yrs).sort(),yt=(RC.yr&&RC.yr!=="Tất cả")?String(RC.yr):(yk.length>1?yk[0]+" – "+yk[yk.length-1]:(yk[0]||""));
+  var per=(RC.th==="Tất cả"||!RC.th)?"Tất cả các tháng":"Tháng "+RC.th;
+  return {list:list,per:per+(yt?" / "+yt:""),th:RC.th==="Tất cả"?"":RC.th,yr:yt};
+}
+function rcApxCard(w,k){
+  var c=RC_APX_CLS[w.cls]||RC_APX_CLS.n;
+  return '<div class="apxr"><div class="apxr-h"><div class="apxr-n">'+k+'</div><div style="flex:1;min-width:0"><b>'+esc(w.kh||"—")+'</b><div class="apxr-m">'+esc(w.pid||"không có PID")+' · '+esc(w.ngay)+'</div></div><span class="rcb rcb-'+c[2]+'">'+esc(w.kq)+'</span></div>'
+    +'<div class="apxr-dv">'+esc(w.dv)+'</div>'
+    +'<div class="apxr-g"><div><i>Phiếu xuất kho</i>'+esc(w.so)+'</div><div><i>Vật tư</i>'+esc(w.vt)+'</div>'
+    +(w.nd===""?'':'<div><i>SL định mức</i>'+esc(w.nd)+'</div><div><i>SL xuất thực</i>'+esc(w.xt)+'</div>')+'</div>'
+    +(w.gt?'<div class="apxr-gt"><b>Giải trình:</b> '+esc(w.gt)+'</div>':'')+'</div>';
+}
+function rcViewApx(){
+  var h=rcFilter(),D=rcApxBuild(),ys=[["Tất cả","Mọi năm"]].concat(rcYears().map(function(y){return [String(y),"Năm "+y];}));
+  h+='<div style="display:flex;gap:8px;margin-bottom:12px">'+rcSel(7,ys,RC.yr||"Tất cả")+rcSel(8,[["mat","Dịch vụ có vật tư"],["bad","Chỉ ca lệch"],["all","Tất cả dịch vụ"]],RC.ap||"mat")+'</div>';
+  h+='<div class="card" style="margin-bottom:14px"><div class="rcsec">Phụ lục 01 – Chi tiết đối chiếu dịch vụ và phiếu xuất kho</div>'
+    +'<div class="rcnote" style="margin-bottom:10px">Lấy <b>dịch vụ làm gốc</b>: mỗi dòng = 1 dịch vụ × 1 vật tư theo định mức, đối chiếu với phiếu xuất kho của đúng khách (mã BN). Lập riêng cho từng cơ sở / kho theo bộ lọc phía trên. Dịch vụ cùng khách + cùng vật tư được gộp, SL xuất tính ở dòng đầu.</div>'
+    +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px"><button class="btn btn-primary" style="padding:10px" onclick="A.rcApxXlsx()">'+icon("download",16)+'Excel (mỗi kho 1 sheet)</button><button class="btn btn-outline" style="padding:10px" onclick="A.rcApxPrint()">'+icon("file",16)+'In / PDF (khổ ngang)</button></div></div>';
+  RC.apxK=D.list.map(function(B){return "apx|"+B.cs;});
+  if(!D.list.length)return h+'<div class="empty">Không có dòng nào theo bộ lọc hiện tại.</div>';
+  var more=false;
+  D.list.forEach(function(B,bi){
+    var s=B.st,key=RC.apxK[bi],open=RC.co[key]!==undefined?RC.co[key]:(RC.cs!=="Tất cả"||D.list.length===1);
+    h+='<details class="apxk"'+(open?' open':'')+' ontoggle="A.rcApxOpen('+bi+',this.open)"><summary><div class="apxk-t">Cơ sở: '+esc(B.cs)+'</div><div class="apxk-s">'
+      +'<span class="rcb rcb-gray">'+s.tot+' dịch vụ</span><span class="rcb rcb-green">Khớp '+s.ok+'</span>'+(s.ap?'<span class="rcb rcb-sky">Hợp lệ '+s.ap+'</span>':'')
+      +'<span class="rcb rcb-'+(s.bad?'red':'green')+'">Lệch '+s.bad+'</span>'+(s.orph?'<span class="rcb rcb-amber">Xuất chưa gắn DV '+s.orph+'</span>':'')+'</div></summary><div class="apxk-b">';
+    h+='<div class="apxh2">I. Chi tiết theo dịch vụ ('+B.rows.length+' dòng)</div>';
+    if(!B.rows.length)h+='<div class="rcnote">Không có dòng nào.</div>';
+    B.rows.slice(0,RC.lim).forEach(function(w,i){h+=rcApxCard(w,i+1);});
+    if(B.rows.length>RC.lim){more=true;h+='<div class="rcnote" style="text-align:center;padding:4px 0 8px">… còn '+(B.rows.length-RC.lim)+' dòng, xem đủ trong Excel / PDF.</div>';}
+    if(B.orph.length){
+      h+='<div class="apxh2">II. Phiếu xuất kho chưa gắn được dịch vụ ('+B.orph.length+')</div>';
+      B.orph.slice(0,RC.lim).forEach(function(w){
+        var c=RC_APX_CLS[w.cls];
+        h+='<div class="apxr"><div class="apxr-h"><div style="flex:1;min-width:0"><b>'+esc(w.so||"(không số CT)")+'</b><div class="apxr-m">'+esc(w.pid||"không có PID")+' · '+esc(w.ngay)+'</div></div><span class="rcb rcb-'+c[2]+'">'+esc(w.kq)+'</span></div>'
+          +'<div class="apxr-dv">'+esc(w.vt)+' · SL xuất '+esc(w.sl)+'</div>'+(w.gt?'<div class="apxr-gt"><b>Giải trình:</b> '+esc(w.gt)+'</div>':'')+'</div>';
+      });
+      if(B.orph.length>RC.lim)more=true;
+    }
+    h+='</div></details>';
+  });
+  if(more)h+='<button class="btn btn-outline" onclick="A.rcMore()">Xem thêm</button>';
+  return h;
+}
+/* ----- Sao lưu / chuyển máy: dữ liệu đối chiếu ----- */
+function rcBackupCard(){
+  var R=rcDb(),nn=Object.keys(R.notes||{}).length;
+  return '<div class="card" style="margin-top:12px"><div class="rcsec">4. Sao lưu &amp; chuyển sang máy khác</div>'
+    +'<div class="rcnote" style="margin-bottom:8px">Gói <b>toàn bộ dữ liệu đối chiếu</b> vào 1 file: cấu hình dịch vụ → vật tư ('+R.cfg.length+' dòng), định mức từ khóa, chuẩn hóa cơ sở, '+R.dt.length+' dòng doanh thu, '+R.xk.length+' dòng xuất kho, '+nn+' giải trình / duyệt ca, tùy chọn khớp. Gửi file qua Zalo / email rồi nhập trên máy mới.</div>'
+    +'<div class="rcnote" style="margin-bottom:10px">'+(R.lastBackup?'Sao lưu gần nhất lúc <b>'+tsLabel(R.lastBackup)+'</b>.':'Chưa sao lưu dữ liệu đối chiếu lần nào.')+'</div>'
+    +'<button class="btn btn-primary" style="margin-bottom:8px" onclick="A.rcBackup()">'+icon("download",17)+'Sao lưu toàn bộ dữ liệu đối chiếu (.json)</button>'
+    +'<label class="btn btn-outline" style="margin-bottom:8px">'+icon("upload",17)+'Nhập file sao lưu – GỘP vào máy này<input type="file" accept=".json,application/json" style="display:none" onchange="A.rcRestore(this,\'merge\')"></label>'
+    +'<label class="btn btn-outline" style="color:var(--red)">'+icon("upload",17)+'Nhập file sao lưu – THAY THẾ (máy mới)<input type="file" accept=".json,application/json" style="display:none" onchange="A.rcRestore(this,\'replace\')"></label>'
+    +'<div class="rcnote" style="margin-top:8px"><b>Gộp</b>: giữ dữ liệu đang có, chỉ thêm dòng còn thiếu, không ghi đè giải trình / cấu hình đã có. <b>Thay thế</b>: dùng đúng như file, dữ liệu đối chiếu hiện tại bị thay. File này chỉ chứa dữ liệu đối chiếu; muốn chuyển cả kiểm kê, ảnh, chữ ký thì dùng Cài đặt › Chuyển dữ liệu sang máy khác (file đó đã gồm cả dữ liệu đối chiếu).</div></div>';
+}
+/* gộp dữ liệu đối chiếu từ file vào máy này: chỉ THÊM phần còn thiếu, không ghi đè. Trả về số mục đã thêm. */
+function rcMergeRecon(src){
+  var R=rcDb(),n=0;
+  if(!src||typeof src!=="object")return 0;
+  ["dt","xk"].forEach(function(side){
+    var ids={};R[side].forEach(function(r){ids[r.id]=1;});
+    (Array.isArray(src[side])?src[side]:[]).forEach(function(r){if(r&&typeof r==="object"&&r.id&&!ids[r.id]){R[side].push(r);ids[r.id]=1;n++;}});
+  });
+  var ex={};R.cfg.forEach(function(c){ex[norm(c.dv)+"|"+norm(c.ma)+"|"+norm(c.ten)]=1;});
+  (Array.isArray(src.cfg)?src.cfg:[]).forEach(function(c){
+    if(!c||!c.dv)return;var k=norm(c.dv)+"|"+norm(c.ma)+"|"+norm(c.ten);
+    if(ex[k])return;ex[k]=1;
+    R.cfg.push({dv:String(c.dv),ma:String(c.ma||""),ten:String(c.ten||""),dm:(c.dm===""||c.dm==null||isNaN(+c.dm))?1:+c.dm,alt:String(c.alt||""),gia:+c.gia||0});n++;
+  });
+  var nt=(src.notes&&typeof src.notes==="object")?src.notes:{};
+  Object.keys(nt).forEach(function(k){if(!R.notes[k]){R.notes[k]=nt[k];n++;}});
+  ["dm","cs"].forEach(function(m){
+    var cur=R.maps[m]||(R.maps[m]=[]),have={};cur.forEach(function(r){have[r.join("|").toLowerCase()]=1;});
+    ((src.maps&&Array.isArray(src.maps[m]))?src.maps[m]:[]).forEach(function(r){if(!Array.isArray(r))return;var k=r.join("|").toLowerCase();if(!have[k]){have[k]=1;cur.push(r);n++;}});
+  });
+  return n;
+}
+Object.assign(A,{
+  rcApxOpen:function(bi,o){var k=RC.apxK&&RC.apxK[bi];if(k!=null)RC.co[k]=!!o;},
+  /* ----- Phụ lục → Excel (mỗi cơ sở 1 sheet, bố cục như biểu mẫu PHU_LUC) ----- */
+  rcApxXlsx:function(){
+    if(typeof ExcelJS==="undefined"){toast("Chưa tải được thư viện Excel — kiểm tra mạng");return;}
+    var D=rcApxBuild();if(!D.list.length){toast("Không có dữ liệu để lập phụ lục");return;}
+    try{
+      var wb=new ExcelJS.Workbook(),thin={style:"thin",color:{argb:"FF8C96A8"}},bd={top:thin,left:thin,bottom:thin,right:thin};
+      var F=function(o){return Object.assign({name:"Times New Roman",size:10},o||{});};
+      var FILL={g:"FFE2F0D9",b:"FFDDEBF7",r:"FFFCE4E4",n:"FFF2F2F2"},FC={g:"FF15803D",b:"FF0B5394",r:"FFC00000",n:"FF595959"};
+      var fill=function(a){return {type:"pattern",pattern:"solid",fgColor:{argb:a}};};
+      var used={},xl=prPage("landscape").xl;
+      var sname=function(s){var b=String(s||"Kho").replace(/[\[\]\*\?\/\\:']/g," ").replace(/\s+/g," ").trim().substring(0,31)||"Kho",nm=b,k=2;while(used[nm.toLowerCase()]){nm=b.substring(0,28)+" "+k;k++;}used[nm.toLowerCase()]=1;return nm;};
+      var psetup=function(){return {paperSize:xl,orientation:"landscape",fitToPage:true,fitToWidth:1,fitToHeight:0,margins:{left:0.4,right:0.4,top:0.5,bottom:0.5,header:0.2,footer:0.2}};};
+      var nlines=function(s,w){return Math.max(1,Math.ceil(String(s==null?"":s).length/Math.max(1,w*1.05)));};
+      /* --- sheet tổng hợp --- */
+      var ts=wb.addWorksheet(sname("TONG_HOP"),{pageSetup:psetup()});
+      [26,14,10,16,16,16,20].forEach(function(w,i){ts.getColumn(i+1).width=w;});
+      ts.mergeCells("A1:G1");ts.getCell("A1").value="TỔNG HỢP ĐỐI CHIẾU DỊCH VỤ – PHIẾU XUẤT KHO THEO CƠ SỞ";ts.getCell("A1").font=F({size:14,bold:true});ts.getCell("A1").alignment={horizontal:"center"};
+      ts.mergeCells("A2:G2");ts.getCell("A2").value="Kỳ: "+D.per;ts.getCell("A2").font=F({italic:true});ts.getCell("A2").alignment={horizontal:"center"};
+      ["Cơ sở","Số dịch vụ đối chiếu","Khớp","Hợp lệ (đã duyệt)","Lệch chưa xử lý","Không dùng vật tư","Phiếu xuất chưa gắn DV"].forEach(function(t,j){
+        var c=ts.getCell(4,j+1);c.value=t;c.font=F({bold:true,color:{argb:"FFFFFFFF"}});c.fill=fill("FF1F4E5F");c.border=bd;c.alignment={horizontal:"center",vertical:"middle",wrapText:true};
+      });
+      ts.getRow(4).height=32;
+      var tt={tot:0,ok:0,ap:0,bad:0,nov:0,orph:0};
+      D.list.forEach(function(B,i){
+        var s=B.st,v=[B.cs,s.tot,s.ok,s.ap,s.bad,s.nov,s.orph];
+        v.forEach(function(x,j){var c=ts.getCell(5+i,j+1);c.value=x;c.font=F();c.border=bd;c.alignment={horizontal:j?"center":"left",vertical:"middle"};});
+        if(s.bad)ts.getCell(5+i,5).font=F({bold:true,color:{argb:FC.r}});
+        for(var k in tt)tt[k]+=s[k];
+      });
+      var rt=5+D.list.length;
+      [ "Tổng cộng",tt.tot,tt.ok,tt.ap,tt.bad,tt.nov,tt.orph].forEach(function(x,j){var c=ts.getCell(rt,j+1);c.value=x;c.font=F({bold:true});c.border=bd;c.fill=fill("FFD9E2F3");c.alignment={horizontal:j?"center":"left",vertical:"middle"};});
+      /* --- mỗi cơ sở 1 sheet --- */
+      var W=[6,13,22,12,46,18,30,10,10,18,32,10];
+      D.list.forEach(function(B){
+        var ws=wb.addWorksheet(sname(B.cs),{pageSetup:psetup()});
+        W.forEach(function(w,i){ws.getColumn(i+1).width=w;});
+        var put=function(addr,val,font,al){var c=ws.getCell(addr);c.value=val;c.font=F(font);if(al)c.alignment=al;return c;};
+        ws.mergeCells("A1:L1");put("A1","PHỤ LỤC 01 – CHI TIẾT ĐỐI CHIẾU DỊCH VỤ VÀ PHIẾU XUẤT KHO",{size:14,bold:true},{horizontal:"center"});
+        ws.mergeCells("A2:L2");put("A2","(Kèm theo và là một phần không tách rời của Biên bản xác nhận số lượng dịch vụ và vật tư xuất kho)",{italic:true},{horizontal:"center"});
+        ws.mergeCells("A3:L3");put("A3","Cơ sở: "+B.cs+"   |   Kỳ: "+D.per,{bold:true,size:11},{horizontal:"center"});
+        var s=B.st;
+        ws.mergeCells("A4:L4");put("A4","Tổng "+s.tot+" dịch vụ đối chiếu · Khớp "+s.ok+" · Hợp lệ (đã duyệt) "+s.ap+" · Lệch chưa xử lý "+s.bad+(s.nov?" · Không dùng vật tư "+s.nov:"")+(s.orph?" · Phiếu xuất chưa gắn DV "+s.orph:""),{italic:true},{horizontal:"center"});
+        var HR=6;
+        RC_APX_HEAD.forEach(function(t,j){var c=ws.getCell(HR,j+1);c.value=t;c.font=F({bold:true,color:{argb:"FFFFFFFF"}});c.fill=fill("FF1F4E5F");c.border=bd;c.alignment={horizontal:"center",vertical:"middle",wrapText:true};});
+        ws.getRow(HR).height=30;
+        B.rows.forEach(function(w,i){
+          var r=HR+1+i,vals=[i+1,w.pid,w.kh,w.ngay,w.dv,w.so,w.vt,w.nd,w.xt,w.kq,w.gt,"☐"],ln=1;
+          vals.forEach(function(v,j){
+            var c=ws.getCell(r,j+1);c.value=(v===""?null:v);c.font=F();c.border=bd;
+            c.alignment={vertical:"middle",wrapText:true,horizontal:(j===5||j===6||j===4||j===2||j===10)?"left":"center"};
+            ln=Math.max(ln,nlines(v,W[j]));
+          });
+          ws.getRow(r).height=Math.max(16,ln*13);
+          var kc=ws.getCell(r,10);kc.fill=fill(FILL[w.cls]);kc.font=F({bold:true,color:{argb:FC[w.cls]}});
+          if(w.so==="(chưa xuất)")ws.getCell(r,6).font=F({italic:true,color:{argb:"FF1F4FD8"}});
+        });
+        var next=HR+B.rows.length+2;
+        if(B.orph.length){
+          ws.mergeCells(next,1,next,12);put(ws.getCell(next,1).address,"II. PHIẾU XUẤT KHO CHƯA GẮN ĐƯỢC DỊCH VỤ ("+B.orph.length+")",{bold:true},{horizontal:"left"});ws.getCell(next,1).fill=fill("FFFFF2CC");
+          var hr2=next+1,H2=["STT","Mã BN","Số phiếu xuất kho","Ngày xuất","Vật tư","SL xuất","Kết quả","Giải trình"];
+          H2.forEach(function(t,j){var c=ws.getCell(hr2,j+1);c.value=t;c.font=F({bold:true,color:{argb:"FFFFFFFF"}});c.fill=fill("FF1F4E5F");c.border=bd;c.alignment={horizontal:"center",vertical:"middle",wrapText:true};});
+          ws.mergeCells(hr2,8,hr2,11);
+          B.orph.forEach(function(w,i){
+            var r=hr2+1+i,vals=[i+1,w.pid,w.so,w.ngay,w.vt,w.sl,w.kq,w.gt];
+            vals.forEach(function(v,j){var c=ws.getCell(r,j+1);c.value=(v===""?null:v);c.font=F();c.border=bd;c.alignment={vertical:"middle",wrapText:true,horizontal:(j===4||j===7)?"left":"center"};});
+            ws.mergeCells(r,8,r,11);
+            var kc=ws.getCell(r,7);kc.fill=fill(FILL[w.cls]);kc.font=F({bold:true,color:{argb:FC[w.cls]}});
+            ws.getRow(r).height=Math.max(16,Math.max(nlines(w.vt,W[4]),nlines(w.gt,W[7]+W[8]+W[9]+W[10]))*13);
+          });
+          next=hr2+B.orph.length+2;
+        }
+        var sg=next+1;
+        [["B","D","THỦ KHO CƠ SỞ"],["E","F","PHÒNG HÀNH CHÍNH HẬU CẦN"],["J","K","GIÁM ĐỐC CƠ SỞ"]].forEach(function(b){
+          ws.mergeCells(b[0]+sg+":"+b[1]+sg);put(b[0]+sg,b[2],{bold:true},{horizontal:"center"});
+          ws.mergeCells(b[0]+(sg+1)+":"+b[1]+(sg+1));put(b[0]+(sg+1),"(Ký, ghi rõ họ tên)",{italic:true},{horizontal:"center"});
+        });
+        ws.pageSetup.printTitlesRow=HR+":"+HR;
+        ws.views=[{state:"frozen",ySplit:HR}];
+      });
+      var d=new Date(),p=function(n){return String(n).padStart(2,"0");};
+      var fname="PhuLuc01_DoiChieu_TheoKho_"+d.getFullYear()+p(d.getMonth()+1)+p(d.getDate())+".xlsx";
+      wb.xlsx.writeBuffer().then(function(buf){
+        shareOrDownload(new Blob([buf],{type:"application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"}),fname);
+      }).catch(function(e){console.error(e);toast("Không tạo được file: "+e.message);});
+    }catch(err){console.error(err);toast("Không tạo được phụ lục: "+err.message);}
+  },
+  /* ----- Phụ lục → in / PDF (khổ ngang, mỗi cơ sở 1 trang mới) ----- */
+  rcApxPrint:function(){
+    var D=rcApxBuild();if(!D.list.length){toast("Không có dữ liệu để lập phụ lục");return;}
+    var W=[3,7.5,10.5,6.5,21,8.5,13,4,4,7.5,10,4.5];
+    var body='<style>.apx{table-layout:fixed}.apx th,.apx td{font-size:8.5pt;padding:2pt 4pt;vertical-align:top;word-wrap:break-word}.apx th{font-size:8pt}.apx .c{text-align:center}</style>';
+    D.list.forEach(function(B,bi){
+      var s=B.st;
+      body+='<div'+(bi?' style="page-break-before:always"':'')+'>'
+        +'<p style="text-align:center;font-weight:bold;font-size:14pt;margin:0">PHỤ LỤC 01 – CHI TIẾT ĐỐI CHIẾU DỊCH VỤ VÀ PHIẾU XUẤT KHO</p>'
+        +'<p style="text-align:center;font-style:italic;margin:2pt 0">(Kèm theo và là một phần không tách rời của Biên bản xác nhận số lượng dịch vụ và vật tư xuất kho)</p>'
+        +'<p style="text-align:center;margin:2pt 0"><b>Cơ sở: '+esc(B.cs)+'</b> &nbsp;|&nbsp; Kỳ: '+esc(D.per)+'</p>'
+        +'<p style="text-align:center;font-size:9pt;margin:2pt 0 6pt">Tổng '+s.tot+' dịch vụ đối chiếu · Khớp '+s.ok+' · Hợp lệ (đã duyệt) '+s.ap+' · Lệch chưa xử lý '+s.bad+(s.nov?' · Không dùng vật tư '+s.nov:'')+(s.orph?' · Phiếu xuất chưa gắn DV '+s.orph:'')+'</p>'
+        +'<table class="apx"><colgroup>'+W.map(function(x){return '<col style="width:'+x+'%">';}).join('')+'</colgroup><thead><tr>'+RC_APX_HEAD.map(function(t){return '<th>'+t+'</th>';}).join('')+'</tr></thead><tbody>'
+        +B.rows.map(function(w,i){
+          var c=RC_APX_CLS[w.cls]||RC_APX_CLS.n;
+          return '<tr><td class="c">'+(i+1)+'</td><td class="c">'+esc(w.pid)+'</td><td>'+esc(w.kh)+'</td><td class="c">'+esc(w.ngay)+'</td><td>'+esc(w.dv)+'</td><td'+(w.so==="(chưa xuất)"?' style="color:#1f4fd8;font-style:italic"':'')+'>'+esc(w.so)+'</td><td>'+esc(w.vt)+'</td><td class="c">'+esc(w.nd)+'</td><td class="c">'+esc(w.xt)+'</td><td class="c" style="background:'+c[0]+';color:'+c[1]+';font-weight:bold">'+esc(w.kq)+'</td><td>'+esc(w.gt)+'</td><td class="c">☐</td></tr>';
+        }).join('')+'</tbody></table>';
+      if(!B.rows.length)body+='<p><i>Không có dòng dịch vụ nào theo bộ lọc.</i></p>';
+      if(B.orph.length){
+        body+='<p style="font-weight:bold;margin:10pt 0 2pt">II. PHIẾU XUẤT KHO CHƯA GẮN ĐƯỢC DỊCH VỤ ('+B.orph.length+')</p>'
+          +'<table class="apx"><thead><tr><th style="width:4%">STT</th><th style="width:10%">Mã BN</th><th style="width:14%">Số phiếu xuất kho</th><th style="width:9%">Ngày xuất</th><th>Vật tư</th><th style="width:6%">SL xuất</th><th style="width:13%">Kết quả</th><th style="width:20%">Giải trình</th></tr></thead><tbody>'
+          +B.orph.map(function(w,i){var c=RC_APX_CLS[w.cls];return '<tr><td class="c">'+(i+1)+'</td><td class="c">'+esc(w.pid)+'</td><td>'+esc(w.so)+'</td><td class="c">'+esc(w.ngay)+'</td><td>'+esc(w.vt)+'</td><td class="c">'+esc(w.sl)+'</td><td class="c" style="background:'+c[0]+';color:'+c[1]+';font-weight:bold">'+esc(w.kq)+'</td><td>'+esc(w.gt)+'</td></tr>';}).join('')+'</tbody></table>';
+      }
+      body+='<table class="sign" style="width:100%;margin-top:18pt;page-break-inside:avoid"><tr><td><b>THỦ KHO CƠ SỞ</b><br><i>(Ký, ghi rõ họ tên)</i></td><td><b>PHÒNG HÀNH CHÍNH HẬU CẦN</b><br><i>(Ký, ghi rõ họ tên)</i></td><td><b>GIÁM ĐỐC CƠ SỞ</b><br><i>(Ký, đóng dấu)</i></td></tr></table></div>';
+    });
+    printPreviewHtml(docWrap("Phụ lục 01 - Đối chiếu dịch vụ và phiếu xuất kho",body,"landscape"));
+  },
+  /* ----- Sao lưu / chuyển máy: dữ liệu đối chiếu DT – xuất kho ----- */
+  rcBackup:function(){
+    try{
+      var R=rcDb(),d=new Date(),p=function(n){return String(n).padStart(2,"0");};
+      R.lastBackup=Date.now();
+      var out={__type:"recon-backup",v:1,at:R.lastBackup,by:(db.profile&&db.profile.ten)||"",ver:(typeof APP_VERSION!=="undefined"?APP_VERSION:""),recon:R};
+      var fname="SaoLuu_DoiChieu_"+d.getFullYear()+p(d.getMonth()+1)+p(d.getDate())+"_"+p(d.getHours())+p(d.getMinutes())+".json";
+      store.save();
+      shareOrDownload(new Blob([JSON.stringify(out)],{type:"application/json"}),fname);
+      audit("recon-backup","export",null,R.dt.length+" DT / "+R.xk.length+" XK");
+      renderRecon();
+    }catch(err){console.error(err);toast("Không sao lưu được: "+err.message);}
+  },
+  rcRestore:function(inp,mode){
+    var f=inp.files&&inp.files[0];if(!f)return;
+    var fr=new FileReader();
+    fr.onerror=function(){toast("Không đọc được file");inp.value="";};
+    fr.onload=function(){
+      var d,s;
+      try{d=JSON.parse(fr.result);}catch(e){toast("File không hợp lệ: không đọc được JSON");inp.value="";return;}
+      s=d&&d.recon;
+      if(!s||typeof s!=="object"||!Array.isArray(s.dt)||!Array.isArray(s.xk)){toast("Không phải file sao lưu đối chiếu (thiếu dữ liệu doanh thu / xuất kho)");inp.value="";return;}
+      var R=rcDb(),rep=mode==="replace",nf=s.notes&&typeof s.notes==="object"?Object.keys(s.notes).length:0;
+      var msg=(rep?"THAY THẾ toàn bộ dữ liệu đối chiếu trên máy này bằng file đã chọn?":"GỘP dữ liệu đối chiếu từ file vào máy này?")
+        +"\n\nFile có: "+(Array.isArray(s.cfg)?s.cfg.length:0)+" dòng cấu hình, "+s.dt.length+" dòng doanh thu, "+s.xk.length+" dòng xuất kho, "+nf+" giải trình."
+        +"\nMáy này: "+R.cfg.length+" dòng cấu hình, "+R.dt.length+" doanh thu, "+R.xk.length+" xuất kho, "+Object.keys(R.notes).length+" giải trình."
+        +(rep?"\n\nDữ liệu đối chiếu hiện tại sẽ bị thay. Nên bấm Hủy rồi Sao lưu trước.":"\n\nChỉ thêm phần còn thiếu; giải trình và cấu hình đã có trên máy này không bị ghi đè.");
+      if(!confirm(msg)){inp.value="";return;}
+      var old=JSON.parse(JSON.stringify(R)),n=0;
+      try{
+        if(rep){
+          var nr=JSON.parse(JSON.stringify(s));
+          if(!nr.maps||typeof nr.maps!=="object")nr.maps=JSON.parse(JSON.stringify(RC_SEED));
+          if(!nr.notes||typeof nr.notes!=="object")nr.notes={};
+          delete nr.lastBackup;db.recon=nr;rcDb();n=nr.dt.length+nr.xk.length;
+        }else n=rcMergeRecon(s);
+      }catch(e){console.error(e);db.recon=old;toast("Nhập thất bại: "+e.message);inp.value="";return;}
+      if(!store.saveVerified()){db.recon=old;store.save();toast("Nhập THẤT BẠI: không ghi được vào bộ nhớ. Dữ liệu cũ được giữ nguyên.");inp.value="";return;}
+      audit("recon-backup",rep?"restore-replace":"restore-merge",null,f.name);
+      RC.tab=0;RC.co={};renderRecon();
+      toast(rep?"Đã thay thế dữ liệu đối chiếu ("+rcDb().dt.length+" doanh thu, "+rcDb().xk.length+" xuất kho)":"Đã gộp: thêm "+n+" mục vào dữ liệu đối chiếu");
+      inp.value="";
+    };
+    fr.readAsText(f);
+  }
 });
 </script>
 </body>
