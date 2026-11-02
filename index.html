@@ -594,6 +594,74 @@ body{background:var(--bg)}
 .apxr-g{display:grid;grid-template-columns:1fr 1fr;gap:4px 10px;background:var(--card2);border-radius:8px;padding:6px 8px}
 .apxr-g i{display:block;font-style:normal;font-size:10px;font-weight:600;color:var(--mut2)}
 .apxr-gt{margin-top:6px;font-size:11.5px;color:var(--mut)}
+/* ===== V8 · Đối chiếu 2 bên: DOANH THU (định mức) | XUẤT KHO | CHÊNH LỆCH ===== */
+.rcx{border:1px solid var(--line);border-radius:12px;overflow:hidden;background:#fff;font-size:12.5px;margin:8px 0 2px}
+.rcx-h,.rcx-b{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr)}
+.rcx-h>div{padding:6px 8px;font-size:10.5px;font-weight:800;letter-spacing:.04em;text-transform:uppercase}
+.rcx-h>div:first-child{background:var(--sky-bg);color:var(--sky)}
+.rcx-h>div:last-child{background:var(--amber-bg);color:var(--amber);border-left:1px solid var(--line)}
+.rcx-b{border-top:1px solid var(--line)}
+.rcx-c{min-width:0}
+.rcx-c+.rcx-c{border-left:1px solid var(--line)}
+.rcx-c>*+*{border-top:1px solid var(--line)}
+.rcx-i{padding:7px 8px;word-break:break-word}
+.rcx-sv{padding:7px 8px;background:var(--card2);font-size:11.5px;line-height:1.45;word-break:break-word}
+.rcx-t{font-weight:700;line-height:1.35}
+.rcx-m{font-size:11px;color:var(--mut);margin-top:2px;line-height:1.45}
+.rcx-q{display:flex;justify-content:space-between;align-items:baseline;margin-top:5px;padding-top:4px;border-top:1px dashed var(--line);font-size:11px;color:var(--mut)}
+.rcx-q b{font-size:15px;color:var(--ink);font-variant-numeric:tabular-nums}
+.rcx-e{padding:10px 8px;color:var(--mut2);font-style:italic;font-size:12px}
+.rcx-red{color:var(--red)}
+.rcx-bad .rcx-t{color:var(--red)}
+.rcx-me{background:#fffaf0}
+.rcx-dim{opacity:.72}
+.rcx-lb{padding:4px 8px;font-size:10px;font-weight:800;text-transform:uppercase;color:var(--mut2);background:var(--card2)}
+.rcx-f{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));border-top:2px solid var(--fc);background:var(--fb)}
+.rcx-f>div{padding:6px 4px;text-align:center}
+.rcx-f>div+div{border-left:1px solid rgba(16,24,40,.08)}
+.rcx-f i{display:block;font-style:normal;font-size:10px;font-weight:700;color:var(--mut);text-transform:uppercase}
+.rcx-f b{font-size:17px;font-variant-numeric:tabular-nums}
+.rcx-f b.d{color:var(--fc)}
+.rcx-f em{display:block;font-style:normal;font-size:10.5px;font-weight:800;color:var(--fc)}
+.rcx-fm{padding:6px 8px;font-size:11.5px;line-height:1.45;background:var(--fb);color:var(--ink);border-top:1px solid var(--line)}
+.rcx-g{--fc:var(--green);--fb:var(--green-bg)}
+.rcx-r{--fc:var(--red);--fb:var(--red-bg)}
+.rcx-a{--fc:var(--amber);--fb:var(--amber-bg)}
+.rcx-n{--fc:var(--mut);--fb:#f3f5f9}
+.rcnav{display:flex;gap:6px;padding-top:2px;padding-bottom:10px}
+.rcnav button{flex:1;border:1px solid var(--line);background:#fff;color:var(--mut);border-radius:12px;padding:9px 2px;font:inherit;font-size:13px;font-weight:700;cursor:pointer;white-space:nowrap}
+.rcnav button.on{background:var(--teal);border-color:var(--teal);color:#fff}
+.rcnav em{font-style:normal;margin-left:4px;background:var(--red);color:#fff;border-radius:99px;font-size:10.5px;padding:1px 6px;font-weight:800}
+.rcnav button.on em{background:#fff;color:var(--teal)}
+.rcsubnav{display:flex;gap:4px;margin-bottom:12px;padding:3px;background:#e9edf5;border-radius:12px}
+.rcsubnav button{flex:1;border:0;background:transparent;border-radius:9px;padding:8px 6px;font:inherit;font-size:13px;font-weight:700;color:var(--mut);cursor:pointer}
+.rcsubnav button.on{background:#fff;color:var(--teal);box-shadow:0 1px 3px rgba(15,40,90,.12)}
+.rcchips{display:flex;gap:6px;overflow-x:auto;margin-bottom:10px;padding-bottom:2px}
+.rcchip{flex:0 0 auto;border:1px solid var(--line);background:#fff;border-radius:99px;padding:6px 12px;font:inherit;font-size:12.5px;font-weight:600;color:var(--mut);cursor:pointer;white-space:nowrap}
+.rcchip b{margin-left:3px;color:var(--ink)}
+.rcchip.on{background:var(--teal-bg);border-color:var(--teal);color:var(--teal)}.rcchip.on b{color:var(--teal)}
+.rcact,.rcqb{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px}
+.rcact .btn,.rcqb .btn{padding:9px;font-size:13px;margin:0}
+.rcnt{margin-top:8px;border-top:1px dashed var(--line);padding-top:4px}
+.rcnt>summary{list-style:none;cursor:pointer;font-size:12.5px;font-weight:700;color:var(--teal);display:flex;gap:8px;align-items:center;padding:6px 0}
+.rcnt>summary::-webkit-details-marker{display:none}
+.rcnt>summary:after{content:"▾";margin-left:auto;color:var(--mut);transition:transform .15s}
+.rcnt[open]>summary:after{transform:rotate(180deg)}
+.rcbtns{display:flex;gap:8px;margin-top:8px}
+.rcbtns .btn{padding:8px;font-size:13px;flex:1}
+.rcbtns .rcdel{flex:0 0 84px;color:var(--red);background:var(--red-bg);border:1px solid var(--red-ln)}
+.rcacc{background:#fff;border:1px solid var(--line);border-radius:14px;margin-bottom:10px;overflow:hidden}
+.rcacc>summary{list-style:none;cursor:pointer;padding:13px 14px;font-weight:800;font-size:14px;display:flex;align-items:center}
+.rcacc>summary::-webkit-details-marker{display:none}
+.rcacc>summary:after{content:"▾";margin-left:auto;color:var(--mut);transition:transform .15s}
+.rcacc[open]>summary:after{transform:rotate(180deg)}
+.rcacc-b{padding:0 14px 14px}
+.rcm{border:1px solid var(--line);border-radius:10px;padding:6px 8px;margin-bottom:6px}
+.rcm-l{font-weight:700;font-size:12px;margin-bottom:4px;word-break:break-word;color:var(--ink)}
+.rcm-g{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.rcm-g>div{padding:5px 7px;border-radius:8px;background:var(--card2);font-size:12px;word-break:break-word}
+.rcm-g>div+div{background:var(--amber-bg)}
+.rcm-g i{display:block;font-style:normal;font-size:10px;font-weight:700;color:var(--mut2);text-transform:uppercase}
 </style>
 </head>
 <body>
@@ -7051,12 +7119,101 @@ function rcFilter(){
   return '<div style="display:flex;gap:8px;margin-bottom:12px">'+rcSel(0,["Tất cả"].concat(rcCsList()),RC.cs)+rcSel(1,ms,RC.th)+'</div>';
 }
 function rcBadge(t){var c=/KHỚP|OK|✓|Hợp lệ|Khớp/.test(t)?"green":/CHƯA|THIẾU|✗|TRÙNG|THỪA|SAI/.test(t)?"red":"amber";return '<span class="rcb rcb-'+c+'">'+esc(t)+'</span>';}
+/* ===== V8 · Đối chiếu 2 bên ===== */
+var RC_GRP=[["Tổng quan",[0]],["Đối chiếu",[1,5]],["Dữ liệu",[4,2]],["Cấu hình",[3]]];
+var RC_SUBN={1:"Ca lệch",5:"Phụ lục 01",4:"Nhập / Xuất file",2:"Kiểm tra dữ liệu"};
+var RC_ONLY=[[1,"Chưa duyệt"],[0,"Tất cả lệch"],[3,"Cần xem lại"],[2,"Tất cả dòng"]];
+function rcQ(n){n=Math.round((+n||0)*1000)/1000;return String(n);}
+function rcSgn(n){n=Math.round((+n||0)*1000)/1000;return n>0?"+"+n:n<0?"−"+Math.abs(n):"0";}
+function rcSgnF(n){n=Math.round(n||0);return n>0?"+"+rcF(n):n<0?"−"+rcF(-n):"0";}
+function rcSvcRows(g){
+  var Z=RC_RES;
+  if(!Z._gr){Z._gr={};Z.dt.forEach(function(c){if(!c.g||c.none)return;var k=c.g.k,m=Z._gr[k]||(Z._gr[k]={seen:{},list:[]});if(m.seen[c.i])return;m.seen[c.i]=1;m.list.push(c.r);});}
+  var m=Z._gr[g.k];return m?m.list:[];
+}
+function rcDtByPid(pid){
+  var Z=RC_RES;
+  if(!Z._bp){Z._bp={};Z.dt.forEach(function(c){if(c.first&&c.g&&c.pid)(Z._bp[c.pid]=Z._bp[c.pid]||[]).push(c);});}
+  return Z._bp[pid]||[];
+}
+function rcCell(t,m,ql,qv,cls){return '<div class="rcx-i'+(cls?' '+cls:'')+'"><div class="rcx-t">'+esc(t)+'</div>'+(m?'<div class="rcx-m">'+m+'</div>':'')+(ql?'<div class="rcx-q"><span>'+ql+'</span><b>'+esc(qv)+'</b></div>':'')+'</div>';}
+function rcEmpty(t,red){return '<div class="rcx-e'+(red?' rcx-red':'')+'">'+t+'</div>';}
+function rcSvcBlk(g,r0){
+  var rows=g?rcSvcRows(g):[r0],m={},ord=[],h='';
+  rows.forEach(function(r){var k=rcK(r.dv);if(!m[k]){m[k]={dv:r.dv,sl:0,dt:0};ord.push(k);}m[k].sl+=rcNum(r.sl)||1;m[k].dt+=rcNum(r.dt);});
+  ord.slice(0,4).forEach(function(k){var v=m[k];h+='<div><b>'+esc(v.dv||"—")+'</b> <span style="color:var(--mut)">× '+rcQ(v.sl)+'</span>'+(v.dt?'<div style="color:var(--sky);font-weight:700">Doanh thu '+rcF(v.dt)+' đ</div>':'')+'</div>';});
+  if(ord.length>4)h+='<div style="color:var(--mut)">… +'+(ord.length-4)+' dịch vụ khác</div>';
+  if(rows.length>1)h+='<div style="color:var(--mut);margin-top:4px">Đã gộp <b>'+rows.length+'</b> dòng doanh thu cùng khách + cùng vật tư</div>';
+  return '<div class="rcx-sv">'+h+'</div>';
+}
+function rcXCell(x,cls){
+  var m=[];if(x.ma)m.push('Mã <b>'+esc(x.ma)+'</b>');if(x.r.so)m.push('CT '+esc(x.r.so));var d=rcDStr(x.r.ngay);if(d)m.push(esc(d));
+  return rcCell(x.ten||x.ma||"(không tên)",m.join(' · '),"SL xuất",rcQ(x.sl),cls);
+}
+function rcFoot(need,got,cls,msg){
+  var q=Math.round((got-need)*1000)/1000,lb=q===0?"Khớp":q>0?"Thừa":"Thiếu";
+  return '<div class="rcx-f rcx-'+cls+'"><div><i>Cần</i><b>'+rcQ(need)+'</b></div><div><i>Xuất</i><b>'+rcQ(got)+'</b></div><div><i>Chênh lệch</i><b class="d">'+rcSgn(q)+'</b><em>'+lb+'</em></div></div>'+(msg?'<div class="rcx-fm rcx-'+cls+'">'+msg+'</div>':'');
+}
+function rcFootMsg(cls,msg){return '<div class="rcx-fm rcx-'+cls+'" style="border-top:2px solid var(--fc)">'+msg+'</div>';}
+function rcCmpBox(l,r,foot){return '<div class="rcx"><div class="rcx-h"><div>Doanh thu · định mức</div><div>Xuất kho thực tế</div></div><div class="rcx-b"><div class="rcx-c">'+l+'</div><div class="rcx-c">'+r+'</div></div>'+foot+'</div>';}
+/* Phía doanh thu: trái = doanh thu + định mức, phải = phiếu xuất kho, dưới = chênh lệch */
+function rcCmpD(o){
+  var g=o.g,r=o.r,l,rt='',cls,msg;
+  if(o.none)return rcCmpBox(rcSvcBlk(null,r),rcEmpty("Không đối chiếu được"),rcFootMsg("a",esc(o.why||o.T)));
+  if(!o.first)return rcCmpBox(rcSvcBlk(null,r)+rcCell(o.ten||"—","Vật tư theo định mức","SL cần (dòng này)",rcQ(o.nd)),rcEmpty("Đã tính chung ở dòng gộp đầu tiên của nhóm"),rcFootMsg("n","Tổng cần của nhóm: <b>"+rcQ(g.need)+"</b>"));
+  l=rcSvcBlk(g,r)+rcCell(o.ten||"—","Vật tư theo định mức","SL cần",rcQ(g.need));
+  if(g.xs.length)g.xs.forEach(function(x){rt+=rcXCell(x);});
+  else if(o.wrong&&o.wrong.length)o.wrong.forEach(function(w){rt+=rcCell(w.ten||w.ma||"—",(w.ma?'Mã <b>'+esc(w.ma)+'</b>':'')+(w.so?' · CT '+esc(w.so):'')+'<br><span class="rcx-red">⚠ Vật tư khác định mức</span>',"SL xuất",rcQ(w.sl),"rcx-bad");});
+  else rt=rcEmpty("Chưa có phiếu xuất của khách này",1);
+  cls=o.T==="KHỚP"?"g":(o.ok?"a":"r");
+  msg=(o.T==="KHỚP"&&!o.R)?'':'<b>'+esc(RC_KQ[o.T]||o.T)+'</b>'+(o.ok?' · đã duyệt hợp lệ':'')+(o.R?' · Giá trị lệch <b>'+rcSgnF(o.R)+' đ</b>':'');
+  return rcCmpBox(l,rt,rcFoot(g.need,g.got,cls,msg));
+}
+/* Phía xuất kho: phải = phiếu này (và phiếu cùng ca), trái = doanh thu/định mức tương ứng, dưới = chênh lệch */
+function rcCmpX(x){
+  var g=x.g,l="",rt,need=0,got=0,L=[],cls,msg;
+  if(x.skip)return rcCmpBox(rcEmpty("Phiếu chuyển kho / hủy — không đối chiếu"),rcXCell(x),rcFootMsg("n",esc(x.P)));
+  if(g){l=rcSvcBlk(g,null)+rcCell(g.ten,"Vật tư theo định mức","SL cần",rcQ(g.need));need=g.need;got=g.got;}
+  else if(x.pid){
+    L=rcDtByPid(x.pid);
+    if(L.length){
+      L.slice(0,3).forEach(function(c){l+=rcSvcBlk(c.g,c.r)+rcCell(c.ten||"—","Vật tư đúng định mức","SL cần",rcQ(c.O));});
+      if(L.length>3)l+='<div class="rcx-m" style="padding:4px 8px">… +'+(L.length-3)+' vật tư khác</div>';
+      L.forEach(function(c){need+=c.O;got+=c.P;});
+    }else{l=rcEmpty("Không có doanh thu của khách này",1);got=x.sl;}
+  }else{l=rcEmpty("Chưa có mã KH (PID) nên chưa gắn được doanh thu",1);got=x.sl;}
+  rt=rcXCell(x,x.bad?"rcx-bad":"rcx-me");
+  if(g&&g.xs.length>1){
+    var oth=g.xs.filter(function(y){return y!==x;});
+    rt+='<div class="rcx-lb">Phiếu khác cùng ca</div>';
+    oth.slice(0,3).forEach(function(y){rt+=rcXCell(y,"rcx-dim");});
+    if(oth.length>3)rt+='<div class="rcx-m" style="padding:4px 8px">… +'+(oth.length-3)+' phiếu</div>';
+  }
+  cls=x.bad?(x.ok?"a":"r"):"g";
+  msg='<b>'+esc(x.P)+'</b>'+(x.ok?' · đã duyệt hợp lệ':'')+(g&&g.xs.length>1?' · tổng '+g.xs.length+' phiếu cùng ca':'')+(!g&&L.length?' · SL phiếu này ('+rcQ(x.sl)+') không tính vào số xuất của ca':'')+(x.val?' · Giá trị '+rcF(x.val)+' đ':'');
+  return rcCmpBox(l,rt,rcFoot(need,got,cls,msg));
+}
+function rcGi(){var gi=0;RC_GRP.forEach(function(g,i){if(g[1].indexOf(RC.tab)>=0)gi=i;});return gi;}
+function rcNav(){
+  var gi=rcGi(),s=rcSum(),bd=[0,s.needD.length+s.needX.length,0,0];
+  return '<div class="rcnav wrap">'+RC_GRP.map(function(g,i){return '<button class="'+(i===gi?'on':'')+'" onclick="A.rcTab('+(i===gi?RC.tab:g[1][0])+')">'+g[0]+(bd[i]?'<em>'+bd[i]+'</em>':'')+'</button>';}).join('')+'</div>';
+}
+function rcSubNav(){
+  var g=RC_GRP[rcGi()][1];if(g.length<2)return '';
+  return '<div class="rcsubnav">'+g.map(function(t){return '<button class="'+(RC.tab===t?'on':'')+'" onclick="A.rcTab('+t+')">'+RC_SUBN[t]+'</button>';}).join('')+'</div>';
+}
+function rcQuickBar(){
+  return '<div class="rcqb"><button class="btn btn-outline" onclick="A.rcRefresh()">↻ Đối chiếu lại</button><label class="btn btn-primary">'+icon("upload",15)+'Cập nhật từ file<input type="file" accept=".xlsx,.xls" style="display:none" onchange="A.rcQuick(this)"></label></div>'
+    +'<div class="rcnote" style="margin-bottom:12px">Cập nhật từ file: sửa dòng đã có, thêm dòng mới, giữ giải trình và duyệt; có so sánh trước → sau và Hoàn tác. Chi tiết ở Dữ liệu → Nhập / Xuất file.</div>';
+}
+function rcAcc(key,title,body,def){var o=RC.co[key]!==undefined?RC.co[key]:!!def;return '<details class="rcacc"'+(o?' open':'')+' ontoggle="A.rcOpenK(\''+key+'\',this.open)"><summary>'+title+'</summary><div class="rcacc-b">'+body+'</div></details>';}
 function renderRecon(){
-  var R=rcDb(),h='<div class="topbar"><div class="trow wrap"><button class="back" onclick="A.go(\'home\')">‹</button><div class="ttl">Đối chiếu doanh thu – xuất kho</div></div><div style="height:10px"></div></div><div class="wrap" style="padding-top:12px;padding-bottom:50px">';
+  var R=rcDb();
   RC_RES=rcCompute();
-  h+='<div style="display:flex;gap:6px;overflow-x:auto;margin-bottom:12px">'+RC_TABS.map(function(t,i){return '<button class="pill'+(RC.tab===i?' on':'')+'" style="white-space:nowrap'+(RC.tab===i?';background:var(--teal);color:#fff':'')+'" onclick="A.rcTab('+i+')">'+t[1]+'</button>';}).join('')+'</div>';
-  h+='<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:6px"><button class="btn btn-outline" style="padding:10px" onclick="A.rcRefresh()">↻ Đối chiếu lại</button><label class="btn btn-primary" style="padding:10px;margin:0">'+icon("upload",16)+'Cập nhật từ file<input type="file" accept=".xlsx,.xls" style="display:none" onchange="A.rcQuick(this)"></label></div><div class="rcnote" style="margin-bottom:12px;font-size:12px">“Cập nhật từ file” dùng chế độ <b>Bổ sung / điều chỉnh</b>: sửa dòng đã có, thêm dòng mới, giữ nguyên giải trình và duyệt; tự so sánh trước → sau và có Hoàn tác. File cần có sheet DOANH_THU và/hoặc XUAT_KHO (như file mẫu).</div>';
-  if(!R.dt.length&&!R.xk.length&&(RC.tab<2||RC.tab===5))h+='<div class="card" style="margin-bottom:12px"><div style="font-weight:700;margin-bottom:4px">Chưa có dữ liệu</div><div style="font-size:13px;color:var(--mut);margin-bottom:10px">Vào tab Nhập/Xuất: tải file mẫu chuẩn, điền doanh thu + xuất kho rồi nhập vào.</div><button class="btn btn-primary" onclick="A.rcTab(4)">Nhập dữ liệu</button></div>';
+  var h='<div class="topbar"><div class="trow wrap"><button class="back" onclick="A.go(\'home\')">‹</button><div class="ttl">Đối chiếu doanh thu – xuất kho</div></div>'+rcNav()+'</div><div class="wrap" style="padding-top:12px;padding-bottom:50px">';
+  h+=rcSubNav();
+  if(RC.tab<2)h+=rcQuickBar();
+  if(!R.dt.length&&!R.xk.length&&(RC.tab<2||RC.tab===5))h+='<div class="card" style="margin-bottom:12px"><div style="font-weight:700;margin-bottom:4px">Chưa có dữ liệu</div><div style="font-size:13px;color:var(--mut);margin-bottom:10px">Vào Dữ liệu → Nhập / Xuất file: tải file mẫu chuẩn, điền doanh thu + xuất kho rồi nhập vào.</div><button class="btn btn-primary" onclick="A.rcTab(4)">Nhập dữ liệu</button></div>';
   else if(RC.tab===0)h+=rcViewSum();else if(RC.tab===1)h+=rcViewList();else if(RC.tab===2)h+=rcViewChk();else if(RC.tab===3)h+=rcViewMap();else if(RC.tab===4)h+=rcViewImp();else if(RC.tab===5)h+=rcViewApx();
   document.getElementById("app").innerHTML=h+'</div>';
 }
@@ -7083,33 +7240,36 @@ function rcViewSum(){
   return h;
 }
 function rcSelN(side,j,k,opts,cur){return '<select class="inp" onchange="A.rcNote('+side+','+j+','+k+',this.value)">'+opts.map(function(o,i){return '<option value="'+(i?esc(o):'')+'"'+(o===cur?' selected':'')+'>'+esc(o)+'</option>';}).join('')+'</select>';}
+function rcListRows(side,only,q){
+  var Z=RC_RES,R=rcDb();
+  var base=only==2?(side==0?Z.dt:Z.xk):(side==0?Z.dt.filter(function(o){return o.first&&o.bad;}):Z.xk.filter(function(x){return x.bad;}));
+  return base.filter(function(o){return rcIn(o)&&(only!=1||o.need)&&(only!=3||(R.notes[o.nid]&&R.notes[o.nid].chg))&&(!q||rcK(JSON.stringify(o.r)+" "+o.pid+" "+(o.ten||"")+" "+(o.vt||"")+" "+(o.P||"")+" "+(o.T||"")+" "+(o.why||"")).indexOf(q)>=0);});
+}
 function rcViewList(){
-  var Z=RC_RES,R=rcDb(),h=rcFilter(),side=RC.side,q=rcK(RC.q);
-  h+='<div style="display:flex;gap:8px;margin-bottom:8px">'+rcSel(3,[["0","Phía doanh thu"],["1","Phía xuất kho"]],side)+rcSel(4,[["1","Chỉ ca chưa duyệt"],["0","Tất cả ca lệch"],["3","Ca đã duyệt cần xem lại"],["2","Tất cả dòng dữ liệu"]],RC.only)+'</div>'
-    +'<button class="btn btn-primary" style="margin-bottom:10px" onclick="A.rcRow('+side+',-1)">'+icon("plus",16)+'Thêm dòng '+(side?"xuất kho":"doanh thu")+'</button>'
-    +'<button class="btn btn-outline" style="margin-bottom:10px" onclick="A.rcExportDiff()">'+icon("download",16)+'Xuất Excel ca chênh lệch (DT + xuất kho)</button>'
-    +'<input class="inp" placeholder="Tìm PID, khách hàng, vật tư, số CT…" value="'+esc(RC.q)+'" onchange="A.rcS(2,this.value)" style="margin-bottom:12px">';
-  var rows=(RC.only==2?(side==0?Z.dt:Z.xk):(side==0?Z.dt.filter(function(o){return o.first&&o.bad;}):Z.xk.filter(function(x){return x.bad;}))).filter(function(o){return rcIn(o)&&(RC.only!=1||o.need)&&(RC.only!=3||(R.notes[o.nid]&&R.notes[o.nid].chg))&&(!q||rcK(JSON.stringify(o.r)+" "+o.pid+" "+(o.ten||"")+" "+(o.vt||"")+" "+(o.P||"")+" "+(o.T||"")+" "+(o.why||"")).indexOf(q)>=0);});
-  h+='<div style="font-size:13px;color:var(--mut);margin-bottom:8px">'+rows.length+' ca</div>';
+  var R=rcDb(),h=rcFilter(),side=RC.side,q=rcK(RC.q);
+  h+='<div class="rcsubnav"><button class="'+(side==0?'on':'')+'" onclick="A.rcS(3,0)">Doanh thu → xuất kho</button><button class="'+(side==1?'on':'')+'" onclick="A.rcS(3,1)">Xuất kho → doanh thu</button></div>';
+  h+='<div class="rcchips">'+RC_ONLY.map(function(p){return '<button class="rcchip'+(RC.only==p[0]?' on':'')+'" onclick="A.rcS(4,'+p[0]+')">'+p[1]+' <b>'+rcListRows(side,p[0],q).length+'</b></button>';}).join('')+'</div>';
+  h+='<div class="rcact"><button class="btn btn-outline" onclick="A.rcRow('+side+',-1)">'+icon("plus",15)+(side?'Thêm phiếu xuất':'Thêm dòng DT')+'</button><button class="btn btn-outline" onclick="A.rcExportDiff()">'+icon("download",15)+'Xuất ca lệch</button></div>'
+    +'<input class="inp" placeholder="Tìm PID, khách hàng, vật tư, số CT…" value="'+esc(RC.q)+'" onchange="A.rcS(2,this.value)" style="margin-bottom:10px">';
+  var rows=rcListRows(side,RC.only,q);
+  h+='<div style="font-size:13px;color:var(--mut);margin-bottom:8px">'+rows.length+' ca'+(rows.length>RC.lim?' · đang hiện '+RC.lim:'')+'</div>';
   rows.slice(0,RC.lim).forEach(function(o){
-    var r=o.r,d=side==0,jj=d?o.j:o.i,n=R.notes[o.nid]||{},body="";
-    if(d){
-      body=esc(r.dv)+'<br>Vật tư theo định mức: <b>'+esc(o.ten||"—")+'</b>'+(o.first?' · cần '+o.O+' · xuất '+o.P+' · chênh '+o.Q+' · lệch '+rcF(o.R)+' đ'+(o.g&&o.g.n>1?'<br><b>Đã tự cộng gộp '+o.g.n+' dòng doanh thu cùng khách + cùng vật tư → cần '+o.O+'</b>':''):'')
-        +(o.none?'<br><i>'+esc(o.why)+'</i>':'');
-      if(o.wrong&&o.wrong.length){
-        body+='<div style="margin-top:6px;color:var(--red)">Khách này đã xuất vật tư KHÁC: '+o.wrong.map(function(w){return esc(w.ten||w.ma)+(w.ma?' ('+esc(w.ma)+')':'')+' · SL '+w.sl;}).join('; ')+'</div>';
-        if(o.ri>=0)o.wrong.forEach(function(w,k){body+='<button class="btn btn-outline" style="padding:7px;margin-top:6px;font-size:12.5px" onclick="A.rcAcc(0,'+jj+','+k+')">✓ Cùng loại, chỉ khác tên → chấp nhận «'+esc(w.ten||w.ma)+'»</button>';});
-      }
-    }else{
-      body=esc(r.dg)+'<br>'+esc(o.ten)+(o.ma?' · mã '+esc(o.ma):'')+' · SL '+o.sl+(o.vt?'<br>'+esc(o.vt):'');
-      if(o.exp&&o.exp.length)o.exp.forEach(function(e,k){if(e.ri>=0)body+='<button class="btn btn-outline" style="padding:7px;margin-top:6px;font-size:12.5px" onclick="A.rcAcc(1,'+jj+','+k+')">✓ Cùng loại, chỉ khác tên → chấp nhận cho «'+esc(e.ten)+'»</button>';});
+    var r=o.r,d=side==0,jj=d?o.j:o.i,n=R.notes[o.nid]||{},ex="",st;
+    var AB='<button class="btn btn-outline" style="padding:7px;margin-top:6px;font-size:12.5px" onclick="A.rcAcc(';
+    if(d&&o.wrong&&o.wrong.length&&o.ri>=0)o.wrong.forEach(function(w,k){ex+=AB+'0,'+jj+','+k+')">✓ Cùng loại, chỉ khác tên → chấp nhận «'+esc(w.ten||w.ma)+'»</button>';});
+    if(!d&&o.exp&&o.exp.length)o.exp.forEach(function(e,k){if(e.ri>=0)ex+=AB+'1,'+jj+','+k+')">✓ Cùng loại, chỉ khác tên → chấp nhận cho «'+esc(e.ten)+'»</button>';});
+    st=o.ok?"Hợp lệ (đã duyệt)":(d?(o.none?o.T:(o.first?o.T:"Đã gộp vào ca đầu")):o.P);
+    h+='<div class="card" style="margin-bottom:10px;padding:12px"><div style="display:flex;justify-content:space-between;gap:8px;align-items:flex-start"><b style="font-size:14px">'+esc(d?(r.kh||"—"):(r.so||r.ten))+'</b>'+rcBadge(st)+'</div>'
+      +'<div style="font-size:12.5px;color:var(--mut);margin-top:3px">'+esc(o.cs)+' · '+esc(o.pid||"không có PID")+' · '+esc(rcDStr(r.ngay)||r.ngay||"")+'</div>'
+      +(d?rcCmpD(o):rcCmpX(o))+ex;
+    if(n.chg)h+='<div style="margin:8px 0;padding:8px 10px;border-radius:10px;background:var(--amber-bg);color:var(--amber);font-size:12.5px">⚠ Đã duyệt nhưng kết quả đối chiếu đổi sau khi nhập dữ liệu mới<br>'+esc(n.chg)+'<br><a onclick="A.rcChgOk('+side+','+jj+')" style="color:var(--teal);font-weight:700">Giữ nguyên duyệt</a></div>';
+    if(!(d&&o.none)){
+      var has=n.r||n.g||n.st,sc=n.st==="Đã duyệt"?"green":n.st==="Không duyệt"?"red":"amber";
+      h+='<details class="rcnt"'+((has||o.need)?' open':'')+'><summary>✍ Giải trình / xử lý <span class="rcb rcb-'+sc+'">'+esc(n.st||"Chưa xử lý")+'</span></summary>'
+        +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:6px">'+rcSelN(side,jj,0,["Mã lý do"].concat(d?RC_LD:RC_LX),n.r)+rcSelN(side,jj,2,["Trạng thái xử lý"].concat(RC_ST),n.st)+'</div>'
+        +'<input class="inp" placeholder="Giải trình" value="'+esc(n.g||"")+'" onchange="A.rcNote('+side+','+jj+',1,this.value)">'+(n.by?'<div style="font-size:11.5px;color:var(--mut2);margin-top:4px">'+esc(n.by)+' · '+esc(n.at||"")+'</div>':'')+'</details>';
     }
-    h+='<div class="card" style="margin-bottom:10px;padding:12px"><div style="display:flex;justify-content:space-between;gap:8px;align-items:flex-start"><b style="font-size:14px">'+esc(d?(r.kh||"—"):(r.so||r.ten))+'</b>'+rcBadge(o.ok?"Hợp lệ (đã duyệt)":(d?(o.none?o.T:(o.first?o.T:"Đã gộp vào ca đầu")):o.P))+'</div>'
-      +'<div style="font-size:12.5px;color:var(--mut);margin:4px 0 8px">'+esc(o.cs)+' · '+esc(o.pid||"không có PID")+' · '+esc(r.ngay)+'<br>'+body+'</div>';
-    if(n.chg)h+='<div style="margin-bottom:8px;padding:8px 10px;border-radius:10px;background:var(--amber-bg);color:var(--amber);font-size:12.5px">⚠ Đã duyệt nhưng kết quả đối chiếu đổi sau khi nhập dữ liệu mới<br>'+esc(n.chg)+'<br><a onclick="A.rcChgOk('+side+','+jj+')" style="color:var(--teal);font-weight:700">Giữ nguyên duyệt</a></div>';
-    if(!(d&&o.none))h+='<div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:6px">'+rcSelN(side,jj,0,["Mã lý do"].concat(d?RC_LD:RC_LX),n.r)+rcSelN(side,jj,2,["Trạng thái xử lý"].concat(RC_ST),n.st)+'</div>'
-      +'<input class="inp" placeholder="Giải trình" value="'+esc(n.g||"")+'" onchange="A.rcNote('+side+','+jj+',1,this.value)">'+(n.by?'<div style="font-size:11.5px;color:var(--mut2);margin-top:4px">'+esc(n.by)+' · '+esc(n.at||"")+'</div>':'');
-    h+='<div style="display:flex;gap:8px;margin-top:8px"><button class="btn btn-outline" style="padding:8px" onclick="A.rcRow('+side+','+o.i+')">'+icon("edit",15)+'Sửa / khớp tay</button><button class="btn btn-outline" style="padding:8px;color:var(--red)" onclick="A.rcRowDel('+side+','+o.i+')">'+icon("trash",15)+'Xóa dòng</button></div></div>';
+    h+='<div class="rcbtns"><button class="btn btn-outline" onclick="A.rcRow('+side+','+o.i+')">'+icon("edit",15)+'Sửa / khớp tay</button><button class="btn rcdel" onclick="A.rcRowDel('+side+','+o.i+')">'+icon("trash",15)+'Xóa</button></div></div>';
   });
   if(rows.length>RC.lim)h+='<button class="btn btn-outline" onclick="A.rcMore()">Xem thêm</button>';
   return h;
@@ -7209,17 +7369,18 @@ function rcViewMapGen(){
 }
 function rcViewImp(){
   var R=rcDb();
-  return '<div class="card" style="margin-bottom:12px"><div class="sec">1. File mẫu chuẩn</div><div style="font-size:12.5px;color:var(--mut);margin-bottom:10px">Tải mẫu, dán dữ liệu MISA vào đúng cột rồi nhập lại. App đọc theo <b>tên cột</b> nên không sợ lệch vị trí. Mẫu có sheet hướng dẫn và dòng “VÍ DỤ” (tự bỏ qua khi nhập).</div>'
-    +'<button class="btn btn-primary" onclick="A.rcTpl()">'+icon("download",17)+'Tải mẫu nhập liệu (Doanh thu + Xuất kho)</button></div>'
-    +'<div class="card" style="margin-bottom:12px"><div class="sec">2. Nhập dữ liệu</div><div style="font-size:12.5px;color:var(--mut);margin-bottom:10px">Đang có '+R.dt.length+' dòng doanh thu, '+R.xk.length+' dòng xuất kho.</div>'+rcSel(5,[["replace","Thay thế dữ liệu cũ"],["append","Nối thêm (bỏ dòng trùng)"],["update","Bổ sung / điều chỉnh (sửa dòng đã có, thêm dòng mới)"]],RC.mode)
+  var tpl='<div style="font-size:12.5px;color:var(--mut);margin-bottom:10px">Tải mẫu, dán dữ liệu MISA vào đúng cột rồi nhập lại. App đọc theo <b>tên cột</b> nên không sợ lệch vị trí. Mẫu có sheet hướng dẫn và dòng “VÍ DỤ” (tự bỏ qua khi nhập).</div>'
+    +'<button class="btn btn-primary" onclick="A.rcTpl()">'+icon("download",17)+'Tải mẫu nhập liệu (Doanh thu + Xuất kho)</button>';
+  var inp='<div style="font-size:12.5px;color:var(--mut);margin-bottom:10px">Đang có '+R.dt.length+' dòng doanh thu, '+R.xk.length+' dòng xuất kho.</div>'+rcSel(5,[["replace","Thay thế dữ liệu cũ"],["append","Nối thêm (bỏ dòng trùng)"],["update","Bổ sung / điều chỉnh (sửa dòng đã có, thêm dòng mới)"]],RC.mode)
     +'<div class="rcnote" style="margin-top:8px;line-height:1.55">'+(RC.mode==="update"?'<b>Bổ sung / điều chỉnh</b>: dòng đã có (cùng khách + ngày + dịch vụ, hoặc cùng số CT + vật tư + ngày) được <b>sửa theo file</b>, dòng mới được thêm, dòng cũ không có trong file giữ nguyên. Giải trình và duyệt được giữ.':RC.mode==="append"?'<b>Nối thêm</b>: chỉ thêm dòng chưa có, không sửa dòng cũ. Nếu file là bản đã điều chỉnh số liệu, hãy dùng “Bổ sung / điều chỉnh”.':'<b>Thay thế</b>: dùng đúng dữ liệu trong file. Dòng trùng khóa (khách + ngày + dịch vụ / số CT + vật tư) vẫn giữ giải trình và duyệt cũ.')+'<br>Nhập xong app <b>tự đối chiếu lại</b>, hiện bảng so sánh trước → sau và cho phép <b>Hoàn tác</b>.</div>'
     +'<label class="btn btn-primary" style="margin-top:10px">'+icon("upload",17)+'File mẫu chuẩn (cả 2 sheet)<input type="file" accept=".xlsx,.xls,.csv" style="display:none" onchange="A.rcFile(this,0)"></label>'
     +'<label class="btn btn-outline" style="margin-top:8px">Chỉ Doanh thu<input type="file" accept=".xlsx,.xls,.csv" style="display:none" onchange="A.rcFile(this,1)"></label>'
-    +'<label class="btn btn-outline" style="margin-top:8px">Chỉ Xuất kho<input type="file" accept=".xlsx,.xls,.csv" style="display:none" onchange="A.rcFile(this,2)"></label></div>'+rcImpCard()
-    +'<div class="card"><div class="sec">3. Xuất kết quả</div><button class="btn btn-primary" style="margin-bottom:8px" onclick="A.rcExport()">'+icon("download",17)+'Tải Excel kết quả đối chiếu</button><button class="btn btn-primary" style="margin-bottom:8px" onclick="A.rcExportDiff()">'+icon("download",17)+'Xuất Excel ca chênh lệch (để giải trình)</button><button class="btn btn-outline" onclick="A.rcPrint()">'+icon("file",17)+'Biên bản (in / PDF)</button>'
-    +'<div style="font-size:12px;color:var(--mut);margin-top:8px">Biên bản và Phụ lục theo bộ lọc Cơ sở / Tháng (Phụ lục có thêm bộ lọc Năm, xem tab Phụ lục).</div>'
-    +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px"><button class="btn btn-outline" style="padding:10px" onclick="A.rcApxXlsx()">'+icon("download",16)+'Phụ lục từng kho (Excel)</button><button class="btn btn-outline" style="padding:10px" onclick="A.rcApxPrint()">'+icon("file",16)+'Phụ lục từng kho (in / PDF)</button></div></div>'+rcBackupCard()
-    +'<div class="card" style="margin-top:12px"><div class="sec">Dán dữ liệu từ MISA / Excel</div><div style="font-size:12px;color:var(--mut);margin-bottom:8px">Copy vùng dữ liệu KÈM DÒNG TIÊU ĐỀ (đúng tên cột như file mẫu) rồi dán vào ô dưới. Không kèm tiêu đề thì app hiểu theo thứ tự cột MISA cũ. Dùng chế độ Thay thế / Nối thêm ở trên.</div><textarea id="rcpaste" class="inp" rows="5"></textarea><div style="display:flex;gap:8px;margin-top:8px"><button class="btn btn-primary" onclick="A.rcPaste(0)">Dán vào Doanh thu</button><button class="btn btn-primary" onclick="A.rcPaste(1)">Dán vào Xuất kho</button></div><div style="display:flex;gap:8px;margin-top:8px"><button class="btn btn-outline" style="color:var(--red)" onclick="A.rcClear(0)">Xóa hết doanh thu</button><button class="btn btn-outline" style="color:var(--red)" onclick="A.rcClear(1)">Xóa hết xuất kho</button></div></div>';
+    +'<label class="btn btn-outline" style="margin-top:8px">Chỉ Xuất kho<input type="file" accept=".xlsx,.xls,.csv" style="display:none" onchange="A.rcFile(this,2)"></label>';
+  var out='<button class="btn btn-primary" style="margin-bottom:8px" onclick="A.rcExport()">'+icon("download",17)+'Tải Excel kết quả đối chiếu</button><button class="btn btn-primary" style="margin-bottom:8px" onclick="A.rcExportDiff()">'+icon("download",17)+'Xuất Excel ca chênh lệch (để giải trình)</button><button class="btn btn-outline" onclick="A.rcPrint()">'+icon("file",17)+'Biên bản (in / PDF)</button>'
+    +'<div style="font-size:12px;color:var(--mut);margin-top:8px">Biên bản và Phụ lục theo bộ lọc Cơ sở / Tháng (Phụ lục có thêm bộ lọc Năm, xem Đối chiếu → Phụ lục 01).</div>'
+    +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px"><button class="btn btn-outline" style="padding:10px" onclick="A.rcApxXlsx()">'+icon("download",16)+'Phụ lục từng kho (Excel)</button><button class="btn btn-outline" style="padding:10px" onclick="A.rcApxPrint()">'+icon("file",16)+'Phụ lục từng kho (in / PDF)</button></div>';
+  var paste='<div style="font-size:12px;color:var(--mut);margin-bottom:8px">Copy vùng dữ liệu KÈM DÒNG TIÊU ĐỀ (đúng tên cột như file mẫu) rồi dán vào ô dưới. Không kèm tiêu đề thì app hiểu theo thứ tự cột MISA cũ. Dùng chế độ Thay thế / Nối thêm ở trên.</div><textarea id="rcpaste" class="inp" rows="5"></textarea><div style="display:flex;gap:8px;margin-top:8px"><button class="btn btn-primary" onclick="A.rcPaste(0)">Dán vào Doanh thu</button><button class="btn btn-primary" onclick="A.rcPaste(1)">Dán vào Xuất kho</button></div><div style="display:flex;gap:8px;margin-top:8px"><button class="btn btn-outline" style="color:var(--red)" onclick="A.rcClear(0)">Xóa hết doanh thu</button><button class="btn btn-outline" style="color:var(--red)" onclick="A.rcClear(1)">Xóa hết xuất kho</button></div>';
+  return rcImpCard()+rcAcc("imp-in","Nhập dữ liệu",inp,1)+rcAcc("imp-out","Xuất kết quả &amp; phụ lục",out,1)+rcAcc("imp-tpl","File mẫu chuẩn",tpl,0)+rcAcc("imp-paste","Dán dữ liệu từ MISA / Excel",paste,0)+rcBackupCard();
 }
 /* ----- Nhập file (đọc theo TÊN CỘT; không có tiêu đề thì theo bố cục MISA cũ) ----- */
 function rcHdr(rows,side){
@@ -7311,7 +7472,7 @@ function rcApply(side,arr,nt){
     return j;
   }
   function lbl(o){return side==="dt"?((o.kh||o.pid||"—")+" · "+(o.dv||"")):((o.so||o.ten||o.ma||"—")+" · "+(o.ten||o.ma||""));}
-  function note(o,d){if(res.chg.length<60)res.chg.push({l:lbl(o),d:d.map(function(x){return RC_FLB[x[0]]+" "+rcShow(x[0],x[1])+" → "+rcShow(x[0],x[2]);}).join("; ")});}
+  function note(o,d){if(res.chg.length<60)res.chg.push({l:lbl(o),f:d.map(function(x){return [RC_FLB[x[0]],rcShow(x[0],x[1]),rcShow(x[0],x[2])];}),d:d.map(function(x){return RC_FLB[x[0]]+" "+rcShow(x[0],x[1])+" → "+rcShow(x[0],x[2]);}).join("; ")});}
   function mapNotes(overwrite){for(var q in nt){var t=idMap[q]||q;if(overwrite||!R.notes[t])R.notes[t]=nt[q];}}
   if(mode==="append"){
     /* giữ nguyên cách cũ: chỉ thêm dòng chưa có; cảnh báo dòng giống dòng cũ nhưng khác số liệu (có thể là bản điều chỉnh) */
@@ -7376,7 +7537,7 @@ function rcImpReport(b,a,res,src){
     var c=rep.ch[sd]={fixed:0,bad:0,other:0,nw:0,nwBad:0,gone:0},it=rep.it[sd]={fixed:[],bad:[],other:[],nwBad:[],gone:[]},keys={};
     Object.keys(b[sd]).forEach(function(k){keys[k]=1;});Object.keys(a[sd]).forEach(function(k){keys[k]=1;});
     function tx(e){return sd==="dt"?((RC_KQ[e.T]||e.T)+((e.O||e.P)?" (cần "+e.O+" / xuất "+e.P+")":"")):e.P;}
-    function ln(e0,e1){var e=e1||e0;return e.lbl+" · "+e.ten+": "+(e0?tx(e0):"mới")+" → "+(e1?tx(e1):"không còn");}
+    function ln(e0,e1){var e=e1||e0;return {l:e.lbl+" · "+e.ten,a:e0?tx(e0):"(mới phát sinh)",b:e1?tx(e1):"(không còn)"};}
     function push(arr,s){if(arr.length<40)arr.push(s);}
     Object.keys(keys).forEach(function(k){
       var e0=b[sd][k],e1=a[sd][k],nn,chgd;
@@ -7415,10 +7576,16 @@ function rcImpShow(rep){
 }
 function rcImpHtml(rep){
   var kb=rep.kb,ka=rep.ka;
+  function itm(s){
+    if(typeof s==="string")return '<div style="margin-bottom:4px">• '+esc(s)+'</div>';
+    if(s.f&&s.f.length)return '<div class="rcm"><div class="rcm-l">'+esc(s.l)+'</div>'+rcTbl(["Trường","Trước","Sau"],s.f.map(function(z){return [esc(z[0]),esc(z[1]),'<b>'+esc(z[2])+'</b>'];}),3)+'</div>';
+    if(s.a!==undefined)return '<div class="rcm"><div class="rcm-l">'+esc(s.l)+'</div><div class="rcm-g"><div><i>Trước</i>'+esc(s.a)+'</div><div><i>Sau</i><b>'+esc(s.b)+'</b></div></div></div>';
+    return '<div style="margin-bottom:4px">• '+esc(s.l)+(s.d?' — '+esc(s.d):'')+'</div>';
+  }
   function det(t,n,arr,col){
     if(!n)return '';
     return '<details style="margin-top:6px"><summary style="font-weight:700;font-size:13px;color:var(--'+col+')">'+t+' ('+n+')</summary><div style="font-size:12px;color:var(--mut);padding:6px 0 0 4px;line-height:1.5">'
-      +arr.map(function(s){return '• '+esc(s);}).join('<br>')+(n>arr.length?'<br>… và '+(n-arr.length)+' mục nữa':'')+'</div></details>';
+      +arr.map(itm).join('')+(n>arr.length?'<div>… và '+(n-arr.length)+' mục nữa</div>':'')+'</div></details>';
   }
   function pct(v){return v==null?"–":v.toFixed(1)+"%";}
   function dcell(x,y,f,good){
@@ -7451,7 +7618,7 @@ function rcImpHtml(rep){
   h+='</div>';
   [["dt","Doanh thu"],["xk","Xuất kho"]].forEach(function(p){
     var c=rep.cnt[p[0]],l=rep.chg[p[0]];
-    if(c&&c.upd&&l&&l.length)h+='<div style="margin-top:10px">'+det("Dòng "+p[1].toLowerCase()+" đã được điều chỉnh",c.upd,l.map(function(x){return x.l+" — "+x.d;}),"sky")+'</div>';
+    if(c&&c.upd&&l&&l.length)h+='<div style="margin-top:10px">'+det("Dòng "+p[1].toLowerCase()+" đã được điều chỉnh",c.upd,l,"sky")+'</div>';
   });
   if(rep.reN)h+='<div style="margin-top:12px;padding:8px 10px;border-radius:10px;background:var(--red-bg);color:var(--red);font-size:12.5px">⚠ <b>'+rep.reN+'</b> ca <b>đã duyệt</b> nhưng kết quả đối chiếu đã đổi sau lần nhập này. Giải trình được giữ, ca được gắn cờ để duyệt lại.'+det("Danh sách",rep.reN,rep.reL,"red")+'</div>';
   if(rep.orph)h+='<div style="margin-top:10px;padding:8px 10px;border-radius:10px;background:var(--amber-bg);color:var(--amber);font-size:12.5px"><b>'+rep.orph+'</b> giải trình / duyệt cũ không còn gắn với dòng nào (dòng đã bị bỏ khỏi dữ liệu).</div>';
@@ -7465,11 +7632,13 @@ function rcImpHtml(rep){
 function rcImpCard(){
   var L=rcDb().lastImp;if(!L)return '';
   var c=L.cnt||{},t=function(s,n){return n?s+": +"+n.add+" mới · "+n.upd+" sửa · "+n.same+" giữ nguyên"+(L.mode==="replace"?" · "+n.del+" bỏ":""):"";};
-  return '<div class="card" style="margin-bottom:12px"><div class="sec">Lần cập nhật gần nhất</div><div style="font-size:12.5px;color:var(--mut);margin-bottom:10px">'+esc(L.at)+' · '+esc(L.modeLbl)+' · '+esc(L.src)
-    +(c.dt?'<br>'+esc(t("Doanh thu",c.dt)):'')+(c.xk?'<br>'+esc(t("Xuất kho",c.xk)):'')
-    +'<br>Tỷ lệ khớp: <b>'+(L.kb.rate==null?"–":L.kb.rate.toFixed(1)+"%")+' → '+(L.ka.rate==null?"–":L.ka.rate.toFixed(1)+"%")+'</b> · Ca cần xử lý: <b>'+(L.kb.needD+L.kb.needX)+' → '+(L.ka.needD+L.ka.needX)+'</b></div>'
-    +'<div style="display:grid;grid-template-columns:'+((RC_UNDO&&RC_UNDO.at===L.at)?'1fr 1fr':'1fr')+';gap:8px"><button class="btn btn-outline" onclick="A.rcImpLast()">Xem chi tiết</button>'
-    +((RC_UNDO&&RC_UNDO.at===L.at)?'<button class="btn btn-outline" style="color:var(--red)" onclick="A.rcImpUndo()">Hoàn tác</button>':'')+'</div></div>';
+  function pc(v){return v==null?"–":v.toFixed(1)+"%";}
+  var cu=(RC_UNDO&&RC_UNDO.at===L.at);
+  return '<div class="card" style="margin-bottom:12px"><div class="sec">Lần cập nhật gần nhất</div><div style="font-size:12.5px;color:var(--mut);margin-bottom:8px">'+esc(L.at)+' · '+esc(L.modeLbl)+' · '+esc(L.src)
+    +(c.dt?'<br>'+esc(t("Doanh thu",c.dt)):'')+(c.xk?'<br>'+esc(t("Xuất kho",c.xk)):'')+'</div>'
+    +rcTbl(["Chỉ tiêu","Trước","Sau"],[["Tỷ lệ khớp",pc(L.kb.rate),'<b>'+pc(L.ka.rate)+'</b>'],["Ca cần xử lý",L.kb.needD+L.kb.needX,'<b>'+(L.ka.needD+L.ka.needX)+'</b>']],1)
+    +'<div style="display:grid;grid-template-columns:'+(cu?'1fr 1fr':'1fr')+';gap:8px;margin-top:10px"><button class="btn btn-outline" onclick="A.rcImpLast()">Xem chi tiết</button>'
+    +(cu?'<button class="btn btn-outline" style="color:var(--red)" onclick="A.rcImpUndo()">Hoàn tác</button>':'')+'</div></div>';
 }
 function rcRows(wb,name){var ws=wb.Sheets[name]||wb.Sheets[wb.SheetNames[0]];return XLSX.utils.sheet_to_json(ws,{header:1,raw:true,defval:""});}
 function rcWbOut(wb,fname){shareOrDownload(new Blob([XLSX.write(wb,{bookType:"xlsx",type:"array"})],{type:"application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"}),fname);}
@@ -7873,6 +8042,7 @@ function rcApxRow(o,N){
     g.xs.forEach(function(x){var s=String(x.r.so||"").trim()||"(không số CT)";if(sos.indexOf(s)<0)sos.push(s);});
     if(!sos.length&&o.wrong&&o.wrong.length)o.wrong.forEach(function(w){var s=String(w.so||"").trim()||"(không số CT)";if(sos.indexOf(s)<0)sos.push(s);});
     row.so=sos.length?sos.join("; "):"(chưa xuất)";
+    row.xl=g.xs.length?g.xs.map(function(x){return {ten:x.ten,ma:x.ma,so:String(x.r.so||"").trim(),ngay:rcDStr(x.r.ngay)||"",sl:x.sl};}):(o.wrong||[]).map(function(w2){return {ten:w2.ten,ma:w2.ma,so:String(w2.so||"").trim(),ngay:"",sl:w2.sl,bad:1};});
     if(o.wrong&&o.wrong.length){var au="Đã xuất vật tư khác: "+o.wrong.map(function(w){return (w.ten||w.ma)+" ×"+w.sl;}).join("; ");row.gt=row.gt?row.gt+" | "+au:au;}
     if(g.n>1)row.vt+=" (gộp "+g.n+" dòng DV)";
   }else{
@@ -7894,7 +8064,7 @@ function rcApxBuild(){
   Z.xk.forEach(function(x){
     if(!rcIn(x)||!rcYrOk(x.r.ngay)||!x.bad||(x.P==="XUẤT SAI VẬT TƯ"&&x.inWrong))return;
     var n=N[x.nid]||{},d=rcDate(x.r.ngay);
-    box(x.cs||"(chưa rõ cơ sở)").orph.push({ngay:rcDStr(x.r.ngay)||"",dk:d?d.y*10000+d.m*100+d.d:0,so:String(x.r.so||"").trim(),pid:x.pid||"",vt:x.ten||x.ma||"",sl:x.sl,
+    box(x.cs||"(chưa rõ cơ sở)").orph.push({ngay:rcDStr(x.r.ngay)||"",dk:d?d.y*10000+d.m*100+d.d:0,so:String(x.r.so||"").trim(),pid:x.pid||"",vt:x.ten||x.ma||"",ma:x.ma||"",sl:x.sl,
       kq:x.ok?"Hợp lệ (đã duyệt)":(RC_KQX[x.P]||(String(x.P).indexOf("THIẾU MÃ KH")===0?"Thiếu mã KH":x.P)),cls:x.ok?"b":"r",gt:[n.r,n.g].filter(Boolean).join(" – "),i:x.i});
   });
   var list=[],seen={},yrs={};
@@ -7916,11 +8086,14 @@ function rcApxBuild(){
   return {list:list,per:per+(yt?" / "+yt:""),th:RC.th==="Tất cả"?"":RC.th,yr:yt};
 }
 function rcApxCard(w,k){
-  var c=RC_APX_CLS[w.cls]||RC_APX_CLS.n;
+  var c=RC_APX_CLS[w.cls]||RC_APX_CLS.n,cl={g:"g",b:"a",r:"r",n:"n"}[w.cls]||"n",l,rt,ft;
+  l='<div class="rcx-sv"><b>'+esc(w.dv||"—")+'</b></div>'+(w.nd===""?rcCell(w.vt||"—","Không đối chiếu vật tư"):rcCell(w.vt||"—","Vật tư theo định mức","SL cần",rcQ(w.nd)));
+  if(!w.cnt)rt=rcEmpty("Tính ở dòng gộp đầu tiên của nhóm");
+  else if(w.xl&&w.xl.length)rt=w.xl.map(function(x){return rcCell(x.ten||x.ma||"—",(x.ma?'Mã <b>'+esc(x.ma)+'</b>':'')+(x.so?' · CT '+esc(x.so):'')+(x.ngay?' · '+esc(x.ngay):''),"SL xuất",rcQ(x.sl),x.bad?"rcx-bad":"");}).join('');
+  else rt=rcEmpty(w.nd===""?"Không đối chiếu xuất kho":"Chưa xuất kho",w.nd!=="");
+  ft=(w.cnt&&w.nd!=="")?rcFoot(w.nd,w.xt,cl,esc(w.kq)):rcFootMsg(cl,esc(w.kq||"—"));
   return '<div class="apxr"><div class="apxr-h"><div class="apxr-n">'+k+'</div><div style="flex:1;min-width:0"><b>'+esc(w.kh||"—")+'</b><div class="apxr-m">'+esc(w.pid||"không có PID")+' · '+esc(w.ngay)+'</div></div><span class="rcb rcb-'+c[2]+'">'+esc(w.kq)+'</span></div>'
-    +'<div class="apxr-dv">'+esc(w.dv)+'</div>'
-    +'<div class="apxr-g"><div><i>Phiếu xuất kho</i>'+esc(w.so)+'</div><div><i>Vật tư</i>'+esc(w.vt)+'</div>'
-    +(w.nd===""?'':'<div><i>SL định mức</i>'+esc(w.nd)+'</div><div><i>SL xuất thực</i>'+esc(w.xt)+'</div>')+'</div>'
+    +rcCmpBox(l,rt,ft)
     +(w.gt?'<div class="apxr-gt"><b>Giải trình:</b> '+esc(w.gt)+'</div>':'')+'</div>';
 }
 function rcViewApx(){
@@ -7946,7 +8119,8 @@ function rcViewApx(){
       B.orph.slice(0,RC.lim).forEach(function(w){
         var c=RC_APX_CLS[w.cls];
         h+='<div class="apxr"><div class="apxr-h"><div style="flex:1;min-width:0"><b>'+esc(w.so||"(không số CT)")+'</b><div class="apxr-m">'+esc(w.pid||"không có PID")+' · '+esc(w.ngay)+'</div></div><span class="rcb rcb-'+c[2]+'">'+esc(w.kq)+'</span></div>'
-          +'<div class="apxr-dv">'+esc(w.vt)+' · SL xuất '+esc(w.sl)+'</div>'+(w.gt?'<div class="apxr-gt"><b>Giải trình:</b> '+esc(w.gt)+'</div>':'')+'</div>';
+          +rcCmpBox(rcEmpty("Chưa gắn được dịch vụ / doanh thu",1),rcCell(w.vt||"—",w.ma?'Mã <b>'+esc(w.ma)+'</b>':'',"SL xuất",rcQ(w.sl),"rcx-bad"),rcFootMsg(w.cls==="b"?"a":"r",esc(w.kq)))
+          +(w.gt?'<div class="apxr-gt"><b>Giải trình:</b> '+esc(w.gt)+'</div>':'')+'</div>';
       });
       if(B.orph.length>RC.lim)more=true;
     }
@@ -7990,6 +8164,7 @@ function rcMergeRecon(src){
 }
 Object.assign(A,{
   rcApxOpen:function(bi,o){var k=RC.apxK&&RC.apxK[bi];if(k!=null)RC.co[k]=!!o;},
+  rcOpenK:function(k,o){RC.co[k]=!!o;},
   /* ----- Phụ lục → Excel (mỗi cơ sở 1 sheet, bố cục như biểu mẫu PHU_LUC) ----- */
   rcApxXlsx:function(){
     if(typeof ExcelJS==="undefined"){toast("Chưa tải được thư viện Excel — kiểm tra mạng");return;}
