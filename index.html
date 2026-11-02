@@ -2,7 +2,7 @@
 <html lang="vi">
 <head>
 <meta charset="UTF-8">
-<meta name="app-version" content="2026110203">
+<meta name="app-version" content="2026110204">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
 <meta name="theme-color" content="#eef3fb">
 <link rel="manifest" href="manifest.webmanifest">
@@ -7084,10 +7084,10 @@ function rcViewSum(){
 function rcSelN(side,j,k,opts,cur){return '<select class="inp" onchange="A.rcNote('+side+','+j+','+k+',this.value)">'+opts.map(function(o,i){return '<option value="'+(i?esc(o):'')+'"'+(o===cur?' selected':'')+'>'+esc(o)+'</option>';}).join('')+'</select>';}
 function rcViewList(){
   var Z=RC_RES,R=rcDb(),h=rcFilter(),side=RC.side,q=rcK(RC.q);
-  h+='<div style="display:flex;gap:8px;margin-bottom:8px">'+rcSel(3,[["0","Phía doanh thu"],["1","Phía xuất kho"]],side)+rcSel(4,[["1","Chỉ ca chưa duyệt"],["0","Tất cả ca lệch"],["2","Tất cả dòng dữ liệu"]],RC.only)+'</div>'
+  h+='<div style="display:flex;gap:8px;margin-bottom:8px">'+rcSel(3,[["0","Phía doanh thu"],["1","Phía xuất kho"]],side)+rcSel(4,[["1","Chỉ ca chưa duyệt"],["0","Tất cả ca lệch"],["3","Ca đã duyệt cần xem lại"],["2","Tất cả dòng dữ liệu"]],RC.only)+'</div>'
     +'<button class="btn btn-primary" style="margin-bottom:10px" onclick="A.rcRow('+side+',-1)">'+icon("plus",16)+'Thêm dòng '+(side?"xuất kho":"doanh thu")+'</button>'
     +'<input class="inp" placeholder="Tìm PID, khách hàng, vật tư, số CT…" value="'+esc(RC.q)+'" onchange="A.rcS(2,this.value)" style="margin-bottom:12px">';
-  var rows=(RC.only==2?(side==0?Z.dt:Z.xk):(side==0?Z.dt.filter(function(o){return o.first&&o.bad;}):Z.xk.filter(function(x){return x.bad;}))).filter(function(o){return rcIn(o)&&(RC.only!=1||o.need)&&(!q||rcK(JSON.stringify(o.r)+" "+o.pid+" "+(o.ten||"")+" "+(o.vt||"")+" "+(o.P||"")+" "+(o.T||"")+" "+(o.why||"")).indexOf(q)>=0);});
+  var rows=(RC.only==2?(side==0?Z.dt:Z.xk):(side==0?Z.dt.filter(function(o){return o.first&&o.bad;}):Z.xk.filter(function(x){return x.bad;}))).filter(function(o){return rcIn(o)&&(RC.only!=1||o.need)&&(RC.only!=3||(R.notes[o.nid]&&R.notes[o.nid].chg))&&(!q||rcK(JSON.stringify(o.r)+" "+o.pid+" "+(o.ten||"")+" "+(o.vt||"")+" "+(o.P||"")+" "+(o.T||"")+" "+(o.why||"")).indexOf(q)>=0);});
   h+='<div style="font-size:13px;color:var(--mut);margin-bottom:8px">'+rows.length+' ca</div>';
   rows.slice(0,RC.lim).forEach(function(o){
     var r=o.r,d=side==0,jj=d?o.j:o.i,n=R.notes[o.nid]||{},body="";
@@ -7104,6 +7104,7 @@ function rcViewList(){
     }
     h+='<div class="card" style="margin-bottom:10px;padding:12px"><div style="display:flex;justify-content:space-between;gap:8px;align-items:flex-start"><b style="font-size:14px">'+esc(d?(r.kh||"—"):(r.so||r.ten))+'</b>'+rcBadge(o.ok?"Hợp lệ (đã duyệt)":(d?(o.none?o.T:(o.first?o.T:"Đã gộp vào ca đầu")):o.P))+'</div>'
       +'<div style="font-size:12.5px;color:var(--mut);margin:4px 0 8px">'+esc(o.cs)+' · '+esc(o.pid||"không có PID")+' · '+esc(r.ngay)+'<br>'+body+'</div>';
+    if(n.chg)h+='<div style="margin-bottom:8px;padding:8px 10px;border-radius:10px;background:var(--amber-bg);color:var(--amber);font-size:12.5px">⚠ Đã duyệt nhưng kết quả đối chiếu đổi sau khi nhập dữ liệu mới<br>'+esc(n.chg)+'<br><a onclick="A.rcChgOk('+side+','+jj+')" style="color:var(--teal);font-weight:700">Giữ nguyên duyệt</a></div>';
     if(!(d&&o.none))h+='<div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:6px">'+rcSelN(side,jj,0,["Mã lý do"].concat(d?RC_LD:RC_LX),n.r)+rcSelN(side,jj,2,["Trạng thái xử lý"].concat(RC_ST),n.st)+'</div>'
       +'<input class="inp" placeholder="Giải trình" value="'+esc(n.g||"")+'" onchange="A.rcNote('+side+','+jj+',1,this.value)">'+(n.by?'<div style="font-size:11.5px;color:var(--mut2);margin-top:4px">'+esc(n.by)+' · '+esc(n.at||"")+'</div>':'');
     h+='<div style="display:flex;gap:8px;margin-top:8px"><button class="btn btn-outline" style="padding:8px" onclick="A.rcRow('+side+','+o.i+')">'+icon("edit",15)+'Sửa / khớp tay</button><button class="btn btn-outline" style="padding:8px;color:var(--red)" onclick="A.rcRowDel('+side+','+o.i+')">'+icon("trash",15)+'Xóa dòng</button></div></div>';
@@ -7208,10 +7209,11 @@ function rcViewImp(){
   var R=rcDb();
   return '<div class="card" style="margin-bottom:12px"><div class="sec">1. File mẫu chuẩn</div><div style="font-size:12.5px;color:var(--mut);margin-bottom:10px">Tải mẫu, dán dữ liệu MISA vào đúng cột rồi nhập lại. App đọc theo <b>tên cột</b> nên không sợ lệch vị trí. Mẫu có sheet hướng dẫn và dòng “VÍ DỤ” (tự bỏ qua khi nhập).</div>'
     +'<button class="btn btn-primary" onclick="A.rcTpl()">'+icon("download",17)+'Tải mẫu nhập liệu (Doanh thu + Xuất kho)</button></div>'
-    +'<div class="card" style="margin-bottom:12px"><div class="sec">2. Nhập dữ liệu</div><div style="font-size:12.5px;color:var(--mut);margin-bottom:10px">Đang có '+R.dt.length+' dòng doanh thu, '+R.xk.length+' dòng xuất kho.</div>'+rcSel(5,[["replace","Thay thế dữ liệu cũ"],["append","Nối thêm (bỏ dòng trùng)"]],RC.mode)
+    +'<div class="card" style="margin-bottom:12px"><div class="sec">2. Nhập dữ liệu</div><div style="font-size:12.5px;color:var(--mut);margin-bottom:10px">Đang có '+R.dt.length+' dòng doanh thu, '+R.xk.length+' dòng xuất kho.</div>'+rcSel(5,[["replace","Thay thế dữ liệu cũ"],["append","Nối thêm (bỏ dòng trùng)"],["update","Bổ sung / điều chỉnh (sửa dòng đã có, thêm dòng mới)"]],RC.mode)
+    +'<div class="rcnote" style="margin-top:8px;line-height:1.55">'+(RC.mode==="update"?'<b>Bổ sung / điều chỉnh</b>: dòng đã có (cùng khách + ngày + dịch vụ, hoặc cùng số CT + vật tư + ngày) được <b>sửa theo file</b>, dòng mới được thêm, dòng cũ không có trong file giữ nguyên. Giải trình và duyệt được giữ.':RC.mode==="append"?'<b>Nối thêm</b>: chỉ thêm dòng chưa có, không sửa dòng cũ. Nếu file là bản đã điều chỉnh số liệu, hãy dùng “Bổ sung / điều chỉnh”.':'<b>Thay thế</b>: dùng đúng dữ liệu trong file. Dòng trùng khóa (khách + ngày + dịch vụ / số CT + vật tư) vẫn giữ giải trình và duyệt cũ.')+'<br>Nhập xong app <b>tự đối chiếu lại</b>, hiện bảng so sánh trước → sau và cho phép <b>Hoàn tác</b>.</div>'
     +'<label class="btn btn-primary" style="margin-top:10px">'+icon("upload",17)+'File mẫu chuẩn (cả 2 sheet)<input type="file" accept=".xlsx,.xls,.csv" style="display:none" onchange="A.rcFile(this,0)"></label>'
     +'<label class="btn btn-outline" style="margin-top:8px">Chỉ Doanh thu<input type="file" accept=".xlsx,.xls,.csv" style="display:none" onchange="A.rcFile(this,1)"></label>'
-    +'<label class="btn btn-outline" style="margin-top:8px">Chỉ Xuất kho<input type="file" accept=".xlsx,.xls,.csv" style="display:none" onchange="A.rcFile(this,2)"></label></div>'
+    +'<label class="btn btn-outline" style="margin-top:8px">Chỉ Xuất kho<input type="file" accept=".xlsx,.xls,.csv" style="display:none" onchange="A.rcFile(this,2)"></label></div>'+rcImpCard()
     +'<div class="card"><div class="sec">3. Xuất kết quả</div><button class="btn btn-primary" style="margin-bottom:8px" onclick="A.rcExport()">'+icon("download",17)+'Tải Excel kết quả đối chiếu</button><button class="btn btn-outline" onclick="A.rcPrint()">'+icon("file",17)+'Biên bản (in / PDF)</button>'
     +'<div style="font-size:12px;color:var(--mut);margin-top:8px">Biên bản và Phụ lục theo bộ lọc Cơ sở / Tháng (Phụ lục có thêm bộ lọc Năm, xem tab Phụ lục).</div>'
     +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px"><button class="btn btn-outline" style="padding:10px" onclick="A.rcApxXlsx()">'+icon("download",16)+'Phụ lục từng kho (Excel)</button><button class="btn btn-outline" style="padding:10px" onclick="A.rcApxPrint()">'+icon("file",16)+'Phụ lục từng kho (in / PDF)</button></div></div>'+rcBackupCard()
@@ -7255,13 +7257,217 @@ function rcMk(rows,side,v4,nt){
   }
   return out;
 }
+/* ===== V7 · CẬP NHẬT LẠI ĐỐI CHIẾU KHI NHẬP DỮ LIỆU THAY THẾ / BỔ SUNG ĐIỀU CHỈNH =====
+   - 3 chế độ nhập: Thay thế · Nối thêm · Bổ sung/điều chỉnh (cập nhật dòng đã có, thêm dòng mới)
+   - Dòng cũ và dòng mới được nhận ra là CÙNG 1 dòng theo khóa mềm (khách + ngày + dịch vụ / số CT + vật tư + ngày), không phụ thuộc SL hay số tiền
+     → dòng giữ nguyên mã nội bộ nên GIẢI TRÌNH / DUYỆT không bị mất khi số liệu được điều chỉnh
+   - Sau mỗi lần nhập: tự đối chiếu lại, so sánh trước/sau, gắn cờ ca đã duyệt nhưng kết quả đổi, cho phép hoàn tác */
+var RC_UNDO=null;
+var RC_FLD={dt:["cs","pid","kh","bs","ngay","dv","mvt","sl","dt"],xk:["cs","ma","ten","ngay","so","dg","dvt","ct","sl","pid"]};
+var RC_FLB={cs:"Cơ sở",pid:"PID",kh:"Khách",bs:"Bác sĩ",ngay:"Ngày",dv:"Dịch vụ",mvt:"Mã VT",sl:"SL",dt:"DT",ma:"Mã",ten:"Tên",so:"Số CT",dg:"Diễn giải",dvt:"ĐVT",ct:"Loại CT"};
+var RC_MODE={replace:"Thay thế",append:"Nối thêm",update:"Bổ sung / điều chỉnh"};
+function rcPidN(v){var m=String(v==null?"":v).match(/\d+/);return m?String(parseInt(m[0],10)):"";}
+function rcDK(v){var d=rcDate(v);return d?d.d+"/"+d.m+"/"+d.y:rcK(v);}
+/* khóa mềm nhận ra "cùng 1 dòng" dù SL / số tiền / diễn giải được điều chỉnh */
+function rcLoose(side,r){
+  var cs=rcK(r.cs),dk=rcDK(r.ngay),p,s;
+  if(side==="dt"){
+    p=rcPidN(r.pid);s=norm(r.dv);
+    return {k1:p?cs+"|p"+p+"|"+dk+"|"+s:"",k2:norm(r.kh)?cs+"|k"+norm(r.kh)+"|"+dk+"|"+s:""};
+  }
+  s=norm(r.so);
+  return {k1:norm(r.ma)?cs+"|m"+norm(r.ma)+"|"+dk+"|"+s:"",k2:norm(r.ten)?cs+"|t"+norm(r.ten)+"|"+dk+"|"+s:""};
+}
+function rcShow(f,v){if(f==="dt")return rcF(v);if(f==="sl")return String(v);return (v===""||v==null)?"(trống)":String(v);}
+/* các trường khác nhau giữa dòng cũ o và dòng mới r: [trường, cũ, mới, giá trị mới thô] */
+function rcRowDiff(side,o,r){
+  var out=[];
+  RC_FLD[side].forEach(function(f){
+    var a=o[f],b=r[f],x,y;
+    if(f==="pid"&&(b===""||b==null)&&a)return;           /* file không có PID → giữ PID đã nhập tay */
+    if(f==="sl"||f==="dt"){x=rcNum(a);y=rcNum(b);}
+    else if(f==="pid"){x=rcPidN(a);y=rcPidN(b);}
+    else if(f==="ngay"){x=rcDK(a);y=rcDK(b);}
+    else{x=String(a==null?"":a).trim();y=String(b==null?"":b).trim();}
+    if(x!==y)out.push([f,(f==="pid"?String(a==null?"":a):x),(f==="pid"?String(b==null?"":b):y),(f==="sl"||f==="dt")?y:b]);
+  });
+  return out;
+}
+/* Áp dữ liệu nhập vào side ("dt" | "xk"). Trả về {add,upd,same,del,warn,chg[]} */
 function rcApply(side,arr,nt){
-  var R=rcDb(),cur=R[side],ids={},add=0;
-  if(RC.mode==="replace")cur=R[side]=[];
-  cur.forEach(function(r){ids[r.id]=1;});
-  arr.forEach(function(r){if(!ids[r.id]){cur.push(r);ids[r.id]=1;add++;}});
-  for(var k in nt)if(RC.mode==="replace"||!R.notes[k])R.notes[k]=nt[k];
-  return add;
+  var R=rcDb(),old=R[side].slice(),mode=RC.mode,res={add:0,upd:0,same:0,del:0,warn:0,chg:[]};
+  var idIx={},m1={},m2={},used=[],idMap={},keep=["ov","pidm","tenm"],k,i;
+  old.forEach(function(r,j){idIx[r.id]=j;var L=rcLoose(side,r);
+    if(L.k1)(m1[L.k1]=m1[L.k1]||[]).push(j);
+    if(L.k2)(m2[L.k2]=m2[L.k2]||[]).push(j);});
+  function free(a){if(a)for(var j=0;j<a.length;j++)if(!used[a[j]])return a[j];return -1;}
+  function find(r,byId){
+    var j=-1,L=rcLoose(side,r);
+    if(byId&&idIx[r.id]!==undefined&&!used[idIx[r.id]])j=idIx[r.id];
+    if(j<0&&L.k1)j=free(m1[L.k1]);
+    if(j<0&&L.k2)j=free(m2[L.k2]);
+    return j;
+  }
+  function lbl(o){return side==="dt"?((o.kh||o.pid||"—")+" · "+(o.dv||"")):((o.so||o.ten||o.ma||"—")+" · "+(o.ten||o.ma||""));}
+  function note(o,d){if(res.chg.length<60)res.chg.push({l:lbl(o),d:d.map(function(x){return RC_FLB[x[0]]+" "+rcShow(x[0],x[1])+" → "+rcShow(x[0],x[2]);}).join("; ")});}
+  function mapNotes(overwrite){for(var q in nt){var t=idMap[q]||q;if(overwrite||!R.notes[t])R.notes[t]=nt[q];}}
+  if(mode==="append"){
+    /* giữ nguyên cách cũ: chỉ thêm dòng chưa có; cảnh báo dòng giống dòng cũ nhưng khác số liệu (có thể là bản điều chỉnh) */
+    arr.forEach(function(r){
+      if(idIx[r.id]!==undefined){res.same++;return;}
+      if(find(r,false)>=0)res.warn++;
+      R[side].push(r);idIx[r.id]=-1;res.add++;
+    });
+    mapNotes(false);
+  }else if(mode==="update"){
+    var taken={};R[side].forEach(function(r){taken[r.id]=1;});
+    arr.forEach(function(r){
+      var j=find(r,true),o,d;
+      if(j<0){var b0=r.id,n0=1;while(taken[r.id])r.id=b0+"#u"+(++n0);if(r.id!==b0)idMap[b0]=r.id;taken[r.id]=1;R[side].push(r);res.add++;return;}
+      used[j]=1;o=old[j];d=rcRowDiff(side,o,r);idMap[r.id]=o.id;
+      if(!d.length){res.same++;return;}
+      d.forEach(function(x){o[x[0]]=x[3];});
+      res.upd++;note(o,d);
+    });
+    mapNotes(false);
+  }else{
+    /* thay thế: dùng đúng dữ liệu file, nhưng dòng trùng khóa mềm giữ mã cũ (→ giữ giải trình) và giữ các gán tay (vật tư gán, PID gán) */
+    var nw=[],mt=[],um=[],tk={};
+    arr.forEach(function(r){var j=find(r,true);if(j>=0){used[j]=1;mt.push([r,old[j]]);}else um.push(r);});
+    mt.forEach(function(p){
+      var r=p[0],o=p[1],d=rcRowDiff(side,o,r);
+      idMap[r.id]=o.id;
+      keep.forEach(function(f){if(o[f]!==undefined&&r[f]===undefined)r[f]=o[f];});
+      if((r.pid===""||r.pid==null)&&o.pid)r.pid=o.pid;
+      r.id=o.id;tk[r.id]=1;nw.push(r);
+      if(d.length){res.upd++;note(o,d);}else res.same++;
+    });
+    um.forEach(function(r){var b0=r.id,n0=1;while(tk[r.id])r.id=b0+"#u"+(++n0);if(r.id!==b0)idMap[b0]=r.id;tk[r.id]=1;nw.push(r);res.add++;});
+    res.del=old.length-mt.length;
+    R[side]=nw;
+    mapNotes(true);
+  }
+  return res;
+}
+/* ----- Ảnh chụp kết quả đối chiếu (để so sánh trước/sau khi nhập) ----- */
+function rcSnap(){
+  var Z=rcCompute(),s={dt:{},xk:{},valid:{}};
+  Z.dt.forEach(function(c){
+    s.valid[c.nid]=1;
+    if(!(c.first||c.none))return;
+    s.dt[c.g?"G|"+c.g.k:"N|"+c.nid]={nid:c.nid,T:c.T,O:c.O||0,P:c.P||0,ok:!!c.ok,good:(c.T==="KHỚP"||c.T==="KHÔNG DÙNG VẬT TƯ"),lbl:(c.r.kh||c.pid||"—"),ten:(c.ten||c.r.dv||"")};
+  });
+  Z.xk.forEach(function(x){s.valid[x.nid]=1;s.xk[x.nid]={nid:x.nid,P:x.P||"",ok:!!x.ok,good:!x.bad,lbl:(x.r.so||x.ten||x.ma||"—"),ten:(x.ten||x.ma||"")};});
+  var F=Z.dt.filter(function(o){return o.first;}),rev=0,val=0,ok=0;
+  F.forEach(function(o){if(o.T==="KHỚP")ok++;});
+  Z.rows.forEach(function(o){rev+=rcNum(o.r.dt);});
+  Z.xk.forEach(function(x){val+=x.val||0;});
+  s.k={n:F.length,ok:ok,rate:F.length?ok/F.length*100:null,needD:F.filter(function(o){return o.need;}).length,needX:Z.xk.filter(function(x){return x.need;}).length,rev:rev,val:val};
+  return s;
+}
+function rcImpReport(b,a,res,src){
+  var R=rcDb(),N=R.notes,d=new Date();
+  var rep={at:rcToday()+" "+("0"+d.getHours()).slice(-2)+":"+("0"+d.getMinutes()).slice(-2),src:src,mode:RC.mode,modeLbl:RC_MODE[RC.mode]||RC.mode,cnt:{},chg:{},ch:{},it:{},kb:b.k,ka:a.k,warn:0,reN:0,reD:0,reX:0,reL:[],orph:0};
+  ["dt","xk"].forEach(function(sd){
+    var r=res[sd];
+    if(r){rep.cnt[sd]={add:r.add,upd:r.upd,same:r.same,del:r.del};rep.warn+=r.warn;rep.chg[sd]=r.chg;}
+    var c=rep.ch[sd]={fixed:0,bad:0,other:0,nw:0,nwBad:0,gone:0},it=rep.it[sd]={fixed:[],bad:[],other:[],nwBad:[],gone:[]},keys={};
+    Object.keys(b[sd]).forEach(function(k){keys[k]=1;});Object.keys(a[sd]).forEach(function(k){keys[k]=1;});
+    function tx(e){return sd==="dt"?((RC_KQ[e.T]||e.T)+((e.O||e.P)?" (cần "+e.O+" / xuất "+e.P+")":"")):e.P;}
+    function ln(e0,e1){var e=e1||e0;return e.lbl+" · "+e.ten+": "+(e0?tx(e0):"mới")+" → "+(e1?tx(e1):"không còn");}
+    function push(arr,s){if(arr.length<40)arr.push(s);}
+    Object.keys(keys).forEach(function(k){
+      var e0=b[sd][k],e1=a[sd][k],nn,chgd;
+      if(e1&&e1.good){nn=N[e1.nid];if(nn&&nn.chg)delete nn.chg;}
+      if(!e0&&e1){c.nw++;if(!e1.good){c.nwBad++;push(it.nwBad,ln(null,e1));}return;}
+      if(e0&&!e1){c.gone++;push(it.gone,ln(e0,null));return;}
+      chgd=sd==="dt"?(e0.T!==e1.T||e0.O!==e1.O||e0.P!==e1.P):(e0.P!==e1.P);
+      if(!chgd||(e0.good&&e1.good))return;
+      if(!e0.good&&e1.good){c.fixed++;push(it.fixed,ln(e0,e1));}
+      else if(e0.good&&!e1.good){c.bad++;push(it.bad,ln(e0,e1));}
+      else{c.other++;push(it.other,ln(e0,e1));}
+      if(e0.ok&&!e1.good){
+        nn=N[e1.nid];
+        if(nn&&(nn.st==="Đã duyệt"||nn.st==="Đã xử lý")){
+          nn.chg="Trước: "+tx(e0)+" → nay: "+tx(e1)+" ("+rcToday()+")";
+          rep.reN++;if(sd==="dt")rep.reD++;else rep.reX++;push(rep.reL,ln(e0,e1));
+        }
+      }
+    });
+  });
+  Object.keys(N).forEach(function(k){var n=N[k];if(n&&(n.r||n.g||n.st)&&b.valid[k]&&!a.valid[k])rep.orph++;});
+  return rep;
+}
+/* Chạy 1 lần nhập: chụp trước → áp dữ liệu → đối chiếu lại → so sánh → hiện kết quả. Lỗi thì trả dữ liệu về như cũ. */
+function rcRunImport(src,fn){
+  var R=rcDb(),before=rcSnap(),res,after,rep;
+  var undo={dt:JSON.parse(JSON.stringify(R.dt)),xk:JSON.parse(JSON.stringify(R.xk)),notes:JSON.parse(JSON.stringify(R.notes)),last:R.lastImp?JSON.parse(JSON.stringify(R.lastImp)):null};
+  try{res=fn();after=rcSnap();rep=rcImpReport(before,after,res,src);}
+  catch(e){R.dt=undo.dt;R.xk=undo.xk;R.notes=undo.notes;throw e;}
+  undo.at=rep.at;RC_UNDO=undo;R.lastImp=rep;
+  audit("recon-import",src,null,rep.modeLbl+" · DT "+(rep.cnt.dt?"+"+rep.cnt.dt.add+"/~"+rep.cnt.dt.upd:"–")+" · XK "+(rep.cnt.xk?"+"+rep.cnt.xk.add+"/~"+rep.cnt.xk.upd:"–"));
+  saveSoon();RC.tab=0;RC.lim=40;renderRecon();rcImpShow(rep);
+}
+function rcImpShow(rep){
+  document.getElementById("modal").innerHTML='<div style="position:fixed;inset:0;background:rgba(16,24,40,.5);z-index:90;display:flex;align-items:flex-end;justify-content:center"><div style="background:#fff;width:100%;max-width:560px;max-height:90vh;overflow-y:auto;border-radius:18px 18px 0 0;padding:16px">'+rcImpHtml(rep)+'</div></div>';
+}
+function rcImpHtml(rep){
+  var kb=rep.kb,ka=rep.ka;
+  function det(t,n,arr,col){
+    if(!n)return '';
+    return '<details style="margin-top:6px"><summary style="font-weight:700;font-size:13px;color:var(--'+col+')">'+t+' ('+n+')</summary><div style="font-size:12px;color:var(--mut);padding:6px 0 0 4px;line-height:1.5">'
+      +arr.map(function(s){return '• '+esc(s);}).join('<br>')+(n>arr.length?'<br>… và '+(n-arr.length)+' mục nữa':'')+'</div></details>';
+  }
+  function pct(v){return v==null?"–":v.toFixed(1)+"%";}
+  function dcell(x,y,f,good){
+    if(x==null||y==null)return "—";var d=y-x;if(Math.abs(d)<1e-9)return "—";
+    var c=good===undefined?"mut":((good==="up")===(d>0)?"green":"red");
+    return '<span style="color:var(--'+c+');font-weight:700">'+(d>0?"+":"−")+f(Math.abs(d))+'</span>';
+  }
+  var h='<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px"><div><div class="sec" style="margin-bottom:2px">Đã cập nhật lại đối chiếu</div><div style="font-size:12px;color:var(--mut)">'+esc(rep.at)+' · '+esc(rep.modeLbl)+' · '+esc(rep.src)+'</div></div><button class="btn btn-outline" style="width:auto;padding:6px 12px" onclick="A.rcImpClose()">Đóng</button></div>';
+  var rows=[];
+  [["dt","Doanh thu"],["xk","Xuất kho"]].forEach(function(p){var c=rep.cnt[p[0]];if(c)rows.push([p[1],c.add,c.upd,c.same,rep.mode==="replace"?c.del:"—"]);});
+  h+='<div style="margin-top:12px"><div style="font-weight:700;font-size:13px;margin-bottom:4px">1. Dữ liệu vừa nhập (số dòng)</div>'+rcTbl(["","Thêm mới","Sửa","Giữ nguyên","Bỏ"],rows,1)
+    +'<div style="font-size:11.5px;color:var(--mut2);margin-top:4px">Sửa = dòng đã có được cập nhật theo file (giữ nguyên giải trình). Bỏ = dòng cũ không có trong file thay thế.</div></div>';
+  if(rep.warn)h+='<div class="rcnote" style="margin-top:10px;padding:8px 10px;border-radius:10px;background:var(--amber-bg);color:var(--amber)">⚠ <b>'+rep.warn+'</b> dòng mới giống dòng đã có (cùng khách/ngày/dịch vụ hoặc cùng số CT/vật tư) nhưng khác số liệu, đã được THÊM như dòng riêng nên có thể bị tính trùng. Nếu đó là bản điều chỉnh: bấm Hoàn tác, chọn chế độ “Bổ sung / điều chỉnh” rồi nhập lại.</div>';
+  var kp=[["Tỷ lệ khớp",pct(kb.rate),pct(ka.rate),dcell(kb.rate,ka.rate,function(v){return v.toFixed(1)+"%";},"up")],
+    ["Lượt đối chiếu",kb.n,ka.n,dcell(kb.n,ka.n,rcF)],
+    ["Ca doanh thu cần xử lý",kb.needD,ka.needD,dcell(kb.needD,ka.needD,rcF,"down")],
+    ["Phiếu xuất cần xử lý",kb.needX,ka.needX,dcell(kb.needX,ka.needX,rcF,"down")],
+    ["Tổng doanh thu (VND)",rcF(kb.rev),rcF(ka.rev),dcell(kb.rev,ka.rev,rcF)],
+    ["Giá trị xuất kho (VND)",rcF(kb.val),rcF(ka.val),dcell(kb.val,ka.val,rcF)]];
+  h+='<div style="margin-top:14px"><div style="font-weight:700;font-size:13px;margin-bottom:4px">2. Kết quả đối chiếu: trước → sau</div>'+rcTbl(["Chỉ tiêu","Trước","Sau","Chênh"],kp,1)+'</div>';
+  h+='<div style="margin-top:14px"><div style="font-weight:700;font-size:13px">3. Ca đổi kết quả</div>';
+  [["dt","Doanh thu → xuất kho (ca)"],["xk","Phiếu xuất kho"]].forEach(function(p){
+    var c=rep.ch[p[0]],it=rep.it[p[0]];if(!c)return;
+    var tot=c.fixed+c.bad+c.other+c.nw+c.gone;
+    h+='<div style="font-size:12.5px;font-weight:700;margin:8px 0 2px;color:var(--mut)">'+p[1]+'</div>';
+    if(!tot){h+='<div class="rcnote">Không có ca nào đổi kết quả.</div>';return;}
+    h+=det("✔ Chuyển sang khớp / hết lệch",c.fixed,it.fixed,"green")+det("✖ Từ khớp thành lệch",c.bad,it.bad,"red")+det("↔ Vẫn lệch nhưng đổi kết quả / số liệu",c.other,it.other,"amber")
+      +det("＋ Ca mới phát sinh lệch",c.nwBad,it.nwBad,"red")+((c.nw-c.nwBad)?'<div class="rcnote" style="margin-top:6px">＋ Ca mới đã khớp: <b>'+(c.nw-c.nwBad)+'</b></div>':'')+det("－ Ca không còn trong dữ liệu",c.gone,it.gone,"amber");
+  });
+  h+='</div>';
+  [["dt","Doanh thu"],["xk","Xuất kho"]].forEach(function(p){
+    var c=rep.cnt[p[0]],l=rep.chg[p[0]];
+    if(c&&c.upd&&l&&l.length)h+='<div style="margin-top:10px">'+det("Dòng "+p[1].toLowerCase()+" đã được điều chỉnh",c.upd,l.map(function(x){return x.l+" — "+x.d;}),"sky")+'</div>';
+  });
+  if(rep.reN)h+='<div style="margin-top:12px;padding:8px 10px;border-radius:10px;background:var(--red-bg);color:var(--red);font-size:12.5px">⚠ <b>'+rep.reN+'</b> ca <b>đã duyệt</b> nhưng kết quả đối chiếu đã đổi sau lần nhập này. Giải trình được giữ, ca được gắn cờ để duyệt lại.'+det("Danh sách",rep.reN,rep.reL,"red")+'</div>';
+  if(rep.orph)h+='<div style="margin-top:10px;padding:8px 10px;border-radius:10px;background:var(--amber-bg);color:var(--amber);font-size:12.5px"><b>'+rep.orph+'</b> giải trình / duyệt cũ không còn gắn với dòng nào (dòng đã bị bỏ khỏi dữ liệu).</div>';
+  h+='<div style="display:grid;gap:8px;margin-top:14px">';
+  if(rep.reN)h+='<button class="btn btn-primary" onclick="A.rcImpGo('+(rep.reD?0:1)+')">Xem ca đã duyệt cần xem lại ('+rep.reN+')</button>';
+  h+='<button class="btn '+(rep.reN?'btn-outline':'btn-primary')+'" onclick="A.rcImpGo(-1)">Xem các ca lệch cần xử lý</button>';
+  if(RC_UNDO&&RC_UNDO.at===rep.at)h+='<button class="btn btn-outline" style="color:var(--red)" onclick="A.rcImpUndo()">Hoàn tác lần nhập này</button>';
+  h+='</div>';
+  return h;
+}
+function rcImpCard(){
+  var L=rcDb().lastImp;if(!L)return '';
+  var c=L.cnt||{},t=function(s,n){return n?s+": +"+n.add+" mới · "+n.upd+" sửa · "+n.same+" giữ nguyên"+(L.mode==="replace"?" · "+n.del+" bỏ":""):"";};
+  return '<div class="card" style="margin-bottom:12px"><div class="sec">Lần cập nhật gần nhất</div><div style="font-size:12.5px;color:var(--mut);margin-bottom:10px">'+esc(L.at)+' · '+esc(L.modeLbl)+' · '+esc(L.src)
+    +(c.dt?'<br>'+esc(t("Doanh thu",c.dt)):'')+(c.xk?'<br>'+esc(t("Xuất kho",c.xk)):'')
+    +'<br>Tỷ lệ khớp: <b>'+(L.kb.rate==null?"–":L.kb.rate.toFixed(1)+"%")+' → '+(L.ka.rate==null?"–":L.ka.rate.toFixed(1)+"%")+'</b> · Ca cần xử lý: <b>'+(L.kb.needD+L.kb.needX)+' → '+(L.ka.needD+L.ka.needX)+'</b></div>'
+    +'<div style="display:grid;grid-template-columns:'+((RC_UNDO&&RC_UNDO.at===L.at)?'1fr 1fr':'1fr')+';gap:8px"><button class="btn btn-outline" onclick="A.rcImpLast()">Xem chi tiết</button>'
+    +((RC_UNDO&&RC_UNDO.at===L.at)?'<button class="btn btn-outline" style="color:var(--red)" onclick="A.rcImpUndo()">Hoàn tác</button>':'')+'</div></div>';
 }
 function rcRows(wb,name){var ws=wb.Sheets[name]||wb.Sheets[wb.SheetNames[0]];return XLSX.utils.sheet_to_json(ws,{header:1,raw:true,defval:""});}
 function rcWbOut(wb,fname){shareOrDownload(new Blob([XLSX.write(wb,{bookType:"xlsx",type:"array"})],{type:"application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"}),fname);}
@@ -7275,6 +7481,7 @@ Object.assign(A,{
     var R=rcDb(),o=(side?RC_RES.xk:RC_RES.dt)[j],f=["r","g","st"][k];if(!o)return;
     var n=R.notes[o.nid]||(R.notes[o.nid]={}),b=n[f];if(b===v)return;n[f]=v;
     if(f!=="r"){n.by=(db.profile&&db.profile.ten)||n.by||"";n.at=rcToday();}
+    if(f==="st"||f==="g")delete n.chg;
     audit("recon",o.nid+"/"+f,b,v);saveSoon();renderRecon();
   },
   /* chấp nhận vật tư xuất khác tên (cùng loại) cho dịch vụ: thêm vào "mã / tên thay thế" */
@@ -7422,10 +7629,13 @@ Object.assign(A,{
     var fr=new FileReader();
     fr.onload=function(){
       try{
-        var wb=XLSX.read(fr.result,{type:"array"}),nt={},a=0,b=0;
-        if(kind===0||kind===1)a=rcApply("dt",rcMk(rcRows(wb,"DOANH_THU"),"dt",kind===0,nt),nt);
-        if(kind===0||kind===2)b=rcApply("xk",rcMk(rcRows(wb,"XUAT_KHO"),"xk",kind===0,nt),nt);
-        saveSoon();RC.tab=0;renderRecon();toast("Đã nhập "+a+" dòng doanh thu, "+b+" dòng xuất kho");
+        var wb=XLSX.read(fr.result,{type:"array"});
+        rcRunImport(f.name,function(){
+          var o={},n1={},n2={};
+          if(kind===0||kind===1)o.dt=rcApply("dt",rcMk(rcRows(wb,"DOANH_THU"),"dt",kind===0,n1),n1);
+          if(kind===0||kind===2)o.xk=rcApply("xk",rcMk(rcRows(wb,"XUAT_KHO"),"xk",kind===0,n2),n2);
+          return o;
+        });
       }catch(e){console.error(e);toast("Không đọc được file: "+e.message);}
       inp.value="";
     };
@@ -7481,8 +7691,8 @@ Object.assign(A,{
   rcRowClose:function(){document.getElementById("modal").innerHTML="";},
   rcPaste:function(kind){
     var t=document.getElementById("rcpaste").value;if(!t.trim()){toast("Chưa có dữ liệu để dán");return;}
-    var sd=kind?"xk":"dt",nt={},n=rcApply(sd,rcMk(t.split(/\r?\n/).map(function(l){return l.split("\t");}),sd,false,nt),nt);
-    saveSoon();RC.tab=0;renderRecon();toast("Đã dán "+n+" dòng");
+    var sd=kind?"xk":"dt";
+    rcRunImport("Dán từ MISA / Excel",function(){var nt={},o={};o[sd]=rcApply(sd,rcMk(t.split(/\r?\n/).map(function(l){return l.split("\t");}),sd,false,nt),nt);return o;});
   },
   rcClear:function(kind){if(!confirm("Xóa toàn bộ dữ liệu "+(kind?"xuất kho":"doanh thu")+"? Giải trình đã nhập vẫn được giữ."))return;rcDb()[kind?"xk":"dt"]=[];saveSoon();renderRecon();}
 });
@@ -7787,6 +7997,28 @@ Object.assign(A,{
       inp.value="";
     };
     fr.readAsText(f);
+  }
+});
+/* ===== V7 · thao tác cho khung kết quả cập nhật đối chiếu ===== */
+Object.assign(A,{
+  rcImpClose:function(){document.getElementById("modal").innerHTML="";},
+  rcImpLast:function(){var L=rcDb().lastImp;if(L)rcImpShow(L);},
+  rcImpGo:function(side){
+    A.rcImpClose();RC.tab=1;RC.lim=40;RC.q="";RC.cs="Tất cả";RC.th="Tất cả";
+    if(side>=0){RC.side=side;RC.only=3;}else RC.only=1;
+    renderRecon();window.scrollTo(0,0);
+  },
+  rcImpUndo:function(){
+    var U=RC_UNDO,R=rcDb();
+    if(!U){toast("Không còn bản để hoàn tác (chỉ hoàn tác được trong phiên làm việc hiện tại)");return;}
+    if(!confirm("Hoàn tác lần nhập lúc "+U.at+"?\n\nDữ liệu doanh thu, xuất kho và giải trình trở về như trước khi nhập. Các chỉnh sửa tay làm sau lần nhập đó cũng sẽ mất."))return;
+    R.dt=U.dt;R.xk=U.xk;R.notes=U.notes;
+    if(U.last)R.lastImp=U.last;else delete R.lastImp;
+    RC_UNDO=null;audit("recon-import","undo",null,U.at);saveSoon();A.rcImpClose();renderRecon();toast("Đã hoàn tác lần nhập");
+  },
+  rcChgOk:function(side,j){
+    var R=rcDb(),o=(side?RC_RES.xk:RC_RES.dt)[j],n=o&&R.notes[o.nid];
+    if(n&&n.chg){delete n.chg;audit("recon",o.nid+"/chg","cờ xem lại","giữ nguyên duyệt");saveSoon();renderRecon();}
   }
 });
 </script>
