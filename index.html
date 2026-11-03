@@ -4330,7 +4330,7 @@ function renderSettings(){
       +'<button class="btn btn-outline" style="margin-bottom:8px" onclick="document.getElementById(\'replacein\').click()">'+icon('upload',17)+'Nhập file, thay thế toàn bộ (máy mới)</button>'
       +'<input type="file" id="restorein" accept=".json,application/json" style="display:none" onchange="A.restoreFile(this)">'
       +'<button class="btn btn-outline" onclick="document.getElementById(\'restorein\').click()">'+icon('upload',17)+'Nhập file, gộp vào máy này</button>'
-      +'<div style="font-size:12px;color:var(--mut);margin-top:8px">Chuyển máy: sao lưu trên máy cũ, gửi file qua Zalo/email, rồi trên máy mới chọn “thay thế toàn bộ”. “Gộp” chỉ thêm phần còn thiếu, giữ số đã kiểm trên máy này. Chạm 5 lần vào “Về ứng dụng” để ẩn mục này.</div></div>';
+      +'<div style="font-size:12px;color:var(--mut);margin-top:8px">Chuyển máy: sao lưu trên máy cũ, gửi file qua Zalo/email, rồi trên máy mới chọn “thay thế toàn bộ”. “Gộp” chỉ thêm phần còn thiếu, giữ số đã kiểm trên máy này. Chạm vào “Về ứng dụng” để ẩn mục này.</div></div>';
   }
   h+='<div class="card" style="margin-bottom:12px"><div style="font-weight:700;margin-bottom:4px">Giữ dữ liệu an toàn</div>'
     +'<div style="font-size:13px;color:var(--mut)">Dữ liệu lưu ngay trên trình duyệt của máy này. Safari trên iPhone có thể tự xoá dữ liệu trang web nếu lâu không mở. Hãy thêm app vào Màn hình chính (Chia sẻ, Thêm vào MH chính) và sao lưu định kỳ.</div></div>';
@@ -5774,12 +5774,12 @@ var A={
       if(route.view==='home'||route.view==='settings')render();
     }catch(err){console.error(err);toast('Không sao lưu được: '+err.message);}
   },
-  /* nút ẩn: chạm 5 lần vào mục "Về ứng dụng" ở Cài đặt để mở/đóng */
+  /* nút ẩn: chạm 1 lần vào mục "Về ứng dụng" ở Cài đặt để mở/đóng */
   bkTap:function(){
-    var X=window.BKX||(window.BKX={n:0,open:false,t:0});
-    var now=Date.now();if(now-X.t>2500)X.n=0;X.t=now;X.n++;
-    if(X.n>=5){X.n=0;X.open=!X.open;toast(X.open?'Đã mở mục Sao lưu toàn bộ':'Đã ẩn mục Sao lưu toàn bộ');renderUser();}
-    else if(X.n>=3&&!X.open)toast('Chạm thêm '+(5-X.n)+' lần…');
+    var X=window.BKX||(window.BKX={open:false});
+    X.open=!X.open;
+    if(route.view==='settings')render();
+    toast(X.open?'Đã mở mục Sao lưu toàn bộ':'Đã ẩn mục Sao lưu toàn bộ');
   },
   backupSnooze:function(){db.backupSnooze=Date.now()+3*86400000;store.save();render();},
   restoreFile:function(input){
