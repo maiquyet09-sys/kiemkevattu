@@ -2,8 +2,8 @@
 <html lang="vi">
 <head>
 <meta charset="UTF-8">
-<meta name="app-version" content="2026110309">
-<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<meta name="app-version" content="2026110311">
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="theme-color" content="#eef3fb">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="apple-touch-icon" href="icon-192.png">
@@ -13,8 +13,6 @@
 <title>Kiểm kê kho · MedDental</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.4.0/exceljs.min.js"></script>
 <style>
 :root{
   --bg:#f3f5f9; --card:#ffffff; --card2:#f3f6fb; --ink:#101828; --mut:rgba(16,24,40,0.58); --mut2:rgba(16,24,40,0.38); --line:rgba(16,24,40,0.1);
@@ -27,6 +25,7 @@
   --sidebar-w:224px; --header-h:60px;
 }
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+@media (pointer:coarse){input,select,textarea{font-size:max(16px,1em)}}
 html,body{margin:0;padding:0}
 body{background:var(--bg);color:var(--ink);font-family:'Inter',system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;font-size:16px;line-height:1.45}
 #app{max-width:480px;margin:0 auto;min-height:100vh;position:relative}
@@ -738,6 +737,30 @@ body{background:var(--bg)}
 
 <script>
 "use strict";
+/* ===== Tải thư viện Excel theo nhu cầu (không chặn khởi động, chỉ tải khi dùng Excel lần đầu) ===== */
+var KK_LIBS={xlsx:"https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js",exceljs:"https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.4.0/exceljs.min.js"};
+var KK_LP={};
+function kkHas(k){return k==="xlsx"?typeof XLSX!=="undefined":typeof ExcelJS!=="undefined";}
+function kkLoad(k){
+  if(kkHas(k))return Promise.resolve(true);
+  if(KK_LP[k])return KK_LP[k];
+  KK_LP[k]=new Promise(function(res){
+    var el=document.createElement("script");el.src=KK_LIBS[k];
+    el.onload=function(){res(kkHas(k));};el.onerror=function(){res(false);};
+    document.head.appendChild(el);
+  }).then(function(ok){if(!ok)delete KK_LP[k];return ok;});
+  return KK_LP[k];
+}
+/* Trả true nếu đã sẵn sàng. Nếu chưa: tải thư viện rồi tự chạy lại thao tác (retry). */
+function kkNeed(keys,retry){
+  if(keys.every(kkHas))return true;
+  toast("Đang tải thư viện Excel…");
+  Promise.all(keys.map(kkLoad)).then(function(r){
+    if(r.every(Boolean)){if(retry)retry();}
+    else toast("Chưa tải được thư viện Excel — kiểm tra kết nối mạng");
+  });
+  return false;
+}
 /* ================= Helpers ================= */
 function norm(s){return (s==null?"":String(s)).toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"").replace(/đ/g,"d").replace(/\s+/g," ").trim();}
 function esc(s){return (s==null?"":String(s)).replace(/[&<>"']/g,function(m){return {"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[m];});}
@@ -1004,6 +1027,30 @@ function detectHeaderRow(rows){
 }
 function colName(i){var s="";i++;while(i>0){s=String.fromCharCode(65+((i-1)%26))+s;i=Math.floor((i-1)/26);}return s;}
 
+/* Kiểm tra dữ liệu nguồn (KHÔNG tự sửa): mã trống/trùng trong cùng kho, thiếu ĐVT, số âm, tồn cuối lệch công thức */
+function validateItems(items){
+  var errs=[],seen={},EPS=0.0001;
+  items.forEach(function(it,i){
+    var ref="#"+(i+1)+" · "+(it.code||"(không mã)")+" · "+String(it.name||"").slice(0,40);
+    var code=String(it.code||"").trim().toLowerCase();
+    if(!code)errs.push({k:"Thiếu mã",t:ref});
+    else{var key=(it.branch||"")+"|"+code;if(seen[key]!==undefined)errs.push({k:"Mã trùng trong cùng kho",t:ref+" (trùng dòng #"+(seen[key]+1)+")"});else seen[key]=i;}
+    if(!String(it.unit||"").trim())errs.push({k:"Thiếu đơn vị tính",t:ref});
+    ["open","in","out","close"].forEach(function(f){var v=it[f];if(typeof v!=="number"||!isFinite(v)||v<0)errs.push({k:"Số lượng không hợp lệ ("+f+")",t:ref});});
+    if([it.open,it["in"],it.out,it.close].every(function(v){return typeof v==="number"&&isFinite(v);})&&Math.abs(it.open+it["in"]-it.out-it.close)>EPS)
+      errs.push({k:"Tồn cuối ≠ Đầu + Nhập − Xuất",t:ref+" (sổ: "+fmt(it.close)+" · tính: "+fmt(it.open+it["in"]-it.out)+")"});
+  });
+  return errs;
+}
+function validateHtml(errs){
+  if(!errs.length)return '<div class="card mt16" style="border-color:var(--green-ln);background:var(--green-bg);color:var(--green)">Dữ liệu hợp lệ: không phát hiện lỗi.</div>';
+  var by={};errs.forEach(function(e){(by[e.k]=by[e.k]||[]).push(e.t);});
+  var h='<div class="card mt16" style="border-color:var(--red-ln);background:var(--red-bg)"><div class="lbl" style="color:var(--red)">Phát hiện '+errs.length+' vấn đề dữ liệu (app không tự sửa)</div>';
+  Object.keys(by).forEach(function(k){
+    h+='<details style="margin-top:6px"><summary style="font-weight:700;cursor:pointer">'+esc(k)+' · '+by[k].length+'</summary><div style="max-height:180px;overflow:auto;font-size:12px;margin-top:4px">'+by[k].slice(0,200).map(esc).join("<br>")+(by[k].length>200?"<br>… và "+(by[k].length-200)+" dòng khác":"")+'</div></details>';
+  });
+  return h+'<div style="font-size:12px;margin-top:8px">Hãy sửa file nguồn rồi chọn lại, hoặc vẫn tạo kỳ và xác nhận ở bước sau.</div></div>';
+}
 function buildItems(rows,start,map,branchManual,hsd){
   var out=[];
   function get(row,k){return map[k]===undefined?"":row[map[k]];}
@@ -1260,6 +1307,7 @@ function buildBienBan(p){
 }
 function exportExcel(p){
   var fname=fileNameOf(p);
+  if(!kkNeed(["exceljs"],function(){exportExcel(p);}))return;
   if(typeof ExcelJS!=="undefined"){
     buildBienBan(p).xlsx.writeBuffer().then(function(buf){
       shareOrDownload(new Blob([buf],{type:XLSX_MIME}),fname);
@@ -1269,7 +1317,7 @@ function exportExcel(p){
   exportExcelBasic(p,fname);
 }
 function exportExcelBasic(p,fname){
-  if(typeof XLSX==="undefined"){toast("Chưa tải được thư viện Excel — kiểm tra kết nối mạng");return;}
+  if(!kkNeed(["xlsx"],function(){exportExcelBasic(p,fname);}))return;
   var rows=p.items.map(function(it,i){
     return {"STT":i+1,"Chi nhánh/Kho":it.branch,"Mã hàng":it.code,"Tên hàng":it.name,"ĐVT":it.unit,
       "Đầu kỳ":it.open,"Nhập kho":it["in"],"Xuất kho":it.out,"Cuối kỳ":it.close,
@@ -2515,7 +2563,7 @@ function exportHsdAlert(filterBranch){
   var fname="CanhBao_HSD_"+(filterBranch?filterBranch.replace(/[^\w]/g,"_")+"_":"")+dateStr.replace(/\//g,"-")+".xlsx";
   /* Nếu không có ExcelJS thì mở mailto luôn */
   if(typeof ExcelJS==="undefined"){
-    openMailtoSafe(subject,body);
+    kkLoad("exceljs").then(function(ok){if(ok)exportHsdAlert(filterBranch);else openMailtoSafe(subject,body);});
     return;
   }
   var wb=new ExcelJS.Workbook();
@@ -2662,7 +2710,7 @@ function exportKiemKeEmail(p){
   var body=lines.join("\n");
   var fname=("KiemKe_"+p.name).replace(/[^\w-]+/g,"_")+".xlsx";
   if(typeof ExcelJS==="undefined"){
-    openMailtoSafe(subject,body);
+    kkLoad("exceljs").then(function(ok){if(ok)exportKiemKeEmail(p);else openMailtoSafe(subject,body);});
     return;
   }
   buildBienBan(p).xlsx.writeBuffer().then(function(buf){
@@ -2860,7 +2908,13 @@ function scMatch(p,text){
     /* mã số khác nhau chỉ ở số 0 đầu (GTIN-14 / UPC / Excel làm mất số 0) */
     if(/^\d{8,14}$/.test(low)){
       var nz=low.replace(/^0+/,''),ks=Object.keys(ix);
-      for(var z=0;z<ks.length;z++)if(/^\d{8,14}$/.test(ks[z])&&ks[z].replace(/^0+/,'')===nz&&(r0=look(ks[z])))return Object.assign(r0,{how:'code'});
+      var zm=[];
+      for(var z=0;z<ks.length;z++)if(/^\d{8,14}$/.test(ks[z])&&ks[z].replace(/^0+/,'')===nz&&(r0=look(ks[z])))zm.push(r0);
+      if(zm.length===1)return Object.assign(zm[0],{how:'code'});
+      if(zm.length>1){ /* nhiều mã chỉ khác số 0 đầu: KHÔNG tự chọn, buộc người dùng xác nhận */
+        var all=[];zm.forEach(function(m){(m.item?[m.item]:(m.ambig||m.other||[])).forEach(function(i){if(all.indexOf(i)<0)all.push(i);});});
+        return {item:null,gs1:g,canon:canon,ambig:all,how:'code'};
+      }
     }
   }
   return {item:null,gs1:g,canon:canon};
@@ -3816,6 +3870,7 @@ function renderUpload(){
 
   h+='<div class="lbl" style="margin-top:16px">Xem trước · đọc được <b class="tnum" style="color:var(--ink)">'+built.length+'</b> mã vật tư'+
     (inherited>0?' · kế thừa HSD '+inherited+' mã từ kỳ trước':'')+'</div>';
+  h+=validateHtml(validateItems(built));
   h+='<div class="prev"><table><thead><tr>';
   ["Kho","Mã","Tên vật tư","ĐVT","Đầu","Nhập","Xuất","Cuối"].forEach(function(x){h+="<th>"+x+"</th>";});
   h+='</tr></thead><tbody>';
@@ -5274,7 +5329,7 @@ var ASX={
   },
   upFile:function(inp){
     var f=inp.files&&inp.files[0];if(!f)return;
-    if(typeof XLSX==='undefined'){toast('Chưa tải được thư viện Excel — kiểm tra mạng');return;}
+    if(!kkNeed(["xlsx"],function(){ASX.upFile(inp);}))return;
     var fr=new FileReader();
     fr.onload=function(e){
       try{
@@ -5450,7 +5505,7 @@ var ASX={
   },
   exportX:function(){
     var p=asPer(AP.pid);if(!p)return;
-    if(typeof ExcelJS==='undefined'){toast('Chưa tải được thư viện Excel — kiểm tra mạng');return;}
+    if(!kkNeed(["exceljs"],function(){ASX.exportX();}))return;
     PH.preload(p).then(function(){return buildAssetXlsx(p).xlsx.writeBuffer();}).then(function(buf){shareOrDownload(new Blob([buf],{type:XLSX_MIME}),asFileName(p));p.lastExport=Date.now();asLog(p,'Xuất Excel');store.save();asRenderBody();}).catch(function(e){console.error(e);toast('Không xuất được file');});
   },
   print:function(){
@@ -5753,6 +5808,8 @@ var A={
     if(!items.length){toast("Kỳ nguồn không có vật tư");return;}
     var p={id:Date.now().toString(36),name:(UP.pname||"").trim()||"Kỳ kiểm kê",createdAt:Date.now(),items:items,folder:UP.folder||'',by:((db.profile&&db.profile.ten)||'')};
     if(!UP.folder){toast("Chọn thư mục chi nhánh trước");return;}
+    if(!UP.src){var ve=validateItems(items);if(ve.length&&!confirm("Dữ liệu nguồn còn "+ve.length+" vấn đề (mã trùng, thiếu ĐVT, tồn cuối lệch công thức…).\n\nApp KHÔNG tự sửa. Vẫn tạo kỳ kiểm kê với dữ liệu hiện tại?"))return;
+      if(ve.length)audit("create_period_with_errors",p.name,null,{errors:ve.length});}
     db.periods.unshift(p);
     store.save();
     P={id:p.id,q:"",flt:"all",br:"all",limit:80};
@@ -8043,7 +8100,7 @@ Object.assign(A,{
   },
   rcQuick:function(inp){
     var f=inp.files&&inp.files[0];if(!f)return;
-    if(typeof XLSX==="undefined"){toast("Chưa tải được thư viện Excel — kiểm tra kết nối mạng");inp.value="";return;}
+    if(!kkNeed(["xlsx"],function(){A.rcQuick(inp);}))return;
     var fr=new FileReader();
     fr.onload=function(){
       try{
@@ -8066,7 +8123,7 @@ Object.assign(A,{
   },
   /* ----- Xuất Excel các ca CHÊNH LỆCH (doanh thu + xuất kho) làm cơ sở để cơ sở giải trình ----- */
   rcExportDiff:function(){
-    if(typeof ExcelJS==="undefined"){toast("Chưa tải được thư viện Excel — kiểm tra kết nối mạng");return;}
+    if(!kkNeed(["exceljs"],function(){A.rcExportDiff();}))return;
     try{
       RC_RES=rcCompute();
       var Z=RC_RES,R=rcDb(),N=R.notes||{};
@@ -8367,7 +8424,7 @@ Object.assign(A,{
   rcOpenK:function(k,o){RC.co[k]=!!o;},
   /* ----- Phụ lục → Excel (mỗi cơ sở 1 sheet, bố cục như biểu mẫu PHU_LUC) ----- */
   rcApxXlsx:function(){
-    if(typeof ExcelJS==="undefined"){toast("Chưa tải được thư viện Excel — kiểm tra mạng");return;}
+    if(!kkNeed(["exceljs"],function(){A.rcApxXlsx();}))return;
     var D=rcApxBuild();if(!D.list.length){toast("Không có dữ liệu để lập phụ lục");return;}
     try{
       var wb=new ExcelJS.Workbook(),thin={style:"thin",color:{argb:"FF8C96A8"}},bd={top:thin,left:thin,bottom:thin,right:thin};
@@ -9051,7 +9108,7 @@ function payOut(wb,fname){
   wb.xlsx.writeBuffer().then(function(buf){shareOrDownload(new Blob([buf],{type:XLSX_MIME}),fname);}).catch(function(e){console.error(e);toast("Không xuất được file Excel");});
 }
 function payAscii(s){return String(s).normalize("NFD").replace(/[\u0300-\u036f]/g,"").replace(/đ/g,"d").replace(/Đ/g,"D").replace(/[^\w-]+/g,"_");}
-function payNeed(){if(typeof ExcelJS==="undefined"){toast("Chưa tải được thư viện Excel — kiểm tra mạng");return false;}return true;}
+function payNeed(fn,args){return kkNeed(["exceljs"],fn?function(){A[fn].apply(A,args||[]);}:null);}
 
 /* ----- In trực tiếp từ app: Giấy đề nghị thanh toán + Bảng kê hóa đơn (A4 dọc, mỗi NCC 2 trang) ----- */
 var PAY_PCSS='@page{size:21cm 29.7cm;margin:12mm 14mm;}body{font-family:"Times New Roman",serif;font-size:11pt;color:#000;}'
@@ -9202,7 +9259,7 @@ Object.assign(A,{
   },
   payErrFilter:function(c){PAY.ec=c||"all";renderPay();},
   payXlsxErr:function(cs){
-    if(!payNeed())return;
+    if(!payNeed("payXlsxErr",[cs]))return;
     cs=cs||PAY.ec||"all";
     var E=payErrAll(),n=0;
     if(cs!=="all")E=E.filter(function(B){return (B.cs||"?")===cs;});
@@ -9223,10 +9280,10 @@ Object.assign(A,{
   }
 });
 Object.assign(A,{
-  payTemplate:function(){if(!payNeed())return;payOut(payTpl(),"Mau_DeNghiThanhToan_NhapLieu.xlsx");},
+  payTemplate:function(){if(!payNeed("payTemplate"))return;payOut(payTpl(),"Mau_DeNghiThanhToan_NhapLieu.xlsx");},
   payFile:function(inp){
     var f=inp.files&&inp.files[0];if(!f)return;
-    if(typeof XLSX==="undefined"){toast("Chưa tải được thư viện Excel — kiểm tra mạng");return;}
+    if(!kkNeed(["xlsx"],function(){A.payFile(inp);}))return;
     var rd=new FileReader();
     rd.onload=function(e){
       try{
@@ -9265,20 +9322,20 @@ Object.assign(A,{
     if(ns)toast(ns+" NCC thiếu số tài khoản — ô STK trên phiếu để trống");
   },
   payXlsxOne:function(key){
-    if(!payNeed())return;
+    if(!payNeed("payXlsxOne",[key]))return;
     var g=payCompute().filter(function(x){return x.key===key;})[0];if(!g)return;
     var wb=new ExcelJS.Workbook();payAddDn(wb,g,"DE NGHI THANH TOAN");
     if(g.rows.length>=PAY_NGUONG_BK)payAddBk(wb,g,"BANG KE HOA DON");
     payOut(wb,"DNTT_"+payAscii(g.short)+"_T"+g.thang+"-"+g.nam+".xlsx");
   },
   payXlsxDs:function(){
-    if(!payNeed())return;
+    if(!payNeed("payXlsxDs",[]))return;
     var L=payCompute();if(!L.some(function(g){return g.chot>0;})){toast("Chưa có NCC nào chốt được");return;}
     var wb=new ExcelJS.Workbook();payAddDs(wb,L,"DS THANH TOAN");
     var t=payToday();payOut(wb,"DS_ThanhToan_"+("0"+t.d).slice(-2)+("0"+t.m).slice(-2)+t.y+".xlsx");
   },
   payXlsxAll:function(){
-    if(!payNeed())return;
+    if(!payNeed("payXlsxAll",[]))return;
     var L=payCompute(),S=L.filter(function(g){return g.chot>0;});
     if(!S.length){toast("Chưa có NCC nào chốt được");return;}
     var wb=new ExcelJS.Workbook();payAddDs(wb,L,"DS THANH TOAN");
