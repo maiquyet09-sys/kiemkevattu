@@ -2,7 +2,7 @@
 <html lang="vi">
 <head>
 <meta charset="UTF-8">
-<meta name="app-version" content="2026110301">
+<meta name="app-version" content="2026110305">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
 <meta name="theme-color" content="#eef3fb">
 <link rel="manifest" href="manifest.webmanifest">
@@ -662,6 +662,15 @@ body{background:var(--bg)}
 .rcm-g>div{padding:5px 7px;border-radius:8px;background:var(--card2);font-size:12px;word-break:break-word}
 .rcm-g>div+div{background:var(--amber-bg)}
 .rcm-g i{display:block;font-style:normal;font-size:10px;font-weight:700;color:var(--mut2);text-transform:uppercase}
+.rctool{display:flex;gap:8px;margin-bottom:8px}.rctool .btn{flex:1;padding:9px 6px;font-size:13px;margin:0}
+.rcnote-d{margin-bottom:10px}.rcnote-d>summary{font-size:12px;color:var(--mut);cursor:pointer;list-style:none}.rcnote-d>summary::before{content:"ⓘ ";}
+.rchero{margin-bottom:12px;padding:14px}.rchero-t{display:flex;justify-content:space-between;align-items:flex-end}
+.rchero .l,.rcmini .l{font-size:12px;color:var(--mut)}.rchero .big{font-size:30px;font-weight:800;line-height:1.1}
+.rcbarp{height:8px;border-radius:99px;background:#e9edf5;margin:10px 0 6px;overflow:hidden}.rcbarp i{display:block;height:100%;border-radius:99px}
+.rchero-s{font-size:12px;color:var(--mut)}
+.rcmini-g{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px}.rcmini{background:#fff;border:1px solid var(--line);border-radius:14px;padding:10px 12px}.rcmini .v{font-size:16px;font-weight:800}
+.rcfl{display:flex;gap:8px;margin-bottom:12px;align-items:center}.rcfl select{flex:1;min-width:0}.rcfl .rcx{flex:none;border:1px solid var(--line);background:#fff;border-radius:10px;width:38px;height:38px;font-size:16px;color:var(--mut);cursor:pointer}
+.rccard{border-left:4px solid var(--c,#ccd)!important}
 </style>
 </head>
 <body>
@@ -7119,7 +7128,8 @@ function rcTbl(hd,rows,nc){
 function rcSel(k,opts,cur){return '<select class="inp" onchange="A.rcS('+k+',this.value)">'+opts.map(function(o){var v=Array.isArray(o)?o[0]:o,l=Array.isArray(o)?o[1]:o;return '<option value="'+esc(v)+'"'+(String(v)===String(cur)?' selected':'')+'>'+esc(l)+'</option>';}).join('')+'</select>';}
 function rcFilter(){
   var ms=["Tất cả"];for(var i=1;i<=12;i++)ms.push([String(i),"Tháng "+i]);
-  return '<div style="display:flex;gap:8px;margin-bottom:12px">'+rcSel(0,["Tất cả"].concat(rcCsList()),RC.cs)+rcSel(1,ms,RC.th)+'</div>';
+  var on=RC.cs!=="Tất cả"||RC.th!=="Tất cả";
+  return '<div class="rcfl">'+rcSel(0,["Tất cả"].concat(rcCsList()),RC.cs)+rcSel(1,ms,RC.th)+(on?'<button class="rcx" title="Xóa lọc" onclick="A.rcClr()">✕</button>':'')+'</div>';
 }
 function rcBadge(t){var c=/KHỚP|OK|✓|Hợp lệ|Khớp/.test(t)?"green":/CHƯA|THIẾU|✗|TRÙNG|THỪA|SAI/.test(t)?"red":"amber";return '<span class="rcb rcb-'+c+'">'+esc(t)+'</span>';}
 /* ===== V8 · Đối chiếu 2 bên ===== */
@@ -7206,8 +7216,8 @@ function rcSubNav(){
   return '<div class="rcsubnav">'+g.map(function(t){return '<button class="'+(RC.tab===t?'on':'')+'" onclick="A.rcTab('+t+')">'+RC_SUBN[t]+'</button>';}).join('')+'</div>';
 }
 function rcQuickBar(){
-  return '<div class="rcqb"><button class="btn btn-outline" onclick="A.rcRefresh()">↻ Đối chiếu lại</button><label class="btn btn-primary">'+icon("upload",15)+'Cập nhật từ file<input type="file" accept=".xlsx,.xls" style="display:none" onchange="A.rcQuick(this)"></label></div>'
-    +'<div class="rcnote" style="margin-bottom:12px">Cập nhật từ file: sửa dòng đã có, thêm dòng mới, giữ giải trình và duyệt; có so sánh trước → sau và Hoàn tác. Chi tiết ở Dữ liệu → Nhập / Xuất file.</div>';
+  return '<div class="rctool"><button class="btn btn-outline" onclick="A.rcRefresh()">↻ Đối chiếu lại</button><label class="btn btn-primary">'+icon("upload",15)+'Cập nhật từ file<input type="file" accept=".xlsx,.xls" style="display:none" onchange="A.rcQuick(this)"></label></div>'
+    +'<details class="rcnote-d"><summary>Cập nhật từ file hoạt động thế nào?</summary><div class="rcnote">Sửa dòng đã có, thêm dòng mới, giữ giải trình và duyệt; có so sánh trước → sau và Hoàn tác. Chi tiết ở Dữ liệu → Nhập / Xuất file.</div></details>';
 }
 function rcAcc(key,title,body,def){var o=RC.co[key]!==undefined?RC.co[key]:!!def;return '<details class="rcacc"'+(o?' open':'')+' ontoggle="A.rcOpenK(\''+key+'\',this.open)"><summary>'+title+'</summary><div class="rcacc-b">'+body+'</div></details>';}
 function renderRecon(){
@@ -7221,15 +7231,21 @@ function renderRecon(){
   document.getElementById("app").innerHTML=h+'</div>';
 }
 function rcViewSum(){
-  var s=rcSum(),Z=RC_RES,h=rcFilter(),n=s.F.length;
-  function kpi(l,v,c){return '<div class="card" style="padding:12px"><div style="font-size:12px;color:var(--mut)">'+l+'</div><div class="tnum" style="font-size:18px;font-weight:800'+(c?';color:var(--'+c+')':'')+'">'+v+'</div></div>';}
-  h+='<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px">'+kpi("Tổng doanh thu (VND)",rcF(s.rev))+kpi("Giá trị xuất kho (VND)",rcF(s.val))+kpi("Lượt đối chiếu",n)+kpi("Tỷ lệ khớp",n?(s.ok/n*100).toFixed(1)+"%":"–","green")
-    +kpi("Ca cần xử lý (DT)",s.needD.length,s.needD.length?"red":"green")+kpi("Phiếu xuất cần xử lý",s.needX.length,s.needX.length?"red":"green")
-    +kpi("Ca đã duyệt – hợp lệ",s.apprD)+kpi("Phiếu xuất SAI VẬT TƯ",s.badVt,s.badVt?"red":"green")+'</div>';
+  var s=rcSum(),Z=RC_RES,h=rcFilter(),n=s.F.length,need=s.needD.length+s.needX.length,pct=n?(s.ok/n*100):0;
+  var col=pct>=95?"green":pct>=80?"amber":"red";
+  function mini(l,v,c){return '<div class="rcmini"><div class="l">'+l+'</div><div class="v tnum"'+(c?' style="color:var(--'+c+')"':'')+'>'+v+'</div></div>';}
+  h+='<div class="card rchero"><div class="rchero-t"><div><div class="l">Tỷ lệ khớp</div><div class="big tnum" style="color:var(--'+col+')">'+(n?pct.toFixed(1)+'%':'–')+'</div></div>'
+    +'<div style="text-align:right"><div class="l">Cần xử lý</div><div class="big tnum" style="color:var(--'+(need?'red':'green')+')">'+need+'</div></div></div>'
+    +'<div class="rcbarp"><i style="width:'+pct.toFixed(1)+'%;background:var(--'+col+')"></i></div>'
+    +'<div class="rchero-s">'+n+' lượt đối chiếu · '+s.ok+' khớp · '+s.apprD+' đã duyệt hợp lệ</div>'
+    +(need?'<div class="rcact" style="margin:10px 0 0"><button class="btn btn-primary" onclick="A.rcGoList(0)">Ca doanh thu lệch ('+s.needD.length+')</button><button class="btn btn-outline" onclick="A.rcGoList(1)">Phiếu xuất lệch ('+s.needX.length+')</button></div>':'<div style="margin-top:8px;color:var(--green);font-weight:700;font-size:13px">✓ Không còn ca nào cần xử lý</div>')+'</div>';
+  h+='<div class="rcmini-g">'+mini("Tổng doanh thu (VND)",rcF(s.rev))+mini("Giá trị xuất kho (VND)",rcF(s.val))
+    +mini("Ca cần xử lý (DT)",s.needD.length,s.needD.length?"red":"green")+mini("Phiếu xuất cần xử lý",s.needX.length,s.needX.length?"red":"green")
+    +mini("Phiếu xuất SAI VẬT TƯ",s.badVt,s.badVt?"red":"green")+mini("Ca đã duyệt – hợp lệ",s.apprD)+'</div>';
   function cnt(a,f){return a.filter(f).length;}
   var st=[["KHỚP","DT"],["CHƯA XUẤT KHO","DT"],["XUẤT SAI VẬT TƯ","DT"],["XUẤT SAI SỐ LƯỢNG (THIẾU)","DT"],["XUẤT SAI SỐ LƯỢNG (THỪA)","DT"],["XUẤT CHƯA CÓ DOANH THU","XK"],["XUẤT SAI VẬT TƯ","XK"],["TRÙNG/THỪA XUẤT","XK"],["THIẾU MÃ KH","XK"]];
-  h+='<div class="card" style="margin-bottom:12px"><div class="sec">1. Phân loại trạng thái</div>'+rcTbl(["Trạng thái","Nguồn","Số lượt"],st.map(function(t){var c=t[1]==="DT"?cnt(s.F,function(o){return o.T===t[0];}):cnt(s.X,function(x){return x.P.indexOf(t[0])===0;});return [rcBadge(t[0]),t[1],c];}),2)+'</div>';
-  h+='<div class="card" style="margin-bottom:12px"><div class="sec">2. Theo cơ sở</div>'+rcTbl(["Cơ sở","Khớp","Lệch","Xuất chưa DT","Giá trị lệch"],rcCsList().map(function(c){var F=s.F.filter(function(o){return o.cs===c;}),v=0;F.forEach(function(o){v+=o.R;});return [esc(c),cnt(F,function(o){return o.T==="KHỚP";}),cnt(F,function(o){return o.bad;}),cnt(s.X,function(x){return x.cs===c&&x.P==="XUẤT CHƯA CÓ DOANH THU";}),rcF(v)];}),1)+'</div>';
+  h+=rcAcc("sum1","Phân loại trạng thái",rcTbl(["Trạng thái","Nguồn","Số lượt"],st.map(function(t){var c=t[1]==="DT"?cnt(s.F,function(o){return o.T===t[0];}):cnt(s.X,function(x){return x.P.indexOf(t[0])===0;});return [rcBadge(t[0]),t[1],c];}),2),1);
+  h+=rcAcc("sum2","Theo cơ sở",rcTbl(["Cơ sở","Khớp","Lệch","Xuất chưa DT","Giá trị lệch"],rcCsList().map(function(c){var F=s.F.filter(function(o){return o.cs===c;}),v=0;F.forEach(function(o){v+=o.R;});return [esc(c),cnt(F,function(o){return o.T==="KHỚP";}),cnt(F,function(o){return o.bad;}),cnt(s.X,function(x){return x.cs===c&&x.P==="XUẤT CHƯA CÓ DOANH THU";}),rcF(v)];}),1),1);
   var vr=[];
   Z.vids.forEach(function(g){
     var F=s.F.filter(function(o){return o.g&&o.g.vid===g.vid;}),q=0;F.forEach(function(o){q+=o.Q;});
@@ -7237,9 +7253,9 @@ function rcViewSum(){
     if(!F.length&&!xc)return;
     vr.push([esc(g.ten),F.length,cnt(F,function(o){return o.T==="KHỚP";}),cnt(F,function(o){return o.T==="CHƯA XUẤT KHO";}),cnt(F,function(o){return o.T==="XUẤT SAI VẬT TƯ";}),cnt(F,function(o){return o.T.indexOf("SAI SỐ")===0;}),xc,q,q<0?"THIẾU":q>0?"THỪA":"—"]);
   });
-  h+='<div class="card" style="margin-bottom:12px"><div class="sec">3. Theo vật tư</div>'+rcTbl(["Vật tư","Tổng ca","Khớp","Chưa xuất","Sai VT","Sai SL","Xuất chưa DT","Chênh SL","Đánh giá"],vr,1)+'</div>';
+  h+=rcAcc("sum3","Theo vật tư",rcTbl(["Vật tư","Tổng ca","Khớp","Chưa xuất","Sai VT","Sai SL","Xuất chưa DT","Chênh SL","Đánh giá"],vr,1),0);
   var mo=[];for(var m=1;m<=12;m++){var X=Z.xk.filter(function(x){return x.mo===m;}),v=0;X.forEach(function(x){v+=x.val;});if(X.length)mo.push(["Tháng "+m,X.length,rcF(v)]);}
-  h+='<div class="card"><div class="sec">4. Xuất kho theo tháng (toàn kỳ)</div>'+rcTbl(["Tháng","Số phiếu","Giá trị xuất (VND)"],mo,1)+'</div>';
+  h+=rcAcc("sum4","Xuất kho theo tháng (toàn kỳ)",rcTbl(["Tháng","Số phiếu","Giá trị xuất (VND)"],mo,1),0);
   return h;
 }
 function rcSelN(side,j,k,opts,cur){return '<select class="inp" onchange="A.rcNote('+side+','+j+','+k+',this.value)">'+opts.map(function(o,i){return '<option value="'+(i?esc(o):'')+'"'+(o===cur?' selected':'')+'>'+esc(o)+'</option>';}).join('')+'</select>';}
@@ -7248,21 +7264,20 @@ function rcListRows(side,only,q){
   var base=only==2?(side==0?Z.dt:Z.xk):(side==0?Z.dt.filter(function(o){return o.first&&o.bad;}):Z.xk.filter(function(x){return x.bad;}));
   return base.filter(function(o){return rcIn(o)&&(only!=1||o.need)&&(only!=3||(R.notes[o.nid]&&R.notes[o.nid].chg))&&(!q||rcK(JSON.stringify(o.r)+" "+o.pid+" "+(o.ten||"")+" "+(o.vt||"")+" "+(o.P||"")+" "+(o.T||"")+" "+(o.why||"")).indexOf(q)>=0);});
 }
-function rcViewList(){
-  var R=rcDb(),h=rcFilter(),side=RC.side,q=rcK(RC.q);
-  h+='<div class="rcsubnav"><button class="'+(side==0?'on':'')+'" onclick="A.rcS(3,0)">Doanh thu → xuất kho</button><button class="'+(side==1?'on':'')+'" onclick="A.rcS(3,1)">Xuất kho → doanh thu</button></div>';
-  h+='<div class="rcchips">'+RC_ONLY.map(function(p){return '<button class="rcchip'+(RC.only==p[0]?' on':'')+'" onclick="A.rcS(4,'+p[0]+')">'+p[1]+' <b>'+rcListRows(side,p[0],q).length+'</b></button>';}).join('')+'</div>';
-  h+='<div class="rcact"><button class="btn btn-outline" onclick="A.rcRow('+side+',-1)">'+icon("plus",15)+(side?'Thêm phiếu xuất':'Thêm dòng DT')+'</button><button class="btn btn-outline" onclick="A.rcExportDiff()">'+icon("download",15)+'Xuất ca lệch</button></div>'
-    +'<input class="inp" placeholder="Tìm PID, khách hàng, vật tư, số CT…" value="'+esc(RC.q)+'" onchange="A.rcS(2,this.value)" style="margin-bottom:10px">';
-  var rows=rcListRows(side,RC.only,q);
+function rcChipsHtml(side,q){
+  return RC_ONLY.map(function(p){return '<button class="rcchip'+(RC.only==p[0]?' on':'')+'" onclick="A.rcS(4,'+p[0]+')">'+p[1]+' <b>'+rcListRows(side,p[0],q).length+'</b></button>';}).join('');
+}
+function rcListBody(side,q){
+  var R=rcDb(),h='',rows=rcListRows(side,RC.only,q);
   h+='<div style="font-size:13px;color:var(--mut);margin-bottom:8px">'+rows.length+' ca'+(rows.length>RC.lim?' · đang hiện '+RC.lim:'')+'</div>';
+  if(!rows.length)h+='<div class="card" style="text-align:center;color:var(--mut)">Không có ca nào trong bộ lọc này</div>';
   rows.slice(0,RC.lim).forEach(function(o){
     var r=o.r,d=side==0,jj=d?o.j:o.i,n=R.notes[o.nid]||{},ex="",st;
     var AB='<button class="btn btn-outline" style="padding:7px;margin-top:6px;font-size:12.5px" onclick="A.rcAcc(';
     if(d&&o.wrong&&o.wrong.length&&o.ri>=0)o.wrong.forEach(function(w,k){ex+=AB+'0,'+jj+','+k+')">✓ Cùng loại, chỉ khác tên → chấp nhận «'+esc(w.ten||w.ma)+'»</button>';});
     if(!d&&o.exp&&o.exp.length)o.exp.forEach(function(e,k){if(e.ri>=0)ex+=AB+'1,'+jj+','+k+')">✓ Cùng loại, chỉ khác tên → chấp nhận cho «'+esc(e.ten)+'»</button>';});
     st=o.ok?"Hợp lệ (đã duyệt)":(d?(o.none?o.T:(o.first?o.T:"Đã gộp vào ca đầu")):o.P);
-    h+='<div class="card" style="margin-bottom:10px;padding:12px"><div style="display:flex;justify-content:space-between;gap:8px;align-items:flex-start"><b style="font-size:14px">'+esc(d?(r.kh||"—"):(r.so||r.ten))+'</b>'+rcBadge(st)+'</div>'
+    h+='<div class="card rccard" style="margin-bottom:10px;padding:12px;--c:var(--'+(o.ok||st==="KHỚP"||st==="Hợp lệ (đã duyệt)"?"green":(o.need?"red":"amber"))+')"><div style="display:flex;justify-content:space-between;gap:8px;align-items:flex-start"><b style="font-size:14px">'+esc(d?(r.kh||"—"):(r.so||r.ten))+'</b>'+rcBadge(st)+'</div>'
       +'<div style="font-size:12.5px;color:var(--mut);margin-top:3px">'+esc(o.cs)+' · '+esc(o.pid||"không có PID")+' · '+esc(rcDStr(r.ngay)||r.ngay||"")+'</div>'
       +(d?rcCmpD(o):rcCmpX(o))+ex;
     if(n.chg)h+='<div style="margin:8px 0;padding:8px 10px;border-radius:10px;background:var(--amber-bg);color:var(--amber);font-size:12.5px">⚠ Đã duyệt nhưng kết quả đối chiếu đổi sau khi nhập dữ liệu mới<br>'+esc(n.chg)+'<br><a onclick="A.rcChgOk('+side+','+jj+')" style="color:var(--teal);font-weight:700">Giữ nguyên duyệt</a></div>';
@@ -7274,8 +7289,16 @@ function rcViewList(){
     }
     h+='<div class="rcbtns"><button class="btn btn-outline" onclick="A.rcRow('+side+','+o.i+')">'+icon("edit",15)+'Sửa / khớp tay</button><button class="btn rcdel" onclick="A.rcRowDel('+side+','+o.i+')">'+icon("trash",15)+'Xóa</button></div></div>';
   });
-  if(rows.length>RC.lim)h+='<button class="btn btn-outline" onclick="A.rcMore()">Xem thêm</button>';
+  if(rows.length>RC.lim)h+='<button class="btn btn-outline" onclick="A.rcMore()">Xem thêm ('+(rows.length-RC.lim)+' ca còn lại)</button>';
   return h;
+}
+function rcViewList(){
+  var h=rcFilter(),side=RC.side,q=rcK(RC.q);
+  h+='<div class="rcsubnav"><button class="'+(side==0?'on':'')+'" onclick="A.rcS(3,0)">Doanh thu → xuất kho</button><button class="'+(side==1?'on':'')+'" onclick="A.rcS(3,1)">Xuất kho → doanh thu</button></div>';
+  h+='<input class="inp" id="rcq" type="search" placeholder="Tìm PID, khách hàng, vật tư, số CT…" value="'+esc(RC.q)+'" oninput="A.rcSearch(this.value)" style="margin-bottom:10px">';
+  h+='<div class="rcchips" id="rcchips">'+rcChipsHtml(side,q)+'</div>';
+  h+='<div class="rcact"><button class="btn btn-outline" onclick="A.rcRow('+side+',-1)">'+icon("plus",15)+(side?'Thêm phiếu xuất':'Thêm dòng DT')+'</button><button class="btn btn-outline" onclick="A.rcExportDiff()">'+icon("download",15)+'Xuất ca lệch</button></div>';
+  return h+'<div id="rclist">'+rcListBody(side,q)+'</div>';
 }
 var RC_GO=[
   {t:1,side:1,q:"THIẾU MÃ",only:1},
@@ -7980,7 +8003,7 @@ Object.assign(A,{
     var body='<p style="text-align:center;font-weight:bold">CÔNG TY CỔ PHẦN NỤ CƯỜI MỚI VIỆT NAM</p><h2 style="text-align:center">BIÊN BẢN XÁC NHẬN SẢN LƯỢNG DỊCH VỤ VÀ VẬT TƯ XUẤT KHO</h2><p style="text-align:center">'+k+'</p>'
       +'<p>Tổng doanh thu: <b>'+rcF(s.rev)+'</b> đ · Giá trị xuất kho: <b>'+rcF(s.val)+'</b> đ · Tỷ lệ khớp: <b>'+(s.F.length?(s.ok/s.F.length*100).toFixed(1):0)+'%</b></p>'
       +tb(["STT","Vật tư","Số ca","SL cần","SL xuất","Chênh","Đánh giá"],g)+'<p><i>Kèm theo: Phụ lục 01 – Chi tiết đối chiếu dịch vụ và phiếu xuất kho của từng cơ sở (in riêng, khổ ngang).</i></p><p><b>Phụ lục 02: các ca chưa xử lý ('+ex.length+')</b></p>'+(ex.length?tb(["Nguồn","Cơ sở","PID","Dịch vụ / Vật tư","Trạng thái","Giải trình"],ex):'<p>Không có.</p>')
-      +'<table style="width:100%;margin-top:30px;text-align:center"><tr><td><b>THỦ KHO</b><br><i>(Ký, ghi rõ họ tên)</i></td><td><b>PHÒNG HÀNH CHÍNH</b><br><i>(Ký, ghi rõ họ tên)</i></td><td><b>GIÁM ĐỐC CƠ SỞ</b><br><i>(Ký, đóng dấu)</i></td></tr></table>';
+      +'<table style="width:100%;margin-top:30px;text-align:center;border:0"><tr><td style="border:0"><b>THỦ KHO</b><br><i>(Ký, ghi rõ họ tên)</i></td><td style="border:0"><b>PHÒNG HÀNH CHÍNH</b><br><i>(Ký, ghi rõ họ tên)</i></td><td style="border:0"><b>GIÁM ĐỐC CƠ SỞ</b><br><i>(Ký, đóng dấu)</i></td></tr></table>';
     printPreviewHtml(docWrap("Biên bản đối chiếu",body,"portrait"));
   }
 });
@@ -8491,7 +8514,8 @@ function payHomeHtml(){
   if(!P.mua.length){
     return '<div class="card">'+imp+'<div style="font-weight:700;margin-bottom:4px">Nhập file Excel đối chiếu công nợ</div>'
       +'<div style="font-size:13px;color:var(--mut);margin-bottom:12px">Chọn file có các sheet <b>DANH MUC NCC</b>, <b>MUA_HANG</b>, <b>HOA_DON_MISA</b> (đúng mẫu file Đề nghị thanh toán). App tự đối chiếu theo số HĐ, lập Giấy đề nghị thanh toán, Bảng kê hóa đơn và Danh sách thanh toán; xuất Excel đúng bố cục file mẫu.</div>'
-      +'<button class="btn btn-primary" onclick="document.getElementById(\'payin\').click()">'+icon('upload',17)+'Chọn file Excel</button></div>';
+      +'<button class="btn btn-primary" style="margin-bottom:8px" onclick="document.getElementById(\'payin\').click()">'+icon('upload',17)+'Chọn file Excel</button>'
+      +'<button class="btn btn-outline" onclick="A.payTemplate()">'+icon('download',17)+'Tải file Excel mẫu</button></div>';
   }
   var L=payCompute(),ch=0,nk=0,np=0,giu=0;
   L.forEach(function(g){ch+=g.chot;if(g.chot>0)nk++;if(g.bad)np++;giu+=g.tong-g.chot+g.extraSum;});
@@ -8501,8 +8525,10 @@ function payHomeHtml(){
     +'<div><div style="font-size:11px;color:var(--mut2);font-weight:700">GIỮ LẠI (LỆCH)</div><div style="font-size:20px;font-weight:800;color:'+(giu?'var(--red)':'var(--green)')+'">'+payF(giu)+'</div></div>'
     +'<div><div style="font-size:11px;color:var(--mut2);font-weight:700">NCC CHỐT ĐƯỢC</div><div style="font-size:20px;font-weight:800">'+nk+'</div></div>'
     +'<div><div style="font-size:11px;color:var(--mut2);font-weight:700">NCC CÓ LỆCH</div><div style="font-size:20px;font-weight:800">'+np+'</div></div></div>'
-    +'<div class="rcact"><button class="btn btn-primary" onclick="A.payXlsxDs()">'+icon('download',16)+'DS thanh toán</button><button class="btn btn-outline" onclick="A.payXlsxAll()">'+icon('download',16)+'Phiếu hàng loạt</button></div>'
-    +'<button class="btn btn-outline" style="padding:9px;font-size:13px" onclick="document.getElementById(\'payin\').click()">'+icon('upload',16)+'Nạp lại file Excel</button></div>';
+    +'<button class="btn btn-primary" style="margin-bottom:8px" onclick="A.payPrintAll()">'+icon('file',17)+'In phiếu + bảng kê ('+L.filter(function(g){return g.khop;}).length+' NCC khớp)</button>'
+    +'<div class="rcact"><button class="btn btn-outline" onclick="A.payXlsxDs()">'+icon('download',16)+'DS thanh toán</button><button class="btn btn-outline" onclick="A.payXlsxAll()">'+icon('download',16)+'Phiếu hàng loạt</button></div>'
+    +'<button class="btn btn-outline" style="padding:9px;font-size:13px" onclick="document.getElementById(\'payin\').click()">'+icon('upload',16)+'Nạp lại file Excel</button>'
+    +'<button class="btn btn-outline" style="padding:9px;font-size:13px;margin-top:8px" onclick="A.payTemplate()">'+icon('download',16)+'Tải file Excel mẫu</button></div>';
   h+=payCfgHtml();
   var cnt={all:L.length,ok:0,bad:0,stk:0};
   L.forEach(function(g){if(g.khop)cnt.ok++;if(g.bad)cnt.bad++;if(!g.stk&&g.chot>0)cnt.stk++;});
@@ -8539,7 +8565,8 @@ function payDetailHtml(key){
     +row("Người dự trù",esc(payNguoiLap()))+row("Phòng/Ban",esc(C.pb))+row("Lý do",esc(payContent(g)))+row("Hình thức",esc(C.ht)+" · "+esc(C.dv))
     +row("Thành tiền",'<b>'+payF(g.tong)+'</b> · ĐVCP '+esc(C.dvcp))+row("Bằng chữ",'<i>'+esc(soThanhChu(g.tong))+'./.</i>')+row("Số HĐ",esc(paySoHd(g)))
     +row("Người thụ hưởng",esc(g.full))+row("Số tài khoản",g.stk?esc(g.stk):'<span style="color:var(--red)">Chưa có — bổ sung ở sheet DANH MUC NCC</span>')+row("Ngân hàng",esc(g.bank)+(g.cn?" · "+esc(g.cn):""))
-    +'<button class="btn btn-primary" style="margin-top:12px" onclick="A.payXlsxOne(\''+g.key+'\')">'+icon('download',17)+'Xuất Excel (phiếu'+(g.rows.length>=PAY_NGUONG_BK?' + bảng kê':'')+')</button></div>';
+    +'<button class="btn btn-primary" style="margin-top:12px" onclick="A.payPrintOne(\''+g.key+'\')">'+icon('file',17)+'In phiếu + bảng kê</button>'
+    +'<button class="btn btn-outline" style="margin-top:8px" onclick="A.payXlsxOne(\''+g.key+'\')">'+icon('download',17)+'Xuất Excel (phiếu'+(g.rows.length>=PAY_NGUONG_BK?' + bảng kê':'')+')</button></div>';
   h+='<div class="card" style="margin-bottom:12px"><div style="font-weight:700;margin-bottom:6px">Kiểm tra trước khi trình ký</div>'
     +ck.items.map(function(c){return '<div style="display:flex;gap:8px;font-size:13px;padding:3px 0"><div style="flex:0 0 130px;color:var(--mut)">'+c[1]+'</div><div style="flex:1;color:'+(c[0]?'var(--green)':'var(--red)')+'">'+esc(c[2])+'</div></div>';}).join("")
     +'<div style="margin-top:8px;font-weight:800;color:'+(ck.ok?'var(--green)':'var(--red)')+'">'+ck.end+'</div></div>';
@@ -8675,7 +8702,83 @@ function payOut(wb,fname){
 }
 function payAscii(s){return String(s).normalize("NFD").replace(/[\u0300-\u036f]/g,"").replace(/đ/g,"d").replace(/Đ/g,"D").replace(/[^\w-]+/g,"_");}
 function payNeed(){if(typeof ExcelJS==="undefined"){toast("Chưa tải được thư viện Excel — kiểm tra mạng");return false;}return true;}
+
+/* ----- In trực tiếp từ app: Giấy đề nghị thanh toán + Bảng kê hóa đơn (A4 dọc, mỗi NCC 2 trang) ----- */
+var PAY_PCSS='@page{size:21cm 29.7cm;margin:12mm 14mm;}body{font-family:"Times New Roman",serif;font-size:11pt;color:#000;}'
+  +'.pg{page-break-after:always;}.pg:last-child{page-break-after:auto;}'
+  +'.hd{display:flex;justify-content:space-between;font-size:10.5pt;}.hd b{font-size:12pt;}'
+  +'.t{text-align:center;font-weight:bold;font-size:16pt;margin:6pt 0 2pt;}.ct{text-align:center;}.it{font-style:italic;}'
+  +'table{border-collapse:collapse;width:100%;}table.f td{padding:4pt 0;vertical-align:top;font-size:10.5pt;}table.f td:first-child{width:34%;}'
+  +'table.b th,table.b td{border:1px solid #000;padding:3pt 4pt;font-size:10.5pt;}table.b th{text-align:center;}'
+  +'table.b td.e{height:20pt;}table.k th{background:#1f4e79;color:#fff;font-weight:normal;font-size:11pt;border:1px solid #000;padding:4pt;}'
+  +'table.k td{border:1px solid #000;padding:2pt 4pt;font-size:10pt;}.r{text-align:right;}.c{text-align:center;}'
+  +'table.s td{text-align:center;font-size:10.5pt;width:20%;padding-top:2pt;}.sp{height:48pt;}p{margin:4pt 0;font-size:10.5pt;}';
+function payPrintDn(g){
+  var C=payDb().cfg,T=payToday(),dt="Hà Nội, ngày "+T.d+" tháng "+T.m+" năm "+T.y,ci=C.ht==="Chuyển khoản",e=esc;
+  var rw=function(l,v){return '<tr><td>'+l+'</td><td>'+e(v)+'</td></tr>';},tr='';
+  for(var i=0;i<7;i++)tr+='<tr><td class="e"></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>';
+  return '<div class="pg"><div class="hd"><b>MEDDENTAL</b><div>Mã CT: ……………………<br>Số phiếu:</div></div>'
+    +'<div class="t">GIẤY ĐỀ NGHỊ THANH TOÁN</div><div class="ct it" style="margin-bottom:6pt">Tháng '+("0"+T.m).slice(-2)+' năm '+T.y+'</div>'
+    +'<table class="f">'+rw("Họ và tên người dự trù:",payNguoiLap())+rw("Phòng/Ban:",C.pb)+rw("CHỌN NHÀ CUNG CẤP  ▼",g.short)+rw("Lý do thanh toán:",payContent(g))+rw("Hình thức thanh toán:",C.ht)+rw("Đơn vị:",C.dv)+'</table>'
+    +'<p><b>CHI TIẾT CÁC NỘI DUNG:</b></p><table class="b"><tr><th style="width:7%">STT</th><th>Nội dung</th><th style="width:7%">ĐVT</th><th style="width:7%">SL</th><th style="width:10%">Đơn giá</th><th style="width:14%">Thành tiền</th><th style="width:14%">Số HĐ</th><th style="width:9%">ĐVCP</th></tr>'
+    +'<tr><td class="c">1</td><td>'+e(payContent(g))+'</td><td></td><td></td><td></td><td class="c">'+payF(g.tong)+'</td><td class="c">'+e(paySoHd(g))+'</td><td class="c">'+e(C.dvcp)+'</td></tr>'+tr
+    +'<tr><td colspan="2" class="c"><b>TỔNG CỘNG</b></td><td colspan="3" style="border:0"></td><td class="r"><b>'+payF(g.tong)+'</b></td><td colspan="2" style="border:0"></td></tr></table>'
+    +'<p><b>Bằng chữ:</b> <i>'+e(soThanhChu(g.tong))+'./.</i></p><p><b>Người thụ hưởng: '+e(g.full)+'</b></p><p>CMND (Nếu thanh toán TM):</p>'
+    +'<p>Số tài khoản ngân hàng (Nếu thanh toán CK): '+e(ci?g.stk:"")+'</p><p><b>Tại ngân hàng: '+e(g.bank)+'</b><span style="float:right"><b>Chi nhánh: '+e(g.cn)+'</b></span></p>'
+    +'<p style="margin-top:8pt">Chứng từ kèm theo: (Ghi số lượng cho từng loại chứng từ):<br>1. Hóa đơn VAT:<br>2. Biên bản giao nhận:<br>3. Phiếu nhập kho:</p>'
+    +'<p class="r it" style="margin-right:20pt">'+dt+'</p>'
+    +'<table class="s"><tr><td><b>Tổng giám đốc</b></td><td><b>Phụ trách Phòng Kế toán</b></td><td><b>Kế toán thanh toán</b></td><td><b>Quản lý khoa/phòng</b></td><td><b>Người dự trù</b></td></tr>'
+    +'<tr><td class="sp"></td><td></td><td></td><td></td><td></td></tr><tr><td>'+e(C.tgd)+'</td><td></td><td>'+e(C.ktt)+'</td><td>'+e(C.ql)+'</td><td>'+e(payNguoiLap())+'</td></tr></table>'
+    +'<p class="r it" style="margin:14pt 20pt 0 0">'+dt+'</p><table class="s"><tr><td></td><td></td><td><b>Thủ Quỹ</b></td><td><b>Người nhận tiền</b></td><td></td></tr></table></div>';
+}
+function payPrintBk(g){
+  var e=esc,s=[0,0,0],r=g.rows.map(function(x,i){
+    s[0]+=x.pre;s[1]+=x.vat;s[2]+=x.tong;
+    return '<tr><td class="c">'+(i+1)+'</td><td class="c">'+e(x.r[2])+'</td><td></td><td class="c">'+payDs(x.d)+'</td><td class="r">'+payF(x.pre)+'</td><td class="r">'+payF(x.vat)+'</td><td class="r">'+payF(x.tong)+'</td></tr>';
+  }).join("");
+  return '<div class="pg"><div class="hd"><b>MEDDENTAL</b></div><div class="t">BẢNG KÊ HÓA ĐƠN</div>'
+    +'<p style="font-size:11pt"><b>Nhà cung cấp: '+e(g.full)+'</b></p><p class="it" style="font-size:10pt">Kỳ thanh toán: tháng '+g.thang+'/'+g.nam+'  |  Đơn vị tính: VNĐ</p>'
+    +'<table class="k"><tr><th>STT</th><th>Số hóa đơn</th><th>Ký hiệu</th><th>Ngày HĐ</th><th>Giá trị trước VAT</th><th>Thuế GTGT</th><th>Tổng tiền</th></tr>'+r
+    +'<tr><td colspan="4" class="c"><b>TỔNG CỘNG</b></td><td class="r"><b>'+payF(s[0])+'</b></td><td class="r"><b>'+payF(s[1])+'</b></td><td class="r"><b>'+payF(s[2])+'</b></td></tr></table>'
+    +'<p><b>Tổng số HĐ: &nbsp; '+g.rows.length+' hóa đơn</b></p></div>';
+}
+function payPrintOpen(L,title){
+  var h='<!doctype html><html><head><meta charset="utf-8"><title>'+esc(title)+'</title><style>'+PAY_PCSS+'</style></head><body>'
+    +L.map(function(g){return payPrintDn(g)+payPrintBk(g);}).join("")+'</body></html>';
+  printPreviewHtml(h);
+}
+
+/* ----- File Excel mẫu để nhập dữ liệu ----- */
+function payTpl(){
+  var wb=new ExcelJS.Workbook(),thin={style:"thin"},bd={top:thin,left:thin,bottom:thin,right:thin};
+  var hdr=function(ws,row,cols,color){cols.forEach(function(t,j){var c=ws.getCell(row,j+1);c.value=t;c.font=payFont({bold:true,color:{argb:"FFFFFFFF"}});c.fill={type:"pattern",pattern:"solid",fgColor:{argb:color}};c.border=bd;c.alignment={horizontal:"center",vertical:"middle",wrapText:true};});ws.getRow(row).height=30;};
+  var note=function(ws,t,n){ws.mergeCells(1,1,1,n);var c=ws.getCell(1,1);c.value=t;c.font=payFont({bold:true,size:11,color:{argb:"FFC00000"}});c.alignment={wrapText:true,vertical:"middle"};ws.getRow(1).height=34;};
+  var hd=wb.addWorksheet("HUONG DAN");hd.getColumn(1).width=110;
+  ["HƯỚNG DẪN NHẬP DỮ LIỆU — ĐỀ NGHỊ THANH TOÁN NCC","",
+   "1. Giữ nguyên tên 3 sheet và dòng tiêu đề (xanh). Xóa các dòng MẪU rồi dán dữ liệu thật từ dòng ngay dưới tiêu đề. Dán giá trị, không dán công thức.",
+   "2. DANH MUC NCC: mỗi NCC 1 dòng. Cột STK để dạng Text để không mất số 0 đầu. NCC thiếu STK vẫn đối chiếu được nhưng phiếu để trống ô STK.",
+   "3. MUA_HANG: dữ liệu phiếu nhập/mua từ phần mềm kế toán. Cột 'Nhà cung cấp' phải GIỐNG 'Tên đầy đủ' hoặc 'Tên đối chiếu' trong DANH MUC NCC (không phân biệt hoa thường, dấu cách).",
+   "4. HOA_DON_MISA: danh sách hóa đơn từ MISA. Số HĐ ở 2 sheet được so theo số (00003324 = 3324). Cột Thuế GTGT có thể để trống nếu HĐ không chịu thuế.",
+   "5. Mã cơ sở lấy từ Số chứng từ dạng NK-<mã>-… (ND, BTX, CL, LVL, QN, HO). Có thể gõ thêm cột 'Mã cơ sở' ở MUA_HANG nếu số chứng từ không đúng dạng.",
+   "6. Dòng hóa đơn 0 đồng vẫn nhập bình thường (app đếm vào số HĐ như file Excel cũ).",
+   "7. Vào app → Biểu mẫu → Đề nghị thanh toán NCC → Chọn file Excel."].forEach(function(t,i){var c=hd.getCell(i+1,1);c.value=t;c.font=payFont({bold:i===0,size:i===0?14:11});c.alignment={wrapText:true,vertical:"top"};});
+  var d=wb.addWorksheet("DANH MUC NCC");[6,26,48,22,34,22,26,48].forEach(function(w,i){d.getColumn(i+1).width=w;});
+  note(d,"DANH MỤC NHÀ CUNG CẤP — xóa dòng MẪU rồi nhập thật",8);
+  hdr(d,2,["STT","Tên gọi tắt (chọn trên form)","Tên đầy đủ / Người thụ hưởng","Số tài khoản","Ngân hàng","Chi nhánh","Ghi chú","Tên đối chiếu (Map_NCC)"],"FF1F4E79");
+  [[1,"VÍ DỤ A (MẪU)","CÔNG TY TNHH VÍ DỤ A","0123456789","Vietcombank","Thành Công","","CÔNG TY TNHH VÍ DỤ A"],[2,"VÍ DỤ B (MẪU)","CÔNG TY CỔ PHẦN VÍ DỤ B","","","","Thiếu STK - cần bổ sung","CÔNG TY CỔ PHẦN VÍ DỤ B"]].forEach(function(r,i){r.forEach(function(v,j){var c=d.getCell(3+i,j+1);c.value=v;c.font=payFont({italic:true,color:{argb:"FF7F7F7F"}});c.border=bd;if(j===3)c.numFmt="@";});});
+  var m=wb.addWorksheet("MUA_HANG");[6,14,18,14,48,18,18,12].forEach(function(w,i){m.getColumn(i+1).width=w;});
+  note(m,"① MUA HÀNG — xóa dòng MẪU từ dòng 4 rồi dán dữ liệu thật vào các cột A–G (cột H 'Mã cơ sở' không bắt buộc)",8);
+  hdr(m,3,["STT","Ngày hạch toán","Số chứng từ","Số hóa đơn","Nhà cung cấp","Tổng tiền thanh toán","Giá trị nhập kho","Mã cơ sở"],"FFBF9000");
+  var dm=function(day){return new Date(2026,9,day);};
+  [[1,dm(2),"NK-ND-10-001","00001001","CÔNG TY TNHH VÍ DỤ A",5500000,5000000,""],[2,dm(5),"NK-CL-10-002","00001002","CÔNG TY TNHH VÍ DỤ A",3000000,3000000,""],[3,dm(8),"NK-QN-10-003","00002001","CÔNG TY CỔ PHẦN VÍ DỤ B",1200000,1200000,""]].forEach(function(r,i){r.forEach(function(v,j){var c=m.getCell(4+i,j+1);c.value=v;c.font=payFont({italic:true,color:{argb:"FF7F7F7F"}});c.border=bd;if(j===1)c.numFmt="dd/mm/yyyy";if(j===5||j===6)c.numFmt="#,##0";});});
+  var h=wb.addWorksheet("HOA_DON_MISA");[14,18,14,48,20,18,20].forEach(function(w,i){h.getColumn(i+1).width=w;});
+  note(h,"② HÓA ĐƠN MISA — xóa dòng MẪU từ dòng 4 rồi dán dữ liệu thật vào các cột A–G",7);
+  hdr(h,3,["Ngày hạch toán","Số chứng từ","Số hóa đơn","Nhà cung cấp","Giá trị hóa đơn (VND)","Thuế GTGT (VND)","Tổng tiền thanh toán"],"FFBF9000");
+  [[dm(2),"NK-ND-10-001","1001","CÔNG TY TNHH VÍ DỤ A",5000000,500000,5500000],[dm(5),"NK-CL-10-002","1002","CÔNG TY TNHH VÍ DỤ A",3000000,0,3000000],[dm(8),"NK-QN-10-003","2001","CÔNG TY CỔ PHẦN VÍ DỤ B",1200000,0,1200000]].forEach(function(r,i){r.forEach(function(v,j){var c=h.getCell(4+i,j+1);c.value=v;c.font=payFont({italic:true,color:{argb:"FF7F7F7F"}});c.border=bd;if(j===0)c.numFmt="dd/mm/yyyy";if(j>=4)c.numFmt="#,##0";});});
+  return wb;
+}
 Object.assign(A,{
+  payTemplate:function(){if(!payNeed())return;payOut(payTpl(),"Mau_DeNghiThanhToan_NhapLieu.xlsx");},
   payFile:function(inp){
     var f=inp.files&&inp.files[0];if(!f)return;
     if(typeof XLSX==="undefined"){toast("Chưa tải được thư viện Excel — kiểm tra mạng");return;}
@@ -8696,6 +8799,17 @@ Object.assign(A,{
   paySearch:function(v){PAY.q=v;var el=document.getElementById("paylist");if(el)el.innerHTML=payListHtml(payCompute());},
   paySel:function(k){PAY.sel=k||"";renderPay();window.scrollTo(0,0);},
   payCfg:function(k,v){payDb().cfg[k]=v;saveSoon();},
+  payPrintOne:function(key){
+    var g=payCompute().filter(function(x){return x.key===key;})[0];if(!g)return;
+    payPrintOpen([g],"DNTT_"+payAscii(g.short));
+  },
+  payPrintAll:function(){
+    var S=payCompute().filter(function(g){return g.khop;});
+    if(!S.length){toast("Chưa có NCC nào khớp công nợ để in");return;}
+    var ns=S.filter(function(g){return !g.stk;}).length;
+    payPrintOpen(S,"DNTT_NCC_khop");
+    if(ns)toast(ns+" NCC thiếu số tài khoản — ô STK trên phiếu để trống");
+  },
   payXlsxOne:function(key){
     if(!payNeed())return;
     var g=payCompute().filter(function(x){return x.key===key;})[0];if(!g)return;
@@ -8722,6 +8836,18 @@ Object.assign(A,{
   }
 });
 
+Object.assign(A,{
+  rcClr:function(){RC.cs="Tất cả";RC.th="Tất cả";RC.lim=40;renderRecon();},
+  rcGoList:function(side){RC.tab=1;RC.side=side;RC.only=1;RC.q="";RC.lim=40;renderRecon();window.scrollTo(0,0);},
+  rcSearch:function(v){
+    RC.q=v;RC.lim=40;clearTimeout(A._rcT);
+    A._rcT=setTimeout(function(){
+      var L=document.getElementById("rclist");if(!L||RC.tab!==1)return;
+      var q=rcK(RC.q),c=document.getElementById("rcchips");
+      L.innerHTML=rcListBody(RC.side,q);if(c)c.innerHTML=rcChipsHtml(RC.side,q);
+    },220);
+  }
+});
 </script>
 </body>
 </html>
