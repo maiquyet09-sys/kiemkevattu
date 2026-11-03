@@ -669,6 +669,7 @@ body{background:var(--bg)}
 .rchero .l,.rcmini .l{font-size:12px;color:var(--mut)}.rchero .big{font-size:30px;font-weight:800;line-height:1.1}
 .rcbarp{height:8px;border-radius:99px;background:#e9edf5;margin:10px 0 6px;overflow:hidden}.rcbarp i{display:block;height:100%;border-radius:99px}
 .rchero-s{font-size:12px;color:var(--mut)}
+.rcmini-b{cursor:pointer;position:relative;-webkit-tap-highlight-color:transparent}.rcmini-b:active{background:var(--card2)}.rcmini-b:after{content:'›';position:absolute;right:12px;top:8px;color:var(--mut2);font-size:20px;line-height:1}
 .rcmini-g{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px}.rcmini{background:#fff;border:1px solid var(--line);border-radius:14px;padding:10px 12px}.rcmini .v{font-size:16px;font-weight:800}
 /* Bộ lọc Cơ sở / Tháng + phạm vi xuất file */
 .rcscope{background:#fff;border:1px solid var(--line);border-radius:16px;padding:10px 12px 12px;margin-bottom:12px}
@@ -7240,7 +7241,7 @@ function rcBadge(t){var c=/KHỚP|OK|✓|Hợp lệ|Khớp/.test(t)?"green":/CH�
 /* ===== V8 · Đối chiếu 2 bên ===== */
 var RC_GRP=[["Tổng quan",[0]],["Đối chiếu",[1,5]],["Dữ liệu",[4,2]],["Cấu hình",[3]]];
 var RC_SUBN={1:"Ca lệch",5:"Phụ lục 01",4:"Nhập / Xuất file",2:"Kiểm tra dữ liệu"};
-var RC_ONLY=[[1,"Chưa duyệt"],[0,"Tất cả lệch"],[3,"Cần xem lại"],[2,"Tất cả dòng"]];
+var RC_ONLY=[[1,"Chưa duyệt"],[0,"Tất cả lệch"],[4,"Đã duyệt hợp lệ"],[3,"Cần xem lại"],[2,"Tất cả dòng"]];
 function rcQ(n){n=Math.round((+n||0)*1000)/1000;return String(n);}
 function rcSgn(n){n=Math.round((+n||0)*1000)/1000;return n>0?"+"+n:n<0?"−"+Math.abs(n):"0";}
 function rcSgnF(n){n=Math.round(n||0);return n>0?"+"+rcF(n):n<0?"−"+rcF(-n):"0";}
@@ -7338,15 +7339,16 @@ function renderRecon(){
 function rcViewSum(){
   var s=rcSum(),Z=RC_RES,h=rcFilter(),n=s.F.length,need=s.needD.length+s.needX.length,pct=n?(s.ok/n*100):0;
   var col=pct>=95?"green":pct>=80?"amber":"red";
-  function mini(l,v,c){return '<div class="rcmini"><div class="l">'+l+'</div><div class="v tnum"'+(c?' style="color:var(--'+c+')"':'')+'>'+v+'</div></div>';}
+  function mini(l,v,c,go){return '<div class="rcmini'+(go?' rcmini-b':'')+'"'+(go?' role="button" onclick="A.rcTile('+go+')"':'')+'><div class="l">'+l+'</div><div class="v tnum"'+(c?' style="color:var(--'+c+')"':'')+'>'+v+'</div></div>';}
   h+='<div class="card rchero"><div class="rchero-t"><div><div class="l">Tỷ lệ khớp</div><div class="big tnum" style="color:var(--'+col+')">'+(n?pct.toFixed(1)+'%':'–')+'</div></div>'
     +'<div style="text-align:right"><div class="l">Cần xử lý</div><div class="big tnum" style="color:var(--'+(need?'red':'green')+')">'+need+'</div></div></div>'
     +'<div class="rcbarp"><i style="width:'+pct.toFixed(1)+'%;background:var(--'+col+')"></i></div>'
     +'<div class="rchero-s">'+n+' lượt đối chiếu · '+s.ok+' khớp · '+s.apprD+' đã duyệt hợp lệ</div>'
     +(need?'<div class="rcact" style="margin:10px 0 0"><button class="btn btn-primary" onclick="A.rcGoList(0)">Ca doanh thu lệch ('+s.needD.length+')</button><button class="btn btn-outline" onclick="A.rcGoList(1)">Phiếu xuất lệch ('+s.needX.length+')</button></div>':'<div style="margin-top:8px;color:var(--green);font-weight:700;font-size:13px">✓ Không còn ca nào cần xử lý</div>')+'</div>';
-  h+='<div class="rcmini-g">'+mini("Tổng doanh thu (VND)",rcF(s.rev))+mini("Giá trị xuất kho (VND)",rcF(s.val))
-    +mini("Ca cần xử lý (DT)",s.needD.length,s.needD.length?"red":"green")+mini("Phiếu xuất cần xử lý",s.needX.length,s.needX.length?"red":"green")
-    +mini("Phiếu xuất SAI VẬT TƯ",s.badVt,s.badVt?"red":"green")+mini("Ca đã duyệt – hợp lệ",s.apprD)+'</div>';
+  h+='<div class="rcmini-g">'+mini("Tổng doanh thu (VND)",rcF(s.rev),"","0,2,\'\'")+mini("Giá trị xuất kho (VND)",rcF(s.val),"","1,2,\'\'")
+    +mini("Ca cần xử lý (DT)",s.needD.length,s.needD.length?"red":"green","0,1,\'\'")+mini("Phiếu xuất cần xử lý",s.needX.length,s.needX.length?"red":"green","1,1,\'\'")
+    +mini("Phiếu xuất SAI VẬT TƯ",s.badVt,s.badVt?"red":"green","1,0,\'XUẤT SAI VẬT TƯ\'")+mini("Ca đã duyệt – hợp lệ",s.apprD,"","0,4,\'\'")+'</div>'
+    +'<div style="font-size:12px;color:var(--mut2);margin:-4px 0 12px">Chạm vào từng ô để xem chi tiết các ca.</div>';
   function cnt(a,f){return a.filter(f).length;}
   var st=[["KHỚP","DT"],["CHƯA XUẤT KHO","DT"],["XUẤT SAI VẬT TƯ","DT"],["XUẤT SAI SỐ LƯỢNG (THIẾU)","DT"],["XUẤT SAI SỐ LƯỢNG (THỪA)","DT"],["XUẤT CHƯA CÓ DOANH THU","XK"],["XUẤT SAI VẬT TƯ","XK"],["TRÙNG/THỪA XUẤT","XK"],["THIẾU MÃ KH","XK"]];
   h+=rcAcc("sum1","Phân loại trạng thái",rcTbl(["Trạng thái","Nguồn","Số lượt"],st.map(function(t){var c=t[1]==="DT"?cnt(s.F,function(o){return o.T===t[0];}):cnt(s.X,function(x){return x.P.indexOf(t[0])===0;});return [rcBadge(t[0]),t[1],c];}),2),1);
@@ -7366,8 +7368,8 @@ function rcViewSum(){
 function rcSelN(side,j,k,opts,cur){return '<select class="inp" onchange="A.rcNote('+side+','+j+','+k+',this.value)">'+opts.map(function(o,i){return '<option value="'+(i?esc(o):'')+'"'+(o===cur?' selected':'')+'>'+esc(o)+'</option>';}).join('')+'</select>';}
 function rcListRows(side,only,q){
   var Z=RC_RES,R=rcDb();
-  var base=only==2?(side==0?Z.dt:Z.xk):(side==0?Z.dt.filter(function(o){return o.first&&o.bad;}):Z.xk.filter(function(x){return x.bad;}));
-  return base.filter(function(o){return rcIn(o)&&(only!=1||o.need)&&(only!=3||(R.notes[o.nid]&&R.notes[o.nid].chg))&&(!q||rcK(JSON.stringify(o.r)+" "+o.pid+" "+(o.ten||"")+" "+(o.vt||"")+" "+(o.P||"")+" "+(o.T||"")+" "+(o.why||"")).indexOf(q)>=0);});
+  var base=only==2?(side==0?Z.dt:Z.xk):only==4?(side==0?Z.dt.filter(function(o){return o.first;}):Z.xk):(side==0?Z.dt.filter(function(o){return o.first&&o.bad;}):Z.xk.filter(function(x){return x.bad;}));
+  return base.filter(function(o){return rcIn(o)&&(only!=1||o.need)&&(only!=4||o.ok)&&(only!=3||(R.notes[o.nid]&&R.notes[o.nid].chg))&&(!q||rcK(JSON.stringify(o.r)+" "+o.pid+" "+(o.ten||"")+" "+(o.vt||"")+" "+(o.P||"")+" "+(o.T||"")+" "+(o.why||"")).indexOf(q)>=0);});
 }
 function rcChipsHtml(side,q){
   return RC_ONLY.map(function(p){return '<button class="rcchip'+(RC.only==p[0]?' on':'')+'" onclick="A.rcS(4,'+p[0]+')">'+p[1]+' <b>'+rcListRows(side,p[0],q).length+'</b></button>';}).join('');
@@ -7398,7 +7400,7 @@ function rcListBody(side,q){
   return h;
 }
 function rcViewList(){
-  var h=rcFilter(),side=RC.side,q=rcK(RC.q);
+  var h=(RC.from?'<button class="btn btn-outline" style="margin-bottom:10px" onclick="A.rcBackSum()">‹ Về Tổng quan</button>':'')+rcFilter(),side=RC.side,q=rcK(RC.q);
   h+='<div class="rcsubnav"><button class="'+(side==0?'on':'')+'" onclick="A.rcS(3,0)">Doanh thu → xuất kho</button><button class="'+(side==1?'on':'')+'" onclick="A.rcS(3,1)">Xuất kho → doanh thu</button></div>';
   h+='<input class="inp" id="rcq" type="search" placeholder="Tìm PID, khách hàng, vật tư, số CT…" value="'+esc(RC.q)+'" oninput="A.rcSearch(this.value)" style="margin-bottom:10px">';
   h+='<div class="rcchips" id="rcchips">'+rcChipsHtml(side,q)+'</div>';
@@ -7775,7 +7777,9 @@ function rcRows(wb,name){var ws=wb.Sheets[name]||wb.Sheets[wb.SheetNames[0]];ret
 function rcWbOut(wb,fname){shareOrDownload(new Blob([XLSX.write(wb,{bookType:"xlsx",type:"array"})],{type:"application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"}),fname);}
 function rcWs(aoa,w){var ws=XLSX.utils.aoa_to_sheet(aoa);ws["!cols"]=w.map(function(x){return {wch:x};});return ws;}
 Object.assign(A,{
-  rcTab:function(i){RC.tab=i;RC.lim=40;RC.q="";renderRecon();window.scrollTo(0,0);},
+  rcTab:function(i){RC.tab=i;RC.lim=40;RC.q="";RC.from=0;renderRecon();window.scrollTo(0,0);},
+  rcTile:function(side,only,q){RC.tab=1;RC.side=side;RC.only=only;RC.q=q||"";RC.lim=40;RC.from=1;renderRecon();window.scrollTo(0,0);},
+  rcBackSum:function(){RC.tab=0;RC.from=0;RC.q="";renderRecon();window.scrollTo(0,0);},
   rcS:function(k,v){RC[RC_KEYS[k]]=(k===3||k===4)?+v:v;RC.lim=40;if(k===6)RC.q="";renderRecon();},
   rcMore:function(){RC.lim+=40;renderRecon();},
   rcOpt:function(k,v){var R=rcDb();R.opt[k]=v?1:0;audit("recon-opt",k,null,R.opt[k]);saveSoon();renderRecon();},
@@ -9009,7 +9013,7 @@ Object.assign(A,{
 
 Object.assign(A,{
   rcClr:function(){RC.cs="Tất cả";RC.th="Tất cả";RC.lim=40;renderRecon();},
-  rcGoList:function(side){RC.tab=1;RC.side=side;RC.only=1;RC.q="";RC.lim=40;renderRecon();window.scrollTo(0,0);},
+  rcGoList:function(side){RC.tab=1;RC.side=side;RC.only=1;RC.q="";RC.lim=40;RC.from=1;renderRecon();window.scrollTo(0,0);},
   rcSearch:function(v){
     RC.q=v;RC.lim=40;clearTimeout(A._rcT);
     A._rcT=setTimeout(function(){
