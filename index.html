@@ -2,7 +2,7 @@
 <html lang="vi">
 <head>
 <meta charset="UTF-8">
-<meta name="app-version" content="2026110306">
+<meta name="app-version" content="2026110307">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
 <meta name="theme-color" content="#eef3fb">
 <link rel="manifest" href="manifest.webmanifest">
@@ -8606,15 +8606,42 @@ function payNoteRow(gk,i){var g=payCompute().filter(function(z){return z.key===g
 function payNoteMut(gk,i,fn){
   var r=payNoteRow(gk,i);if(!r)return false;
   var P=payDb(),k=payNKey(r),n=P.notes[k];
-  if(!n){var c=payNoteGet(r);n={t:[],x:c&&c.imp?c.x:"",at:0};}
+  if(!n){var c=payNoteGet(r);n={t:[],x:c&&c.imp?c.x:"",ok:0,at:0};}
   fn(n);n.at=Date.now();
-  if(!n.t.length&&!String(n.x||"").trim()&&!r[9])delete P.notes[k];else P.notes[k]=n;
+  if(!n.t.length&&!String(n.x||"").trim()&&!r[9]&&!n.ok)delete P.notes[k];else P.notes[k]=n;
   saveSoon();return true;
 }
+function payOkGet(r){var m=payDb().notes[payNKey(r)];return !!(m&&m.ok&&!((m.t&&m.t.length)||String(m.x||"").trim()));}
+var PAY_CSN={ND:"nghia dung",BTX:"bui thi xuan",CL:"cat linh",LVL:"le van luong",QN:"quang ninh",HO:"van phong tru so"};
+function payRowHay(x,g){
+  var r=x.r,cs=r[7]||"",nt=x.note?payNoteErrs(x.note).map(function(z){return z.d;}).join(" "):"";
+  return norm([g.short,g.full,r[1],r[2],r[6],payDs(r[0]),payDs(x.d),cs,PAY_CSN[cs]||"",r[3],r[8],Math.round(r[4]||0),payF(r[4]),Math.round(r[5]||0),payF(r[5]),x.h?x.h[2]:"",nt,x.note?"thieu chung tu loi ghi chu":(payOkGet(r)?"chung tu du":"")].join(" "));
+}
+function payHits(L,q){
+  var T=norm(q).split(" ").filter(Boolean),o=[];
+  L.forEach(function(g){g.rows.forEach(function(x,i){
+    var hay=payRowHay(x,g);
+    if(T.every(function(t){var d=/^[\d.,]+$/.test(t)?t.replace(/[.,]/g,""):"";return hay.indexOf(t)>=0||(d&&hay.indexOf(d)>=0);}))o.push({g:g,x:x,i:i});
+  });});
+  return o;
+}
+function payHitHtml(z){
+  var g=z.g,x=z.x,i=z.i,r=x.r,gk=g.key,open=PAY.ed===gk+"#"+i,nt=x.note,er=nt?payNoteErrs(nt):[],ok=payOkGet(r),s=PAY_ST[x.st];
+  var bs="padding:9px;font-size:13px;margin:0;";
+  return '<div class="card" style="margin-bottom:10px"><div style="display:flex;gap:10px;align-items:flex-start"><div style="flex:1;min-width:0"><div style="font-weight:700;font-size:14px;word-break:break-word">'+esc(g.short)+'</div>'
+    +'<div style="font-size:12px;color:var(--mut);word-break:break-word">Phiếu '+esc(r[1]||"—")+' · HĐ '+esc(r[2]||r[6]||"—")+'</div><div style="font-size:12px;color:var(--mut)">'+(payDs(x.d)||"—")+' · CS '+esc(r[7]||"?")+'</div></div>'
+    +'<div style="text-align:right;flex:none"><div style="font-weight:800;font-variant-numeric:tabular-nums">'+payF(x.tong)+'</div><div style="margin-top:4px">'+(x.st==="ok"?payTag("Khớp","green"):payTag(s[0],s[1]))+'</div></div></div>'
+    +'<div style="margin-top:10px;padding-top:10px;border-top:1px solid var(--line)"><div style="font-size:11px;font-weight:700;color:var(--mut2);margin-bottom:6px">CHỨNG TỪ</div>'
+    +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px"><button class="btn btn-outline" style="'+bs+(ok?'background:var(--green);border-color:var(--green);color:#fff':'')+'" onclick="A.payCdOk(\''+gk+'\','+i+')">✔ Chứng từ đủ</button>'
+    +'<button class="btn btn-outline" style="'+bs+(er.length?'background:var(--red);border-color:var(--red);color:#fff':'')+'" onclick="A.payCdMiss(\''+gk+'\','+i+')">✖ Thiếu chứng từ</button></div>'
+    +(er.length?'<div style="margin-top:8px;color:var(--orange);font-weight:600;font-size:12.5px">⚠ '+esc(er.map(function(q){return q.d;}).filter(function(v,j,a){return a.indexOf(v)===j;}).join("; "))+(nt.imp?' <span style="font-weight:400;color:var(--mut2)">(từ file Excel)</span>':'')+'</div>':'')
+    +(er.length&&!open?'<button style="border:none;background:none;padding:4px 0 0;font:inherit;font-size:12px;font-weight:700;color:var(--teal);cursor:pointer" onclick="A.payNoteEd(\''+gk+'\','+i+')">✎ Sửa ghi chú</button>':'')
+    +(open?payNoteEdHtml(gk,i,nt,"8px 0 0 0"):'')+'</div></div>';
+}
 function payKeep(){var y=window.scrollY;renderPay();window.scrollTo(0,y);}
-function payNoteEdHtml(gk,i,n){
+function payNoteEdHtml(gk,i,n,mg){
   var T=(n&&n.t)||[],X=(n&&n.x)||"";
-  return '<div style="margin:8px 0 2px 30px;padding:10px;background:var(--card2);border-radius:10px">'
+  return '<div style="margin:'+(mg||"8px 0 2px 30px")+';padding:10px;background:var(--card2);border-radius:10px">'
     +'<div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px">'+PAY_LOI.map(function(t,ti){return '<button class="rcchip'+(T.indexOf(t)>=0?' on':'')+'" onclick="A.payNoteTag(\''+gk+'\','+i+','+ti+')">'+esc(t)+'</button>';}).join("")+'</div>'
     +'<input class="inp" style="margin-bottom:8px" placeholder="Ghi chú thêm (vd: thiếu PNK ngày 12/10)…" value="'+esc(X)+'" oninput="A.payNoteTxt(\''+gk+'\','+i+',this.value)">'
     +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px"><button class="btn btn-outline" style="padding:8px;font-size:13px;margin:0" onclick="A.payNoteClr(\''+gk+'\','+i+')">Xóa ghi chú</button><button class="btn btn-primary" style="padding:8px;font-size:13px;margin:0" onclick="A.payNoteEd()">Xong</button></div></div>';
@@ -8667,11 +8694,11 @@ function payHomeHtml(){
   var cnt={all:L.length,ok:0,bad:0,stk:0,note:0};
   L.forEach(function(g){if(g.khop)cnt.ok++;if(g.bad)cnt.bad++;if(!g.stk&&g.chot>0)cnt.stk++;if(g.nNote)cnt.note++;});
   h+='<div class="rcchips">'+[["all","Tất cả"],["ok","Khớp"],["bad","Lệch"],["stk","Thiếu STK"],["note","Có ghi chú lỗi"]].map(function(f){return '<button class="rcchip'+(PAY.f===f[0]?' on':'')+'" onclick="A.payFilter(\''+f[0]+'\')">'+f[1]+'<b>'+cnt[f[0]]+'</b></button>';}).join("")+'</div>';
-  h+='<input class="inp" style="margin-bottom:12px" placeholder="Tìm nhà cung cấp…" value="'+esc(PAY.q)+'" oninput="A.paySearch(this.value)">';
+  h+='<input class="inp" style="margin-bottom:12px" placeholder="Tìm NCC, số HĐ, số phiếu, số tiền, cơ sở…" value="'+esc(PAY.q)+'" oninput="A.paySearch(this.value)">';
   h+='<div id="paylist">'+payListHtml(L)+'</div>';
   return h;
 }
-function payListHtml(L){
+function payNccListHtml(L){
   var q=payK(PAY.q),h='';
   L.filter(function(g){
     if(PAY.f==="ok"&&!g.khop)return false;if(PAY.f==="bad"&&!g.bad)return false;if(PAY.f==="stk"&&!(!g.stk&&g.chot>0))return false;if(PAY.f==="note"&&!g.nNote)return false;
@@ -8682,7 +8709,15 @@ function payListHtml(L){
       +'<div style="text-align:right;flex:none"><div style="font-weight:800;font-variant-numeric:tabular-nums">'+payF(g.tong)+'</div><div style="font-size:11px;color:var(--mut)">'+g.rows.length+' HĐ</div></div></div>'
       +'<div style="display:flex;flex-wrap:wrap;gap:6px;margin-top:8px">'+st+(g.chot>0?payTag(g.pri,"sky"):"")+(g.stk?"":payTag("Thiếu STK","red"))+(g.nNote?payTag("Ghi chú lỗi · "+g.nNote,"orange"):"")+'</div></div>';
   });
-  return h||'<div class="card" style="color:var(--mut);text-align:center">Không có nhà cung cấp phù hợp</div>';
+  return h;
+}
+function payListHtml(L){
+  var h=payNccListHtml(L),qs=String(PAY.q||"").trim(),H=qs.length>=2?payHits(L,qs):[],lim=40;
+  if(H.length){
+    h+='<div style="font-size:12.5px;font-weight:800;margin:14px 2px 8px">Phiếu mua khớp “'+esc(qs)+'” · '+H.length+'</div>'+H.slice(0,lim).map(payHitHtml).join("");
+    if(H.length>lim)h+='<div class="card" style="color:var(--mut);text-align:center;font-size:13px">Còn '+(H.length-lim)+' phiếu — gõ thêm ký tự để thu hẹp</div>';
+  }
+  return h||'<div class="card" style="color:var(--mut);text-align:center">Không tìm thấy NCC hoặc phiếu mua phù hợp</div>';
 }
 /* ----- Rà soát lỗi nhập liệu → báo cơ sở qua Zalo ----- */
 var PAY_ZALO_MAX=1800;
@@ -8783,6 +8818,7 @@ function payDetailHtml(key){
     var s=PAY_ST[x.st],ek=key+"#"+i,open=PAY.ed===ek,nt=x.note,er=nt?payNoteErrs(nt):[];
     h+='<div style="padding:7px 0;border-top:1px solid var(--line);font-size:12.5px"><div style="display:flex;gap:8px;align-items:center"><div style="flex:0 0 22px;color:var(--mut2)">'+(i+1)+'</div><div style="flex:1"><b>'+esc(x.r[2])+'</b><div style="color:var(--mut);font-size:11px">'+payDs(x.d)+' · '+esc(x.r[7]||"?")+'</div></div><div style="text-align:right"><div style="font-variant-numeric:tabular-nums">'+payF(x.tong)+'</div>'+(x.st==="ok"?"":payTag(s[0],s[1]))+'</div></div>'
       +(er.length?'<div style="margin:4px 0 0 30px;color:var(--orange);font-weight:600;font-size:12px">⚠ '+esc(er.map(function(z){return z.d;}).filter(function(v,j,a){return a.indexOf(v)===j;}).join("; "))+(nt.imp?' <span style="font-weight:400;color:var(--mut2)">(từ file Excel)</span>':'')+'</div>':'')
+      +(!er.length&&payOkGet(x.r)?'<div style="margin:4px 0 0 30px;color:var(--green);font-weight:600;font-size:12px">✔ Chứng từ đủ</div>':'')
       +'<div style="margin:4px 0 0 30px"><button style="border:none;background:none;padding:2px 0;font:inherit;font-size:12px;font-weight:700;color:var(--teal);cursor:pointer" onclick="A.payNoteEd(\''+key+'\','+i+')">'+(open?'▾ Đóng':'✎ '+(er.length?'Sửa ghi chú lỗi':'Ghi lỗi cơ sở'))+'</button></div>'
       +(open?payNoteEdHtml(key,i,nt):'')+'</div>';
   });
@@ -9052,9 +9088,11 @@ function payAddErr(wb,E){
   return ws;
 }
 Object.assign(A,{
+  payCdOk:function(gk,i){var r=payNoteRow(gk,i);if(!r)return;payDb().notes[payNKey(r)]={t:[],x:"",ok:1,at:Date.now()};saveSoon();PAY.ed="";payKeep();},
+  payCdMiss:function(gk,i){payNoteMut(gk,i,function(n){n.ok=0;if(!n.t.length&&!String(n.x||"").trim())n.t.push("Thiếu chứng từ/chữ ký");});PAY.ed=gk+"#"+i;payKeep();},
   payNoteEd:function(gk,i){var k=gk?gk+"#"+i:"";PAY.ed=(k&&PAY.ed!==k)?k:"";payKeep();},
-  payNoteTag:function(gk,i,ti){var t=PAY_LOI[ti];if(!t)return;payNoteMut(gk,i,function(n){var x=n.t.indexOf(t);if(x>=0)n.t.splice(x,1);else n.t.push(t);});payKeep();},
-  payNoteTxt:function(gk,i,v){payNoteMut(gk,i,function(n){n.x=v;});},
+  payNoteTag:function(gk,i,ti){var t=PAY_LOI[ti];if(!t)return;payNoteMut(gk,i,function(n){var x=n.t.indexOf(t);if(x>=0)n.t.splice(x,1);else n.t.push(t);n.ok=0;});payKeep();},
+  payNoteTxt:function(gk,i,v){payNoteMut(gk,i,function(n){n.x=v;if(String(v||"").trim())n.ok=0;});},
   payNoteClr:function(gk,i){
     var r=payNoteRow(gk,i);if(!r)return;
     var P=payDb(),k=payNKey(r);if(r[9])P.notes[k]={t:[],x:"",at:Date.now()};else delete P.notes[k];
@@ -9088,7 +9126,7 @@ Object.assign(A,{
     rd.readAsArrayBuffer(f);
   },
   payFilter:function(f){PAY.f=f;renderPay();},
-  paySearch:function(v){PAY.q=v;var el=document.getElementById("paylist");if(el)el.innerHTML=payListHtml(payCompute());},
+  paySearch:function(v){PAY.q=v;clearTimeout(A._paT);A._paT=setTimeout(function(){var el=document.getElementById("paylist");if(el)el.innerHTML=payListHtml(payCompute());},180);},
   paySel:function(k){PAY.sel=k||"";renderPay();window.scrollTo(0,0);},
   payView:function(v){PAY.v=v||"";PAY.sel="";renderPay();window.scrollTo(0,0);},
   payErrCopy:function(bi,pi,share){
