@@ -2,8 +2,10 @@
 <html lang="vi">
 <head>
 <meta charset="UTF-8">
-<meta name="app-version" content="2026110401">
+<meta name="app-notes" content="Thông báo cập nhật rõ hơn; tối ưu nhập liệu và giao diện mobile/desktop">
+<meta name="app-version" content="2026110403">
 <meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light">
 <meta name="theme-color" content="#eef3fb">
 <meta name="robots" content="noindex,nofollow,noarchive">
 <link rel="manifest" href="manifest.webmanifest">
@@ -13,7 +15,8 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <title>Kiểm kê kho · MedDental</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" media="print" onload="this.media=\'all\'">
 <style>
 :root{
   --bg:#f3f5f9; --card:#ffffff; --card2:#f3f6fb; --ink:#101828; --mut:rgba(16,24,40,0.58); --mut2:rgba(16,24,40,0.38); --line:rgba(16,24,40,0.1);
@@ -740,6 +743,16 @@ body{background:var(--bg)}
 }
 @media(max-width:899px){.h2.h5{padding:10px 6px 10px 16px}.h2.h5 .h2art{max-width:104px}.h2.h5 .h2c{display:none}}
 </style>
+<style id="ux-opt">
+html{-webkit-text-size-adjust:100%}
+button,.btn,.chip,.gnav-item,select,label,[role=button]{touch-action:manipulation}
+:focus-visible{outline:2px solid var(--teal);outline-offset:2px}
+input:focus-visible,select:focus-visible,textarea:focus-visible{outline-offset:0}
+@media (pointer:coarse){.chip{min-height:40px}#ghmenu{width:44px;height:44px}.gnav-item{min-height:44px}}
+@media (hover:hover){.btn:hover{filter:brightness(1.06)}.chip:hover:not(.chip-on){border-color:var(--teal-ln);color:var(--teal)}.btn-dk:hover{background:rgba(255,255,255,.1)}[role=button]{cursor:pointer}*{scrollbar-width:thin}}
+#netbar{position:fixed;left:50%;transform:translateX(-50%);top:calc(var(--header-h) + 8px);z-index:90;background:#fdf1d6;color:#7a4f06;border:1px solid rgba(180,120,10,.28);border-radius:999px;padding:6px 14px;font-size:12.5px;font-weight:600;box-shadow:0 4px 14px rgba(0,0,0,.08);max-width:92vw;text-align:center}
+#netbar[hidden]{display:none}
+</style>
 </head>
 <body>
 <header id="gheader">
@@ -756,7 +769,7 @@ body{background:var(--bg)}
 <nav id="gdrawer"></nav>
 <div id="modal"></div>
 <nav id="bnav" aria-label="Điều hướng chính"></nav>
-<div id="toast"><div class="in" id="toastin"></div></div>
+<div id="toast" role="status" aria-live="polite"><div class="in" id="toastin"></div></div><div id="netbar" hidden>Đang ngoại tuyến · dữ liệu vẫn được lưu trên máy</div>
 
 <script>
 "use strict";
@@ -1479,9 +1492,9 @@ function hsdEntries(){
 }
 function toast(m){
   var el=document.getElementById("toastin");
-  el.textContent=m;el.classList.add("show");
+  el.textContent=m;el.classList.add("show");var _d=Math.max(2200,Math.min(6500,String(m).length*65));
   clearTimeout(toast._t);
-  toast._t=setTimeout(function(){el.classList.remove("show");},2200);
+  toast._t=setTimeout(function(){el.classList.remove("show");},_d);
 }
 
 /* ================= Trang chủ ================= */
@@ -6759,32 +6772,47 @@ Object.assign(A,{
 /* ================= Tự động kiểm tra bản mới ================= */
 var APP_VERSION=(document.querySelector&&document.querySelector('meta[name="app-version"]'))?document.querySelector('meta[name="app-version"]').content:'';
 var UPD_SHOWN=false;
-function showUpdateBanner(newVer){
-  if(UPD_SHOWN)return;
-  UPD_SHOWN=true;
+var UPD_LAST=0,UPD_SNOOZE=0,UPD_TOASTED='';
+function updFmt(v){var m=/^(\d{4})(\d{2})(\d{2})(\d{2})?$/.exec(v||'');return m?(m[3]+'/'+m[2]+'/'+m[1]+(m[4]?' · bản '+m[4]:'')):(v||'');}
+function showUpdateBanner(newVer,note){
+  if(Date.now()<UPD_SNOOZE||document.getElementById('updbanner'))return;
   var d=document.createElement('div');
-  d.id='updbanner';
-  d.style.cssText='position:fixed;top:0;left:0;right:0;z-index:200;background:#2f6fed;color:#fff;display:flex;align-items:center;justify-content:center;gap:12px;padding:10px 14px;font-size:14px;font-weight:600;box-shadow:0 2px 12px rgba(0,0,0,.2)';
-  d.innerHTML='<span>Có bản cập nhật mới</span>'
-    +'<button style="border:none;background:#fff;color:#2f6fed;font:inherit;font-weight:700;border-radius:999px;padding:6px 14px;cursor:pointer" onclick="reloadLatest(\''+newVer+'\')">Tải lại ngay</button>'
-    +'<button style="border:none;background:none;color:rgba(255,255,255,.8);font:inherit;cursor:pointer" onclick="document.getElementById(\'updbanner\').remove()">Để sau</button>';
+  d.id='updbanner';d.setAttribute('role','alert');
+  d.style.cssText='position:fixed;top:0;left:0;right:0;z-index:200;background:#2f6fed;color:#fff;display:flex;align-items:center;gap:10px;padding:calc(10px + env(safe-area-inset-top,0px)) 14px 10px;font-size:14px;font-weight:600;box-shadow:0 2px 12px rgba(0,0,0,.25)';
+  d.innerHTML='<span style="flex:1;min-width:0;line-height:1.3">Có bản cập nhật mới ('+esc(updFmt(newVer))+')'+(note?'<small style="display:block;font-weight:500;opacity:.9;margin-top:2px">'+esc(note)+'</small>':'')+'</span>'
+    +'<button id="updgo" style="flex:none;border:none;background:#fff;color:#2f6fed;font:inherit;font-weight:700;border-radius:999px;padding:8px 14px;cursor:pointer">Cập nhật ngay</button>'
+    +'<button id="updlater" style="flex:none;border:none;background:none;color:rgba(255,255,255,.85);font:inherit;padding:8px 4px;cursor:pointer">Để sau</button>';
   document.body.appendChild(d);
+  document.getElementById('updgo').onclick=function(){this.disabled=true;this.textContent='Đang cập nhật…';reloadLatest(newVer);};
+  document.getElementById('updlater').onclick=function(){UPD_SNOOZE=Date.now()+30*60*1000;d.remove();toast('Mình sẽ nhắc lại sau 30 phút');};
+  if(UPD_TOASTED!==newVer){UPD_TOASTED=newVer;try{toast('Có bản cập nhật mới — bấm "Cập nhật ngay"');}catch(e){}}
 }
 function reloadLatest(ver){
-  var base=location.href.split('#')[0].split('?')[0];
-  location.href=base+'?v='+encodeURIComponent(ver||Date.now());
+  var f;try{if(window.store&&store.flush)f=store.flush();}catch(e){}
+  var base=location.href.split('#')[0].split('?')[0],done=false;
+  function go(){if(done)return;done=true;location.replace(base+'?v='+encodeURIComponent(ver||Date.now()));}
+  setTimeout(go,2500);
+  var ps=[Promise.resolve(f).catch(function(){})];
+  try{
+    if(window.caches&&caches.keys)ps.push(caches.keys().then(function(ks){return Promise.all(ks.map(function(k){return caches.delete(k);}));}).catch(function(){}));
+    if(navigator.serviceWorker&&navigator.serviceWorker.getRegistrations)ps.push(navigator.serviceWorker.getRegistrations().then(function(rs){return Promise.all(rs.map(function(r){return r.unregister();}));}).catch(function(){}));
+  }catch(e){}
+  Promise.all(ps).then(function(){setTimeout(go,350);});
 }
-function checkForUpdate(){
-  if(!APP_VERSION||!window.fetch||location.protocol==='file:')return;
+function checkForUpdate(force){
+  if(!APP_VERSION||!window.fetch||location.protocol==='file:'||navigator.onLine===false)return;
+  var n=Date.now();if(force!==true&&n-UPD_LAST<30000)return;UPD_LAST=n;
   var base=location.href.split('#')[0].split('?')[0];
-  fetch(base+'?_='+Date.now(),{cache:'no-store'})
+  try{if(navigator.serviceWorker&&navigator.serviceWorker.getRegistration)navigator.serviceWorker.getRegistration().then(function(r){if(r)r.update().catch(function(){});}).catch(function(){});}catch(e){}
+  fetch(base+'?_='+n,{cache:'no-store'})
     .then(function(r){return r.ok?r.text():'';})
     .then(function(t){
       var m=t&&t.match(/<meta name="app-version" content="([^"]+)"/);
-      if(m&&m[1]!==APP_VERSION)showUpdateBanner(m[1]);
+      if(m&&m[1]!==APP_VERSION){var k=t.match(/<meta name="app-notes" content="([^"]*)"/);showUpdateBanner(m[1],k?k[1]:'');}
     })
     .catch(function(){});
 }
+(function(){try{var k='kk_ver_seen',o=localStorage.getItem(k);if(o&&o!==APP_VERSION)setTimeout(function(){toast('Đã cập nhật lên bản '+updFmt(APP_VERSION));},1500);localStorage.setItem(k,APP_VERSION);}catch(e){}})();
 try{if('serviceWorker' in navigator&&location.protocol==='https:')navigator.serviceWorker.register('sw.js').catch(function(){});}catch(e){}
 (function(){
   var oc=A.scClose;
@@ -6797,7 +6825,9 @@ try{if('serviceWorker' in navigator&&location.protocol==='https:')navigator.serv
   window.addEventListener('online',function(){toast('Đã có mạng trở lại');});
 })();
 setTimeout(checkForUpdate,4000);
-setInterval(checkForUpdate,5*60*1000);
+setInterval(checkForUpdate,2*60*1000);
+window.addEventListener('online',function(){checkForUpdate(true);});
+window.addEventListener('focus',function(){checkForUpdate();});
 document.addEventListener('visibilitychange',function(){if(document.visibilityState==='visible')checkForUpdate();});
 
 /* ================= UI v2 (theo mẫu MedDental: quét QR, danh sách, thông tin vật tư) ================= */
@@ -9883,6 +9913,62 @@ Object.assign(A,{
     },220);
   }
 });
+</script>
+<script id="ux-opt-js">
+(function(){
+"use strict";
+var D=document;
+/* 1. Lưới an toàn lỗi: không làm gián đoạn thao tác, luôn chốt dữ liệu */
+var lastErr=0;
+function safe(m){var n=Date.now();if(n-lastErr<8000)return;lastErr=n;try{if(window.store&&store.flush)store.flush();}catch(e){}try{toast(m);}catch(e){}}
+window.addEventListener('error',function(e){if(!e||!e.message||/ResizeObserver|Script error/i.test(e.message))return;console.error(e.error||e.message);safe('Có lỗi nhỏ xảy ra, dữ liệu của bạn vẫn được giữ nguyên.');});
+window.addEventListener('unhandledrejection',function(e){var r=e&&e.reason;if(r&&/AbortError|NotAllowedError|cancel/i.test(String(r.name||r)))return;console.error(r);safe('Tác vụ chưa hoàn tất, bạn thử lại nhé.');});
+/* 2. Trạng thái mạng */
+var nb=D.getElementById('netbar');
+function net(){if(nb)nb.hidden=navigator.onLine!==false;}
+window.addEventListener('offline',function(){net();});window.addEventListener('online',net);net();
+/* 3. Nhập liệu chính xác: chặn tự sửa chính tả/viết hoa mã vật tư, bàn phím phù hợp */
+function fixInputs(root){
+  root.querySelectorAll('input:not([data-ux])').forEach(function(i){
+    var t=(i.type||'text').toLowerCase();if(t!=='text'&&t!=='search'&&t!=='number'&&t!=='tel')return;
+    i.setAttribute('data-ux','1');
+    var m=i.getAttribute('inputmode')||'';
+    if(m==='decimal'||m==='numeric'||t==='number'){if(!i.hasAttribute('enterkeyhint'))i.setAttribute('enterkeyhint','done');}
+    else if(i.classList.contains('inp')||i.classList.contains('sinp')||/mã|tìm|quét|dãy số/i.test(i.placeholder||'')){
+      if(!i.hasAttribute('autocapitalize'))i.setAttribute('autocapitalize','off');
+      if(!i.hasAttribute('autocorrect'))i.setAttribute('autocorrect','off');
+      if(!i.hasAttribute('spellcheck'))i.spellcheck=false;
+      if(!i.hasAttribute('autocomplete'))i.setAttribute('autocomplete','off');
+    }
+  });
+}
+/* 4. Thân thiện bàn phím + trình đọc màn hình */
+function a11y(root){
+  root.querySelectorAll('[onclick]:not(button):not(a):not(input):not(select):not(textarea):not(label):not([role]):not([tabindex]):not(.ovl)').forEach(function(el){
+    if(el.querySelector('button,input,select,textarea,a'))return;
+    el.setAttribute('role','button');el.tabIndex=0;
+  });
+  root.querySelectorAll('button:not([aria-label])').forEach(function(b){
+    if(!b.textContent.trim()&&b.title)b.setAttribute('aria-label',b.title);
+  });
+}
+var hm=D.getElementById('ghmenu');if(hm&&!hm.getAttribute('aria-label'))hm.setAttribute('aria-label','Mở menu');
+D.addEventListener('keydown',function(e){
+  var t=e.target;if(t&&t.getAttribute&&t.getAttribute('role')==='button'&&(e.key==='Enter'||e.key===' ')){e.preventDefault();t.click();}
+});
+/* 5. Thao tác nhanh: chạm ô số lượng là chọn sẵn toàn bộ để gõ đè */
+D.addEventListener('focusin',function(e){
+  var t=e.target;if(!t||t.tagName!=='INPUT')return;
+  var m=t.getAttribute('inputmode');
+  if(m==='decimal'||m==='numeric'||t.type==='number')setTimeout(function(){try{t.select();}catch(x){}},0);
+});
+/* quét DOM gọn nhẹ, gộp theo khung hình */
+var q=false;
+function run(){q=false;fixInputs(D);a11y(D);}
+function sched(){if(q)return;q=true;(window.requestAnimationFrame||setTimeout)(run);}
+try{new MutationObserver(sched).observe(D.body,{childList:true,subtree:true});}catch(e){}
+run();
+})();
 </script>
 </body>
 </html>
