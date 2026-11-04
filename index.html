@@ -8863,10 +8863,16 @@ function paySheet(wb,names){
   return null;
 }
 /* ----- Đọc file Excel mẫu ----- */
-function payParse(wb){
+function payParse(wb,part,kind){
   var rd=function(ws){return XLSX.utils.sheet_to_json(ws,{header:1,raw:true,defval:null,blankrows:false});};
   var sN=paySheet(wb,["danh muc ncc"]),sM=paySheet(wb,["mua hang"]),sH=paySheet(wb,["hoa don misa"]);
-  if(!sM||!sH)throw new Error("Thiếu sheet MUA_HANG hoặc HOA_DON_MISA");
+  if(part){
+    if(kind===1&&!sM)sM=wb.Sheets[wb.SheetNames[0]];
+    if(kind===2&&!sH)sH=wb.Sheets[wb.SheetNames[0]];
+    if(kind===1)sH=null;
+    if(kind===2)sM=null;
+    if(!sM&&!sH)throw new Error("Không thấy sheet MUA_HANG hoặc HOA_DON_MISA. Nếu file chỉ có 1 sheet, dùng nút “Chỉ Mua hàng” hoặc “Chỉ HĐ MISA”.");
+  }else if(!sM||!sH)throw new Error("Thiếu sheet MUA_HANG hoặc HOA_DON_MISA");
   var out={ncc:[],mua:[],hd:[]};
   if(sN){
     var rn=rd(sN),hn=payHdr(rn,["ten goi tat","ten day du"]);
@@ -8879,11 +8885,11 @@ function payParse(wb){
       }
     }
   }
-  var rm=rd(sM),hm=payHdr(rm,["so chung tu","so hoa don","nha cung cap"]);
-  if(!hm)throw new Error("Không thấy dòng tiêu đề ở sheet MUA_HANG");
-  var m=hm.m,ix={d:payCol(m,"ngay hach toan"),ct:payCol(m,"so chung tu"),hd:payCol(m,"so hoa don"),n:payCol(m,"nha cung cap"),t:payCol(m,"tong tien thanh toan"),v:payCol(m,"gia tri nhap kho"),nc:payCol(m,"ncc chuan"),hc:payCol(m,"so hd chuan"),cs:payCol(m,"ma co so"),nt:payColAny(m,["ghi chu loi","loi co so","loi nhap","ghi chu co so"])};
+  var rm=sM?rd(sM):[],hm=sM?payHdr(rm,["so chung tu","so hoa don","nha cung cap"]):null;
+  if(sM&&!hm)throw new Error("Không thấy dòng tiêu đề ở sheet MUA_HANG");
+  var m=hm?hm.m:{},ix={d:payCol(m,"ngay hach toan"),ct:payCol(m,"so chung tu"),hd:payCol(m,"so hoa don"),n:payCol(m,"nha cung cap"),t:payCol(m,"tong tien thanh toan"),v:payCol(m,"gia tri nhap kho"),nc:payCol(m,"ncc chuan"),hc:payCol(m,"so hd chuan"),cs:payCol(m,"ma co so"),nt:payColAny(m,["ghi chu loi","loi co so","loi nhap","ghi chu co so"])};
   var gv=function(r,j){return j>=0?r[j]:null;};
-  for(var a=hm.i+1;a<rm.length;a++){
+  for(var a=hm?hm.i+1:0;a<rm.length;a++){
     var r2=rm[a],ncc=String(gv(r2,ix.nc)||gv(r2,ix.n)||"").trim(),tong=payN(gv(r2,ix.t)),tr=payN(gv(r2,ix.v));
     var hn1=payHn(gv(r2,ix.hc)!=null&&gv(r2,ix.hc)!==""?gv(r2,ix.hc):gv(r2,ix.hd));
     if(!ncc||(!tong&&!tr&&!hn1))continue;
@@ -8892,17 +8898,38 @@ function payParse(wb){
     if(!cs)cs=payCsFromCt(sct);
     out.mua.push([payD(gv(r2,ix.d)),sct,String(gv(r2,ix.hd)||"").trim(),String(gv(r2,ix.n)||"").trim(),tong,tr||tong,hn1,cs,ncc,String(gv(r2,ix.nt)||"").trim()]);
   }
-  var rh=rd(sH),hh=payHdr(rh,["so chung tu","so hoa don","nha cung cap","gia tri hoa don"]);
-  if(!hh)throw new Error("Không thấy dòng tiêu đề ở sheet HOA_DON_MISA");
-  var q=hh.m,jx={d:payCol(q,"ngay hach toan"),ct:payCol(q,"so chung tu"),hd:payCol(q,"so hoa don"),n:payCol(q,"nha cung cap"),g:payCol(q,"gia tri hoa don"),th:payCol(q,"thue gtgt"),t:payCol(q,"tong tien thanh toan"),nc:payCol(q,"ncc chuan"),hc:payCol(q,"so hd chuan")};
-  for(var b=hh.i+1;b<rh.length;b++){
+  var rh=sH?rd(sH):[],hh=sH?payHdr(rh,["so chung tu","so hoa don","nha cung cap","gia tri hoa don"]):null;
+  if(sH&&!hh)throw new Error("Không thấy dòng tiêu đề ở sheet HOA_DON_MISA");
+  var q=hh?hh.m:{},jx={d:payCol(q,"ngay hach toan"),ct:payCol(q,"so chung tu"),hd:payCol(q,"so hoa don"),n:payCol(q,"nha cung cap"),g:payCol(q,"gia tri hoa don"),th:payCol(q,"thue gtgt"),t:payCol(q,"tong tien thanh toan"),nc:payCol(q,"ncc chuan"),hc:payCol(q,"so hd chuan")};
+  for(var b=hh?hh.i+1:0;b<rh.length;b++){
     var r3=rh[b],nc3=String(gv(r3,jx.nc)||gv(r3,jx.n)||"").trim(),gt=payN(gv(r3,jx.g)),th=payN(gv(r3,jx.th)),t3=payN(gv(r3,jx.t))||(gt+th);
     var hn3=payHn(gv(r3,jx.hc)!=null&&gv(r3,jx.hc)!==""?gv(r3,jx.hc):gv(r3,jx.hd));
     if(!nc3||(!t3&&!hn3))continue;
     out.hd.push([payD(gv(r3,jx.d)),String(gv(r3,jx.ct)||"").trim(),String(gv(r3,jx.hd)||"").trim(),String(gv(r3,jx.n)||"").trim(),gt||t3,th,t3,hn3,nc3]);
   }
-  if(!out.mua.length)throw new Error("MUA_HANG chưa có dòng dữ liệu nào");
+  if(part){if(!out.mua.length&&!out.hd.length)throw new Error("Không có dòng dữ liệu nào trong file");}
+  else if(!out.mua.length)throw new Error("MUA_HANG chưa có dòng dữ liệu nào");
   return out;
+}
+/* ----- Bổ sung dữ liệu: chỉ THÊM dòng mới, bỏ dòng trùng, không xóa / sửa dòng cũ ----- */
+function payHKey(h){return [h[1]||"",h[7]||"",payK(h[8]),Math.round(h[6]||0)].join("|");}
+function payMerge(o,fname){
+  var P=payDb(),had={},hadH={},st={mua:{add:0,dup:0},hd:{add:0,dup:0},ncc:{add:0,upd:0}};
+  var snap={mua:P.mua.length,hd:P.hd.length,ncc:JSON.stringify(P.ncc)};
+  P.mua.forEach(function(r){had[payNKey(r)]=1;});
+  P.hd.forEach(function(h){hadH[payHKey(h)]=1;});
+  o.mua.forEach(function(r){if(had[payNKey(r)])st.mua.dup++;else{P.mua.push(r);st.mua.add++;}});
+  o.hd.forEach(function(h){if(hadH[payHKey(h)])st.hd.dup++;else{P.hd.push(h);st.hd.add++;}});
+  o.ncc.forEach(function(n){
+    var ix=-1,a=payK(n[0]),b=payK(n[1]);
+    P.ncc.forEach(function(e,i){if(ix<0&&((a&&payK(e[0])===a)||(b&&payK(e[1])===b)))ix=i;});
+    if(ix<0){P.ncc.push(n);st.ncc.add++;return;}
+    var e=P.ncc[ix],ch=0;
+    for(var j=2;j<7;j++)if(!String(e[j]||"").trim()&&String(n[j]||"").trim()){e[j]=n[j];ch=1;}
+    if(ch)st.ncc.upd++;
+  });
+  if(st.mua.add||st.hd.add||st.ncc.add||st.ncc.upd){P.undo=snap;P.last={at:Date.now(),file:fname,mua:st.mua,hd:st.hd,ncc:st.ncc};P.at=Date.now();}
+  return st;
 }
 /* ----- Đối chiếu Mua hàng ⇄ HĐ MISA (khóa: NCC → số HĐ → giá trị) ----- */
 function payCompute(){
@@ -9037,6 +9064,18 @@ function payMonths(){
 function payScopeLine(){return PAY.m==="all"?'':'<div class="rcscope-l">Đang lọc: <b>tháng '+payMLab(PAY.m)+'</b> · mọi nút xuất / in đều theo tháng này</div>';}
 /* ----- Giao diện ----- */
 function payTag(t,c){return '<span style="display:inline-block;padding:2px 9px;border-radius:99px;font-size:11px;font-weight:700;background:var(--'+c+'-bg);color:var(--'+c+')">'+esc(t)+'</span>';}
+function payAddHtml(P){
+  var l=P.last,h='<div style="margin-top:12px;padding-top:12px;border-top:1px solid var(--line)"><div style="font-weight:700;font-size:13px;margin-bottom:3px">Bổ sung dữ liệu mua hàng / hóa đơn MISA</div>'
+    +'<div style="font-size:12px;color:var(--mut);margin-bottom:8px;line-height:1.5">Chỉ <b>thêm dòng mới</b>, không xóa dữ liệu đang có. Dòng trùng (cùng số CT + số HĐ + NCC + số tiền) tự bỏ qua. Xong app tự đối chiếu lại. File cần sheet <b>MUA_HANG</b> và/hoặc <b>HOA_DON_MISA</b>.</div>'
+    +'<label class="btn btn-primary" style="margin-bottom:8px">'+icon('upload',16)+'Bổ sung từ file Excel<input type="file" accept=".xlsx,.xlsm,.xls" style="display:none" onchange="A.payAdd(this,0)"></label>'
+    +'<div class="rcact"><label class="btn btn-outline">Chỉ Mua hàng<input type="file" accept=".xlsx,.xlsm,.xls" style="display:none" onchange="A.payAdd(this,1)"></label><label class="btn btn-outline">Chỉ HĐ MISA<input type="file" accept=".xlsx,.xlsm,.xls" style="display:none" onchange="A.payAdd(this,2)"></label></div>';
+  if(l){
+    var dup=(l.mua.dup||0)+(l.hd.dup||0);
+    h+='<div style="font-size:12px;color:var(--mut);margin-top:2px">Lần bổ sung gần nhất: <b>'+esc(l.file||"")+'</b> · +'+l.mua.add+' phiếu mua, +'+l.hd.add+' HĐ MISA'+(l.ncc.add?', +'+l.ncc.add+' NCC':'')+(dup?' · bỏ qua '+dup+' dòng trùng':'')+'</div>'
+      +(P.undo?'<button class="btn btn-outline" style="padding:8px;font-size:12.5px;margin-top:8px;color:var(--red)" onclick="A.payUndoAdd()">Hoàn tác lần bổ sung này</button>':'');
+  }
+  return h+'</div>';
+}
 function payHomeHtml(){
   var P=payDb(),h='';
   var imp='<input type="file" id="payin" accept=".xlsx,.xlsm,.xls" style="display:none" onchange="A.payFile(this)">';
@@ -9058,7 +9097,8 @@ function payHomeHtml(){
     +'<button class="btn btn-primary" style="margin-bottom:8px" onclick="A.payPrintAll()">'+icon('file',17)+'In phiếu + bảng kê ('+L.filter(function(g){return g.khop;}).length+' NCC khớp)</button>'
     +'<div class="rcact"><button class="btn btn-outline" onclick="A.payXlsxDs()">'+icon('download',16)+'DS thanh toán</button><button class="btn btn-outline" onclick="A.payXlsxAll()">'+icon('download',16)+'Phiếu hàng loạt</button></div>'
     +'<button class="btn btn-primary" style="margin-top:8px" onclick="A.payXlsxRecon()">'+icon('download',16)+'Xuất tổng hợp đối chiếu MISA ⇄ Mua hàng (từng phiếu)</button>'
-    +'<button class="btn btn-outline" style="padding:9px;font-size:13px" onclick="document.getElementById(\'payin\').click()">'+icon('upload',16)+'Nạp lại file Excel</button>'
+    +payAddHtml(P)
+    +'<button class="btn btn-outline" style="padding:9px;font-size:13px;margin-top:10px" onclick="document.getElementById(\'payin\').click()">'+icon('upload',16)+'Nạp lại file Excel (thay toàn bộ dữ liệu cũ)</button>'
     +'<button class="btn btn-outline" style="padding:9px;font-size:13px;margin-top:8px" onclick="A.payTemplate()">'+icon('download',16)+'Tải file Excel mẫu</button></div>';
   h+=payErrCard();
   h+=payCfgHtml()+payCsCfgHtml();
@@ -9588,7 +9628,7 @@ Object.assign(A,{
     rd.onload=function(e){
       try{
         var wb=XLSX.read(new Uint8Array(e.target.result),{type:"array"}),o=payParse(wb),P=payDb();
-        P.ncc=o.ncc.length?o.ncc:P.ncc;P.mua=o.mua;P.hd=o.hd;P.at=Date.now();P.file=f.name;
+        P.ncc=o.ncc.length?o.ncc:P.ncc;P.mua=o.mua;P.hd=o.hd;P.at=Date.now();P.file=f.name;delete P.undo;delete P.last;
         PAY.sel="";PAY.f="all";PAY.q="";audit("pay-import",f.name,null,o.mua.length+"/"+o.hd.length);
         if(!store.saveVerified())toast("Đã nạp nhưng chưa lưu được vào bộ nhớ app — hãy sao lưu");else toast("Đã nạp "+o.mua.length+" phiếu mua, "+o.hd.length+" HĐ MISA");
         renderPay();
@@ -9596,6 +9636,35 @@ Object.assign(A,{
       inp.value="";
     };
     rd.readAsArrayBuffer(f);
+  },
+  payAdd:function(inp,kind){
+    var f=inp.files&&inp.files[0];if(!f)return;
+    if(!kkNeed(["xlsx"],function(){A.payAdd(inp,kind);}))return;
+    var rd=new FileReader();
+    rd.onload=function(e){
+      try{
+        var wb=XLSX.read(new Uint8Array(e.target.result),{type:"array"}),o=payParse(wb,1,kind||0),st=payMerge(o,f.name);
+        var dup=st.mua.dup+st.hd.dup,ch=st.mua.add+st.hd.add+st.ncc.add+st.ncc.upd;
+        if(ch){
+          audit("pay-add",f.name,null,st.mua.add+"/"+st.hd.add);
+          if(!store.saveVerified())toast("Đã bổ sung nhưng chưa lưu được vào bộ nhớ app — hãy sao lưu");
+          else toast("Đã bổ sung "+st.mua.add+" phiếu mua, "+st.hd.add+" HĐ MISA"+(dup?" · bỏ qua "+dup+" dòng trùng":""));
+        }else toast("Không có dòng mới: "+dup+" dòng đã có sẵn trong dữ liệu");
+        PAY.sel="";renderPay();
+      }catch(err){console.error(err);toast("Không đọc được file: "+(err&&err.message||err));}
+      inp.value="";
+    };
+    rd.readAsArrayBuffer(f);
+  },
+  payUndoAdd:function(){
+    var P=payDb(),u=P.undo,l=P.last;if(!u)return;
+    if(P.mua.length<u.mua||P.hd.length<u.hd){toast("Không hoàn tác được vì dữ liệu đã thay đổi");return;}
+    if(!confirm("Hoàn tác lần bổ sung từ file “"+(l&&l.file||"")+"”? Các phiếu mua và HĐ MISA vừa thêm sẽ bị gỡ ra.\nGhi chú lỗi đã nhập tay vẫn được giữ."))return;
+    P.mua.length=u.mua;P.hd.length=u.hd;
+    try{P.ncc=JSON.parse(u.ncc);}catch(e){}
+    audit("pay-add-undo",l&&l.file||"",null,"");
+    delete P.undo;delete P.last;
+    store.saveVerified();toast("Đã hoàn tác lần bổ sung gần nhất");renderPay();
   },
   payFilter:function(f){PAY.f=f;renderPay();},
   paySearch:function(v){PAY.q=v;clearTimeout(A._paT);A._paT=setTimeout(function(){var el=document.getElementById("paylist");if(el)el.innerHTML=payListHtml(payCompute());},180);},
