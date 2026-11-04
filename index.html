@@ -8173,14 +8173,129 @@ Object.assign(A,{
     fr.readAsArrayBuffer(f);
   },
   rcExport:function(){
-    if(!kkNeed(["xlsx"],function(){A.rcExport();}))return;
-    var Z=RC_RES,R=rcDb(),wb=XLSX.utils.book_new();
-    var a=[["Cơ sở","Mã KH","Khách hàng","Ngày DV","Dịch vụ","SL dịch vụ","Giá trị DT","Vật tư theo định mức","SL cần (gộp)","SL thực xuất","Chênh","Giá trị lệch","Trạng thái","Kết quả cuối","Vật tư đã xuất khác","Mã lý do","Giải trình","Trạng thái xử lý"]];
-    Z.dt.filter(rcIn).forEach(function(o){var n=R.notes[o.nid]||{};a.push([o.cs,o.pid,o.r.kh,o.r.ngay,o.r.dv,rcNum(o.r.sl),o.rowFirst?rcNum(o.r.dt):"",o.ten||"",o.first?o.O:"",o.first?o.P:"",o.first?o.Q:"",o.first?o.R:"",o.none?o.T:(o.first?o.T:"Dòng gộp"),o.none?o.T:(o.first?o.fin:""),(o.wrong||[]).map(function(w){return (w.ten||"")+(w.ma?" ("+w.ma+")":"");}).join("; "),n.r||"",n.g||"",n.st||""]);});
-    var b=[["Cơ sở","Mã hàng","Tên vật tư","Ngày xuất","Số CT","Diễn giải","ĐVT","Loại CT","SL xuất","Vật tư theo cấu hình","Mã KH","Giá trị","KIỂM TRA XUẤT","Kết quả cuối","Kiểm tra vật tư","Mã lý do","Giải trình","Trạng thái xử lý"]];
-    Z.xk.filter(rcIn).forEach(function(x){var n=R.notes[x.nid]||{};b.push([x.cs,x.ma,x.ten,x.r.ngay,x.r.so,x.r.dg,x.r.dvt||"",x.r.ct||"",x.sl,x.vname||"",x.pid,x.val,x.P,x.fin,x.vt,n.r||"",n.g||"",n.st||""]);});
-    XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet(a),"DOANH_THU");XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet(b),"XUAT_KHO");
-    rcWbOut(wb,"DoiChieu_DT_XuatKho"+rcScopeTag()+".xlsx");
+    if(!kkNeed(["exceljs"],function(){A.rcExport();}))return;
+    try{
+      RC_RES=rcCompute();
+      var Z=RC_RES,R=rcDb(),O=R.opt||{},N=R.notes||{},wb=new ExcelJS.Workbook();
+      var thin={style:"thin",color:{argb:"FF8C96A8"}},bd={top:thin,left:thin,bottom:thin,right:thin};
+      var F=function(o){return Object.assign({name:"Times New Roman",size:10},o||{});};
+      var fill=function(a){return {type:"pattern",pattern:"solid",fgColor:{argb:a}};};
+      var xl=prPage("landscape").xl,MONEY="#,##0;[Red]-#,##0";
+      var nlines=function(v,w){return Math.max(1,Math.ceil(String(v==null?"":v).length/Math.max(1,w*1.05)));};
+      var per="Cơ sở: "+RC.cs+"  |  Kỳ: "+(RC.th==="Tất cả"?"Tất cả các tháng":"Tháng "+RC.th)+"  |  Xuất ngày "+rcToday();
+
+      /* ===== Dữ liệu 2 sheet gốc (giữ nguyên cấu trúc để còn nhập lại được) ===== */
+      var a=[["Cơ sở","Mã KH","Khách hàng","Ngày DV","Dịch vụ","SL dịch vụ","Giá trị DT","Vật tư theo định mức","SL cần (gộp)","SL thực xuất","Chênh","Giá trị lệch","Trạng thái","Kết quả cuối","Vật tư đã xuất khác","Mã lý do","Giải trình","Trạng thái xử lý"]];
+      Z.dt.filter(rcIn).forEach(function(o){var n=N[o.nid]||{};a.push([o.cs,o.pid,o.r.kh,o.r.ngay,o.r.dv,rcNum(o.r.sl),o.rowFirst?rcNum(o.r.dt):"",o.ten||"",o.first?o.O:"",o.first?o.P:"",o.first?o.Q:"",o.first?o.R:"",o.none?o.T:(o.first?o.T:"Dòng gộp"),o.none?o.T:(o.first?o.fin:""),(o.wrong||[]).map(function(w){return (w.ten||"")+(w.ma?" ("+w.ma+")":"");}).join("; "),n.r||"",n.g||"",n.st||""]);});
+      var b=[["Cơ sở","Mã hàng","Tên vật tư","Ngày xuất","Số CT","Diễn giải","ĐVT","Loại CT","SL xuất","Vật tư theo cấu hình","Mã KH","Giá trị","KIỂM TRA XUẤT","Kết quả cuối","Kiểm tra vật tư","Mã lý do","Giải trình","Trạng thái xử lý"]];
+      Z.xk.filter(rcIn).forEach(function(x){var n=N[x.nid]||{};b.push([x.cs,x.ma,x.ten,x.r.ngay,x.r.so,x.r.dg,x.r.dvt||"",x.r.ct||"",x.sl,x.vname||"",x.pid,x.val,x.P,x.fin,x.vt,n.r||"",n.g||"",n.st||""]);});
+
+      /* ===== SHEET MAP: doanh thu là mốc tham chiếu, phiếu xuất kho gắn vào bên cạnh ===== */
+      var byG={};
+      Z.dt.forEach(function(c){if(c.g)(byG[c.g.k]=byG[c.g.k]||[]).push(c);});
+      var used={},M=[],nG=0,cnt={match:0,bad:0,ok:0,warn:0,none:0,xbad:0};
+      function dtDesc(o){
+        var t=o.T,vt=o.ten||"vật tư theo định mức";
+        if(t==="KHỚP")return "Khớp: cần "+o.O+", đã xuất "+o.P+".";
+        if(t==="CHƯA XUẤT KHO")return "Có doanh thu nhưng chưa có phiếu xuất kho «"+vt+"» (cần "+o.O+").";
+        if(t==="XUẤT SAI VẬT TƯ")return "Đã xuất vật tư khác ("+(o.wrong||[]).map(function(w){return (w.ten||w.ma||"")+" · SL "+w.sl;}).join("; ")+") thay vì «"+vt+"» (cần "+o.O+").";
+        return "Cần "+o.O+" «"+vt+"», thực xuất "+o.P+" → "+(o.Q<0?"THIẾU ":"THỪA ")+Math.abs(o.Q)+".";
+      }
+      function xkDesc(x){
+        var t=x.P;
+        if(t==="XUẤT CHƯA CÓ DOANH THU")return "Có phiếu xuất kho nhưng không có dòng doanh thu nào tương ứng"+(x.pid?" của "+x.pid:"")+".";
+        if(t==="XUẤT SAI VẬT TƯ")return (x.vt||"Vật tư xuất không đúng định mức của dịch vụ").replace(/^✗\s*/,"")+".";
+        if(t==="CHƯA CẤU HÌNH DỊCH VỤ")return "Khách có doanh thu nhưng dịch vụ chưa được cấu hình vật tư nên không gắn được phiếu xuất.";
+        if(t.indexOf("THIẾU MÃ KH")===0)return "Phiếu xuất chưa có mã KH (PID) nên không gắn được với doanh thu.";
+        return t;
+      }
+      var items=[];
+      Z.dt.forEach(function(c){if(!rcIn(c))return;if(c.first&&c.g)items.push({c:c,cs:c.cs||""});else if(c.none)items.push({c:c,cs:c.cs||""});});
+      items.sort(function(p,q){return String(p.cs).localeCompare(String(q.cs),"vi")||p.c.j-q.c.j;});
+      items.forEach(function(it){
+        var c=it.c,nt=N[c.nid]||{};
+        if(c.none){
+          var tp=c.T==="KHÔNG DÙNG VẬT TƯ"?"none":"warn";cnt[tp]++;nG++;
+          M.push({t:tp,f:1,v:[nG,c.cs,c.pid||"",c.r.kh||"",c.r.ngay,c.r.dv,rcNum(c.r.sl)||1,rcNum(c.r.dt),"","","","","","","","","","","",c.T,c.why||"",nt.r||"",nt.g||"",nt.st||""]});
+          return;
+        }
+        var g=c.g,lines=byG[g.k]||[c],xs=(g.xs||[]).slice();
+        if(!xs.length&&c.T==="XUẤT SAI VẬT TƯ")xs=Z.xk.filter(function(x){return !x.skip&&!x.g&&x.inWrong&&x.pid===g.pid&&(!O.cs||rcK(x.cs)===rcK(g.cs));});
+        xs.forEach(function(x){used[x.i]=1;});
+        var tp=c.T==="KHỚP"?"match":(c.ok?"ok":"bad");cnt[tp]++;nG++;
+        var n=Math.max(lines.length,xs.length,1);
+        for(var i=0;i<n;i++){
+          var L=lines[i],x=xs[i],f=i===0;
+          M.push({t:tp,f:f,v:[nG,g.cs,g.pid,c.r.kh||"",
+            L?L.r.ngay:"",L?L.r.dv:"",L?(rcNum(L.r.sl)||1):"",(L&&L.rowFirst)?rcNum(L.r.dt):"",g.ten||"",f?c.O:"",
+            x?x.r.ngay:"",x?x.r.so:"",x?x.r.dg:"",x?x.ma:"",x?x.ten:"",x?x.sl:"",
+            f?c.P:"",f?c.Q:"",f?c.R:"",c.T,f?dtDesc(c):"",f?(nt.r||""):"",f?(nt.g||""):"",f?(nt.st||""):""]});
+        }
+      });
+      var left=Z.xk.filter(function(x){return !x.skip&&!used[x.i]&&rcIn(x);}).sort(function(p,q){return String(p.cs||"").localeCompare(String(q.cs||""),"vi")||p.i-q.i;});
+      if(left.length){
+        M.push({t:"sec",v:["PHIẾU XUẤT KHO CHƯA KHỚP VỚI DOANH THU ("+left.length+" phiếu) – không gắn được vào dòng doanh thu nào"]});
+        left.forEach(function(x){
+          var nt=N[x.nid]||{},tp=x.ok?"ok":"bad";if(tp==="bad")cnt.xbad++;else cnt.ok++;
+          M.push({t:tp,f:1,v:["—",x.cs,x.pid||"","","","","","","","",x.r.ngay,x.r.so,x.r.dg,x.ma,x.ten,x.sl,x.sl,x.sl,x.val||0,x.P,xkDesc(x),nt.r||"",nt.g||"",nt.st||""]});
+        });
+      }
+      var HEAD=["STT nhóm","Cơ sở","Mã KH (PID)","Khách hàng","Ngày DV","Dịch vụ","SL DV","Doanh thu (VND)","Vật tư theo định mức","SL cần","Ngày xuất","Số CT","Diễn giải phiếu xuất","Mã hàng","Tên vật tư xuất","SL xuất","Tổng SL xuất","Chênh SL (xuất − cần)","Giá trị lệch (VND)","Kết quả đối chiếu","Diễn giải chênh lệch","Mã lý do","Giải trình của cơ sở","Trạng thái xử lý"];
+      var W=[8,16,13,22,12,34,7,15,26,9,12,14,40,12,28,9,10,11,14,26,48,14,32,14];
+      var LEFT=[2,4,6,9,13,15,20,21,23],MON=[8,19],NC=HEAD.length;
+      var ws=wb.addWorksheet("MAP_DT_XUAT_KHO",{pageSetup:{paperSize:xl,orientation:"landscape",fitToPage:true,fitToWidth:1,fitToHeight:0,margins:{left:0.4,right:0.4,top:0.5,bottom:0.5,header:0.2,footer:0.2}}});
+      W.forEach(function(w,i){ws.getColumn(i+1).width=w;});
+      var c0;
+      ws.mergeCells(1,1,1,NC);c0=ws.getCell(1,1);c0.value="MAP ĐỐI CHIẾU DOANH THU – XUẤT KHO (doanh thu là mốc tham chiếu)";c0.font=F({size:14,bold:true});c0.alignment={horizontal:"center"};
+      ws.mergeCells(2,1,2,NC);c0=ws.getCell(2,1);c0.value=per;c0.font=F({italic:true});c0.alignment={horizontal:"center"};
+      ws.mergeCells(3,1,3,NC);c0=ws.getCell(3,1);
+      c0.value="Nhóm doanh thu: "+nG+"  |  Khớp: "+cnt.match+"  |  Lệch chưa xử lý: "+cnt.bad+"  |  Hợp lệ (đã duyệt): "+cnt.ok+"  |  Chưa đối chiếu được: "+cnt.warn+"  |  Phiếu xuất chưa gắn doanh thu: "+cnt.xbad+"   —   Đỏ = lệch / phiếu xuất chưa khớp · Xanh = đã duyệt · Vàng = thiếu PID hoặc chưa cấu hình dịch vụ · Phiếu chuyển kho / hủy không đưa vào.";
+      c0.font=F({bold:true,color:{argb:"FF9C0006"}});c0.alignment={wrapText:true,vertical:"middle"};ws.getRow(3).height=30;
+      var bands=[[1,4,"KHÁCH HÀNG","FF1F4E5F"],[5,10,"DOANH THU · MỐC THAM CHIẾU","FF1F6F8B"],[11,16,"XUẤT KHO","FF8A5A1F"],[17,21,"ĐỐI CHIẾU","FF3B3B6B"],[22,24,"GIẢI TRÌNH","FF555555"]];
+      bands.forEach(function(q){ws.mergeCells(4,q[0],4,q[1]);var c=ws.getCell(4,q[0]);c.value=q[2];c.font=F({bold:true,color:{argb:"FFFFFFFF"}});c.fill=fill(q[3]);c.alignment={horizontal:"center",vertical:"middle"};for(var k=q[0];k<=q[1];k++){ws.getCell(4,k).border=bd;ws.getCell(4,k).fill=fill(q[3]);}});
+      HEAD.forEach(function(t,j){var q=bands.filter(function(z){return j+1>=z[0]&&j+1<=z[1];})[0],c=ws.getCell(5,j+1);c.value=t;c.font=F({bold:true,color:{argb:"FFFFFFFF"}});c.fill=fill(q[3]);c.border=bd;c.alignment={horizontal:"center",vertical:"middle",wrapText:true};});
+      ws.getRow(5).height=32;
+      var STY={bad:["FFFFC7CE","FF9C0006"],ok:["FFE2F0D9","FF15803D"],warn:["FFFFF2CC","FF7F6000"],none:[null,"FF7F7F7F"],match:[null,null]};
+      var top={style:"medium",color:{argb:"FF1F4E5F"}};
+      M.forEach(function(w,i){
+        var r=6+i;
+        if(w.t==="sec"){ws.mergeCells(r,1,r,NC);var sc=ws.getCell(r,1);sc.value=w.v[0];sc.font=F({bold:true,size:11,color:{argb:"FFFFFFFF"}});sc.fill=fill("FFC00000");sc.alignment={vertical:"middle"};ws.getRow(r).height=22;return;}
+        var st=STY[w.t]||STY.match,ln=1;
+        w.v.forEach(function(v,j){
+          var c=ws.getCell(r,j+1),isM=MON.indexOf(j+1)>=0;
+          c.value=(v===""||v==null)?null:v;
+          c.font=F(st[1]?{color:{argb:st[1]}}:{});
+          c.border=w.f?{top:top,left:thin,bottom:thin,right:thin}:bd;
+          if(st[0])c.fill=fill(st[0]);
+          c.alignment={vertical:"middle",wrapText:true,horizontal:isM?"right":(LEFT.indexOf(j+1)>=0?"left":"center")};
+          if(isM)c.numFmt=MONEY;
+          ln=Math.max(ln,nlines(v,W[j]));
+        });
+        var rc=ws.getCell(r,20);rc.font=F(st[1]?{bold:true,color:{argb:st[1]}}:{bold:true});
+        ws.getRow(r).height=Math.max(16,ln*13);
+      });
+      ws.autoFilter={from:{row:5,column:1},to:{row:5+Math.max(1,M.length),column:NC}};
+      ws.views=[{state:"frozen",ySplit:5,xSplit:4}];
+      ws.pageSetup.printTitlesRow="5:5";
+
+      /* ===== 2 sheet dữ liệu gốc ===== */
+      function plain(name,aoa,widths){
+        var s2=wb.addWorksheet(name);
+        widths.forEach(function(w,i){s2.getColumn(i+1).width=w;});
+        aoa.forEach(function(row,i){
+          var rr=s2.addRow(row.map(function(v){return (v===""||v==null)?null:v;}));
+          if(i===0){rr.eachCell(function(c){c.font={bold:true,color:{argb:"FFFFFFFF"}};c.fill=fill("FF1F4E5F");c.alignment={horizontal:"center",vertical:"middle",wrapText:true};});}
+        });
+        s2.views=[{state:"frozen",ySplit:1}];
+        return s2;
+      }
+      plain("DOANH_THU",a,[16,14,22,12,34,10,14,26,10,10,9,13,24,24,30,14,30,14]);
+      plain("XUAT_KHO",b,[16,12,28,12,14,40,8,12,9,26,13,13,24,24,34,14,30,14]);
+      wb.xlsx.writeBuffer().then(function(buf){
+        shareOrDownload(new Blob([buf],{type:"application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"}),"DoiChieu_DT_XuatKho"+rcScopeTag()+".xlsx");
+        toast("Đã xuất file: sheet MAP ("+nG+" nhóm doanh thu"+(left.length?", "+left.length+" phiếu xuất chưa khớp":"")+")");
+      }).catch(function(e){console.error(e);toast("Không tạo được file: "+e.message);});
+    }catch(e){console.error(e);toast("Không xuất được: "+e.message);}
   },
   /* ----- Cập nhật nhanh: đối chiếu lại + nhập bổ sung/điều chỉnh từ file bên ngoài ----- */
   rcRefresh:function(){
