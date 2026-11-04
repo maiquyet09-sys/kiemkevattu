@@ -360,7 +360,7 @@ body{background:var(--bg)}
 .v2ph .padd{width:96px;height:96px;border-radius:12px;border:1.5px dashed var(--teal-ln);background:#fff;color:var(--teal);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;font:inherit;font-size:12px;font-weight:600}
 .v2ft2{padding:10px 16px calc(env(safe-area-inset-bottom,0px) + 12px);background:#fff;box-shadow:0 -6px 20px rgba(15,40,90,.08);display:flex;flex-direction:column;gap:8px}
 .v2ft2 .nx{border:0;border-radius:14px;padding:16px;font:inherit;font-weight:800;font-size:16px;background:var(--teal);color:#fff;cursor:pointer}.v2ft2 .nx:disabled{opacity:.4}
-.v2ft2 .sec{display:grid;grid-template-columns:1fr 1.4fr;gap:8px}.v2ft2 .sec button{border:1px solid var(--line);background:#fff;border-radius:12px;padding:11px;font:inherit;font-weight:700;font-size:14px;color:var(--mut);cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px}.v2ft2 .sec button:disabled{opacity:.4}
+.v2ft2 .nx small{display:block;font-weight:600;font-size:11.5px;opacity:.85;margin-top:2px}.v2ft2 .sec{display:grid;grid-template-columns:1fr 1fr 1.3fr;gap:8px}.v2ft2 .sec button{border:1px solid var(--line);background:#fff;border-radius:12px;padding:11px;font:inherit;font-weight:700;font-size:14px;color:var(--mut);cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px}.v2ft2 .sec button:disabled{opacity:.4}
 .v2dt{background:#fff;border:1px solid var(--line);border-radius:12px;margin-top:10px}.v2dt>summary{list-style:none;cursor:pointer;padding:13px 14px;font-weight:700;font-size:14px;display:flex;align-items:center;gap:8px}.v2dt>summary::-webkit-details-marker{display:none}
 .v2dt>summary::after{content:"+";margin-left:auto;color:var(--mut);font-size:20px;line-height:1}.v2dt[open]>summary::after{content:"−"}.v2dt .tg{font-weight:400;font-size:12px;color:var(--mut)}.v2dt .dtb{padding:0 14px 12px}
 .v2ft{display:grid;grid-template-columns:1fr 1.7fr;gap:10px;padding:10px 16px 6px;background:#fff;box-shadow:0 -6px 20px rgba(15,40,90,.08)}
@@ -648,6 +648,7 @@ body{background:var(--bg)}
 .mpt tbody tr{background:#fff}.mpt td:first-child,.mpt th:first-child{position:sticky;left:0;z-index:1;min-width:110px}.mpt th:first-child{z-index:3}
 .mpt tr.f td{border-top:2px solid #1F4E5F}.mpt td.rs{font-weight:700}
 .mpt tr.mp-bad{background:#FFC7CE!important;color:#9C0006}.mpt tr.mp-ok{background:#E2F0D9!important;color:#15803D}.mpt tr.mp-warn{background:#FFF2CC!important;color:#7F6000}.mpt tr.mp-none{color:#7F7F7F}
+.mpt tbody tr[onclick]{cursor:pointer}.mpt tr.mpx td{position:static;background:#fffaf0;color:var(--ink);white-space:normal;padding:0}.mpxd{position:sticky;left:0;box-sizing:border-box;width:min(560px,calc(100vw - 48px));padding:10px 12px;font-size:12.5px;line-height:1.55}
 .mpt tr.mps td{background:#C00000;color:#fff;font-weight:700;position:static}
 @media(max-width:420px){.rcnav button{font-size:12px;padding:9px 0}}
 .paysteps{display:flex;gap:6px;margin-bottom:14px}.paysteps button{flex:1;border:1px solid var(--line);background:#fff;color:var(--mut);border-radius:12px;padding:8px 2px;font:inherit;font-size:12px;font-weight:700;display:flex;flex-direction:column;align-items:center;gap:3px;cursor:pointer;position:relative}
@@ -6589,6 +6590,16 @@ var A={
     else if(cur.indexOf(text)<0){ta.value=cur+"; "+text;}
     A.calc();
   },
+  sheetDirty:function(){var nt=document.getElementById('snote');return !!SB&&((SB.qtyStr||'').trim()!==(SB._q0||'')||(nt&&nt.value.trim()!==(SB._n0||'')));},
+  sheetCancel:function(){if(A.sheetDirty()&&!confirm('Bỏ số liệu vừa nhập cho mã này?'))return;A.closeSheet();},
+  sheetSkip:function(){
+    if(!SB)return;var p=per(P.id);if(!p)return;
+    if(A.sheetDirty()&&!confirm('Bỏ số liệu vừa nhập và chuyển sang mã khác?'))return;
+    var fl=filteredList(p),id=SB.itemId,ix=-1,j,nx=null;
+    for(j=0;j<fl.length;j++)if(fl[j].id===id){ix=j;break;}
+    for(j=1;j<=fl.length;j++){var c=fl[(ix+j)%fl.length];if(!c.counted&&c.id!==id){nx=c;break;}}
+    if(nx)openSheet(nx.id,true);else toast('Không còn mã nào chưa kiểm');
+  },
   batAdd:function(){SB.batches.push({qty:"",exp:""});renderBatches();v2Tags();},
   batDel:function(i){SB.batches.splice(i,1);renderBatches();v2Tags();},
   photoTake:function(input){
@@ -6922,6 +6933,7 @@ function openSheet(itemId,seq){
   if(!it)return;
   SB={itemId:itemId,seq:!!seq,qtyStr:(it.counted&&it.countQty!==null)?String(it.countQty):"",batches:(it.batches||[]).map(function(b){return {qty:(b.qty===null||b.qty===undefined)?"":String(b.qty),exp:b.exp||""};})};
   var done=p.items.filter(function(x){return x.counted;}).length,total=p.items.length,u=esc(it.unit||'');
+  var left=filteredList(p).filter(function(x){return !x.counted&&x.id!==itemId;}).length;
   var h='<div class="ovl v2o" id="ovl"><div class="sheet v2s" onclick="event.stopPropagation()">'
     +'<div class="v2hd"><button class="v2bk" onclick="A.closeSheet()" aria-label="Quay lại">'+icon('back',26)+'</button>'
     +'<div class="v2tt">Thông tin vật tư'+(seq?'<small>Kiểm tuần tự · '+done+'/'+total+'</small>':'')+'</div>'
@@ -6949,11 +6961,11 @@ function openSheet(itemId,seq){
     +'<input type="file" id="photoin" accept="image/*" capture="environment" style="display:none" onchange="A.photoTake(this)"></div></details>'
     +(it.counted?'<button class="reset" onclick="A.sheetReset()">Xóa kết quả, đưa về "chưa kiểm"</button>':'<div style="height:14px"></div>')
     +'</div>'
-    +'<div class="v2ft2"><button class="nx" id="snext" onclick="A.sheetSave(true)">Lưu &amp; kiểm mã tiếp theo →</button><div class="sec"><button onclick="A.closeSheet()">Hủy</button><button id="ssave" onclick="A.sheetSave(false)">'+icon('save',17)+'Lưu &amp; đóng</button></div></div>'
+    +'<div class="v2ft2"><button class="nx" id="snext" onclick="A.sheetSave(true)">'+(left?'Lưu &amp; kiểm mã tiếp theo →':'Lưu &amp; hoàn tất ✓')+'<small>'+(left?'Còn '+left+' mã chưa kiểm':'Đây là mã cuối cùng')+'</small></button><div class="sec"><button onclick="A.sheetCancel()">Hủy</button><button onclick="A.sheetSkip()"'+(left?'':' disabled')+'>Bỏ qua →</button><button id="ssave" onclick="A.sheetSave(false)">'+icon('save',17)+'Lưu &amp; đóng</button></div></div>'
     +'</div></div>';
   document.getElementById("modal").innerHTML=h;
   document.getElementById("ovl").addEventListener("click",function(e){if(e.target===this)A.closeSheet();});
-  SB._close=it.close;SB._unit=it.unit;SB.photo=it.photo||null;
+  SB._close=it.close;SB._unit=it.unit;SB.photo=it.photo||null;SB._q0=SB.qtyStr;SB._n0=it.note||'';
   renderBatches();renderBoxes();renderPhotoSec();A.calc();
 }
 (function(){
@@ -7316,7 +7328,7 @@ var RC_HD={
   dt:{cs:["co so","chi nhanh","don vi"],pid:["ma kh","ma khach hang","pid","ma kh (pid)","ma benh nhan"],kh:["khach hang","ten khach hang","ten kh","benh nhan"],bs:["bac si"],ngay:["ngay dv","ngay dich vu","ngay","ngay thuc hien"],dv:["dich vu","ten dich vu"],mvt:["ma vat tu"],sl:["sl dich vu","so luong dich vu","so luong","sl"],dt:["doanh thu","doanh thu (vnd)","gia tri dt","gia tri doanh thu","thanh tien"]},
   xk:{cs:["co so","chi nhanh","don vi","kho"],pid:["ma kh","ma khach hang","pid","ma kh (pid)"],ma:["ma vat tu","ma hang","ma vt"],ten:["ten vat tu","ten hang","ten vt"],ngay:["ngay xuat","ngay hach toan","ngay"],so:["so ct","so chung tu","so phieu"],dg:["dien giai","dien giai chung","noi dung"],dvt:["dvt","don vi tinh"],ct:["loai ct","loai chung tu"],sl:["sl xuat","so luong xuat","so luong","sl"]}
 };
-var RC={mf:1,mlim:60,tab:0,cs:"Tất cả",th:"Tất cả",q:"",lim:40,side:0,only:1,mode:"replace",map:"cfg",co:{},cfgG:[],apxK:[],yr:"Tất cả",ap:"mat"};
+var RC={mf:1,mlim:60,mq:"",mx:"",tab:0,cs:"Tất cả",th:"Tất cả",q:"",lim:40,side:0,only:1,mode:"replace",map:"cfg",co:{},cfgG:[],apxK:[],yr:"Tất cả",ap:"mat"};
 var RC_RES=null;
 /* ----- Dữ liệu & cấu hình ----- */
 function rcSeedCfg(M){
@@ -7650,8 +7662,8 @@ function rcMapBuild(Z,O,N){
 }
 
 /* ===== Tab Map: xem ngay trên màn hình, cùng cách tô màu như sheet MAP trong file Excel ===== */
-var MP_COLS=[[3,"Khách hàng"],[1,"Cơ sở"],[5,"Dịch vụ"],[7,"Doanh thu"],[8,"VT định mức"],[9,"SL cần"],[11,"Số CT"],[14,"VT xuất"],[15,"SL xuất"],[17,"Chênh"],[19,"Kết quả"],[20,"Diễn giải"]];
-var MP_BANDS=[["Khách hàng",2,"#1F4E5F"],["Doanh thu · mốc",4,"#1F6F8B"],["Xuất kho",3,"#8A5A1F"],["Đối chiếu",3,"#3B3B6B"]];
+var MP_COLS=[[3,"Khách hàng"],[1,"Cơ sở"],[5,"Dịch vụ"],[7,"Doanh thu"],[8,"VT định mức"],[9,"SL cần"],[11,"Số CT"],[14,"VT xuất"],[15,"SL xuất"],[17,"Chênh"],[19,"Kết quả"]];
+var MP_BANDS=[["Khách hàng",2,"#1F4E5F"],["Doanh thu · mốc",4,"#1F6F8B"],["Xuất kho",3,"#8A5A1F"],["Đối chiếu",2,"#3B3B6B"]];
 function mpCell(j,v){
   if(v===""||v==null)return "";
   if(j===7)return typeof v==="number"?rcF(v):esc(v);
@@ -7659,31 +7671,52 @@ function mpCell(j,v){
   if(j===17)return typeof v==="number"?((v>0?"+":"")+rcQ(v)):esc(v);
   return esc(v);
 }
-function rcViewMapX(){
-  var R=rcDb(),B=rcMapBuild(RC_RES,R.opt||{},R.notes||{}),c=B.cnt,onlyBad=RC.mf!==0;
-  var rows=B.M.filter(function(w){return !onlyBad||w.t==="bad"||w.t==="sec";});
-  if(onlyBad&&rows.length&&rows[rows.length-1].t==="sec")rows.pop();
-  var nBad=c.bad+c.xbad,lim=RC.mlim||60,show=rows.slice(0,lim);
-  var h=rcFilter();
-  h+='<div class="rcsubnav"><button class="'+(onlyBad?'on':'')+'" onclick="A.rcMapF(1)">Chỉ ca lệch ('+nBad+')</button><button class="'+(!onlyBad?'on':'')+'" onclick="A.rcMapF(0)">Tất cả ('+B.nG+')</button></div>';
-  h+='<div class="mpleg"><span class="r">Đỏ: lệch / phiếu xuất chưa khớp</span><span class="g">Xanh: đã duyệt</span><span class="y">Vàng: thiếu PID / chưa cấu hình</span></div>';
-  h+='<div class="mpsum">Khớp <b>'+c.match+'</b> · Lệch <b class="rd">'+c.bad+'</b> · Hợp lệ <b>'+c.ok+'</b> · Chưa đối chiếu <b>'+c.warn+'</b> · Xuất chưa gắn DT <b class="rd">'+c.xbad+'</b></div>';
-  if(!show.length)return h+'<div class="card" style="text-align:center;color:var(--mut)">'+(onlyBad?'Không còn ca lệch nào trong phạm vi đang xem.':'Không có dữ liệu trong phạm vi đang xem.')+'</div>';
-  var nc=MP_COLS.length;
-  h+='<div class="mpw"><table class="mpt"><thead><tr class="b">'+MP_BANDS.map(function(b){return '<th colspan="'+b[1]+'" style="background:'+b[2]+'">'+b[0]+'</th>';}).join('')+'</tr><tr class="c">'
+function rcMapB(){var R=rcDb(),B=rcMapBuild(RC_RES,R.opt||{},R.notes||{});B.M.forEach(function(w,i){w._i=i;w._k=(w.t!=="sec"&&w.v[0]!=="—")?String(w.v[0]):"x"+i;});return B;}
+function rcMapBody(B){
+  var onlyBad=RC.mf!==0,q=norm(RC.mq||""),hit={},first={},sec=null,rows=[],secDone=false;
+  B.M.forEach(function(w){if(w.t==="sec"){sec=w;return;}if(!first[w._k])first[w._k]=w;if(q&&!hit[w._k]&&norm(w.v.join(" ")).indexOf(q)>=0)hit[w._k]=1;});
+  secDone=!sec;
+  B.M.forEach(function(w){
+    if(w.t==="sec")return;
+    if((onlyBad&&w.t!=="bad")||(q&&!hit[w._k]))return;
+    if(!secDone&&w.v[0]==="—"){rows.push(sec);secDone=true;}
+    rows.push(w);
+  });
+  var lim=RC.mlim||60,show=rows.slice(0,lim),nc=MP_COLS.length;
+  if(!show.length)return '<div class="card" style="text-align:center;color:var(--mut)">'+(q?'Không tìm thấy dòng nào khớp “'+esc(RC.mq)+'”.':onlyBad?'Không còn ca lệch nào trong phạm vi đang xem.':'Không có dữ liệu trong phạm vi đang xem.')+'</div>';
+  var h='<div class="mpw"><table class="mpt"><thead><tr class="b">'+MP_BANDS.map(function(b){return '<th colspan="'+b[1]+'" style="background:'+b[2]+'">'+b[0]+'</th>';}).join('')+'</tr><tr class="c">'
     +MP_COLS.map(function(k,i){var bi=i<2?0:i<6?1:i<9?2:3;return '<th style="background:'+MP_BANDS[bi][2]+'">'+k[1]+'</th>';}).join('')+'</tr></thead><tbody>';
   show.forEach(function(w){
     if(w.t==="sec"){h+='<tr class="mps"><td colspan="'+nc+'">'+esc(w.v[0])+'</td></tr>';return;}
-    h+='<tr class="mp-'+w.t+(w.f?' f':'')+'">'+MP_COLS.map(function(k){
+    var open=RC.mx===w._k;
+    h+='<tr class="mp-'+w.t+(w.f?' f':'')+'" onclick="A.rcMapX(\''+w._k+'\')">'+MP_COLS.map(function(k){
       var j=k[0],v=w.v[j];if(j===3&&(v===""||v==null))v=w.v[2];
       var cl=(j===7||j===9||j===15||j===17)?'n':(j===19?'rs':'');
       return '<td'+(cl?' class="'+cl+'"':'')+'>'+mpCell(j,v)+'</td>';
     }).join('')+'</tr>';
+    if(open&&w.f){
+      var v=w.v,L=[];
+      if(v[2])L.push('<b>PID:</b> '+esc(v[2])+(v[4]?' · <b>Ngày DV:</b> '+esc(v[4]):''));
+      if(v[20])L.push(esc(v[20]));
+      if(v[12])L.push('<b>Phiếu xuất:</b> '+esc(v[12]));
+      if(v[21]||v[22]||v[23])L.push('<b>Giải trình:</b> '+esc([v[21],v[22],v[23]].filter(Boolean).join(' · ')));
+      var sd=(w.t==="bad")?(w.v[0]==="—"?1:0):-1;
+      h+='<tr class="mpx"><td colspan="'+nc+'"><div class="mpxd">'+(L.join('<br>')||'Không có thêm chi tiết.')
+        +(sd>=0?'<button class="btn btn-primary" style="margin-top:8px;padding:9px" onclick="event.stopPropagation();A.rcTile('+sd+',1,\''+esc(String(v[2]||v[3]||'')).replace(/'/g,'')+'\')">Xử lý / giải trình ca này →</button>':'')+'</div></td></tr>';
+    }
   });
   h+='</tbody></table></div>';
   if(rows.length>show.length)h+='<button class="btn btn-outline" style="margin-top:10px" onclick="A.rcMapMore()">Xem thêm ('+(rows.length-show.length)+' dòng)</button>';
-  h+='<button class="btn btn-primary" style="margin-top:10px" onclick="A.rcExport()">'+icon("download",15)+'Tải file Excel (sheet MAP)</button>';
-  return h;
+  return h+'<button class="btn btn-primary" style="margin-top:10px" onclick="A.rcExport()">'+icon("download",15)+'Tải file Excel (sheet MAP)</button>';
+}
+function rcViewMapX(){
+  var B=rcMapB(),c=B.cnt,nBad=c.bad+c.xbad;
+  return rcFilter()
+    +'<div class="rcsubnav"><button class="'+(RC.mf!==0?'on':'')+'" onclick="A.rcMapF(1)">Chỉ ca lệch ('+nBad+')</button><button class="'+(RC.mf===0?'on':'')+'" onclick="A.rcMapF(0)">Tất cả ('+B.nG+')</button></div>'
+    +'<input class="inp" type="search" placeholder="Tìm PID, khách hàng, dịch vụ, vật tư, số CT…" value="'+esc(RC.mq||"")+'" oninput="A.rcMapQ(this.value)" style="margin-bottom:10px">'
+    +'<div class="mpleg"><span class="r">Đỏ: lệch / phiếu xuất chưa khớp</span><span class="g">Xanh: đã duyệt</span><span class="y">Vàng: thiếu PID / chưa cấu hình</span></div>'
+    +'<div class="mpsum">Khớp <b>'+c.match+'</b> · Lệch <b class="rd">'+c.bad+'</b> · Hợp lệ <b>'+c.ok+'</b> · Chưa đối chiếu <b>'+c.warn+'</b> · Xuất chưa gắn DT <b class="rd">'+c.xbad+'</b> · <i>Chạm một dòng để xem chi tiết</i></div>'
+    +'<div id="mpbody">'+rcMapBody(B)+'</div>';
 }
 function renderRecon(){
   var R=rcDb();
@@ -8142,7 +8175,10 @@ Object.assign(A,{
   rcS:function(k,v){RC[RC_KEYS[k]]=(k===3||k===4)?+v:v;RC.lim=40;if(k===6)RC.q="";renderRecon();},
   rcMore:function(){RC.lim+=40;renderRecon();},
   rcMapF:function(v){RC.mf=v;RC.mlim=60;renderRecon();},
-  rcMapMore:function(){RC.mlim=(RC.mlim||60)+60;renderRecon();},
+  rcMapMore:function(){RC.mlim=(RC.mlim||60)+60;A.rcMapRe();},
+  rcMapRe:function(){var e=document.getElementById("mpbody");if(!e){renderRecon();return;}var y=window.scrollY,w=e.querySelector(".mpw"),l=w?w.scrollLeft:0,t=w?w.scrollTop:0;e.innerHTML=rcMapBody(rcMapB());w=e.querySelector(".mpw");if(w){w.scrollLeft=l;w.scrollTop=t;}window.scrollTo(0,y);},
+  rcMapX:function(k){RC.mx=(RC.mx===k)?"":k;A.rcMapRe();},
+  rcMapQ:function(v){RC.mq=v;RC.mlim=60;clearTimeout(A._mpT);A._mpT=setTimeout(A.rcMapRe,250);},
   rcOpt:function(k,v){var R=rcDb();R.opt[k]=v?1:0;audit("recon-opt",k,null,R.opt[k]);saveSoon();renderRecon();},
   rcNote:function(side,j,k,v){
     var R=rcDb(),o=(side?RC_RES.xk:RC_RES.dt)[j],f=["r","g","st"][k];if(!o)return;
