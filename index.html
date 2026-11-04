@@ -2,9 +2,10 @@
 <html lang="vi">
 <head>
 <meta charset="UTF-8">
-<meta name="app-version" content="2026110311">
+<meta name="app-version" content="2026110401">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="theme-color" content="#eef3fb">
+<meta name="robots" content="noindex,nofollow,noarchive">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="apple-touch-icon" href="icon-192.png">
 <meta name="apple-mobile-web-app-title" content="Kiểm kê kho">
@@ -738,17 +739,26 @@ body{background:var(--bg)}
 <script>
 "use strict";
 /* ===== Tải thư viện Excel theo nhu cầu (không chặn khởi động, chỉ tải khi dùng Excel lần đầu) ===== */
-var KK_LIBS={xlsx:"https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js",exceljs:"https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.4.0/exceljs.min.js"};
+/* Thứ tự thử: file trong lib/ (cùng máy chủ) → CDN dự phòng. Chạy script lib/download-libs.* để tải về lib/ */
+var KK_LIBS={xlsx:["lib/xlsx.full.min.js","https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js","https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"],exceljs:["lib/exceljs.min.js","https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.4.0/exceljs.min.js"]};
 var KK_LP={};
 function kkHas(k){return k==="xlsx"?typeof XLSX!=="undefined":typeof ExcelJS!=="undefined";}
+function kkTry(urls,chk){
+  return new Promise(function(res){
+    var i=0;
+    (function next(){
+      if(chk())return res(true);
+      if(i>=urls.length)return res(false);
+      var el=document.createElement("script");el.src=urls[i++];
+      el.onload=function(){chk()?res(true):next();};el.onerror=function(){el.remove();next();};
+      document.head.appendChild(el);
+    })();
+  });
+}
 function kkLoad(k){
   if(kkHas(k))return Promise.resolve(true);
   if(KK_LP[k])return KK_LP[k];
-  KK_LP[k]=new Promise(function(res){
-    var el=document.createElement("script");el.src=KK_LIBS[k];
-    el.onload=function(){res(kkHas(k));};el.onerror=function(){res(false);};
-    document.head.appendChild(el);
-  }).then(function(ok){if(!ok)delete KK_LP[k];return ok;});
+  KK_LP[k]=kkTry(KK_LIBS[k],function(){return kkHas(k);}).then(function(ok){if(!ok)delete KK_LP[k];return ok;});
   return KK_LP[k];
 }
 /* Trả true nếu đã sẵn sàng. Nếu chưa: tải thư viện rồi tự chạy lại thao tác (retry). */
@@ -903,29 +913,87 @@ function quickNoteChipsHtml(){
 }
 
 /* ================= Lưu trữ (localStorage) ================= */
+/* ===== IndexedDB (kk_main) là nơi lưu chính; localStorage chỉ giữ bản sao nhỏ (<3,5 MB) để dự phòng ===== */
+var LS_MAX=3500000;
+var IDBM={db:null,ok:false,busy:false,next:null,fail:false,
+  open:function(){return new Promise(function(res){
+    try{var r=indexedDB.open("kk_main",1);
+      r.onupgradeneeded=function(){r.result.createObjectStore("kv");};
+      r.onsuccess=function(){IDBM.db=r.result;IDBM.ok=true;res(true);};
+      r.onerror=r.onblocked=function(){res(false);};
+    }catch(e){res(false);}
+  });},
+  get:function(k){return new Promise(function(res){
+    if(!IDBM.db)return res(null);
+    try{var q=IDBM.db.transaction("kv").objectStore("kv").get(k);q.onsuccess=function(){res(q.result==null?null:q.result);};q.onerror=function(){res(null);};}catch(e){res(null);}
+  });},
+  set:function(k,v){return new Promise(function(res){
+    if(!IDBM.db)return res(false);
+    try{var t=IDBM.db.transaction("kv","readwrite");t.objectStore("kv").put(v,k);t.oncomplete=function(){res(true);};t.onerror=t.onabort=function(){res(false);};}catch(e){res(false);}
+  });},
+  /* ghi nối tiếp, gộp các lần lưu dồn: luôn ghi bản mới nhất */
+  put:function(v){
+    IDBM.next=v;if(IDBM.busy)return;IDBM.busy=true;
+    (function run(){
+      var cur=IDBM.next;IDBM.next=null;
+      IDBM.set("db",cur).then(function(ok){
+        IDBM.fail=!ok;
+        if(!ok){if(!store.lsOk)store.ind(0,new Error("idb"));}
+        else if(store.lsSkipped){try{localStorage.removeItem("kk_db_v1");}catch(e){}}
+        if(IDBM.next)run();else IDBM.busy=false;
+      });
+    })();
+  }
+};
 var store={
   ok:(function(){try{var t="__kk_t";localStorage.setItem(t,"1");localStorage.removeItem(t);return true;}catch(e){return false;}})(),
+  /* Mở IndexedDB, chọn bản dữ liệu MỚI hơn giữa IndexedDB và localStorage (dữ liệu cũ chỉ có ở localStorage sẽ tự được chuyển sang) */
+  boot:function(cb){
+    var done=false;
+    function fin(){if(done)return;done=true;cb();}
+    var tm=setTimeout(function(){if(!done){store._late=true;fin();}},4000);
+    try{if(navigator.storage&&navigator.storage.persist)navigator.storage.persist();}catch(e){}
+    if(typeof indexedDB==="undefined")return fin();
+    IDBM.open().then(function(ok){
+      if(store._late){IDBM.ok=false;IDBM.db=null;return;}
+      if(!ok)return fin();
+      return IDBM.get("db").then(function(rec){
+        var ls=null,lsAt=0;
+        if(store.ok){try{ls=localStorage.getItem("kk_db_v1");lsAt=Number(localStorage.getItem("kk_db_at"))||0;}catch(e){}}
+        if(rec&&typeof rec.s==="string"&&(!ls||(rec.at||0)>=lsAt))store._pre=rec.s;else store._pre=ls;
+        clearTimeout(tm);fin();
+      });
+    }).catch(function(){fin();});
+  },
   /* v3: phân biệt "chưa có dữ liệu" với "dữ liệu lỗi"; dữ liệu lỗi KHÔNG bị ghi đè (store.bad giữ bản gốc) */
   load:function(){
-    if(!store.ok)return null;var s=null;
-    try{s=localStorage.getItem("kk_db_v1");}catch(e){return null;}
+    var s=null;
+    if(store._pre!==undefined)s=store._pre;
+    else{if(!store.ok)return null;try{s=localStorage.getItem("kk_db_v1");}catch(e){return null;}}
     if(!s)return null;
     try{var d=JSON.parse(s);if(d&&typeof d==="object"&&Array.isArray(d.periods))return d;}catch(e){}
     store.bad=s;store.blocked=true;return null;
   },
   save:function(){
-    if(!store.ok||store.blocked)return false;
+    if((!store.ok&&!IDBM.ok)||store.blocked)return false;
     clearTimeout(saveT);saveT=null;
-    try{
-      var s=JSON.stringify(db);
-      localStorage.setItem("kk_db_v1",s);
-      store.last=s;store.state="ok";store.at=Date.now();store.ind(s.length);return true;
-    }catch(e){console.error(e);store.state="fail";store.ind(0,e);return false;}
+    var s,at=Date.now(),ls=false;
+    try{s=JSON.stringify(db);}catch(e){console.error(e);store.state="fail";store.ind(0,e);return false;}
+    store.lsSkipped=false;
+    if(store.ok){
+      if(s.length<=LS_MAX){try{localStorage.setItem("kk_db_v1",s);localStorage.setItem("kk_db_at",String(at));ls=true;}catch(e){console.error(e);}}
+      else store.lsSkipped=true;
+    }
+    store.lsOk=ls;
+    if(IDBM.ok)IDBM.put({s:s,at:at});
+    if(ls||IDBM.ok){store.last=s;store.state="ok";store.at=at;store.ind(IDBM.ok?0:s.length);return true;}
+    store.state="fail";store.ind(0,new Error("full"));return false;
   },
-  /* ghi rồi đọc lại so khớp: dùng cho khôi phục / thay thế / thao tác quan trọng */
+  /* ghi rồi đọc lại so khớp (localStorage); nếu chỉ ghi IndexedDB thì chỉ biết đã xếp lệnh ghi */
   saveVerified:function(){
     if(!store.save())return false;
-    try{return localStorage.getItem("kk_db_v1")===store.last;}catch(e){return false;}
+    if(store.lsOk){try{return localStorage.getItem("kk_db_v1")===store.last;}catch(e){return false;}}
+    return IDBM.ok&&!IDBM.fail;
   },
   flush:function(){if(saveT)store.save();},
   ind:function(len,err){
@@ -966,6 +1034,28 @@ function validBackup(d){
   for(var i=0;i<d.periods.length;i++){var p=d.periods[i];if(!p||!p.id||!Array.isArray(p.items))return "kỳ kiểm kê thứ "+(i+1)+" thiếu id hoặc danh sách mã";}
   if(d.assets&&!Array.isArray(d.assets))return "phần CCDC/TSCĐ sai định dạng";
   return "";
+}
+
+/* ===== Toàn vẹn file sao lưu: mã kiểm tra (cyrb53) + phiên bản cấu trúc + đối chiếu số lượng ===== */
+var BK_SCHEMA=2;
+function bkSum(str){
+  var h1=0xdeadbeef,h2=0x41c6ce57;
+  for(var i=0,c;i<str.length;i++){c=str.charCodeAt(i);h1=Math.imul(h1^c,2654435761);h2=Math.imul(h2^c,1597334677);}
+  h1=Math.imul(h1^(h1>>>16),2246822507)^Math.imul(h2^(h2>>>13),3266489909);
+  h2=Math.imul(h2^(h2>>>16),2246822507)^Math.imul(h1^(h1>>>13),3266489909);
+  return (4294967296*(2097151&h2)+(h1>>>0)).toString(16);
+}
+function bkCore(d){var c=Object.assign({},d);delete c.__sync;return JSON.stringify(c);}
+/* Trả {bad:"lý do chặn"} | {warn:"lưu ý"} | {} */
+function bkIntegrity(d){
+  var sy=d&&d.__sync;
+  if(!sy||typeof sy!=="object")return {warn:"File sao lưu cũ, không có mã kiểm tra toàn vẹn (không xác minh được file có nguyên vẹn không)."};
+  if(sy.schema!==undefined&&Number(sy.schema)>BK_SCHEMA)return {bad:"file tạo bởi phiên bản app mới hơn (cấu trúc "+sy.schema+" > "+BK_SCHEMA+"). Hãy cập nhật app trước khi khôi phục."};
+  if(sy.ky!==undefined&&Number(sy.ky)!==d.periods.length)return {bad:"số kỳ kiểm kê không khớp ("+d.periods.length+" so với "+sy.ky+" khi sao lưu) — file có thể bị cắt/thiếu."};
+  if(sy.photos!==undefined&&Object.keys(d.__photos||{}).length!==Number(sy.photos))return {bad:"số ảnh không khớp ("+Object.keys(d.__photos||{}).length+" so với "+sy.photos+" khi sao lưu) — file có thể bị thiếu ảnh."};
+  if(sy.sum){var now=bkSum(bkCore(d));if(now!==sy.sum)return {bad:"mã kiểm tra không khớp — file đã bị chỉnh sửa hoặc hỏng sau khi sao lưu."};}
+  else return {warn:"File không có mã kiểm tra toàn vẹn."};
+  return {};
 }
 
 /* ================= Nhận diện cột Excel ================= */
@@ -1376,6 +1466,7 @@ function toast(m){
 /* ================= Tạo báo cáo kiểm kê ================= */
 var HHTM_CODES=["90000003","90000004","90000008","90000009","90000010","90000012","90000024","90000025","90000026","90000027","90000028","90000029","99000002"];
 function readKiemKeXlsx(file,cb){
+    if(!kkNeed(["xlsx"],function(){readKiemKeXlsx(file,cb);}))return;
   var reader=new FileReader();
   reader.onload=function(e){
     try{
@@ -2824,7 +2915,7 @@ function renderTransfer(){
 }
 
 /* ================= Quét QR / mã vạch để khớp vật tư ================= */
-var ZX_URL='https://cdn.jsdelivr.net/npm/@zxing/library@0.21.3/umd/index.min.js';
+var ZX_URLS=['lib/zxing.min.js','https://cdn.jsdelivr.net/npm/@zxing/library@0.21.3/umd/index.min.js'];
 var SC=null;
 function parseGS1(t){
   var s=String(t||''),out={},m,found=false;
@@ -2919,14 +3010,7 @@ function scMatch(p,text){
   }
   return {item:null,gs1:g,canon:canon};
 }
-function scEnsureZx(){
-  return new Promise(function(res){
-    if(window.ZXing){res(true);return;}
-    var sc=document.createElement('script');sc.src=ZX_URL;
-    sc.onload=function(){res(!!window.ZXing);};sc.onerror=function(){res(false);};
-    document.head.appendChild(sc);
-  });
-}
+function scEnsureZx(){return kkTry(ZX_URLS,function(){return !!window.ZXing;});}
 function scInitDecoder(){
   if('BarcodeDetector' in window){try{SC.det=new BarcodeDetector();return Promise.resolve(true);}catch(e){SC.det=null;}}
   return scEnsureZx();
@@ -5764,6 +5848,7 @@ var A={
     document.getElementById("gdrawer-ovl").classList.remove("open");
   },
   onFile:function(input){
+    if(!kkNeed(["xlsx"],function(){A.onFile(input);}))return;
     var f=input.files&&input.files[0];
     if(!f)return;
     var isCsv=/\.csv$/i.test(f.name);
@@ -5890,7 +5975,8 @@ var A={
       }).then(function(ph){
         var out=Object.assign({},db);
         if(Object.keys(ph).length)out.__photos=ph;
-        delete out.webauthn;out.__sync={v:2,at:Date.now(),by:(db.profile&&db.profile.ten)||'',full:true,photos:Object.keys(ph).length};
+        delete out.webauthn;out.__sync={v:2,schema:BK_SCHEMA,at:Date.now(),by:(db.profile&&db.profile.ten)||'',full:true,photos:Object.keys(ph).length,ky:(out.periods||[]).length};
+        out.__sync.sum=bkSum(bkCore(out));
         shareOrDownload(new Blob([JSON.stringify(out)],{type:'application/json'}),fname);
         toast('Đã sao lưu toàn bộ dữ liệu ('+Object.keys(ph).length+' ảnh)');
       }).catch(function(err){console.error(err);toast('Không sao lưu được: '+err.message);});
@@ -5913,8 +5999,9 @@ var A={
       var d,prev=null;
       try{d=JSON.parse(e.target.result);}catch(err){toast('File không hợp lệ: không đọc được JSON');return;}
       var bad=validBackup(d);if(bad){toast('File không hợp lệ: '+bad);return;}
+      var ig=bkIntegrity(d);if(ig.bad){alert('KHÔNG khôi phục: '+ig.bad+'\n\nDữ liệu trên máy được giữ nguyên.');return;}
       var ph=d.__photos||{};
-      if(!confirm('GỘP dữ liệu từ file vào máy này?\n\nFile có: '+d.periods.length+' kỳ vật tư, '+(d.assets||[]).length+' kỳ CCDC/TSCĐ, '+(d.handovers||[]).length+' biên bản, '+(d.explains||[]).length+' phiếu, '+Object.keys(ph).length+' ảnh.\nMáy này: '+db.periods.length+' kỳ vật tư, '+(db.assets||[]).length+' kỳ CCDC/TSCĐ.\n\nChỉ thêm phần còn thiếu; số đã kiểm trên máy này không bị ghi đè.'))return;
+      if(!confirm((ig.warn?'⚠ '+ig.warn+'\n\n':'')+'GỘP dữ liệu từ file vào máy này?\n\nFile có: '+d.periods.length+' kỳ vật tư, '+(d.assets||[]).length+' kỳ CCDC/TSCĐ, '+(d.handovers||[]).length+' biên bản, '+(d.explains||[]).length+' phiếu, '+Object.keys(ph).length+' ảnh.\nMáy này: '+db.periods.length+' kỳ vật tư, '+(db.assets||[]).length+' kỳ CCDC/TSCĐ.\n\nChỉ thêm phần còn thiếu; số đã kiểm trên máy này không bị ghi đè.'))return;
       prev=JSON.stringify(db);
       try{localStorage.setItem('kk_db_prev',prev);}catch(x){}
       Promise.all(Object.keys(ph).map(function(k){return PH.put(k,ph[k]);})).then(function(rs){
@@ -5949,7 +6036,8 @@ var A={
       var d;
       try{d=JSON.parse(e.target.result);}catch(err){toast('File không hợp lệ: không đọc được JSON');return;}
       var bad=validBackup(d);if(bad){toast('File không hợp lệ: '+bad);return;}
-      var msg='Thay thế TOÀN BỘ dữ liệu trên máy này bằng file đã chọn?\n\nFile có: '+d.periods.length+' kỳ vật tư, '+(d.assets||[]).length+' kỳ CCDC/TSCĐ, '+(d.handovers||[]).length+' biên bản bàn giao.\nMáy này hiện có: '+db.periods.length+' kỳ vật tư, '+(db.assets||[]).length+' kỳ CCDC/TSCĐ.\n\nDữ liệu hiện tại sẽ được giữ 1 bản tạm trên máy để quay lui (Cài đặt › Khôi phục bản tạm).';
+      var ig=bkIntegrity(d);if(ig.bad){alert('KHÔNG thay thế: '+ig.bad+'\n\nDữ liệu trên máy được giữ nguyên.');return;}
+      var msg=(ig.warn?'⚠ '+ig.warn+'\n\n':'')+'Thay thế TOÀN BỘ dữ liệu trên máy này bằng file đã chọn?\n\nFile có: '+d.periods.length+' kỳ vật tư, '+(d.assets||[]).length+' kỳ CCDC/TSCĐ, '+(d.handovers||[]).length+' biên bản bàn giao.\nMáy này hiện có: '+db.periods.length+' kỳ vật tư, '+(db.assets||[]).length+' kỳ CCDC/TSCĐ.\n\nDữ liệu hiện tại sẽ được giữ 1 bản tạm trên máy để quay lui (Cài đặt › Khôi phục bản tạm).';
       if(!confirm(msg))return;
       var ph=d.__photos||{};delete d.__photos;delete d.__sync;
       var prev=JSON.stringify(db);
@@ -7125,7 +7213,7 @@ document.getElementById('bnav').innerHTML=
  +'<button data-k="rep" onclick="A.go(\'reporthub\')">'+icon('bars',24)+'Biểu mẫu</button>'
  +'<button data-k="more" onclick="A.drawerToggle()">'+icon('dots',24)+'Khác</button>';
 
-(function(){
+store.boot(function(){
   var saved=store.load();
   if(saved&&saved.periods)db=sanitizeDb(saved);
   if(store.bad){
@@ -7163,7 +7251,7 @@ document.getElementById('bnav').innerHTML=
     wm.style.cssText='position:fixed;inset:0;z-index:9000;pointer-events:none;background-image:url('+url+');background-repeat:repeat;background-size:'+W+'px '+H+'px';
     document.body.appendChild(wm);
   }catch(e){}
-})();
+});
 /* ===== ĐỐI CHIẾU DOANH THU – XUẤT KHO V5 (khớp theo mã KH + vật tư + số lượng; không dùng nhóm vật tư) ===== */
 var RC_SEED={"dv":[["Osstem","Trụ Osstem (Hàn)","TRỤ OSSTEM (HÀN)"],["Hiossen","Trụ Hiossen (Mỹ) - AET3","TRỤ HIOSSEN"],["Biotem","Trụ Biotem","TRỤ BIOTEM"],["Nobel","Trụ NobelActive","TRỤ NOBEL"],["Ti Ultra","Trụ NobelActive cổ vàng","TRỤ NOBEL TI ULTRA"],["Neobiotech","Trụ Neobiotech","TRỤ NEOBIOTECH"],["Straumann","Trụ straumann","TRỤ STRAUMANN"],["SLActive","Trụ Straumann Active","TRỤ STRAUMANN ACTIVE"],["Neodent","Trụ Neodent","TRỤ NEODENT"],["Neodent","Trụ Neodent","TRỤ NEODENT"],["Neodent Straumann","Trụ Neodent","TRỤ NEODENT"],["Neoporos","Trụ Neodent Neoporos","TRỤ NEODENT NEOPOROS"],["mắc cài","Mắc cài kim loại thường","MẮC CÀI KIM LOẠI THƯỜNG"],["tự buộc","Mắc cài kim loại tự buộc MBT 022","MẮC CÀI TỰ BUỘC MBT 022"],["mắc cài sứ","Mắc cài sứ thường AO","MẮC CÀI SỨ AO"],["bột xương","Bột xương","BỘT XƯƠNG"],["Osteon","Bột xương","BỘT XƯƠNG"],["ghép xương","Bột xương","BỘT XƯƠNG"],["màng xương","Màng xương","MÀNG XƯƠNG"],["vít chỉnh nha","Vít chỉnh nha","VÍT CHỈNH NHA"],["Minivis","Vít chỉnh nha","VÍT CHỈNH NHA"],["NANCE","Vít chỉnh nha","VÍT CHỈNH NHA"],["Comprehensive 3","Invisalign Comprehensive 3","INVISALIGN COMPREHENSIVE 3"],["Comprehensive 5","Invisalign Comprehensive 5","INVISALIGN COMPREHENSIVE 5"],["Moderate","Invisalign Moderate","INVISALIGN MODERATE"],["First Phase I","Invisalign First Phase I","INVISALIGN FIRST PHASE I"],["Essential","Invisalign Essential","INVISALIGN ESSENTIAL"],["sứ tự buộc","Mắc cài sứ tự buộc empower 2.0","MẮC CÀI SỨ TỰ BUỘC EMPOWER 2.0"],["hướng dẫn phẫu thuật","Dụng cụ cố định vị trí băng nhựa sử dụng trên máy định vị Pdent","MÁY ĐỊNH VỊ PHẪU THUẬT"],["Osstem + abutment + sứ Katana","Trụ Osstem (Hàn) - NoMount","TRỤ OSSTEM (HÀN) - NOMOUNT"]],"vt":[["Bột xương","BỘT XƯƠNG"],["Bột xương cerabone 1cc","BỘT XƯƠNG"],["Bột xương dùng trong nha khoa Osteon 1cc","BỘT XƯƠNG"],["Vật liệu ghép xương OSTEON 1CC","BỘT XƯƠNG"],["Màng xương","MÀNG XƯƠNG"],["Màng xương CM 20x30S","MÀNG XƯƠNG"],["Màng xương GCM 15x20","MÀNG XƯƠNG"],["Màng xương GCM 20x30","MÀNG XƯƠNG"],["Màng xương jason colagent","MÀNG XƯƠNG"],["Trụ Biotem","TRỤ BIOTEM"],["Chân trụ răng Hiossen - AET3 (NH)","TRỤ HIOSSEN"],["Trụ Hiossen (Mỹ) - AET3","TRỤ HIOSSEN"],["Trụ Hiossen AET3 NH/ Trụ Hiossen AET3","TRỤ HIOSSEN"],["Trụ Hiossen AET3/ Trụ Hiossen AET3 NH","TRỤ HIOSSEN"],["Trụ Neobiotech","TRỤ NEOBIOTECH"],["Trụ chân răng NeoBiotech","TRỤ NEOBIOTECH"],["Trụ Neodent","TRỤ NEODENT"],["Trụ Neodent Neoporos","TRỤ NEODENT NEOPOROS"],["Trụ neodent","TRỤ NEODENT"],["Trụ neodent Neoporos","TRỤ NEODENT NEOPOROS"],["Nobel Active cổ vàng","TRỤ NOBEL TI ULTRA"],["Trụ Nobel Active","TRỤ NOBEL"],["Trụ NobelActive","TRỤ NOBEL"],["Trụ NobelActive cổ vàng","TRỤ NOBEL TI ULTRA"],["Trụ Straumann Active","TRỤ STRAUMANN ACTIVE"],["Trụ straumann","TRỤ STRAUMANN"],["Vít chỉnh nha","VÍT CHỈNH NHA"],["Vít chỉnh nha Hoặc Vít chỉnh nha Jeli / Vít chỉnh nha KMS","VÍT CHỈNH NHA"],["Vít chỉnh nha Jeil","VÍT CHỈNH NHA"],["Vít chỉnh nha KMS","VÍT CHỈNH NHA"],["Invisalign Comprehensive 3","Invisalign Comprehensive 3"],["Invisalign Comprehensive 5","Invisalign Comprehensive 5"],["Invisalign Moderate","Invisalign Moderate"],["Invisalign First Phase I","Invisalign First Phase I"],["Invisalign Essential","Invisalign Essential"],["Vít Neo Screw","VÍT CHỈNH NHA"],["Dụng cụ cố định vị trí băng nhựa sử dụng trên máy định vị Pdent","MÁY ĐỊNH VỊ PHẪU THUẬT"],["Trụ Osstem (Hàn)","TRỤ OSSTEM (HÀN)"],["Trụ Osstem (Hàn) - NoMount","TRỤ OSSTEM (HÀN) - NOMOUNT"],["Mắc cài kim loại thường","MẮC CÀI KIM LOẠI THƯỜNG"],["Mắc cài kim loại thường 3m","MẮC CÀI KIM LOẠI THƯỜNG 3M"],["Mắc cài kim loại thường (Hàn quốc)","MẮC CÀI KIM LOẠI THƯỜNG HÀN QUỐC"],["Mắc cài kim loại thường Standard (MBT)","MẮC CÀI KIM LOẠI THƯỜNG MBT"],["Mắc cài kim loại thường BIO","MẮC CÀI KIM LOẠI THƯỜNG BIO"],["Mắc cài sứ thường AO","MẮC CÀI SỨ AO"],["Mắc cài sứ gemini 3m","MẮC CÀI SỨ GEMINI 3M"],["Mắc cài kim loại tự buộc MBT 022","MẮC CÀI TỰ BUỘC MBT 022"],["Mắc cài kim loại tự buộc 3M","MẮC CÀI TỰ BUỘC 3M"],["Mắc cài kim loại tự khóa 3M","MẮC CÀI TỰ KHÓA 3M"],["Mắc cài kim loại tự buộc empower","MẮC CÀI TỰ BUỘC EMPOWER"],["Mắc cài sứ tự buộc empower 2.0","MẮC CÀI SỨ TỰ BUỘC EMPOWER 2.0"],["Mắc cài sứ tự buộc Empower Clear","MẮC CÀI SỨ TỰ BUỘC EMPOWER CLEAR"],["Mắc cài sứ tự buộc Clarus - C","MẮC CÀI SỨ TỰ BUỘC CLARUS-C"],["Mắc cài chỉnh nha Atlas Mini Bracket","MẮC CÀI CHỈNH NHA ATLAS MINI BRACKET"],["Vít chỉnh nha Jiscop","VÍT CHỈNH NHA"],["Xương khối Osteon Collagen","BỘT XƯƠNG"],["Chân trụ răng Hiossen - AET3 (NH)","TRỤ HIOSSEN"],["Trụ Hiossen (Mỹ) - AET3","TRỤ HIOSSEN"],["Trụ Straumann Active size mini 2.9","TRỤ STRAUMANN ACTIVE"],["Vít chỉnh nha Jeil","VÍT CHỈNH NHA"],["Màng xương CM 20x30S","MÀNG XƯƠNG"],["Xương collagen OSTEON 6×10 cm","BỘT XƯƠNG"],["Bột xương dùng trong nha khoa Osteon 1cc","BỘT XƯƠNG"],["Bộ chỉnh nha Invisalign System - Comprehensive 3","Invisalign Comprehensive 3"],["Bộ chỉnh nha Invisalign System - Comprehensive 5","Invisalign Comprehensive 5"],["Bộ chỉnh nha Essential","Invisalign Essential"],["Vít chỉnh nha Jiscop","VÍT CHỈNH NHA"]],"grp":[["TRỤ NEODENT","Trụ Implant","Cao",2900000.0],["TRỤ NEODENT NEOPOROS","Trụ Implant","Cao",2900000.0],["TRỤ HIOSSEN","Trụ Implant","Cao",1583634.0],["TRỤ BIOTEM","Trụ Implant","Cao",814038.0],["TRỤ STRAUMANN","Trụ Implant","Cao",14000000.0],["TRỤ STRAUMANN ACTIVE","Trụ Implant","Cao",14000000.0],["TRỤ NOBEL","Trụ Implant","Cao",4610766.0],["TRỤ NOBEL TI ULTRA","Trụ Implant","Cao",4610766.0],["TRỤ NEOBIOTECH","Trụ Implant","Cao",2000000.0],["BỘT XƯƠNG","Vật tư khác","Thấp",2120400.0],["MÀNG XƯƠNG","Vật tư khác","Thấp",2986800.0],["VÍT CHỈNH NHA","Vật tư khác","Thấp",327444.0],["MÁY ĐỊNH VỊ PHẪU THUẬT","Vật tư khác","Thấp",5000000.0],["INVISALIGN COMPREHENSIVE 3","INVISALIGN","",0.0],["INVISALIGN COMPREHENSIVE 5","INVISALIGN","",0.0],["INVISALIGN MODERATE","INVISALIGN","",0.0],["INVISALIGN FIRST PHASE I","INVISALIGN","",0.0],["INVISALIGN ESSENTIAL","INVISALIGN","",0.0],["TRỤ OSSTEM (HÀN)","Trụ Implant","Cao",1513600.0],["TRỤ OSSTEM (HÀN) - NOMOUNT","Trụ Implant","Cao",1513600.0],["MẮC CÀI KIM LOẠI THƯỜNG","Mắc cài","Trung bình",426667.0],["MẮC CÀI CHỈNH NHA ATLAS MINI BRACKET","Mắc cài","Trung bình",426667.0],["MẮC CÀI KIM LOẠI THƯỜNG 3M","Mắc cài","Trung bình",426667.0],["MẮC CÀI KIM LOẠI THƯỜNG HÀN QUỐC","Mắc cài","Trung bình",426667.0],["MẮC CÀI KIM LOẠI THƯỜNG MBT","Mắc cài","Trung bình",426667.0],["MẮC CÀI KIM LOẠI THƯỜNG BIO","Mắc cài","Trung bình",426667.0],["MẮC CÀI SỨ AO","Mắc cài","Trung bình",426667.0],["MẮC CÀI SỨ GEMINI 3M","Mắc cài","Trung bình",426667.0],["MẮC CÀI TỰ BUỘC MBT 022","Mắc cài","Trung bình",2095238.0],["MẮC CÀI TỰ BUỘC 3M","Mắc cài","Trung bình",2095238.0],["MẮC CÀI TỰ KHÓA 3M","Mắc cài","Trung bình",2095238.0],["MẮC CÀI TỰ BUỘC EMPOWER","Mắc cài","Trung bình",2095238.0],["MẮC CÀI SỨ TỰ BUỘC EMPOWER 2.0","Mắc cài","Trung bình",2095238.0],["MẮC CÀI SỨ TỰ BUỘC EMPOWER CLEAR","Mắc cài","Trung bình",2095238.0],["MẮC CÀI SỨ TỰ BUỘC CLARUS-C","Mắc cài","Trung bình",2095238.0]],"dm":[["all-on-4",4],["all on 4",4],["allon4",4],["all-on 4",4],["all-on-5",5],["all on 5",5],["all-on-6",6],["all on 6",6],["allon6",6],["all-on 6",6],["all-on-8",8],["all on 8",8],["toàn hàm",1]],"cs":[["Ba Đình - Nghĩa Dũng","41 Nghĩa Dũng"],["41 Nghĩa Dũng-Ba Đình","41 Nghĩa Dũng"],["41 Nghĩa Dũng - Ba Đình","41 Nghĩa Dũng"],["Nghĩa Dũng","41 Nghĩa Dũng"],["Bùi Thị Xuân","Bùi Thị Xuân"],["Hà Nội","Cát Linh"],["Cát Linh","Cát Linh"],["Cát Linh (Hà Nội)","Cát Linh"],["Lê Văn Lương","Lê Văn Lương"],["Quảng Ninh","Quảng Ninh"]],"dvvt":[["Phẫu thuật cấy ghép Implant (Biotem + abutment)","13000102"],["Phẫu thuật cấy ghép Implant (Biotem + abutment + sứ Katana)","13000102"],["Phẫu thuật cấy ghép Implant (Neobiotech + abutment + sứ Katana)","13000163"],["Phẫu thuật cấy ghép Implant (Osstem + abutment)","13000089"],["Phẫu thuật cấy ghép Implant (Osstem + abutment)","13000090"],["Phẫu thuật cấy ghép Implant (Osstem + abutment + sứ Katana)","13000089"],["Phẫu thuật cấy ghép Implant (Osstem + abutment + sứ Katana)","13000090"],["Phẫu thuật cấy ghép Implant (Hiossen + abutment + sứ Katana)","13000087"],["Phẫu thuật cấy ghép Implant (Neodent Neoporos + abutment cá nhân + sứ Katana)","13000170"],["Phẫu thuật cấy ghép Implant (Neodent Neoporos + abutment)","13000170"],["Phẫu thuật cấy ghép Implant (Neodent Acqua + abutment cá nhân + sứ Katana)","13000088"],["Phẫu thuật cấy ghép Implant (Straumann BLT SLA Titanium + abutment cá nhân + sứ Katana)","13000091"],["Phẫu thuật cấy ghép Implant (Straumann BLT SLActive Roxolid + abutment cá nhân + sứ Katana)","13000169"],["Phẫu thuật cấy ghép Implant (Nobel Ti Ultra + abutment)","13000160"],["Phẫu thuật cấy ghép Implant (Nobel Ti Unite + abutment)","13000103"],["Phẫu thuật ghép xương nhân tạo để cấy ghép implant","13000057"],["Phẫu thuật ghép xương nhân tạo để cấy ghép implant","13000058"],["Phẫu thuật ghép xương nhân tạo để cấy ghép implant","13000130"],["Phẫu thuật ghép xương nhân tạo để cấy ghép implant","13000168"],["Phẫu thuật ghép xương nhân tạo để cấy ghép implant","13000182"],["Phẫu thuật ghép xương nhân tạo để cấy ghép implant","13000162"],["Phẫu thuật tái tạo xương ổ răng bằng ghép xương tự thân lấy trong miệng (màng xương nhân tạo)","13000009"],["Phẫu thuật tái tạo xương ổ răng bằng ghép xương tự thân lấy trong miệng (màng xương nhân tạo)","13000034"],["Phẫu thuật tái tạo xương ổ răng bằng ghép xương tự thân lấy trong miệng (màng xương nhân tạo)","13000152"],["Phẫu thuật tái tạo xương ổ răng bằng ghép xương tự thân lấy trong miệng (màng xương nhân tạo)","13000162"],["Phẫu thuật tái tạo xương ổ răng bằng ghép xương tự thân lấy trong miệng (màng xương nhân tạo)","13000181"],["Phẫu thuật tái tạo xương ổ răng bằng ghép xương tự thân lấy trong miệng (màng xương nhân tạo)","13000059"],["Phẫu thuật cấy ghép Implant (All-on-4 Osstem)","13000089"],["Phẫu thuật cấy ghép Implant (All-on-4 Osstem)","13000090"],["Phẫu thuật cấy ghép Implant (All-on-4 Osstem - Hàm nhựa thường)","13000089"],["Phẫu thuật cấy ghép Implant (All-on-4 Osstem - Hàm nhựa thường)","13000090"],["Phẫu thuật cấy ghép Implant (All-on-4 Osstem - Hàm nhựa Ivo base)","13000089"],["Phẫu thuật cấy ghép Implant (All-on-4 Osstem - Hàm nhựa Ivo base)","13000090"],["Phẫu thuật cấy ghép Implant (All-on-4 Osstem - Răng sứ Katana)","13000089"],["Phẫu thuật cấy ghép Implant (All-on-4 Osstem - Răng sứ Katana)","13000090"],["Phẫu thuật cấy ghép Implant (All-on-4 Osstem - Răng sứ Cercon HT)","13000089"],["Phẫu thuật cấy ghép Implant (All-on-4 Osstem - Răng sứ Cercon HT)","13000090"],["Phẫu thuật cấy ghép Implant (All-on-4 Osstem - Răng sứ Lava)","13000089"],["Phẫu thuật cấy ghép Implant (All-on-4 Osstem - Răng sứ Lava)","13000090"],["Phẫu thuật cấy ghép Implant (All-on-6 Osstem)","13000089"],["Phẫu thuật cấy ghép Implant (All-on-6 Osstem)","13000090"],["Phẫu thuật cấy ghép Implant (All-on-6 Osstem - Hàm nhựa thường)","13000089"],["Phẫu thuật cấy ghép Implant (All-on-6 Osstem - Hàm nhựa thường)","13000090"],["Phẫu thuật cấy ghép Implant (All-on-6 Osstem - Hàm nhựa Ivo base)","13000089"],["Phẫu thuật cấy ghép Implant (All-on-6 Osstem - Hàm nhựa Ivo base)","13000090"],["Phẫu thuật cấy ghép Implant (All-on-6 Osstem - Răng sứ Katana)","13000089"],["Phẫu thuật cấy ghép Implant (All-on-6 Osstem - Răng sứ Katana)","13000090"],["Phẫu thuật cấy ghép Implant (All-on-6 Osstem - Răng sứ Cercon HT)","13000089"],["Phẫu thuật cấy ghép Implant (All-on-6 Osstem - Răng sứ Cercon HT)","13000090"],["Phẫu thuật cấy ghép Implant (All-on-6 Osstem - Răng sứ Lava)","13000089"],["Phẫu thuật cấy ghép Implant (All-on-6 Osstem - Răng sứ Lava)","13000090"],["Phẫu thuật cấy ghép Implant (All-on-4 Neodent Neoporos)","13000170"],["Phẫu thuật cấy ghép Implant (All-on-4 Neodent Neoporos - Hàm nhựa thường)","13000170"],["Phẫu thuật cấy ghép Implant (All-on-4 Neodent Neoporos - Hàm nhựa Ivo base)","13000170"],["Phẫu thuật cấy ghép Implant (All-on-4 Neodent Neoporos - Răng sứ Katana)","13000170"],["Phẫu thuật cấy ghép Implant (All-on-4 Neodent Neoporos - Răng sứ Cercon HT)","13000170"],["Phẫu thuật cấy ghép Implant (All-on-4 Neodent Neoporos - Răng sứ Lava)","13000170"],["Phẫu thuật cấy ghép Implant (All-on-6 Neodent Neoporos)","13000170"],["Phẫu thuật cấy ghép Implant (All-on-6 Neodent Neoporos - Hàm nhựa thường)","13000170"],["Phẫu thuật cấy ghép Implant (All-on-6 Neodent Neoporos - Hàm nhựa Ivo base)","13000170"],["Phẫu thuật cấy ghép Implant (All-on-6 Neodent Neoporos - Răng sứ Katana)","13000170"],["Phẫu thuật cấy ghép Implant (All-on-6 Neodent Neoporos - Răng sứ Cercon HT)","13000170"],["Phẫu thuật cấy ghép Implant (All-on-6 Neodent Neoporos - Răng sứ Lava)","13000170"],["Phẫu thuật cấy ghép Implant (All-on-4 Straumann BLT SLA Titaninum)","13000091"],["Phẫu thuật cấy ghép Implant (All-on-4 Straumann BLT SLA Titaninum - Hàm nhựa thường)","13000091"],["Phẫu thuật cấy ghép Implant (All-on-4 Straumann BLT SLA Titaninum - Hàm nhựa Ivo base)","13000091"],["Phẫu thuật cấy ghép Implant (All-on-4 Straumann BLT SLA Titaninum - Răng sứ Katana)","13000091"],["Phẫu thuật cấy ghép Implant (All-on-4 Straumann BLT SLA Titaninum - Răng sứ Cercon HT)","13000091"],["Phẫu thuật cấy ghép Implant (All-on-4 Straumann BLT SLA Titaninum - Răng sứ Lava)","13000091"],["Phẫu thuật cấy ghép Implant (All-on-6 Straumann BLT SLA Titaninum)","13000091"],["Phẫu thuật cấy ghép Implant (All-on-6 Straumann BLT SLA Titaninum - Hàm nhựa thường)","13000091"],["Phẫu thuật cấy ghép Implant (All-on-6 Straumann BLT SLA Titaninum - Hàm nhựa Ivo base)","13000091"],["Phẫu thuật cấy ghép Implant (All-on-6 Straumann BLT SLA Titaninum - Răng sứ Katana)","13000091"],["Phẫu thuật cấy ghép Implant (All-on-6 Straumann BLT SLA Titaninum - Răng sứ Cercon HT)","13000091"],["Phẫu thuật cấy ghép Implant (All-on-6 Straumann BLT SLA Titaninum - Răng sứ Lava)","13000091"],["Cấy ghép implant (máy hướng dẫn phẫu thuật)","10000580"],["Khí cụ neo chặn cố định Minivis","14000398"],["Khí cụ neo chặn cố định Minivis","14000373"],["Khí cụ neo chặn cố định Minivis","14000017"],["Nắn chỉnh răng sử dụng mắc cài trực tiếp mặt ngoài (Mắc cài kim loại - 1 hàm)","14000047"],["Nắn chỉnh răng sử dụng mắc cài trực tiếp mặt ngoài (Mắc cài kim loại - 1 hàm)","14000090"],["Nắn chỉnh răng sử dụng mắc cài trực tiếp mặt ngoài (Mắc cài kim loại - 1 hàm)","14000343"],["Nắn chỉnh răng sử dụng mắc cài trực tiếp mặt ngoài (Mắc cài kim loại - 1 hàm)","14000356"],["Nắn chỉnh răng sử dụng mắc cài trực tiếp mặt ngoài (Mắc cài kim loại - 1 hàm)","14000401"],["Nắn chỉnh răng sử dụng mắc cài trực tiếp mặt ngoài (Mắc cài kim loại - 2 hàm)","14000047"],["Nắn chỉnh răng sử dụng mắc cài trực tiếp mặt ngoài (Mắc cài kim loại - 2 hàm)","14000090"],["Nắn chỉnh răng sử dụng mắc cài trực tiếp mặt ngoài (Mắc cài kim loại - 2 hàm)","14000343"],["Nắn chỉnh răng sử dụng mắc cài trực tiếp mặt ngoài (Mắc cài kim loại - 2 hàm)","14000356"],["Nắn chỉnh răng sử dụng mắc cài trực tiếp mặt ngoài (Mắc cài kim loại - 2 hàm)","14000401"],["Nắn chỉnh răng sử dụng mắc cài trực tiếp mặt ngoài (Mắc cài sứ - 1 hàm)","14000375"],["Nắn chỉnh răng sử dụng mắc cài trực tiếp mặt ngoài (Mắc cài sứ - 1 hàm)","14000056"],["Nắn chỉnh răng sử dụng mắc cài trực tiếp mặt ngoài (Mắc cài sứ - 2 hàm)","14000375"],["Nắn chỉnh răng sử dụng mắc cài trực tiếp mặt ngoài (Mắc cài sứ - 2 hàm)","14000056"],["Nắn chỉnh răng sử dụng mắc cài tự buộc (Mắc cài Titanium - 1 hàm)","14000375"],["Nắn chỉnh răng sử dụng mắc cài tự buộc (Mắc cài Titanium - 1 hàm)","14000056"],["Nắn chỉnh răng sử dụng mắc cài tự buộc (Mắc cài Titanium - 2 hàm)","14000355"],["Nắn chỉnh răng sử dụng mắc cài tự buộc (Mắc cài Titanium - 2 hàm)","14000046"],["Nắn chỉnh răng sử dụng mắc cài tự buộc (Mắc cài Titanium - 2 hàm)","14000078"],["Nắn chỉnh răng sử dụng mắc cài tự buộc (Mắc cài Titanium - 2 hàm)","14000001"],["Sử dụng mắc cài tự buộc trong nắn chỉnh răng (Mắc cài sứ tự buộc - 1 hàm)","14000039"],["Sử dụng mắc cài tự buộc trong nắn chỉnh răng (Mắc cài sứ tự buộc - 1 hàm)","14000111"],["Sử dụng mắc cài tự buộc trong nắn chỉnh răng (Mắc cài sứ tự buộc - 1 hàm)","14000164"],["Sử dụng mắc cài tự buộc trong nắn chỉnh răng (Mắc cài sứ tự buộc - 2 hàm)","14000039"],["Sử dụng mắc cài tự buộc trong nắn chỉnh răng (Mắc cài sứ tự buộc - 2 hàm)","14000111"],["Sử dụng mắc cài tự buộc trong nắn chỉnh răng (Mắc cài sứ tự buộc - 2 hàm)","14000164"],["Nắn chỉnh răng sử dụng hệ thống khay cá nhân (Invisalign Comprehensive 5 năm)","14000342"],["Nắn chỉnh răng sử dụng hệ thống khay cá nhân (Invisalign Comprehensive 3 năm)","14000332"],["Nắn chỉnh răng sử dụng hệ thống khay cá nhân (Invisalign Moderate)","14000154"],["Nắn chỉnh răng sử dụng hệ thống khay cá nhân (Invisalign First Phase I)","14000156"],["Nắn chỉnh răng sử dụng hệ thống khay cá nhân (Invisalign Essential)","14000157"],["Nắn chỉnh răng sử dụng hệ thống khay cá nhân (Hàm duy trì Vivera 1 bộ)","14000329"],["Nắn chỉnh răng sử dụng hệ thống khay cá nhân (Hàm duy trì Vivera 1 bộ)","14000410"],["Nắn chỉnh răng sử dụng hệ thống khay cá nhân (Hàm duy trì Vivera 3 bộ)","14000329"],["Nắn chỉnh răng sử dụng hệ thống khay cá nhân (Hàm duy trì Vivera 3 bộ)","14000410"],["Khí cụ neo chặn cố định Minivis","14000418"],["Nắn chỉnh răng sử dụng mắc cài trực tiếp mặt ngoài (Mắc cài kim loại - 1 hàm)","14000050"],["Nắn chỉnh răng sử dụng mắc cài trực tiếp mặt ngoài (Mắc cài kim loại - 2 hàm)","14000050"],["Phẫu thuật ghép xương nhân tạo để cấy ghép implant","13000092"],["Phẫu thuật ghép xương nhân tạo để cấy ghép implant","13000196"]]};
 var RC_LD=["Muộn kỳ","Liên cơ sở","Bảo hành","Phác đồ duyệt","Sai PID","Ký gửi","Khác"];
@@ -7956,6 +8044,7 @@ Object.assign(A,{
   rcCfgDel:function(i){if(!confirm("Xóa dòng cấu hình này?"))return;rcDb().cfg.splice(i,1);saveSoon();renderRecon();},
   rcCfgReset:function(){if(!confirm("Khôi phục cấu hình dịch vụ → vật tư về mặc định? Các dòng bạn đã thêm/sửa sẽ mất."))return;rcDb().cfg=rcSeedCfg(RC_SEED);saveSoon();renderRecon();},
   rcCfgTpl:function(){
+    if(!kkNeed(["xlsx"],function(){A.rcCfgTpl();}))return;
     var R=rcDb(),wb=XLSX.utils.book_new(),a=[RC_CF.map(function(f){return f[1];})];
     R.cfg.forEach(function(c){a.push([c.dv,c.ma||"",c.ten||"",rcDm(c),c.alt||"",+c.gia||0]);});
     if(a.length===1)a.push(["VÍ DỤ: Phẫu thuật cấy ghép Implant (Neodent Neoporos + abutment)","13000170","Trụ Neodent Neoporos",1,"Trụ neodent Neoporos; 13000171",2900000]);
@@ -7974,6 +8063,7 @@ Object.assign(A,{
     rcWbOut(wb,"CauHinh_DinhMuc_DichVu.xlsx");
   },
   rcCfgFile:function(inp,mode){
+    if(!kkNeed(["xlsx"],function(){A.rcCfgFile(inp,mode);}))return;
     var f=inp.files&&inp.files[0];if(!f)return;
     var fr=new FileReader();
     fr.onload=function(){
@@ -8037,6 +8127,7 @@ Object.assign(A,{
   rcMapReset:function(){if(!confirm("Khôi phục bảng này về bản gốc? Các dòng bạn đã thêm sẽ mất."))return;rcDb().maps[RC.map]=JSON.parse(JSON.stringify(RC_SEED[RC.map]));saveSoon();renderRecon();},
   /* ----- mẫu nhập liệu chuẩn ----- */
   rcTpl:function(){
+    if(!kkNeed(["xlsx"],function(){A.rcTpl();}))return;
     var wb=XLSX.utils.book_new();
     var dt=[["Cơ sở","Mã KH (PID)","Khách hàng","Bác sĩ","Ngày DV","Dịch vụ","SL dịch vụ","Doanh thu (VND)"],
       ["VÍ DỤ: Cát Linh","PID0001234","Nguyễn Văn A","BS Hùng","15/10/2026","Phẫu thuật cấy ghép Implant (Neodent Neoporos + abutment)",1,25000000]];
@@ -8064,6 +8155,7 @@ Object.assign(A,{
     rcWbOut(wb,"Mau_nhap_DoiChieu_DT_XuatKho.xlsx");
   },
   rcFile:function(inp,kind){
+    if(!kkNeed(["xlsx"],function(){A.rcFile(inp,kind);}))return;
     var f=inp.files&&inp.files[0];if(!f)return;
     var fr=new FileReader();
     fr.onload=function(){
@@ -8081,6 +8173,7 @@ Object.assign(A,{
     fr.readAsArrayBuffer(f);
   },
   rcExport:function(){
+    if(!kkNeed(["xlsx"],function(){A.rcExport();}))return;
     var Z=RC_RES,R=rcDb(),wb=XLSX.utils.book_new();
     var a=[["Cơ sở","Mã KH","Khách hàng","Ngày DV","Dịch vụ","SL dịch vụ","Giá trị DT","Vật tư theo định mức","SL cần (gộp)","SL thực xuất","Chênh","Giá trị lệch","Trạng thái","Kết quả cuối","Vật tư đã xuất khác","Mã lý do","Giải trình","Trạng thái xử lý"]];
     Z.dt.filter(rcIn).forEach(function(o){var n=R.notes[o.nid]||{};a.push([o.cs,o.pid,o.r.kh,o.r.ngay,o.r.dv,rcNum(o.r.sl),o.rowFirst?rcNum(o.r.dt):"",o.ten||"",o.first?o.O:"",o.first?o.P:"",o.first?o.Q:"",o.first?o.R:"",o.none?o.T:(o.first?o.T:"Dòng gộp"),o.none?o.T:(o.first?o.fin:""),(o.wrong||[]).map(function(w){return (w.ten||"")+(w.ma?" ("+w.ma+")":"");}).join("; "),n.r||"",n.g||"",n.st||""]);});
@@ -8606,7 +8699,10 @@ Object.assign(A,{
 /* ================= Đề nghị thanh toán NCC (theo file Excel FN_ĐỀ NGHỊ TT) =================
    Nhập file Excel đối chiếu (sheet DANH MUC NCC, MUA_HANG, HOA_DON_MISA) → đối chiếu Mua hàng ⇄ HĐ MISA theo số HĐ
    → lập Giấy đề nghị thanh toán + Bảng kê hóa đơn + Danh sách thanh toán, xuất Excel đúng bố cục file mẫu. */
-var PAY={q:"",f:"all",sel:"",v:"",ed:"",ec:"all",csOpen:0};
+var PAY={q:"",f:"all",sel:"",v:"",ed:"",ec:"all",m:"all",csOpen:0};
+/* Lọc theo tháng (yyyymm hoặc "all"): tháng của phiếu = tháng HĐ MISA nếu đã khớp, nếu chưa thì tháng hạch toán của phiếu */
+function payInM(d){var m=PAY.m;return !m||m==="all"||!!(d&&Math.floor(d/100)===+m);}
+function payMLab(ym){ym=String(ym);return ym.slice(4)+"/"+ym.slice(0,4);}
 var PAY_CSL0=[["ND","Nghĩa Dũng"],["BTX","Bùi Thị Xuân"],["CL","Cát Linh"],["LVL","Lê Văn Lương"],["QN","Quảng Ninh"],["HO","Văn phòng"]],PAY_NGUONG_BK=4;
 var PAY_CFG0={nlap:"",pb:"Phòng Hành chính hậu cần",dv:"MEDDENTAL",dvcp:"HC115",ht:"Chuyển khoản",tgd:"Trần Phương Bình",ktt:"Nguyễn Thị Ngọc Anh",ql:"Nguyễn Văn Đại"};
 function payDb(){
@@ -8716,9 +8812,10 @@ function payCompute(){
       if(!r[6])st="noHd";else if(!h)st="missing";else if(cnt[r[6]]>1)st="dup";else if(Math.abs(h[6]-r[4])>0.5)st="diff";
       if(r[6])seen[r[6]]=1;
       var row={r:r,h:h,st:st,d:(h&&h[0])||r[0],tong:r[4],vat:h?h[5]:Math.max(0,r[4]-r[5]),pre:h?h[4]:r[5],note:payNoteGet(r)};
+      if(!payInM(row.d))return;
       g.rows.push(row);g.tong+=r[4];if(st==="ok")g.chot+=r[4];else g.bad++;if(row.note)g.nNote++;
     });
-    g.hd.forEach(function(h){if(!seen[h[7]]&&h[6]){g.extra.push(h);g.bad++;}});
+    g.hd.forEach(function(h){if(!seen[h[7]]&&h[6]&&payInM(h[0])){g.extra.push(h);g.bad++;}});
     g.nOk=g.rows.filter(function(x){return x.st==="ok";}).length;
     g.extraSum=g.extra.reduce(function(s,h){return s+h[6];},0);
     g.khop=g.rows.length>0&&!g.bad;
@@ -8812,6 +8909,17 @@ function payCheck(g){
   return {items:c,ok:all,end:all?"✔ SẴN SÀNG trình ký":"⚠ CẦN KIỂM TRA"};
 }
 var PAY_ST={ok:["Khớp","green"],noHd:["Thiếu số HĐ","red"],missing:["Chưa có HĐ MISA","red"],dup:["Trùng số HĐ","orange"],diff:["Sai giá trị","red"],extra:["HĐ MISA thừa","amber"]};
+function payMonths(){
+  var keep=PAY.m,c={};PAY.m="all";
+  try{
+    payCompute().forEach(function(g){
+      g.rows.forEach(function(x){if(x.d){var k=Math.floor(x.d/100);c[k]=(c[k]||0)+1;}});
+      g.extra.forEach(function(h){if(h[0]){var k=Math.floor(h[0]/100);c[k]=(c[k]||0)+1;}});
+    });
+  }finally{PAY.m=keep;}
+  return Object.keys(c).map(Number).sort(function(a,b){return b-a;}).map(function(k){return [String(k),c[k]];});
+}
+function payScopeLine(){return PAY.m==="all"?'':'<div class="rcscope-l">Đang lọc: <b>tháng '+payMLab(PAY.m)+'</b> · mọi nút xuất / in đều theo tháng này</div>';}
 /* ----- Giao diện ----- */
 function payTag(t,c){return '<span style="display:inline-block;padding:2px 9px;border-radius:99px;font-size:11px;font-weight:700;background:var(--'+c+'-bg);color:var(--'+c+')">'+esc(t)+'</span>';}
 function payHomeHtml(){
@@ -8831,12 +8939,21 @@ function payHomeHtml(){
     +'<div><div style="font-size:11px;color:var(--mut2);font-weight:700">GIỮ LẠI (LỆCH)</div><div style="font-size:20px;font-weight:800;color:'+(giu?'var(--red)':'var(--green)')+'">'+payF(giu)+'</div></div>'
     +'<div><div style="font-size:11px;color:var(--mut2);font-weight:700">NCC CHỐT ĐƯỢC</div><div style="font-size:20px;font-weight:800">'+nk+'</div></div>'
     +'<div><div style="font-size:11px;color:var(--mut2);font-weight:700">NCC CÓ LỆCH</div><div style="font-size:20px;font-weight:800">'+np+'</div></div></div>'
+    +payScopeLine()
     +'<button class="btn btn-primary" style="margin-bottom:8px" onclick="A.payPrintAll()">'+icon('file',17)+'In phiếu + bảng kê ('+L.filter(function(g){return g.khop;}).length+' NCC khớp)</button>'
     +'<div class="rcact"><button class="btn btn-outline" onclick="A.payXlsxDs()">'+icon('download',16)+'DS thanh toán</button><button class="btn btn-outline" onclick="A.payXlsxAll()">'+icon('download',16)+'Phiếu hàng loạt</button></div>'
+    +'<button class="btn btn-primary" style="margin-top:8px" onclick="A.payXlsxRecon()">'+icon('download',16)+'Xuất tổng hợp đối chiếu MISA ⇄ Mua hàng (từng phiếu)</button>'
     +'<button class="btn btn-outline" style="padding:9px;font-size:13px" onclick="document.getElementById(\'payin\').click()">'+icon('upload',16)+'Nạp lại file Excel</button>'
     +'<button class="btn btn-outline" style="padding:9px;font-size:13px;margin-top:8px" onclick="A.payTemplate()">'+icon('download',16)+'Tải file Excel mẫu</button></div>';
   h+=payErrCard();
   h+=payCfgHtml()+payCsCfgHtml();
+  var ms=payMonths();
+  if(PAY.m!=="all"&&!ms.some(function(m){return m[0]===PAY.m;}))PAY.m="all";
+  if(ms.length>1||PAY.m!=="all"){
+    var tot=0;ms.forEach(function(m){tot+=m[1];});
+    h+='<div style="font-size:11px;font-weight:700;color:var(--mut2);margin:0 2px 6px">LỌC THEO THÁNG (dữ liệu có '+ms.length+' tháng)</div><div class="rcchips">'
+      +[["all","Tất cả",tot]].concat(ms.map(function(m){return [m[0],payMLab(m[0]),m[1]];})).map(function(f){return '<button class="rcchip'+(PAY.m===f[0]?' on':'')+'" onclick="A.payMonth(\''+f[0]+'\')">'+f[1]+'<b>'+f[2]+'</b></button>';}).join("")+'</div>';
+  }
   var cnt={all:L.length,ok:0,bad:0,stk:0,note:0};
   L.forEach(function(g){if(g.khop)cnt.ok++;if(g.bad)cnt.bad++;if(!g.stk&&g.chot>0)cnt.stk++;if(g.nNote)cnt.note++;});
   var ccs={},ctot=0,cC=payCsCodes();
@@ -9104,6 +9221,73 @@ function payAddDs(wb,L,sn){
   ws.pageSetup.printArea="A$1:I$"+sg;
   return ws;
 }
+/* ----- Tổng hợp đối chiếu HĐ MISA ⇄ Mua hàng, khớp từng phiếu (1 file, 2 sheet) ----- */
+var PAY_ST_LB={ok:"Khớp",diff:"Lệch tiền",dup:"Trùng số HĐ ở nhiều phiếu",missing:"Chưa có HĐ MISA",noHd:"Phiếu thiếu số HĐ",extra:"HĐ MISA chưa có phiếu mua"};
+var PAY_ST_FILL={ok:"FFE2F0D9",diff:"FFFCE4D6",dup:"FFFFF2CC",missing:"FFFCE4D6",noHd:"FFFFF2CC",extra:"FFDDEBF7"};
+function payDObj(d){return d?new Date(Math.floor(d/10000),Math.floor(d/100)%100-1,d%100):null;}
+function payAddRecon(wb,L){
+  var thin={style:"thin",color:{argb:"FF8C96A8"}},bd={top:thin,left:thin,bottom:thin,right:thin};
+  var Ct={horizontal:"center",vertical:"middle",wrapText:true},Lf={horizontal:"left",vertical:"middle",wrapText:true},R={horizontal:"right",vertical:"middle"};
+  var used=new Set();L.forEach(function(g){g.hd.forEach(function(h){used.add(h);});});
+  var orphan=payDb().hd.filter(function(h){return !used.has(h)&&h[6]&&payInM(h[0]);});
+  function head(ws,row,cols){
+    cols.forEach(function(c,j){var cell=ws.getCell(row,j+1);cell.value=c[0];ws.getColumn(j+1).width=c[1];
+      cell.font=payFont({bold:true,color:{argb:"FFFFFFFF"}});cell.alignment=Ct;cell.border=bd;cell.fill={type:"pattern",pattern:"solid",fgColor:{argb:"FF1F4E79"}};});
+    ws.getRow(row).height=34;
+  }
+  function put(ws,r,c,v,al,fmt,fill){var cell=ws.getCell(r,c);cell.value=v;cell.font=payFont({size:10});cell.alignment=al||Lf;cell.border=bd;if(fmt)cell.numFmt=fmt;if(fill)cell.fill={type:"pattern",pattern:"solid",fgColor:{argb:fill}};return cell;}
+  /* ===== Sheet 1: TỔNG HỢP theo NCC ===== */
+  var w1=wb.addWorksheet("TONG HOP",{views:[{state:"frozen",ySplit:5}],pageSetup:{paperSize:9,orientation:"landscape",fitToPage:true,fitToWidth:1,fitToHeight:0}});
+  var t=payToday();
+  w1.getCell("A1").value="ĐỐI CHIẾU HÓA ĐƠN MISA ⇄ MUA HÀNG — TỔNG HỢP THEO NHÀ CUNG CẤP";w1.getCell("A1").font=payFont({size:14,bold:true});
+  w1.getCell("A2").value=(PAY.m==="all"?"Phạm vi: tất cả các tháng · ":"Phạm vi: THÁNG "+payMLab(PAY.m)+" · ")+"Ngày lập: "+("0"+t.d).slice(-2)+"/"+("0"+t.m).slice(-2)+"/"+t.y+" · Khóa khớp: NCC → số hóa đơn → giá trị (chênh > 0,5 đ là lệch). Chi tiết từng phiếu ở sheet TUNG PHIEU.";w1.getCell("A2").font=payFont({size:10,italic:true});
+  head(w1,5,[["STT",6],["Nhà cung cấp",44],["Số phiếu mua",11],["Tổng tiền phiếu mua",19],["Số HĐ MISA (đã gắn phiếu)",14],["Tổng tiền HĐ MISA (đã gắn phiếu)",20],["Số phiếu khớp",11],["Số phiếu lỗi",11],["HĐ MISA chưa có phiếu (số)",14],["HĐ MISA chưa có phiếu (tiền)",19],["Kết luận",30]]);
+  var r=6,S=[0,0,0,0,0,0,0,0];
+  L.forEach(function(g,i){
+    var seen={},nh=0,th=0;g.rows.forEach(function(x){if(x.h&&!seen[x.h[7]]){seen[x.h[7]]=1;nh++;th+=x.h[6];}});
+    var nBad=g.rows.length-g.nOk,ex=g.extra.length,vals=[i+1,g.full,g.rows.length,g.tong,nh,th,g.nOk,nBad,ex,g.extraSum];
+    var ket=g.khop?"Khớp toàn bộ":(g.nOk?"Khớp "+g.nOk+"/"+g.rows.length+" phiếu — còn "+(nBad+ex)+" mục cần xử lý":"Chưa khớp phiếu nào");
+    vals.forEach(function(v,j){put(w1,r,j+1,v,j===1?Lf:(j===3||j===5||j===9?R:Ct),(j===3||j===5||j===9)?"#,##0":null,g.khop?PAY_ST_FILL.ok:null);});
+    put(w1,r,11,ket,Lf,null,g.khop?PAY_ST_FILL.ok:PAY_ST_FILL.diff);
+    [2,3,4,5,6,7,8,9].forEach(function(k,j){S[j]+=vals[k]||0;});r++;
+  });
+  put(w1,r,1,"TỔNG CỘNG",Ct);w1.mergeCells(r,1,r,2);
+  [3,4,5,6,7,8,9,10].forEach(function(c,j){var col=String.fromCharCode(64+c);put(w1,r,c,{formula:"SUM("+col+"6:"+col+(r-1)+")",result:S[j]},c===4||c===6||c===10?R:Ct,c===4||c===6||c===10?"#,##0":null).font=payFont({size:10,bold:true});});
+  put(w1,r,11,"",Lf);
+  w1.autoFilter={from:{row:5,column:1},to:{row:Math.max(5,r-1),column:11}};
+  /* ===== Sheet 2: TỪNG PHIẾU ===== */
+  var w2=wb.addWorksheet("TUNG PHIEU",{views:[{state:"frozen",ySplit:4,xSplit:2}],pageSetup:{paperSize:9,orientation:"landscape",fitToPage:true,fitToWidth:1,fitToHeight:0}});
+  w2.getCell("A1").value="ĐỐI CHIẾU TỪNG PHIẾU MUA HÀNG ⇄ HÓA ĐƠN MISA";w2.getCell("A1").font=payFont({size:14,bold:true});
+  w2.getCell("A2").value="Lọc theo cột Trạng thái / Nhà cung cấp / Cơ sở để xử lý. Dòng xanh dương = HĐ MISA chưa có phiếu mua.";w2.getCell("A2").font=payFont({size:10,italic:true});
+  head(w2,4,[["STT",6],["Nhà cung cấp",34],["Cơ sở",9],["Ngày hạch toán (phiếu)",13],["Số chứng từ (phiếu)",20],["Số HĐ ghi trên phiếu",16],["Tiền phiếu mua",16],["Số HĐ MISA",16],["Ngày HĐ MISA",13],["Số CT MISA",18],["Tiền HĐ MISA",16],["Chênh lệch (phiếu − HĐ)",16],["Trạng thái",24],["Ghi chú / lỗi cơ sở",46]]);
+  var rr=5,n=0,sumP=0,sumH=0;
+  L.forEach(function(g){
+    var grp={};g.rows.forEach(function(x){if(x.r[6]){var o=grp[x.r[6]]=grp[x.r[6]]||{n:0,s:0};o.n++;o.s+=x.r[4];}});
+    g.rows.slice().sort(function(a,b){return (a.r[0]||0)-(b.r[0]||0);}).forEach(function(x){
+      var h=x.h,f=PAY_ST_FILL[x.st],note=[];
+      var nt=x.note;if(nt)payNoteErrs(nt).forEach(function(e){note.push(e.d);});
+      if(x.st==="dup"&&h)note.unshift(grp[x.r[6]].n+" phiếu cùng số HĐ; tổng các phiếu "+payF(grp[x.r[6]].s)+" · HĐ MISA "+payF(h[6]));
+      n++;put(w2,rr,1,n,Ct,null,f);put(w2,rr,2,g.full,Lf,null,f);put(w2,rr,3,x.r[7]||"",Ct,null,f);
+      put(w2,rr,4,payDObj(x.r[0]),Ct,"dd/mm/yyyy",f);put(w2,rr,5,x.r[1],Lf,null,f);put(w2,rr,6,x.r[2],Lf,null,f);put(w2,rr,7,x.r[4],R,"#,##0",f);
+      put(w2,rr,8,h?h[2]:"",Lf,null,f);put(w2,rr,9,h?payDObj(h[0]):null,Ct,"dd/mm/yyyy",f);put(w2,rr,10,h?h[1]:"",Lf,null,f);put(w2,rr,11,h?h[6]:null,R,"#,##0",f);
+      put(w2,rr,12,h?{formula:"G"+rr+"-K"+rr,result:x.r[4]-h[6]}:null,R,"#,##0;[Red]-#,##0",f);
+      put(w2,rr,13,PAY_ST_LB[x.st],Ct,null,f);put(w2,rr,14,note.join("; "),Lf,null,f);
+      sumP+=x.r[4];if(h)sumH+=h[6];rr++;
+    });
+    g.extra.forEach(function(h){
+      n++;var f=PAY_ST_FILL.extra;put(w2,rr,1,n,Ct,null,f);put(w2,rr,2,g.full,Lf,null,f);put(w2,rr,3,"",Ct,null,f);put(w2,rr,4,null,Ct,null,f);put(w2,rr,5,"",Lf,null,f);put(w2,rr,6,"",Lf,null,f);put(w2,rr,7,null,R,null,f);
+      put(w2,rr,8,h[2],Lf,null,f);put(w2,rr,9,payDObj(h[0]),Ct,"dd/mm/yyyy",f);put(w2,rr,10,h[1],Lf,null,f);put(w2,rr,11,h[6],R,"#,##0",f);put(w2,rr,12,null,R,null,f);put(w2,rr,13,PAY_ST_LB.extra,Ct,null,f);put(w2,rr,14,"",Lf,null,f);sumH+=h[6];rr++;
+    });
+  });
+  orphan.forEach(function(h){
+    n++;var f=PAY_ST_FILL.extra;put(w2,rr,1,n,Ct,null,f);put(w2,rr,2,h[8],Lf,null,f);[3,5,6].forEach(function(c){put(w2,rr,c,"",Lf,null,f);});put(w2,rr,4,null,Ct,null,f);put(w2,rr,7,null,R,null,f);
+    put(w2,rr,8,h[2],Lf,null,f);put(w2,rr,9,payDObj(h[0]),Ct,"dd/mm/yyyy",f);put(w2,rr,10,h[1],Lf,null,f);put(w2,rr,11,h[6],R,"#,##0",f);put(w2,rr,12,null,R,null,f);put(w2,rr,13,PAY_ST_LB.extra,Ct,null,f);put(w2,rr,14,"NCC chưa có phiếu mua nào",Lf,null,f);sumH+=h[6];rr++;
+  });
+  put(w2,rr,1,"TỔNG CỘNG",Ct);w2.mergeCells(rr,1,rr,6);
+  put(w2,rr,7,{formula:"SUM(G5:G"+(rr-1)+")",result:sumP},R,"#,##0").font=payFont({size:10,bold:true});
+  put(w2,rr,11,{formula:"SUM(K5:K"+(rr-1)+")",result:sumH},R,"#,##0").font=payFont({size:10,bold:true});
+  w2.autoFilter={from:{row:4,column:1},to:{row:Math.max(4,rr-1),column:14}};
+}
 function payOut(wb,fname){
   wb.xlsx.writeBuffer().then(function(buf){shareOrDownload(new Blob([buf],{type:XLSX_MIME}),fname);}).catch(function(e){console.error(e);toast("Không xuất được file Excel");});
 }
@@ -9269,6 +9453,7 @@ Object.assign(A,{
     payOut(wb,(cs==="all"?"TongHop_LoiCoSo_":"BaoLoi_"+(cs==="?"?"ChuaRo":payAscii(cs))+"_")+("0"+t.d).slice(-2)+("0"+t.m).slice(-2)+t.y+".xlsx");
   },
   payEc:function(c){PAY.ec=c||"all";payKeep();},
+  payMonth:function(m){PAY.m=m||"all";PAY.sel="";PAY.f="all";payKeep();},
   payCsName:function(i,v){var l=payDb().csl;if(l[i]){l[i][1]=v;saveSoon();}},
   payCsDel:function(i){var l=payDb().csl;if(l.length<=1){toast("Cần giữ ít nhất 1 cơ sở");return;}l.splice(i,1);saveSoon();PAY.csOpen=1;payKeep();},
   payCsAdd:function(){
@@ -9333,6 +9518,13 @@ Object.assign(A,{
     var L=payCompute();if(!L.some(function(g){return g.chot>0;})){toast("Chưa có NCC nào chốt được");return;}
     var wb=new ExcelJS.Workbook();payAddDs(wb,L,"DS THANH TOAN");
     var t=payToday();payOut(wb,"DS_ThanhToan_"+("0"+t.d).slice(-2)+("0"+t.m).slice(-2)+t.y+".xlsx");
+  },
+  payXlsxRecon:function(){
+    if(!payNeed("payXlsxRecon",[]))return;
+    var L=payCompute();if(!L.length){toast("Chưa có dữ liệu Mua hàng để đối chiếu");return;}
+    var wb=new ExcelJS.Workbook(),t=payToday();payAddRecon(wb,L);
+    audit("Xuất tổng hợp đối chiếu MISA-Mua hàng","pay",null,{ncc:L.length});
+    payOut(wb,"DoiChieu_MISA_MuaHang_"+(PAY.m==="all"?"TatCaThang_":"T"+PAY.m.slice(4)+PAY.m.slice(0,4)+"_")+("0"+t.d).slice(-2)+("0"+t.m).slice(-2)+t.y+".xlsx");
   },
   payXlsxAll:function(){
     if(!payNeed("payXlsxAll",[]))return;

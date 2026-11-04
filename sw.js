@@ -1,28 +1,40 @@
-/* Service worker — Kiểm kê kho · MedDental: chạy offline sau lần mở đầu tiên có mạng */
-var V='kk-v2311';
-var CORE=['./','index.html','manifest.webmanifest','icon-192.png','icon-512.png'];
-var CDN=['https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js','https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.4.0/exceljs.min.js','https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap'];
-self.addEventListener('install',function(e){
-  e.waitUntil(caches.open(V).then(function(c){
-    return Promise.all(CORE.map(function(u){return c.add(u).catch(function(){});}).concat(CDN.map(function(u){return c.add(new Request(u,{mode:'no-cors'})).catch(function(){});})));
+/* Service worker — Kiểm kê kho. Đổi CACHE khi muốn ép máy tải lại toàn bộ. */
+var CACHE="kk-v2026110401";
+var CORE=["./","index.html","manifest.webmanifest","icon-192.png",
+  "lib/xlsx.full.min.js","lib/exceljs.min.js","lib/zxing.min.js"];
+var CDN=/^https:\/\/(cdn\.jsdelivr\.net|cdnjs\.cloudflare\.com|cdn\.sheetjs\.com|fonts\.googleapis\.com|fonts\.gstatic\.com)\//;
+
+self.addEventListener("install",function(e){
+  /* thiếu file nào cũng không làm hỏng cả lần cài */
+  e.waitUntil(caches.open(CACHE).then(function(c){
+    return Promise.all(CORE.map(function(u){return c.add(u).catch(function(){});}));
   }).then(function(){return self.skipWaiting();}));
 });
-self.addEventListener('activate',function(e){
-  e.waitUntil(caches.keys().then(function(ks){return Promise.all(ks.filter(function(k){return k.indexOf('kk-')===0&&k!==V;}).map(function(k){return caches.delete(k);}));}).then(function(){return self.clients.claim();}));
+self.addEventListener("activate",function(e){
+  e.waitUntil(caches.keys().then(function(ks){
+    return Promise.all(ks.filter(function(k){return k!==CACHE;}).map(function(k){return caches.delete(k);}));
+  }).then(function(){return self.clients.claim();}));
 });
-self.addEventListener('fetch',function(e){
-  var r=e.request;if(r.method!=='GET')return;
-  var u=new URL(r.url),same=u.origin===self.location.origin;
-  var cdn=/(^|\.)(cdnjs\.cloudflare\.com|fonts\.googleapis\.com|fonts\.gstatic\.com|cdn\.jsdelivr\.net)$/.test(u.hostname);
-  if(!same&&!cdn)return;
-  if(r.mode==='navigate'||(same&&/(index\.html|\/)$/.test(u.pathname))){
-    /* Trang chính: ưu tiên bản mới từ mạng, mất mạng thì dùng bản đã lưu */
-    e.respondWith(fetch(r).then(function(res){var cp=res.clone();caches.open(V).then(function(c){c.put('index.html',cp);});return res;}).catch(function(){return caches.match('index.html').then(function(m){return m||caches.match('./');});}));
+function put(req,res){
+  if(res&&(res.ok||res.type==="opaque")){var cp=res.clone();caches.open(CACHE).then(function(c){c.put(req,cp);});}
+  return res;
+}
+self.addEventListener("fetch",function(e){
+  var r=e.request,u=new URL(r.url);
+  if(r.method!=="GET")return;
+  /* kiểm tra bản mới (?_=...) phải luôn lấy từ mạng */
+  if(u.origin===location.origin&&u.searchParams.has("_"))return;
+  /* trang chính: mạng trước, mất mạng thì dùng bản đã lưu */
+  if(r.mode==="navigate"||(u.origin===location.origin&&/(\/|index\.html)$/.test(u.pathname))){
+    e.respondWith(fetch(r).then(function(res){return put(r,res);}).catch(function(){
+      return caches.match(r,{ignoreSearch:true}).then(function(m){return m||caches.match("index.html");});
+    }));
     return;
   }
-  /* Thư viện, font, ảnh biểu tượng: dùng bản đã lưu, đồng thời cập nhật ngầm */
-  e.respondWith(caches.match(r).then(function(m){
-    var net=fetch(r).then(function(res){if(res&&(res.ok||res.type==='opaque')){var cp=res.clone();caches.open(V).then(function(c){c.put(r,cp);});}return res;}).catch(function(){return m;});
-    return m||net;
-  }));
+  /* thư viện, icon, CDN: ưu tiên bản đã lưu, thiếu thì tải rồi lưu */
+  if(u.origin===location.origin||CDN.test(r.url)){
+    e.respondWith(caches.match(r).then(function(m){
+      return m||fetch(r).then(function(res){return put(r,res);});
+    }));
+  }
 });
