@@ -3832,12 +3832,17 @@ function renderHomeOld(){
   h+='</div></div>';
   var tileL='display:flex;flex-direction:column;gap:8px;padding:18px 8px;line-height:1.25;font-size:14px';
   var tileS='display:flex;flex-direction:column;gap:7px;padding:14px 4px;line-height:1.25;font-size:13px';
-  h+='<div class="wrap mt24"><div class="sec">Kiểm kê</div>';
-  h+='<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">';
-  h+='<button class="btn tile" style="'+tileL+'" onclick="A.go(\'upload\')"><span class="tic">'+icon('box',24)+'</span>Kiểm kê vật tư</button>';
-  h+='<button class="btn tile" style="'+tileL+'" onclick="A.go(\'assets\')"><span class="tic">'+icon('monitor',24)+'</span>Kiểm kê CCDC &amp; TSCĐ</button>';
-  h+='</div>';
-  h+='<div style="height:24px"></div></div>';
+  var open=db.periods.filter(function(p){return p.items.some(function(i){return !i.counted&&i.close!==0;});}).length,nl=0;
+  try{if(db.pay&&db.pay.mua&&db.pay.mua.length)payCompute().forEach(function(g){if(g.bad)nl++;});}catch(e){}
+  function tile(ic,lb,act,bd){return '<button class="btn tile" style="'+tileS+';position:relative" onclick="'+act+'"><span class="tic">'+icon(ic,24)+'</span>'+lb+(bd?'<b style="position:absolute;top:6px;right:8px;min-width:20px;padding:1px 6px;border-radius:99px;background:var(--red);color:#fff;font-size:11px">'+bd+'</b>':'')+'</button>';}
+  h+='<div class="wrap mt24"><div class="sec">Kiểm kê</div><div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">'
+    +tile('box','Kiểm kê vật tư',"A.go('upload')",'')+tile('monitor','Kiểm kê CCDC &amp; TSCĐ',"A.go('assets')",'')
+    +tile('file','Kỳ đang kiểm dở','v2List()',open||'')+tile('qr','Quét QR','v2Scan()','')+'</div>'
+    +'<div class="sec" style="margin-top:22px">Đối chiếu & thanh toán</div><div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">'
+    +tile('swap','Đối chiếu DT – xuất kho',"A.go('recon')",'')+tile('file','Đề nghị thanh toán NCC',"A.go('pay')",nl||'')+'</div>'
+    +'<div class="sec" style="margin-top:22px">Kho & biểu mẫu</div><div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px">'
+    +tile('box','Tồn kho','A.navStock()','')+tile('edit','Biểu mẫu',"A.go('reporthub')",'')+tile('gear','Cài đặt',"A.go('settings')",'')+'</div>'
+    +'<div style="height:24px"></div></div>';
   document.getElementById("app").innerHTML=h;
 }
 
@@ -4416,19 +4421,18 @@ function navGroups(){
   return [
     {k:'ov',icon:'home',label:'Tổng quan',act:"A.navGo('home')",on:v==='home'},
     {k:'inv',icon:'scan',label:'Kiểm kê',subs:inv,on:['lists','transfer','upload','folder','period'].indexOf(v)>=0||(v==='asset'&&LS.back)},
-    {k:'wh',icon:'box',label:'Quản lý kho',on:['stock','hsd','assets'].indexOf(v)>=0||(v==='asset'&&!LS.back),subs:[
+    {k:'dc',icon:'swap',label:'Đối chiếu & thanh toán',on:['recon','pay','dchub'].indexOf(v)>=0,subs:[
+      {label:'Đối chiếu DT – xuất kho',act:C("A.go('recon')"),on:v==='recon'},
+      {label:'Đề nghị thanh toán NCC',act:C("A.go('pay')"),on:v==='pay'}]},
+    {k:'wh',icon:'box',label:'Kho',on:['stock','hsd','assets'].indexOf(v)>=0||(v==='asset'&&!LS.back),subs:[
       {label:'Vật tư, tồn kho',act:'A.navStock()',on:v==='stock'},
       {label:'CCDC & TSCĐ',act:C("A.go('assets')"),on:v==='assets'||(v==='asset'&&!LS.back)},
       {label:'Cảnh báo hạn sử dụng',act:C("A.go('hsd')"),on:v==='hsd'}]},
-    {k:'rc',icon:'swap',label:'Đối chiếu & báo cáo',on:v==='recon'||v==='baocao',subs:[
-      {label:'Đối chiếu DT – xuất kho',act:C("A.go('recon')"),on:v==='recon'},
-      {label:'Báo cáo kiểm kê',act:C("A.go('baocao')"),on:v==='baocao'}]},
-    {k:'pay',icon:'file',label:'Đề nghị thanh toán',act:"A.navGo('pay')",on:v==='pay'},
-    {k:'ut',icon:'gear',label:'Tiện ích & cài đặt',on:['reporthub','handover','handoverEdit','explain','explainEdit','settings'].indexOf(v)>=0,subs:[
-      {label:'Biểu mẫu',act:C("A.go('reporthub')"),on:v==='reporthub'},
+    {k:'bm',icon:'file',label:'Biểu mẫu',on:['reporthub','baocao','handover','handoverEdit','explain','explainEdit'].indexOf(v)>=0,subs:[
+      {label:'Báo cáo kiểm kê',act:C("A.go('baocao')"),on:v==='baocao'},
       {label:'Biên bản bàn giao',act:C("A.go('handover')"),on:v==='handover'||v==='handoverEdit'},
-      {label:'Giải trình chênh lệch',act:C("A.go('explain')"),on:v==='explain'||v==='explainEdit'},
-      {label:'Cài đặt, sao lưu, khôi phục',act:C("A.go('settings')"),on:v==='settings'}]}
+      {label:'Giải trình chênh lệch',act:C("A.go('explain')"),on:v==='explain'||v==='explainEdit'}]},
+    {k:'st',icon:'gear',label:'Cài đặt, sao lưu',act:"A.navGo('settings')",on:v==='settings'}
   ];
 }
 function navActive(gs){
@@ -4478,14 +4482,29 @@ function renderNavOld(){
     cr.innerHTML=t;
   }
 }
+function hubCards(title,back,cards){
+  var h='<div class="topbar"><div class="trow wrap"><button class="back" onclick="A.go(\''+back+'\')">‹</button><div class="ttl">'+title+'</div></div><div style="height:10px"></div></div><div class="wrap" style="padding-top:16px;padding-bottom:40px">';
+  cards.forEach(function(c){
+    h+='<div class="card" style="margin-bottom:12px;cursor:pointer;display:flex;gap:14px;align-items:flex-start" onclick="A.go(\''+c.route+'\')">'
+      +'<div style="width:40px;height:40px;flex:none;border-radius:11px;background:var(--teal-bg);color:var(--teal);display:flex;align-items:center;justify-content:center">'+icon(c.icon,20)+'</div>'
+      +'<div style="flex:1"><div style="font-weight:700;margin-bottom:3px">'+c.title+(c.badge?' <span style="font-size:11px;font-weight:700;padding:2px 8px;border-radius:99px;background:var(--red-bg);color:var(--red)">'+c.badge+'</span>':'')+'</div><div style="font-size:13px;color:var(--mut)">'+c.desc+'</div></div>'
+      +'<div style="color:var(--mut2);display:flex;align-items:center">'+icon('chev',18)+'</div></div>';
+  });
+  document.getElementById("app").innerHTML=h+'</div>';
+}
+function renderDcHub(){
+  var n=0;try{if(db.pay&&db.pay.mua&&db.pay.mua.length)payCompute().forEach(function(g){if(g.bad)n++;});}catch(e){}
+  hubCards('Đối chiếu & thanh toán','home',[
+    {icon:'swap',title:'Đối chiếu doanh thu – xuất kho',desc:'Đối chiếu doanh thu với phiếu xuất kho, xuất Excel kèm sheet map, bôi đỏ phần lệch.',route:'recon'},
+    {icon:'file',title:'Đề nghị thanh toán NCC',desc:'Nạp / bổ sung mua hàng và hóa đơn MISA, rà lỗi, lập giấy đề nghị, bảng kê, danh sách thanh toán.',route:'pay',badge:n?n+' NCC lệch':''}]);
+}
 function renderReportHub(){
   var h='<div class="topbar"><div class="trow wrap"><button class="back" onclick="A.go(\'home\')">‹</button><div class="ttl">Biểu mẫu</div></div><div style="height:10px"></div></div>';
   h+='<div class="wrap" style="padding-top:16px;padding-bottom:40px">';
   var cards=[
     {icon:'file',title:'Báo cáo kiểm kê',desc:'Tổng hợp số liệu kiểm kê nhiều chi nhánh thành báo cáo Word.',route:'baocao'},
     {icon:'swap',title:'Biên bản bàn giao',desc:'Lập biên bản bàn giao tài sản, CCDC, vật tư.',route:'handover'},
-    {icon:'edit',title:'Giải trình chênh lệch',desc:'Giải trình thất thoát, chênh lệch khi kiểm kê.',route:'explain'},
-    {icon:'file',title:'Đề nghị thanh toán NCC',desc:'Đối chiếu mua hàng với hóa đơn MISA, lập giấy đề nghị thanh toán, bảng kê hóa đơn, danh sách thanh toán.',route:'pay'}
+    {icon:'edit',title:'Giải trình chênh lệch',desc:'Giải trình thất thoát, chênh lệch khi kiểm kê.',route:'explain'}
   ];
   cards.forEach(function(c){
     h+='<div class="card" style="margin-bottom:12px;cursor:pointer;display:flex;gap:14px;align-items:flex-start" onclick="A.go(\''+c.route+'\')">'
@@ -5810,6 +5829,7 @@ function render(){
   else if(route.view==="explain")renderExplainList();
   else if(route.view==="explainEdit")renderExplainEdit();
   else if(route.view==="reporthub")renderReportHub();
+  else if(route.view==="dchub")renderDcHub();
   else if(route.view==="settings")renderSettings();
   else if(route.view==="assets")renderAssets();
   else if(route.view==="asset")renderAsset();
@@ -6828,8 +6848,8 @@ function renderNav(){
   var v=route.view,on={
     home:['home','upload','folder'].indexOf(v)>=0,
     list:['lists','period','stock','transfer'].indexOf(v)>=0||(v==='asset'&&LS.back),
-    rep:['reporthub','baocao','handover','handoverEdit','explain','explainEdit','pay'].indexOf(v)>=0,
-    more:['settings','hsd','assets','recon'].indexOf(v)>=0||(v==='asset'&&!LS.back)
+    dc:['dchub','recon','pay'].indexOf(v)>=0,
+    more:['settings','hsd','assets','reporthub','baocao','handover','handoverEdit','explain','explainEdit'].indexOf(v)>=0||(v==='asset'&&!LS.back)
   };
   Array.prototype.forEach.call(document.querySelectorAll('#bnav [data-k]'),function(b){b.classList.toggle('on',!!on[b.getAttribute('data-k')]);});
   document.getElementById('app').classList.toggle('v2p',v==='period');
@@ -7210,7 +7230,7 @@ document.getElementById('bnav').innerHTML=
  '<button data-k="home" onclick="A.go(\'home\')">'+icon('home',24)+'Trang chủ</button>'
  +'<button data-k="list" onclick="v2List()">'+icon('file',24)+'Danh sách</button>'
  +'<button class="fab" onclick="v2Scan()" aria-label="Quét QR"><i>'+icon('qr',30)+'</i>Quét QR</button>'
- +'<button data-k="rep" onclick="A.go(\'reporthub\')">'+icon('bars',24)+'Biểu mẫu</button>'
+ +'<button data-k="dc" onclick="A.go(\'dchub\')">'+icon('swap',24)+'Đối chiếu</button>'
  +'<button data-k="more" onclick="A.drawerToggle()">'+icon('dots',24)+'Khác</button>';
 
 store.boot(function(){
@@ -9097,9 +9117,10 @@ function payHomeHtml(){
     +'<button class="btn btn-primary" style="margin-bottom:8px" onclick="A.payPrintAll()">'+icon('file',17)+'In phiếu + bảng kê ('+L.filter(function(g){return g.khop;}).length+' NCC khớp)</button>'
     +'<div class="rcact"><button class="btn btn-outline" onclick="A.payXlsxDs()">'+icon('download',16)+'DS thanh toán</button><button class="btn btn-outline" onclick="A.payXlsxAll()">'+icon('download',16)+'Phiếu hàng loạt</button></div>'
     +'<button class="btn btn-primary" style="margin-top:8px" onclick="A.payXlsxRecon()">'+icon('download',16)+'Xuất tổng hợp đối chiếu MISA ⇄ Mua hàng (từng phiếu)</button>'
+    +'<details style="margin-top:12px;border-top:1px solid var(--line);padding-top:10px"'+(P.last?' open':'')+'><summary style="cursor:pointer;font-weight:700;font-size:13px">① Nạp dữ liệu · bổ sung · file mẫu</summary>'
     +payAddHtml(P)
     +'<button class="btn btn-outline" style="padding:9px;font-size:13px;margin-top:10px" onclick="document.getElementById(\'payin\').click()">'+icon('upload',16)+'Nạp lại file Excel (thay toàn bộ dữ liệu cũ)</button>'
-    +'<button class="btn btn-outline" style="padding:9px;font-size:13px;margin-top:8px" onclick="A.payTemplate()">'+icon('download',16)+'Tải file Excel mẫu</button></div>';
+    +'<button class="btn btn-outline" style="padding:9px;font-size:13px;margin-top:8px" onclick="A.payTemplate()">'+icon('download',16)+'Tải file Excel mẫu</button></details></div>';
   h+=payErrCard();
   h+=payCfgHtml()+payCsCfgHtml();
   var ms=payMonths();
@@ -9259,7 +9280,7 @@ function payDetailHtml(key){
   return h+'</div>';
 }
 function renderPay(){
-  var errV=PAY.v==="err"&&payDb().mua.length&&!PAY.sel,back=PAY.sel?"A.paySel('')":errV?"A.payView('')":"A.go('reporthub')",ttl=errV?"Rà soát lỗi nhập liệu":"Đề nghị thanh toán";
+  var errV=PAY.v==="err"&&payDb().mua.length&&!PAY.sel,back=PAY.sel?"A.paySel('')":errV?"A.payView('')":"A.go('dchub')",ttl=errV?"Rà soát lỗi nhập liệu":"Đề nghị thanh toán";
   var h='<div class="topbar"><div class="trow wrap"><button class="back" onclick="'+back+'">‹</button><div class="ttl">'+ttl+'</div></div><div style="height:10px"></div></div><div class="wrap" style="padding-top:16px;padding-bottom:40px">'
     +(PAY.sel?payDetailHtml(PAY.sel):errV?payErrHtml():payHomeHtml())+'</div>';
   document.getElementById("app").innerHTML=h;
