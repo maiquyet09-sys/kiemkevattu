@@ -809,6 +809,33 @@ body{background:var(--bg)}
 .pxe b{display:block;color:var(--ink);font-size:15px;margin-bottom:4px}
 .pxc:focus-visible,.pxa:focus-visible,.pxst:focus-visible,.pxa-main:focus-visible,.pxch:focus-visible,.pxs button:focus-visible{outline:2px solid var(--teal);outline-offset:2px}
 @media(prefers-reduced-motion:reduce){.pxc,.pxa,.pxst,.pxa-main{transition:none}}
+/* ===== Đối chiếu doanh thu – xuất kho · giao diện mới ===== */
+.rcnav{gap:0;padding-top:0;padding-bottom:0;margin-top:6px;border-top:1px solid var(--line);overflow-x:auto;scrollbar-width:none}
+.rcnav::-webkit-scrollbar{display:none}
+.rcnav button{flex:1 0 auto;border:0;border-bottom:3px solid transparent;border-radius:0;background:none;padding:12px 14px 10px;font-size:13.5px;color:var(--mut)}
+.rcnav button.on{background:none;color:var(--teal);border-bottom-color:var(--teal)}
+.rcnav button.on em{background:var(--red);color:#fff}
+.rcscope{padding:8px 10px 10px;border-radius:14px;border-color:transparent}
+.rcscope:not(.on):not(.ex) .rcscope-h{display:none}
+.rcscope-g{grid-template-columns:1fr 1fr}
+.rcscope select.inp{padding:8px 10px;font-size:14px;border-radius:10px}
+.rctool{margin-bottom:6px}
+.rctool .btn{padding:8px 6px;border-radius:12px;box-shadow:none}
+.rctool .btn-primary{background:var(--teal-bg);color:var(--teal);border:1px solid var(--teal-ln)}
+.rcH{margin-bottom:12px}
+.rcH .pxbar .b{background:#7cc4ff}.rcH .pxbar .n{background:rgba(255,255,255,.25)}
+.rcl{display:flex;flex-wrap:wrap;gap:6px 14px;font-size:12.5px;color:rgba(255,255,255,.85)}
+.rcl u{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:6px}
+.rcl u.g{background:#4ade80}.rcl u.b{background:#7cc4ff}.rcl u.r{background:#ff7b7b}
+.rcgo{flex-direction:row;align-items:center;justify-content:space-between;gap:10px}
+.rcgo b{font-size:15px}.rcgo i{font-style:normal;font-size:22px;line-height:1}
+.rck-g{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px}
+@media(min-width:760px){.rck-g.q{grid-template-columns:repeat(4,1fr)}}
+.rck{position:relative;background:#fff;border-radius:14px;padding:11px 14px;box-shadow:0 1px 2px rgba(15,40,90,.06)}
+.rck.b{cursor:pointer}.rck.b::after{content:'›';position:absolute;right:12px;top:8px;color:var(--mut2);font-size:20px;line-height:1}
+.rck.b:hover{box-shadow:0 4px 14px rgba(15,40,90,.1)}
+.rck .l{font-size:12.5px;color:var(--mut)}.rck .v{font-size:18px;font-weight:800;margin-top:2px}.rck .s{font-size:12px;color:var(--mut);margin-top:1px}
+.rck:focus-visible{outline:2px solid var(--teal);outline-offset:2px}
 </style>
 <style id="ux-opt">
 html{-webkit-text-size-adjust:100%}
@@ -7618,8 +7645,8 @@ function rcFilter(mode){
 }
 function rcBadge(t){var c=/KHỚP|OK|✓|Hợp lệ|Khớp/.test(t)?"green":/CHƯA|THIẾU|✗|TRÙNG|THỪA|SAI/.test(t)?"red":"amber";return '<span class="rcb rcb-'+c+'">'+esc(t)+'</span>';}
 /* ===== V8 · Đối chiếu 2 bên ===== */
-var RC_GRP=[["Tổng quan",[0]],["Map",[6]],["Đối chiếu",[1,5]],["Dữ liệu",[4,2]],["Cấu hình",[3]]];
-var RC_SUBN={1:"Ca lệch",5:"Phụ lục 01",4:"Nhập / Xuất file",2:"Kiểm tra dữ liệu"};
+var RC_GRP=[["Tổng quan",[0]],["Đối chiếu",[1,6]],["Dữ liệu",[4,2]],["Báo cáo",[5]],["Cấu hình",[3]]];
+var RC_SUBN={1:"Ca lệch",6:"Map DT ↔ xuất kho",4:"Nhập / Xuất file",2:"Kiểm tra dữ liệu"};
 var RC_ONLY=[[1,"Chưa duyệt"],[0,"Tất cả lệch"],[4,"Đã duyệt hợp lệ"],[3,"Cần xem lại"],[2,"Tất cả dòng"]];
 function rcQ(n){n=Math.round((+n||0)*1000)/1000;return String(n);}
 function rcSgn(n){n=Math.round((+n||0)*1000)/1000;return n>0?"+"+n:n<0?"−"+Math.abs(n):"0";}
@@ -7693,7 +7720,7 @@ function rcCmpX(x){
 }
 function rcGi(){var gi=0;RC_GRP.forEach(function(g,i){if(g[1].indexOf(RC.tab)>=0)gi=i;});return gi;}
 function rcNav(){
-  var gi=rcGi(),s=rcSum(),bd=[0,0,s.needD.length+s.needX.length,0,0];
+  var gi=rcGi(),s=rcSum(),bd=[0,s.needD.length+s.needX.length,0,0,0];
   return '<div class="rcnav wrap">'+RC_GRP.map(function(g,i){return '<button class="'+(i===gi?'on':'')+'" onclick="A.rcTab('+(i===gi?RC.tab:g[1][0])+')">'+g[0]+(bd[i]?'<em>'+bd[i]+'</em>':'')+'</button>';}).join('')+'</div>';
 }
 function rcSubNav(){
@@ -7826,18 +7853,20 @@ function renderRecon(){
   document.getElementById("app").innerHTML=h+'</div>';
 }
 function rcViewSum(){
-  var s=rcSum(),Z=RC_RES,h=rcFilter(),n=s.F.length,need=s.needD.length+s.needX.length,pct=n?(s.ok/n*100):0;
-  var col=pct>=95?"green":pct>=80?"amber":"red";
-  function mini(l,v,c,go){return '<div class="rcmini'+(go?' rcmini-b':'')+'"'+(go?' role="button" onclick="A.rcTile('+go+')"':'')+'><div class="l">'+l+'</div><div class="v tnum"'+(c?' style="color:var(--'+c+')"':'')+'>'+v+'</div></div>';}
-  h+='<div class="card rchero"><div class="rchero-t"><div><div class="l">Tỷ lệ khớp</div><div class="big tnum" style="color:var(--'+col+')">'+(n?pct.toFixed(1)+'%':'–')+'</div></div>'
-    +'<div style="text-align:right"><div class="l">Cần xử lý</div><div class="big tnum" style="color:var(--'+(need?'red':'green')+')">'+need+'</div></div></div>'
-    +'<div class="rcbarp"><i style="width:'+pct.toFixed(1)+'%;background:var(--'+col+')"></i></div>'
-    +'<div class="rchero-s">'+n+' lượt đối chiếu · '+s.ok+' khớp · '+s.apprD+' đã duyệt hợp lệ</div>'
-    +(need?'<div class="rcact" style="margin:10px 0 0"><button class="btn btn-primary" onclick="A.rcGoList(0)">Ca doanh thu lệch ('+s.needD.length+')</button><button class="btn btn-outline" onclick="A.rcGoList(1)">Phiếu xuất lệch ('+s.needX.length+')</button></div>':'<div style="margin-top:8px;color:var(--green);font-weight:700;font-size:13px">✓ Không còn ca nào cần xử lý</div>')+'</div>';
-  h+='<div class="rcmini-g">'+mini("Tổng doanh thu (VND)",rcF(s.rev),"","0,2,\'\'")+mini("Giá trị xuất kho (VND)",rcF(s.val),"","1,2,\'\'")
-    +mini("Ca cần xử lý (DT)",s.needD.length,s.needD.length?"red":"green","0,1,\'\'")+mini("Phiếu xuất cần xử lý",s.needX.length,s.needX.length?"red":"green","1,1,\'\'")
-    +mini("Phiếu xuất SAI VẬT TƯ",s.badVt,s.badVt?"red":"green","1,0,\'XUẤT SAI VẬT TƯ\'")+mini("Ca đã duyệt – hợp lệ",s.apprD,"","0,4,\'\'")+'</div>'
-    +'<div style="font-size:12px;color:var(--mut2);margin:-4px 0 12px">Chạm vào từng ô để xem chi tiết các ca.</div>';
+  var s=rcSum(),Z=RC_RES,h=rcFilter(),n=s.F.length,nd=s.needD.length,nx=s.needX.length,need=nd+nx,pct=n?(s.ok/n*100):0;
+  var rest=Math.max(0,n-s.ok-s.apprD-nd),fp=function(x){return (Math.round(x*10)/10).toLocaleString("vi-VN");},sc=rcScopeTxt();
+  function kp(l,v,sub,c,go){return '<div class="rck'+(go?' b':'')+'"'+(go?' role="button" onclick="A.rcTile('+go+')"':'')+'><div class="l">'+l+'</div><div class="v tnum"'+(c?' style="color:var(--'+c+')"':'')+'>'+v+'</div>'+(sub?'<div class="s">'+sub+'</div>':'')+'</div>';}
+  function seg(c,k){return k>0?'<i class="'+c+'" style="flex:'+k+'"></i>':'';}
+  h+='<section class="pxh rcH"><div style="display:flex;justify-content:space-between;align-items:flex-end;gap:12px"><div><div class="pxh-k">Tỷ lệ khớp</div><div class="pxh-n">'+(n?fp(pct)+'%':'–')+'</div></div>'
+    +'<div style="text-align:right"><div class="pxh-k">Cần xử lý</div><div class="pxh-n" style="color:'+(need?'#ff9a9a':'#4ade80')+'">'+need+'</div></div></div>'
+    +'<div class="pxbar" role="img" aria-label="'+s.ok+' khớp, '+s.apprD+' đã duyệt, '+nd+' cần xử lý">'+seg("g",s.ok)+seg("b",s.apprD)+seg("r",nd)+seg("n",rest)+'</div>'
+    +'<div class="rcl"><span><u class="g"></u>'+s.ok+' khớp</span><span><u class="b"></u>'+s.apprD+' đã duyệt hợp lệ</span><span><u class="r"></u>'+nd+' cần xử lý</span></div>'
+    +'<div class="pxh-m">'+n+' lượt đối chiếu · '+esc(sc.cs)+' · '+esc(sc.th)+'</div>'
+    +(need?'<button class="pxst rcgo" onclick="A.rcGoList('+(nd?0:1)+')"><span><b>Xử lý '+need+' ca lệch</b><br><span>'+nd+' ca doanh thu · '+nx+' phiếu xuất</span></span><i>›</i></button>'
+          :'<button class="pxst rcgo" onclick="A.rcTab(5)"><span><b>✓ Đã xử lý hết — lập Phụ lục 01</b><br><span>Bước tiếp theo: xuất báo cáo đối chiếu</span></span><i>›</i></button>')+'</section>';
+  h+='<div class="rck-g">'+kp("Tổng doanh thu (VND)",rcF(s.rev),"","","0,2,''")+kp("Giá trị xuất kho (VND)",rcF(s.val),s.rev?'Bằng '+fp(s.val/s.rev*100)+'% doanh thu':'',"","1,2,''")+'</div>'
+    +'<div class="rck-g q">'+kp("Ca cần xử lý (DT)",nd,"",nd?"red":"green","0,1,''")+kp("Phiếu xuất cần xử lý",nx,"",nx?"red":"green","1,1,''")
+    +kp("Phiếu xuất SAI VẬT TƯ",s.badVt,"",s.badVt?"red":"green","1,0,'XUẤT SAI VẬT TƯ'")+kp("Ca đã duyệt – hợp lệ",s.apprD,"","","0,4,''")+'</div>';
   function cnt(a,f){return a.filter(f).length;}
   var st=[["KHỚP","DT"],["CHƯA XUẤT KHO","DT"],["XUẤT SAI VẬT TƯ","DT"],["XUẤT SAI SỐ LƯỢNG (THIẾU)","DT"],["XUẤT SAI SỐ LƯỢNG (THỪA)","DT"],["XUẤT CHƯA CÓ DOANH THU","XK"],["XUẤT SAI VẬT TƯ","XK"],["TRÙNG/THỪA XUẤT","XK"],["THIẾU MÃ KH","XK"]];
   h+=rcAcc("sum1","Phân loại trạng thái",rcTbl(["Trạng thái","Nguồn","Số lượt"],st.map(function(t){var c=t[1]==="DT"?cnt(s.F,function(o){return o.T===t[0];}):cnt(s.X,function(x){return x.P.indexOf(t[0])===0;});return [rcBadge(t[0]),t[1],c];}),2),1);
