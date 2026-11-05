@@ -16,7 +16,7 @@
 <title>Kiểm kê kho · MedDental</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" media="print" onload="this.media=\'all\'">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
 <style>
 :root{
   --bg:#f3f5f9; --card:#ffffff; --card2:#f3f6fb; --ink:#101828; --mut:rgba(16,24,40,0.58); --mut2:rgba(16,24,40,0.38); --line:rgba(16,24,40,0.1);
@@ -847,6 +847,30 @@ input:focus-visible,select:focus-visible,textarea:focus-visible{outline-offset:0
 #netbar{position:fixed;left:50%;transform:translateX(-50%);top:calc(var(--header-h) + 8px);z-index:90;background:#fdf1d6;color:#7a4f06;border:1px solid rgba(180,120,10,.28);border-radius:999px;padding:6px 14px;font-size:12.5px;font-weight:600;box-shadow:0 4px 14px rgba(0,0,0,.08);max-width:92vw;text-align:center}
 #netbar[hidden]{display:none}
 </style>
+<style id="desk-pro">
+/* Lớp giao diện Desktop (>=1024px). Chỉ thay đổi bố cục/hiển thị; không đụng logic. */
+@media(min-width:1024px){
+  :root{--sidebar-w:240px}
+  #gmain .wrap,#gmain .botin,#gmain .stkwrap,#gmain .prev{max-width:1440px}
+  #gmain .wrap{padding-left:24px;padding-right:24px}
+  #gsidebar{padding:16px 12px}
+  .gnav-item{font-size:14px;position:relative}
+  .gnav-item.on:not(.gnav-sub)::before{content:"";position:absolute;left:-12px;top:8px;bottom:8px;width:3px;border-radius:0 3px 3px 0;background:var(--teal)}
+  .gnav-item:hover:not(.on){background:var(--teal-bg);color:var(--ink)}
+  body.sb-min #gsidebar .gnav-item.on::before{left:-8px}
+  .rck-g{grid-template-columns:repeat(4,1fr);gap:12px}
+  .rck-g.q{grid-template-columns:repeat(4,1fr)}
+  .rcnav,.rcsubnav{max-width:100%}
+  div:has(>table.rct){max-height:calc(100vh - 230px);overflow:auto;border:1px solid var(--line);border-radius:12px;background:#fff}
+  table.rct{width:100%;min-width:720px}
+  table.rct th{position:sticky;top:0;z-index:2;background:#eef3fb;box-shadow:0 1px 0 var(--line)}
+  table.rct tbody tr:hover td,table.rct tr:hover>td{background:var(--teal-bg)}
+  .v2s{max-width:720px}
+  .rctool,.rcact{flex-wrap:wrap}
+}
+@media(min-width:1366px){#gmain .wrap{padding-left:32px;padding-right:32px}}
+@media(min-width:1024px) and (max-width:1365px){.rck-g.q{grid-template-columns:repeat(2,1fr)}}
+</style>
 </head>
 <body>
 <header id="gheader">
@@ -867,6 +891,26 @@ input:focus-visible,select:focus-visible,textarea:focus-visible{outline-offset:0
 
 <script>
 "use strict";
+/* ===== Nhật ký lỗi im lặng (thay cho catch{} rỗng) =====
+   klog(ngữ_cảnh, lỗi): ghi vào bộ nhớ + localStorage 'kk_errlog' (tối đa 100 dòng, gộp trùng).
+   Xem: klogDump() trong console, hoặc localStorage.kk_errlog. Không bao giờ ném lỗi ra ngoài. */
+(function(){
+  var MAX=100,buf=[],idx={},timer=null,loaded=false;
+  function load(){if(loaded)return;loaded=true;try{var r=localStorage.getItem("kk_errlog");if(r){var a=JSON.parse(r);if(Array.isArray(a)){buf=a.slice(-MAX);buf.forEach(function(x,i){idx[x.c+"|"+x.m]=i;});}}}catch(_){}}
+  function save(){timer=null;try{localStorage.setItem("kk_errlog",JSON.stringify(buf));}catch(_){}}
+  window.klog=function(ctx,err){
+    try{
+      load();
+      var m=String(err&&err.message?err.message:err).slice(0,200),n=err&&err.name?String(err.name):"Error",k=ctx+"|"+m,now=Date.now();
+      if(idx[k]!==undefined&&buf[idx[k]]&&buf[idx[k]].c===ctx&&buf[idx[k]].m===m){var e0=buf[idx[k]];e0.n=(e0.n||1)+1;e0.t=now;}
+      else{buf.push({t:now,c:ctx,e:n,m:m,n:1});if(buf.length>MAX){buf.shift();idx={};buf.forEach(function(x,i){idx[x.c+"|"+x.m]=i;});}else idx[k]=buf.length-1;}
+      if(window.console&&console.warn)console.warn("[kk]",ctx,err);
+      if(!timer)timer=setTimeout(save,1500);
+    }catch(_){}
+  };
+  window.klogDump=function(){load();return buf.slice();};
+  window.klogClear=function(){buf=[];idx={};try{localStorage.removeItem("kk_errlog");}catch(_){}};
+})();
 /* ===== Tải thư viện Excel theo nhu cầu (không chặn khởi động, chỉ tải khi dùng Excel lần đầu) ===== */
 /* Thứ tự thử: file trong lib/ (cùng máy chủ) → CDN dự phòng. Chạy script lib/download-libs.* để tải về lib/ */
 var KK_LIBS={xlsx:["lib/xlsx.full.min.js","https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js","https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"],exceljs:["lib/exceljs.min.js","https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.4.0/exceljs.min.js"]};
@@ -1068,7 +1112,7 @@ var IDBM={db:null,ok:false,busy:false,next:null,fail:false,
       IDBM.set("db",cur).then(function(ok){
         IDBM.fail=!ok;
         if(!ok){if(!store.lsOk)store.ind(0,new Error("idb"));}
-        else if(store.lsSkipped){try{localStorage.removeItem("kk_db_v1");}catch(e){}}
+        else if(store.lsSkipped){try{localStorage.removeItem("kk_db_v1");}catch(e){klog("localStorage.removeItem('kk_db_v1');",e)}}
         if(IDBM.next)run();else IDBM.busy=false;
       });
     })();
@@ -1081,14 +1125,14 @@ var store={
     var done=false;
     function fin(){if(done)return;done=true;cb();}
     var tm=setTimeout(function(){if(!done){store._late=true;fin();}},4000);
-    try{if(navigator.storage&&navigator.storage.persist)navigator.storage.persist();}catch(e){}
+    try{if(navigator.storage&&navigator.storage.persist)navigator.storage.persist();}catch(e){klog("if(navigator.storage&&navigator.storage.persist)",e)}
     if(typeof indexedDB==="undefined")return fin();
     IDBM.open().then(function(ok){
       if(store._late){IDBM.ok=false;IDBM.db=null;return;}
       if(!ok)return fin();
       return IDBM.get("db").then(function(rec){
         var ls=null,lsAt=0;
-        if(store.ok){try{ls=localStorage.getItem("kk_db_v1");lsAt=Number(localStorage.getItem("kk_db_at"))||0;}catch(e){}}
+        if(store.ok){try{ls=localStorage.getItem("kk_db_v1");lsAt=Number(localStorage.getItem("kk_db_at"))||0;}catch(e){klog("ls=localStorage.getItem('kk_db_v1');lsAt=Number(",e)}}
         if(rec&&typeof rec.s==="string"&&(!ls||(rec.at||0)>=lsAt))store._pre=rec.s;else store._pre=ls;
         clearTimeout(tm);fin();
       });
@@ -1100,7 +1144,7 @@ var store={
     if(store._pre!==undefined)s=store._pre;
     else{if(!store.ok)return null;try{s=localStorage.getItem("kk_db_v1");}catch(e){return null;}}
     if(!s)return null;
-    try{var d=JSON.parse(s);if(d&&typeof d==="object"&&Array.isArray(d.periods))return d;}catch(e){}
+    try{var d=JSON.parse(s);if(d&&typeof d==="object"&&Array.isArray(d.periods))return d;}catch(e){klog("var d=JSON.parse(s);if(d&&typeof d==='object'&&A",e)}
     store.bad=s;store.blocked=true;return null;
   },
   save:function(){
@@ -1147,7 +1191,7 @@ function audit(type,target,before,after){
     var a=db.audit||(db.audit=[]);
     a.push({at:Date.now(),by:(db.profile&&db.profile.ten)||"",type:type,target:String(target||"").slice(0,120),before:before===undefined?null:before,after:after===undefined?null:after});
     if(a.length>3000)a.splice(0,500);
-  }catch(e){}
+  }catch(e){klog("var a=db.audit||(db.audit=[]); a.push({at:Date.n",e)}
 }
 /* làm sạch dữ liệu đọc từ máy/file: thiếu trường, sai kiểu */
 function sanitizeDb(d){
@@ -1378,7 +1422,7 @@ function buildBienBan(p){
     while(used[sname.toLowerCase()]){sname=base.substring(0,28)+" "+k;k++;}
     used[sname.toLowerCase()]=1;
     var ws=wb.addWorksheet(sname,{views:[{state:"frozen",ySplit:4}]});xlPrint(ws,null,true);
-    if(wmId!==null)try{ws.addBackgroundImage(wmId);}catch(e){}
+    if(wmId!==null)try{ws.addBackgroundImage(wmId);}catch(e){klog("ws.addBackgroundImage(wmId);",e)}
     var cwArr=[4.43,14.57,52,12.29,14.57,14.57,14.57,14.57,11.43,11.43,49.29,13];
     cwArr.forEach(function(w,i){ws.getColumn(i+1).width=w;});
     var last=4+items.length;
@@ -1487,7 +1531,7 @@ function buildBienBan(p){
         tm.value="Ký điện tử "+s.time+" ("+s.dev+")"+(s.auth?" · "+s.auth:"");tm.font={name:"Arial",size:8,italic:true};
         tm.alignment={horizontal:"center",vertical:"top",wrapText:true};
         ws.getRow(sr+3).height=24;
-      }catch(sigErr){}
+      }catch(sigErr){klog("var hh=48,ww=Math.round(hh*(s.w||300)/(s.h||120)",sigErr)}
     });
     /* Tên người ký đã thiết lập theo chi nhánh (nếu chưa ký điện tử) */
     var sgn=sgOf(p.folder);
@@ -1502,7 +1546,7 @@ function buildBienBan(p){
   var hsd=hsdRowsOf(p);
   if(hsd.length){
     var ws2=wb.addWorksheet("HẠN SỬ DỤNG",{views:[{state:"frozen",ySplit:1}]});xlPrint(ws2,"1:1",true);
-    if(wmId!==null)try{ws2.addBackgroundImage(wmId);}catch(e){}
+    if(wmId!==null)try{ws2.addBackgroundImage(wmId);}catch(e){klog("ws2.addBackgroundImage(wmId);",e)}
     [18,14.57,45,10,10,14,14,18,20,30].forEach(function(w,i){ws2.getColumn(i+1).width=w;});
     ["Chi nhánh/Kho","Mã hàng","Tên hàng","ĐVT","Số lượng","Hạn sử dụng","Còn lại (ngày)","Cảnh báo","Nhãn / Kích thước","Lô · Seri · Mã NSX (GTIN)"].forEach(function(t,i){
       var cc=ws2.getCell(1,i+1);
@@ -1954,7 +1998,7 @@ function xlPrint(ws,titleRows,wide){
     ws.pageSetup=Object.assign(ws.pageSetup||{},{paperSize:pg.xl,orientation:wide?'landscape':'portrait',fitToPage:true,fitToWidth:1,fitToHeight:0,horizontalCentered:true,margins:{left:m,right:m,top:m,bottom:m,header:0.3,footer:0.3}});
     if(titleRows)ws.pageSetup.printTitlesRow=titleRows;
     ws.headerFooter={oddFooter:'&C&8Trang &P / &N&R&8In ngày &D'};
-  }catch(e){}
+  }catch(e){klog("var o=PR(),pg=prPage(),m=(+o.margin||20)/25.4; w",e)}
 }
 function docHeaderHtml(diaDiem,soVanBan,loaiVanBan){
   var today=new Date();
@@ -2027,7 +2071,7 @@ function exportDocHtml(html,fname){
   try{
     var mh=toMhtml(html);
     var blob=new Blob([mh!==null?mh:'\ufeff'+html],{type:'application/msword'+(mh!==null?'':';charset=utf-8')});
-    var file=null;try{file=new File([blob],fname,{type:blob.type});}catch(er){}
+    var file=null;try{file=new File([blob],fname,{type:blob.type});}catch(er){klog("file=new File([blob],fname,{type:blob.type});",er)}
     if(file&&navigator.share&&navigator.canShare&&navigator.canShare({files:[file]})){
       navigator.share({files:[file],title:fname}).catch(function(){dlAnchor(blob,fname);});
     }else{dlAnchor(blob,fname);}
@@ -2840,11 +2884,11 @@ function exportHsdAlert(filterBranch){
     wctx.fillText("Mai Văn Quyết quyetmv",0,0);
     var wmId=wb.addImage({base64:wc.toDataURL("image/png").split(",")[1],extension:"png"});
     ws.addBackgroundImage(wmId);
-  }catch(e){}
+  }catch(e){klog("var wc=document.createElement('canvas');wc.width",e)}
   wb.xlsx.writeBuffer().then(function(buf){
     var blob=new Blob([buf],{type:"application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"});
     var file=null;
-    try{file=new File([blob],fname,{type:blob.type});}catch(e){}
+    try{file=new File([blob],fname,{type:blob.type});}catch(e){klog("file=new File([blob],fname,{type:blob.type});",e)}
     var shared=false;
     if(file&&navigator.share&&navigator.canShare&&navigator.canShare({files:[file]})){
       shared=true;
@@ -2936,7 +2980,7 @@ function exportKiemKeEmail(p){
   buildBienBan(p).xlsx.writeBuffer().then(function(buf){
     var blob=new Blob([buf],{type:"application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"});
     var file=null;
-    try{file=new File([blob],fname,{type:blob.type});}catch(e){}
+    try{file=new File([blob],fname,{type:blob.type});}catch(e){klog("file=new File([blob],fname,{type:blob.type});",e)}
     var shared=false;
     if(file&&navigator.share&&navigator.canShare&&navigator.canShare({files:[file]})){
       shared=true;
@@ -3157,7 +3201,7 @@ function scRoi(v,full){
 function scDecodeZx(c){
   if(!window.ZXing)return null;
   try{
-    if(!SC.zr){var hints=new Map();hints.set(ZXing.DecodeHintType.TRY_HARDER,true);try{var F=ZXing.BarcodeFormat,fm=['QR_CODE','DATA_MATRIX','AZTEC','PDF_417','EAN_13','EAN_8','UPC_A','UPC_E','CODE_128','CODE_39','CODE_93','ITF'].map(function(n){return F[n];}).filter(function(x){return x!==undefined;});if(fm.length>4)hints.set(ZXing.DecodeHintType.POSSIBLE_FORMATS,fm);}catch(e){}SC.zr=new ZXing.MultiFormatReader();SC.zr.setHints(hints);}
+    if(!SC.zr){var hints=new Map();hints.set(ZXing.DecodeHintType.TRY_HARDER,true);try{var F=ZXing.BarcodeFormat,fm=['QR_CODE','DATA_MATRIX','AZTEC','PDF_417','EAN_13','EAN_8','UPC_A','UPC_E','CODE_128','CODE_39','CODE_93','ITF'].map(function(n){return F[n];}).filter(function(x){return x!==undefined;});if(fm.length>4)hints.set(ZXing.DecodeHintType.POSSIBLE_FORMATS,fm);}catch(e){klog("var F=ZXing.BarcodeFormat,fm=['QR_CODE','DATA_MA",e)}SC.zr=new ZXing.MultiFormatReader();SC.zr.setHints(hints);}
     var bmp=new ZXing.BinaryBitmap(new ZXing.HybridBinarizer(new ZXing.HTMLCanvasElementLuminanceSource(c)));
     var zr=SC.zr.decode(bmp);try{SCFMT=String(ZXing.BarcodeFormat[zr.getBarcodeFormat()]||'').toLowerCase();}catch(e){SCFMT='';}return zr.getText();
   }catch(e){return null;}
@@ -3243,7 +3287,7 @@ function scStart(){
   navigator.mediaDevices.getUserMedia({video:{facingMode:{ideal:'environment'},width:{ideal:1920},height:{ideal:1080}},audio:false}).then(function(stream){
     if(!SC){stream.getTracks().forEach(function(t){t.stop();});return;}
     SC.stream=stream;scTools(stream);
-    try{if(SC.track)SC.track.applyConstraints({advanced:[{focusMode:'continuous'}]}).catch(function(){});}catch(e){}
+    try{if(SC.track)SC.track.applyConstraints({advanced:[{focusMode:'continuous'}]}).catch(function(){});}catch(e){klog("if(SC.track)SC.track.applyConstraints({advanced:",e)}
     var v=document.getElementById('scvid');
     v.muted=true;v.defaultMuted=true;v.playsInline=true;
     v.setAttribute('muted','');v.setAttribute('playsinline','');v.setAttribute('webkit-playsinline','');
@@ -3355,7 +3399,7 @@ function scOnCode(text,force){
   if(!force&&SC.last===text&&now-SC.lastAt<2500)return;
   SC.last=text;SC.lastAt=now;
   var p=per(SC.pid);if(!p)return;
-  try{if(navigator.vibrate)navigator.vibrate(60);}catch(e){}
+  try{if(navigator.vibrate)navigator.vibrate(60);}catch(e){klog("if(navigator.vibrate)navigator.vibrate(60);",e)}
   if(SC.bind)return scBindCode(p,text);
   var m=scMatch(p,text);
   if(m.item)scShowMatched(m);
@@ -3726,7 +3770,7 @@ function scAutoOcr(v){
     var sh=phSharp(c2);SC.shMax=Math.max((SC.shMax||0)*0.985,sh);
     if(sh<SC.shMax*0.4&&(SC.blurSkip||0)<2){SC.blurSkip=(SC.blurSkip||0)+1;scOcrStatus('Số: ảnh mờ — giữ yên máy, chờ lấy nét','#fbbf24');return;}
     SC.blurSkip=0;
-  }catch(e){}
+  }catch(e){klog("var c2=SC.shc||(SC.shc=document.createElement('c",e)}
   /* Luôn dùng cùng một cách xử lý để các lần đọc cho cùng một chuỗi (dễ xác nhận); chỉ đổi cách khác khi lần trước không thấy gì */
   var mi=SC.ocrMiss||0,mode=mi===0?'bin':(mi%2?'bin2':'gray');
   var t0=now,exact=function(lines){var j=scJudge(p,lines);return !!(j&&j.dist===0&&j.need===1);};
@@ -3749,7 +3793,7 @@ function scAutoOcr(v){
       vt.t=Date.now();
       if(vt.n>=j.need){
         SC.vote=null;
-        try{if(navigator.vibrate)navigator.vibrate(60);}catch(e){}
+        try{if(navigator.vibrate)navigator.vibrate(60);}catch(e){klog("if(navigator.vibrate)navigator.vibrate(60);",e)}
         SC.hold=true;
         scMsg('⚡ '+j.line+(j.dist?' ≈ '+j.it.code:'')+' · '+ms+' ms');
         scShowMatched({item:j.it,how:'ocr',qty:ocrQtyCands(lines,j.line)});
@@ -3811,7 +3855,7 @@ function scBeep(){
     var o=a.createOscillator(),g=a.createGain();
     o.frequency.value=1500;g.gain.value=0.15;o.connect(g);g.connect(a.destination);
     o.start();o.stop(a.currentTime+0.08);
-  }catch(e){}
+  }catch(e){klog("var a=SC&&SC.actx;if(!a)return; var o=a.createOs",e)}
 }
 function scLogRender(){
   var e=document.getElementById('sclog');if(!e||!SC)return;
@@ -3841,7 +3885,7 @@ function scTools(stream){
   var tr=stream.getVideoTracks&&stream.getVideoTracks()[0],box=document.getElementById('sctools');
   if(!tr||!box)return;
   SC.track=tr;
-  var caps={};try{caps=tr.getCapabilities?tr.getCapabilities():{};}catch(e){}
+  var caps={};try{caps=tr.getCapabilities?tr.getCapabilities():{};}catch(e){klog("caps=tr.getCapabilities?tr.getCapabilities():{};",e)}
   var h='';
   if(caps.torch)h+='<button id="sctorch" onclick="A.scTorch()" style="width:40px;height:40px;border-radius:50%;border:1px solid #33333d;background:rgba(18,18,26,.75);color:#fbbf24;font-size:18px">🔦</button>';
   if(caps.zoom&&caps.zoom.max>caps.zoom.min)h+='<input type="range" min="'+caps.zoom.min+'" max="'+Math.min(caps.zoom.max,5)+'" step="'+(caps.zoom.step||0.1)+'" value="'+caps.zoom.min+'" oninput="A.scZoom(this.value)" style="width:110px">';
@@ -3962,13 +4006,13 @@ function renderHomeOld(){
   var tileL='display:flex;flex-direction:column;gap:8px;padding:18px 8px;line-height:1.25;font-size:14px';
   var tileS='display:flex;flex-direction:column;gap:7px;padding:14px 4px;line-height:1.25;font-size:13px';
   var open=db.periods.filter(function(p){return p.items.some(function(i){return !i.counted&&i.close!==0;});}).length,nl=0;
-  try{if(db.pay&&db.pay.mua&&db.pay.mua.length)payCompute().forEach(function(g){if(g.bad)nl++;});}catch(e){}
+  try{if(db.pay&&db.pay.mua&&db.pay.mua.length)payCompute().forEach(function(g){if(g.bad)nl++;});}catch(e){klog("if(db.pay&&db.pay.mua&&db.pay.mua.length)payComp",e)}
   function tile(ic,lb,act,bd){return '<button class="btn tile" style="'+tileS+';position:relative" onclick="'+act+'"><span class="tic">'+icon(ic,24)+'</span>'+lb+(bd?'<b style="position:absolute;top:6px;right:8px;min-width:20px;padding:1px 6px;border-radius:99px;background:var(--red);color:#fff;font-size:11px">'+bd+'</b>':'')+'</button>';}
   h+='<div class="wrap mt24"><div class="sec">Kiểm kê</div><div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">'
     +tile('box','Kiểm kê vật tư',"A.go('upload')",'')+tile('monitor','Kiểm kê CCDC &amp; TSCĐ',"A.go('assets')",'')
     +tile('file','Kỳ đang kiểm dở','v2List()',open||'')+tile('qr','Quét QR','v2Scan()','')+'</div>'
     +'<div class="sec" style="margin-top:22px">Đối chiếu & thanh toán</div><div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">'
-    +tile('swap','Đối chiếu DT – xuất kho',"A.go('recon')",'')+tile('file','Đề nghị thanh toán NCC',"A.go('pay')",nl||'')+'</div>'
+    +tile('swap','Đối chiếu DT – xuất kho',"A.go('recon')",'')+tile('file','Đề nghị thanh toán NCC',"A.go('pay')",nl||'')+tile('monitor','Quản trị liên chi nhánh',"A.go('mgmt')",'')+'</div>'
     +'<div class="sec" style="margin-top:22px">Kho & biểu mẫu</div><div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px">'
     +tile('box','Tồn kho','A.navStock()','')+tile('edit','Biểu mẫu',"A.go('reporthub')",'')+tile('gear','Cài đặt',"A.go('settings')",'')+'</div>'
     +'<div style="height:24px"></div></div>';
@@ -4548,20 +4592,19 @@ function navGroups(){
   if(un)inv.push({label:'Chưa phân loại',act:'A.navFolder(-1)',on:inFolder&&cur==='',cnt:un});
   inv.push({label:'Thêm chi nhánh',act:'A.navFolderAdd()',on:false,add:true});
   return [
-    {k:'ov',icon:'home',label:'Trang chủ',act:"A.navGo('home')",on:v==='home'},
-    {k:'inv',icon:'scan',label:'Kiểm kê',subs:inv,on:['lists','transfer','upload','folder','period'].indexOf(v)>=0||(v==='asset'&&LS.back)},
-    {k:'dc',icon:'swap',label:'Đối chiếu & thanh toán',on:['recon','pay','dchub'].indexOf(v)>=0,subs:[
-      {label:'Đối chiếu DT – xuất kho',act:C("A.go('recon')"),on:v==='recon'},
-      {label:'Đề nghị thanh toán NCC',act:C("A.go('pay')"),on:v==='pay'}]},
-    {k:'wh',icon:'box',label:'Kho',on:['stock','hsd','assets'].indexOf(v)>=0||(v==='asset'&&!LS.back),subs:[
+    {k:'ov',icon:'home',label:'Tổng quan',act:"A.navGo('home')",on:v==='home'},
+    {k:'inv',icon:'scan',label:'Quản lý kiểm kê',subs:inv,on:['lists','transfer','upload','folder','period'].indexOf(v)>=0||(v==='asset'&&LS.back)},
+    {k:'rc',icon:'swap',label:'Đối chiếu và kiểm soát',act:"A.navGo('recon')",on:['recon','dchub'].indexOf(v)>=0},
+    {k:'pay',icon:'doc',label:'Thanh toán nhà cung cấp',act:"A.navGo('pay')",on:v==='pay'},
+    {k:'wh',icon:'box',label:'Quản lý kho và tài sản',on:['stock','hsd','assets'].indexOf(v)>=0||(v==='asset'&&!LS.back),subs:[
       {label:'Vật tư, tồn kho',act:'A.navStock()',on:v==='stock'},
       {label:'CCDC & TSCĐ',act:C("A.go('assets')"),on:v==='assets'||(v==='asset'&&!LS.back)},
       {label:'Cảnh báo hạn sử dụng',act:C("A.go('hsd')"),on:v==='hsd'}]},
-    {k:'bm',icon:'file',label:'Biểu mẫu',on:['reporthub','baocao','handover','handoverEdit','explain','explainEdit'].indexOf(v)>=0,subs:[
+    {k:'bm',icon:'file',label:'Báo cáo và biểu mẫu',on:['reporthub','baocao','handover','handoverEdit','explain','explainEdit'].indexOf(v)>=0,subs:[
       {label:'Báo cáo kiểm kê',act:C("A.go('baocao')"),on:v==='baocao'},
       {label:'Biên bản bàn giao',act:C("A.go('handover')"),on:v==='handover'||v==='handoverEdit'},
       {label:'Giải trình chênh lệch',act:C("A.go('explain')"),on:v==='explain'||v==='explainEdit'}]},
-    {k:'st',icon:'gear',label:'Cài đặt, sao lưu',act:"A.navGo('settings')",on:v==='settings'}
+    {k:'st',icon:'gear',label:'Hệ thống',act:"A.navGo('settings')",on:v==='settings'}
   ];
 }
 function navActive(gs){
@@ -4621,10 +4664,50 @@ function hubCards(title,back,cards){
   });
   document.getElementById("app").innerHTML=h+'</div>';
 }
+/* ===== Giá trị quản trị: dashboard liên chi nhánh · gợi ý điều chuyển tồn >3/6 tháng · đối chiếu 3 chiều ===== */
+function mgData(){
+  var P=(db.periods||[]).slice().sort(function(a,b){return (a.createdAt||0)-(b.createdAt||0);}),now=Date.now(),MO=30.4*864e5,B={};
+  P.forEach(function(p){var t=p.createdAt||0;(p.items||[]).forEach(function(it){
+    var bn=it.branch||"Kho chính",o=B[bn]=B[bn]||{n:bn,first:t,last:t,m:{}};
+    if(t<o.first)o.first=t;if(t>o.last)o.last=t;
+    var k=norm(it.code)||norm(it.name),r=o.m[k]=o.m[k]||{k:k,code:it.code,name:it.name,unit:it.unit,o3:0,o6:0};
+    r.close=it.close;r.name=it.name;r.unit=it.unit;r.counted=!!it.counted;r.diff=diffOf(it);
+    if(t>=now-3*MO)r.o3+=(+it.out||0);if(t>=now-6*MO)r.o6+=(+it.out||0);});});
+  var br=Object.keys(B).map(function(n){var o=B[n],a=Object.keys(o.m).map(function(k){return o.m[k];}),st=a.filter(function(r){return r.close!==0;});
+    o.cov=Math.floor((now-o.first)/MO);o.nMa=a.length;o.nTon=st.length;o.nKiem=st.filter(function(r){return r.counted;}).length;
+    o.nLech=a.filter(function(r){return r.diff!==null&&r.diff!==0;}).length;
+    o.d3=o.cov>=3?st.filter(function(r){return r.close>0&&r.o3===0;}):null;
+    o.d6=o.cov>=6?st.filter(function(r){return r.close>0&&r.o6===0;}):null;return o;});
+  var sug=[];br.forEach(function(A){[[6,A.d6],[3,A.d3]].forEach(function(x){if(!x[1])return;x[1].forEach(function(r){
+    if(x[0]===3&&A.d6&&A.d6.indexOf(r)>=0)return;
+    br.forEach(function(Bn){if(Bn===A)return;var q=Bn.m[r.k];if(q&&q.o3>0)sug.push({m:x[0],from:A.n,to:Bn.n,code:r.code,name:r.name,unit:r.unit,have:r.close,need:q.o3,qty:Math.min(r.close,Math.ceil(q.o3))});});});});});
+  sug.sort(function(a,b){return b.m-a.m||b.qty-a.qty;});
+  return {br:br,sug:sug};
+}
+function renderMgmt(){
+  var D=mgData(),h='<div class="topbar"><button class="btn ghost" onclick="A.go(\'home\')">‹</button><div style="font-weight:800;font-size:17px">Quản trị liên chi nhánh</div></div><div class="wrap">',
+  T=function(hd,rows){return '<div style="overflow-x:auto;margin:8px 0 18px"><table style="border-collapse:collapse;font-size:13px;min-width:100%;white-space:nowrap"><tr>'+hd.map(function(x){return '<th style="text-align:left;padding:6px 10px;border-bottom:1px solid var(--line);color:var(--mut)">'+x+'</th>';}).join('')+'</tr>'+rows.map(function(r){return '<tr>'+r.map(function(c){return '<td style="padding:6px 10px;border-bottom:1px solid var(--line)">'+c+'</td>';}).join('')+'</tr>';}).join('')+'</table></div>';};
+  if(!D.br.length)return document.getElementById("app").innerHTML=h+'<div style="color:var(--mut);padding:20px 0">Chưa có kỳ kiểm kê nào. Tạo kỳ ở mục Kiểm kê vật tư để xem số liệu liên chi nhánh.</div></div>';
+  h+='<div class="sec">1. Dashboard liên chi nhánh</div>'+T(['Chi nhánh','Số mã','Còn tồn','Đã kiểm','Lệch kiểm','Dữ liệu'],D.br.map(function(o){return [esc(o.n),o.nMa,o.nTon,o.nTon?Math.round(100*o.nKiem/o.nTon)+'%':'–',o.nLech?'<b style="color:var(--red)">'+o.nLech+'</b>':'0',o.cov+' tháng'];}));
+  h+='<div class="sec">2. Tồn không xuất ≥ 3 / 6 tháng</div>'+T(['Chi nhánh','Tồn ≥3 tháng','Tồn ≥6 tháng'],D.br.map(function(o){return [esc(o.n),o.d3?o.d3.length+' mã':'<span style="color:var(--mut)">chưa đủ 3 tháng dữ liệu</span>',o.d6?o.d6.length+' mã':'<span style="color:var(--mut)">chưa đủ 6 tháng dữ liệu</span>'];}));
+  h+='<div style="font-size:12px;color:var(--mut);margin:-10px 0 12px">Tính theo các kỳ đã lưu: mã còn tồn dương và tổng xuất = 0 trong cửa sổ 3/6 tháng gần nhất. Chỉ xét khi chi nhánh có dữ liệu phủ đủ cửa sổ.</div>';
+  h+='<div class="sec">3. Gợi ý điều chuyển (nơi thừa → nơi đang xuất)</div>';
+  h+=D.sug.length?T(['Mức','Mã','Vật tư','Từ','Đến','Tồn nguồn','Xuất 3T đích','Đề xuất'],D.sug.slice(0,60).map(function(s){return [s.m+'T+',esc(s.code),esc(s.name),esc(s.from),esc(s.to),fmt(s.have),fmt(s.need),'<b>'+fmt(s.qty)+' '+esc(s.unit||'')+'</b>'];}))+(D.sug.length>60?'<div style="font-size:12px;color:var(--mut)">Hiện 60/'+D.sug.length+' gợi ý.</div>':''):'<div style="color:var(--mut);margin:8px 0 18px">Chưa có gợi ý: cần ≥2 chi nhánh, một nơi tồn không xuất và nơi kia đang xuất cùng mã.</div>';
+  h+='<div class="sec">4. Đối chiếu 3 chiều: doanh thu – xuất kho – kiểm kê</div>';
+  var R=null;try{R=rcCompute();}catch(e){klog("mgmt rcCompute",e);}
+  if(!R||!R.dt||!R.dt.length)h+='<div style="color:var(--mut)">Chưa có dữ liệu doanh thu/xuất kho. Nạp ở mục Đối chiếu DT – xuất kho để hiện đủ 3 chiều.</div>';
+  else{var C={};R.dt.forEach(function(c){var k=norm(c.cs||'');if(!C[k])C[k]={n:c.cs||'(không rõ)',dt:0,xk:0,v:0,bad:0};if(!c.none&&c.first!==false)C[k].dt++;});
+    (R.xk||[]).forEach(function(x){var k=norm(x.cs||'');if(!C[k])C[k]={n:x.cs||'(không rõ)',dt:0,xk:0,v:0,bad:0};C[k].xk++;C[k].v+=(x.val||0);if(x.need)C[k].bad++;});
+    h+=T(['Cơ sở','Dòng DT','Dòng xuất','Giá trị xuất (ĐM)','Cần xử lý','Lệch kiểm kê'],Object.keys(C).map(function(k){var c=C[k],b=D.br.filter(function(o){var nb=norm(o.n);return nb&&k&&(nb===k||nb.indexOf(k)>=0||k.indexOf(nb)>=0);})[0];
+      return [esc(c.n),c.dt,c.xk,fmt(Math.round(c.v)),c.bad?'<b style="color:var(--red)">'+c.bad+'</b>':'0',b?(b.nLech?'<b style="color:var(--red)">'+b.nLech+' mã</b>':'0'):'<span style="color:var(--mut)">chưa khớp tên kho</span>'];}));
+    h+='<div style="font-size:12px;color:var(--mut)">Cột kiểm kê khớp theo tên cơ sở với tên chi nhánh/kho trong kỳ kiểm kê.</div>';}
+  document.getElementById("app").innerHTML=h+'</div>';
+}
 function renderDcHub(){
-  var n=0;try{if(db.pay&&db.pay.mua&&db.pay.mua.length)payCompute().forEach(function(g){if(g.bad)n++;});}catch(e){}
+  var n=0;try{if(db.pay&&db.pay.mua&&db.pay.mua.length)payCompute().forEach(function(g){if(g.bad)n++;});}catch(e){klog("if(db.pay&&db.pay.mua&&db.pay.mua.length)payComp",e)}
   hubCards('Đối chiếu & thanh toán','home',[
     {icon:'swap',title:'Đối chiếu doanh thu – xuất kho',desc:'Đối chiếu doanh thu với phiếu xuất kho, xuất Excel kèm sheet map, bôi đỏ phần lệch.',route:'recon'},
+    {icon:'monitor',title:'Quản trị liên chi nhánh',desc:'Dashboard chi nhánh, tồn ≥3/6 tháng, gợi ý điều chuyển, đối chiếu doanh thu – xuất kho – kiểm kê.',route:'mgmt'},
     {icon:'file',title:'Đề nghị thanh toán NCC',desc:'Nạp / bổ sung mua hàng và hóa đơn MISA, rà lỗi, lập giấy đề nghị, bảng kê, danh sách thanh toán.',route:'pay',badge:n?n+' NCC lệch':''}]);
 }
 function renderReportHub(){
@@ -4762,7 +4845,7 @@ var PH={db:null,cache:{},mem:{},busy:{},
         rq.onerror=function(){res(null);};
       }catch(e){res(null);}
     });
-    try{if(navigator.storage&&navigator.storage.persist)navigator.storage.persist();}catch(e){}
+    try{if(navigator.storage&&navigator.storage.persist)navigator.storage.persist();}catch(e){klog("if(navigator.storage&&navigator.storage.persist)",e)}
     return PH._o;
   },
   put:function(id,d){
@@ -4790,7 +4873,7 @@ var PH={db:null,cache:{},mem:{},busy:{},
   },
   del:function(id){
     delete PH.cache[id];delete PH.mem[id];
-    return PH.open().then(function(db){if(db)try{db.transaction('p','readwrite').objectStore('p').delete(id);}catch(e){}});
+    return PH.open().then(function(db){if(db)try{db.transaction('p','readwrite').objectStore('p').delete(id);}catch(e){klog("db.transaction('p','readwrite').objectStore('p')",e)}});
   },
   /* lấy TOÀN BỘ ảnh đang lưu (IndexedDB + bộ nhớ tạm) để sao lưu */
   dump:function(){
@@ -4841,7 +4924,7 @@ function phSharpen(cv,a){
     var g=cv.getContext('2d'),w=cv.width,h=cv.height,im=g.getImageData(0,0,w,h),s=im.data,o=new Uint8ClampedArray(s),x,y,i,c,v;
     for(y=1;y<h-1;y++)for(x=1;x<w-1;x++){i=(y*w+x)*4;for(c=0;c<3;c++){v=s[i+c];o[i+c]=v+a*(4*v-s[i+c-4]-s[i+c+4]-s[i+c-w*4]-s[i+c+w*4]);}}
     im.data.set(o);g.putImageData(im,0,0);
-  }catch(e){}
+  }catch(e){klog("var g=cv.getContext('2d'),w=cv.width,h=cv.height",e)}
 }
 function phFrame(v,maxSide){
   if(!v||!v.videoWidth)return null;
@@ -4936,8 +5019,8 @@ function phCam(title,cb){
     PC.stream=st;PC.track=st.getVideoTracks()[0];
     var v=document.getElementById('phv');v.muted=true;v.setAttribute('playsinline','');v.srcObject=st;
     var pl=v.play();if(pl&&pl.catch)pl.catch(function(){});
-    try{PC.track.applyConstraints({advanced:[{focusMode:'continuous'}]}).catch(function(){});}catch(e){}
-    var caps={};try{caps=PC.track.getCapabilities?PC.track.getCapabilities():{};}catch(e){}
+    try{PC.track.applyConstraints({advanced:[{focusMode:'continuous'}]}).catch(function(){});}catch(e){klog("PC.track.applyConstraints({advanced:[{focusMode:",e)}
+    var caps={};try{caps=PC.track.getCapabilities?PC.track.getCapabilities():{};}catch(e){klog("caps=PC.track.getCapabilities?PC.track.getCapabi",e)}
     var h='';
     if(caps.torch)h+='<button onclick="phCamTorch()" style="width:40px;height:40px;border-radius:50%;border:1px solid #33333d;background:rgba(18,18,26,.75);font-size:18px">🔦</button>';
     if(caps.zoom&&caps.zoom.max>caps.zoom.min)h+='<input type="range" min="'+caps.zoom.min+'" max="'+Math.min(caps.zoom.max,5)+'" step="'+(caps.zoom.step||0.1)+'" value="'+caps.zoom.min+'" oninput="phCamZoom(this.value)" style="width:110px">';
@@ -4952,8 +5035,8 @@ function phCam(title,cb){
     },450);
   }).catch(function(e){q('Không mở được camera ('+((e&&e.name)||'lỗi')+') — dùng nút “Camera máy”','#fbbf24');});
 }
-function phCamTorch(){if(!PC||!PC.track)return;PC.torch=!PC.torch;try{PC.track.applyConstraints({advanced:[{torch:PC.torch}]}).catch(function(){});}catch(e){}}
-function phCamZoom(z){if(!PC||!PC.track)return;try{PC.track.applyConstraints({advanced:[{zoom:parseFloat(z)}]}).catch(function(){});}catch(e){}}
+function phCamTorch(){if(!PC||!PC.track)return;PC.torch=!PC.torch;try{PC.track.applyConstraints({advanced:[{torch:PC.torch}]}).catch(function(){});}catch(e){klog("PC.track.applyConstraints({advanced:[{torch:PC.t",e)}}
+function phCamZoom(z){if(!PC||!PC.track)return;try{PC.track.applyConstraints({advanced:[{zoom:parseFloat(z)}]}).catch(function(){});}catch(e){klog("PC.track.applyConstraints({advanced:[{zoom:parse",e)}}
 function phCamReview(r){
   PC.data=r;var im=document.getElementById('phprev');im.src=r.d;im.style.display='block';phCamBar('review');
   var e=document.getElementById('phq');if(e){e.textContent='Kiểm tra ảnh đã nét chưa';e.style.color='#9ca3af';}
@@ -5435,7 +5518,7 @@ function buildAssetXlsx(p){
         ws.addImage(id,{tl:{col:cix[z[0]]+0.15,row:r0+1.1},ext:{width:ww,height:hh}});
         ws.mergeCells(z[0]+(r0+6)+':'+ends[z[0]]+(r0+6));
         var c=ws.getCell(z[0]+(r0+6));c.value='Ký điện tử '+x.time+' ('+x.dev+')'+(x.auth?' · '+x.auth:'');c.font={name:'Arial',size:8,italic:true};c.alignment={horizontal:'center',wrapText:true};
-      }catch(e){}
+      }catch(e){klog("var hh=56,ww=Math.round(hh*(x.w||300)/(x.h||120)",e)}
     });
   })();
   addSummarySheet(wb,p);addPhotoSheet(wb,p);addLogSheet(wb,p);addUnmSheet(wb,p);
@@ -5637,7 +5720,7 @@ var ASX={
     var p=asPer(AP.pid);if(!p)return;
     if(SC)A.scClose();
     SC={pid:p.id,kind:'asset',hold:false,busy:false,auto:true};
-    try{var AC=window.AudioContext||window.webkitAudioContext;if(AC){SC.actx=new AC();if(SC.actx.resume)SC.actx.resume();}}catch(e){}
+    try{var AC=window.AudioContext||window.webkitAudioContext;if(AC){SC.actx=new AC();if(SC.actx.resume)SC.actx.resume();}}catch(e){klog("var AC=window.AudioContext||window.webkitAudioCo",e)}
     scMount();scStart();
   },
   scSave:function(id){
@@ -5745,7 +5828,7 @@ var ASX={
     var w=window.open('','_blank');
     if(!w){toast('Trình duyệt chặn cửa sổ in — hãy dùng nút Excel');return;}
     w.document.write(asPrintHtml(p));w.document.close();
-    setTimeout(function(){try{w.focus();w.print();}catch(e){}},500);
+    setTimeout(function(){try{w.focus();w.print();}catch(e){klog("w.focus();w.print();",e)}},500);
   }
 };
 
@@ -5799,7 +5882,7 @@ function scTrack(lines){
 function scUnmNotice(e,isNew){
   if(!SC||SC.hold)return;
   scUnmChip();
-  try{if(navigator.vibrate)navigator.vibrate([30,40,30]);}catch(x){}
+  try{if(navigator.vibrate)navigator.vibrate([30,40,30]);}catch(x){klog("if(navigator.vibrate)navigator.vibrate([30,40,30",x)}
   UNM.pid=SC.pid;
   var ean=eanOk(ocrDigits(e.text)),note=ean===true?' · mã vạch EAN hợp lệ':ean===false?' · ⚠ có thể đọc sai 1–2 số':'';
   document.getElementById('scres').innerHTML='<div style="background:#2a1f12;border:1px solid #8a5a1a;border-radius:14px;padding:10px 12px">'
@@ -5833,7 +5916,7 @@ function asAutoAdd(p,text,kind){
 function asAddedNotice(it,isNew){
   if(!SC)return;
   SC.hold=false;
-  try{if(navigator.vibrate)navigator.vibrate([30,40,30]);}catch(x){}
+  try{if(navigator.vibrate)navigator.vibrate([30,40,30]);}catch(x){klog("if(navigator.vibrate)navigator.vibrate([30,40,30",x)}
   scBeep();scUnmChip();asRenderBody();
   document.getElementById('scres').innerHTML='<div style="background:#2a1f12;border:1px solid #8a5a1a;border-radius:14px;padding:10px 12px">'
     +'<div style="font-size:11px;font-weight:800;letter-spacing:.08em;color:#fbbf24;text-transform:uppercase">⚑ '+(isNew?'Phát hiện tài sản chưa có trong danh mục · đã ghi nhận':'Phát hiện tài sản chưa có trong danh mục · đã ghi nhận trước đó')+'</div>'
@@ -5964,6 +6047,7 @@ function render(){
   else if(route.view==="asset")renderAsset();
   else if(route.view==="lists")renderLists();
   else if(route.view==="recon")renderRecon();
+  else if(route.view==="mgmt")renderMgmt();
   else if(route.view==="pay")renderPay();
   renderNav();
   window.scrollTo(0,0);
@@ -6152,7 +6236,7 @@ var A={
       var ph=d.__photos||{};
       if(!confirm((ig.warn?'⚠ '+ig.warn+'\n\n':'')+'GỘP dữ liệu từ file vào máy này?\n\nFile có: '+d.periods.length+' kỳ vật tư, '+(d.assets||[]).length+' kỳ CCDC/TSCĐ, '+(d.handovers||[]).length+' biên bản, '+(d.explains||[]).length+' phiếu, '+Object.keys(ph).length+' ảnh.\nMáy này: '+db.periods.length+' kỳ vật tư, '+(db.assets||[]).length+' kỳ CCDC/TSCĐ.\n\nChỉ thêm phần còn thiếu; số đã kiểm trên máy này không bị ghi đè.'))return;
       prev=JSON.stringify(db);
-      try{localStorage.setItem('kk_db_prev',prev);}catch(x){}
+      try{localStorage.setItem('kk_db_prev',prev);}catch(x){klog("localStorage.setItem('kk_db_prev',prev);",x)}
       Promise.all(Object.keys(ph).map(function(k){return PH.put(k,ph[k]);})).then(function(rs){
         var lost=rs.filter(function(x){return x===false;}).length;
         var st=mergeDb(d);
@@ -6209,7 +6293,7 @@ var A={
     store.blocked=false;store.bad=null;var b=document.getElementById('badbar');if(b)b.remove();store.save();render();
   },
   restorePrev:function(){
-    var s=null;try{s=localStorage.getItem('kk_db_prev');}catch(e){}
+    var s=null;try{s=localStorage.getItem('kk_db_prev');}catch(e){klog("s=localStorage.getItem('kk_db_prev');",e)}
     if(!s){toast('Không có bản tạm');return;}
     var d;try{d=JSON.parse(s);}catch(e){toast('Bản tạm bị lỗi');return;}
     if(validBackup(d)){toast('Bản tạm không hợp lệ');return;}
@@ -6312,7 +6396,7 @@ var A={
   },
   sbToggle:function(){
     var m=document.body.classList.toggle('sb-min');
-    try{localStorage.setItem('kk_ui_sb',m?'1':'0');}catch(e){}
+    try{localStorage.setItem('kk_ui_sb',m?'1':'0');}catch(e){klog("localStorage.setItem('kk_ui_sb',m?'1':'0');",e)}
   },
   navFolder:function(i){A.drawerClose();A.openFolder(i);},
   navFolderAdd:function(){A.drawerClose();A.folderAdd();},
@@ -6396,7 +6480,7 @@ var A={
     var p=per(P&&P.id);if(!p)return;
     if(SC)A.scClose();
     SC={pid:p.id,hold:false,busy:false,auto:true};
-    try{var AC=window.AudioContext||window.webkitAudioContext;if(AC){SC.actx=new AC();if(SC.actx.resume)SC.actx.resume();}}catch(e){}
+    try{var AC=window.AudioContext||window.webkitAudioContext;if(AC){SC.actx=new AC();if(SC.actx.resume)SC.actx.resume();}}catch(e){klog("var AC=window.AudioContext||window.webkitAudioCo",e)}
     scMount();scStart();
   },
   scClose:function(){
@@ -6404,12 +6488,12 @@ var A={
       if(SC.timer)clearInterval(SC.timer);
       if(SC.watch)clearTimeout(SC.watch);
       if(SC.stream)SC.stream.getTracks().forEach(function(t){t.stop();});
-      try{if(SC.actx&&SC.actx.close)SC.actx.close();}catch(e){}
+      try{if(SC.actx&&SC.actx.close)SC.actx.close();}catch(e){klog("if(SC.actx&&SC.actx.close)SC.actx.close();",e)}
     }
     var o=document.getElementById('scanovl');if(o)o.remove();
     var wasBind=SC&&SC.bind;
     SC=null;
-    if(wasBind&&SB){try{renderBoxes();}catch(e){}}
+    if(wasBind&&SB){try{renderBoxes();}catch(e){klog("renderBoxes();",e)}}
   },
   scNext:function(){
     if(!SC)return;
@@ -6491,12 +6575,12 @@ var A={
   scTorch:function(){
     if(!SC||!SC.track)return;
     SC.torch=!SC.torch;
-    try{SC.track.applyConstraints({advanced:[{torch:SC.torch}]}).catch(function(){});}catch(e){}
+    try{SC.track.applyConstraints({advanced:[{torch:SC.torch}]}).catch(function(){});}catch(e){klog("SC.track.applyConstraints({advanced:[{torch:SC.t",e)}
     var b=document.getElementById('sctorch');if(b)b.style.opacity=SC.torch?'1':'.55';
   },
   scZoom:function(v){
     if(!SC||!SC.track)return;
-    try{SC.track.applyConstraints({advanced:[{zoom:parseFloat(v)}]}).catch(function(){});}catch(e){}
+    try{SC.track.applyConstraints({advanced:[{zoom:parseFloat(v)}]}).catch(function(){});}catch(e){klog("SC.track.applyConstraints({advanced:[{zoom:parse",e)}
   },
   scPickQ:function(q){
     var box=document.getElementById('scpicklist');if(!box||!SC)return;
@@ -6532,7 +6616,7 @@ var A={
     var info=(f.type||'không rõ định dạng')+', '+Math.round(f.size/1024)+' KB';
     scLoadImage(f).then(function(im){
       if(!SC)return;
-      try{var kk=Math.min(1,1600/Math.max(im.w,im.h)),sn=document.createElement('canvas');sn.width=Math.round(im.w*kk);sn.height=Math.round(im.h*kk);sn.getContext('2d').drawImage(im.el,0,0,sn.width,sn.height);SC.snap={d:sn.toDataURL('image/jpeg',0.88),w:sn.width,h:sn.height};}catch(e){}
+      try{var kk=Math.min(1,1600/Math.max(im.w,im.h)),sn=document.createElement('canvas');sn.width=Math.round(im.w*kk);sn.height=Math.round(im.h*kk);sn.getContext('2d').drawImage(im.el,0,0,sn.width,sn.height);SC.snap={d:sn.toDataURL('image/jpeg',0.88),w:sn.width,h:sn.height};}catch(e){klog("var kk=Math.min(1,1600/Math.max(im.w,im.h)),sn=d",e)}
       var go=function(){
         var tryScale=function(maxSide){
           var k=Math.min(1,maxSide/Math.max(im.w,im.h));
@@ -6796,7 +6880,7 @@ Object.assign(A,{
     var it=bxCur();if(!it)return;
     if(SC)A.scClose();
     SC={pid:per(P.id).id,bind:it.id,hold:false,busy:false,auto:false};
-    try{var AC=window.AudioContext||window.webkitAudioContext;if(AC){SC.actx=new AC();if(SC.actx.resume)SC.actx.resume();}}catch(e){}
+    try{var AC=window.AudioContext||window.webkitAudioContext;if(AC){SC.actx=new AC();if(SC.actx.resume)SC.actx.resume();}}catch(e){klog("var AC=window.AudioContext||window.webkitAudioCo",e)}
     scMount();scStart();
     var ab=document.getElementById('scautobtn');if(ab)ab.textContent='Tự đọc số: TẮT';
     var w=document.getElementById('scwarn');
@@ -6879,10 +6963,10 @@ function showUpdateBanner(newVer,note){
   document.body.appendChild(d);
   document.getElementById('updgo').onclick=function(){this.disabled=true;this.textContent='Đang cập nhật…';reloadLatest(newVer);};
   document.getElementById('updlater').onclick=function(){UPD_SNOOZE=Date.now()+30*60*1000;d.remove();toast('Mình sẽ nhắc lại sau 30 phút');};
-  if(UPD_TOASTED!==newVer){UPD_TOASTED=newVer;try{toast('Có bản cập nhật mới — bấm "Cập nhật ngay"');}catch(e){}}
+  if(UPD_TOASTED!==newVer){UPD_TOASTED=newVer;try{toast('Có bản cập nhật mới — bấm "Cập nhật ngay"');}catch(e){klog("toast('Có bản cập nhật mới — bấm 'Cập nhật ngay'",e)}}
 }
 function reloadLatest(ver){
-  var f;try{if(window.store&&store.flush)f=store.flush();}catch(e){}
+  var f;try{if(window.store&&store.flush)f=store.flush();}catch(e){klog("if(window.store&&store.flush)f=store.flush();",e)}
   var base=location.href.split('#')[0].split('?')[0],done=false;
   function go(){if(done)return;done=true;location.replace(base+'?v='+encodeURIComponent(ver||Date.now()));}
   setTimeout(go,2500);
@@ -6890,14 +6974,14 @@ function reloadLatest(ver){
   try{
     if(window.caches&&caches.keys)ps.push(caches.keys().then(function(ks){return Promise.all(ks.map(function(k){return caches.delete(k);}));}).catch(function(){}));
     if(navigator.serviceWorker&&navigator.serviceWorker.getRegistrations)ps.push(navigator.serviceWorker.getRegistrations().then(function(rs){return Promise.all(rs.map(function(r){return r.unregister();}));}).catch(function(){}));
-  }catch(e){}
+  }catch(e){klog("if(window.caches&&caches.keys)ps.push(caches.key",e)}
   Promise.all(ps).then(function(){setTimeout(go,350);});
 }
 function checkForUpdate(force){
   if(!APP_VERSION||!window.fetch||location.protocol==='file:'||navigator.onLine===false)return;
   var n=Date.now();if(force!==true&&n-UPD_LAST<30000)return;UPD_LAST=n;
   var base=location.href.split('#')[0].split('?')[0];
-  try{if(navigator.serviceWorker&&navigator.serviceWorker.getRegistration)navigator.serviceWorker.getRegistration().then(function(r){if(r)r.update().catch(function(){});}).catch(function(){});}catch(e){}
+  try{if(navigator.serviceWorker&&navigator.serviceWorker.getRegistration)navigator.serviceWorker.getRegistration().then(function(r){if(r)r.update().catch(function(){});}).catch(function(){});}catch(e){klog("if(navigator.serviceWorker&&navigator.serviceWor",e)}
   fetch(base+'?_='+n,{cache:'no-store'})
     .then(function(r){return r.ok?r.text():'';})
     .then(function(t){
@@ -6906,8 +6990,8 @@ function checkForUpdate(force){
     })
     .catch(function(){});
 }
-(function(){try{var k='kk_ver_seen',o=localStorage.getItem(k);if(o&&o!==APP_VERSION)setTimeout(function(){toast('Đã cập nhật lên bản '+updFmt(APP_VERSION));},1500);localStorage.setItem(k,APP_VERSION);}catch(e){}})();
-try{if('serviceWorker' in navigator&&location.protocol==='https:')navigator.serviceWorker.register('sw.js').catch(function(){});}catch(e){}
+(function(){try{var k='kk_ver_seen',o=localStorage.getItem(k);if(o&&o!==APP_VERSION)setTimeout(function(){toast('Đã cập nhật lên bản '+updFmt(APP_VERSION));},1500);localStorage.setItem(k,APP_VERSION);}catch(e){klog("var k='kk_ver_seen',o=localStorage.getItem(k);if",e)}})();
+try{if('serviceWorker' in navigator&&location.protocol==='https:')navigator.serviceWorker.register('sw.js').catch(function(){});}catch(e){klog("if('serviceWorker' in navigator&&location.protoc",e)}
 (function(){
   var oc=A.scClose;
   A.scClose=function(){
@@ -7004,7 +7088,7 @@ function renderNav(){
   var v=route.view,on={
     home:['home','upload','folder'].indexOf(v)>=0,
     list:['lists','period','stock','transfer'].indexOf(v)>=0||(v==='asset'&&LS.back),
-    dc:['dchub','recon','pay'].indexOf(v)>=0,
+    dc:['dchub','recon','pay','mgmt'].indexOf(v)>=0,
     more:['settings','hsd','assets','reporthub','baocao','handover','handoverEdit','explain','explainEdit'].indexOf(v)>=0||(v==='asset'&&!LS.back)
   };
   Array.prototype.forEach.call(document.querySelectorAll('#bnav [data-k]'),function(b){b.classList.toggle('on',!!on[b.getAttribute('data-k')]);});
@@ -7385,12 +7469,12 @@ A.hmGo=function(d){
   var rs=renderSettings;
   renderSettings=function(){
     rs.apply(this,arguments);
-    var s=null;try{s=localStorage.getItem('kk_db_prev');}catch(e){}
+    var s=null;try{s=localStorage.getItem('kk_db_prev');}catch(e){klog("s=localStorage.getItem('kk_db_prev');",e)}
     var a=document.getElementById('app');
     if(s&&a)a.querySelector('.wrap').insertAdjacentHTML('beforeend','<div class="card" style="margin-top:12px"><div style="font-weight:700;margin-bottom:2px">Khôi phục bản tạm</div><div style="font-size:12px;color:var(--mut);margin-bottom:10px">Bản dữ liệu máy này trước lần khôi phục/thay thế gần nhất ('+Math.round(s.length/1024)+' KB). Dùng để quay lui nếu dữ liệu mới sai.</div><button class="btn btn-outline" onclick="A.restorePrev()">Quay lui về bản tạm</button></div>');
   };
 })();
-try{if(localStorage.getItem('kk_ui_sb')==='1'&&window.innerWidth>=900)document.body.classList.add('sb-min');}catch(e){}
+try{if(localStorage.getItem('kk_ui_sb')==='1'&&window.innerWidth>=900)document.body.classList.add('sb-min');}catch(e){klog("if(localStorage.getItem('kk_ui_sb')==='1'&&windo",e)}
 document.getElementById('bnav').innerHTML=
  '<button data-k="home" onclick="A.go(\'home\')">'+icon('home',24)+'Trang chủ</button>'
  +'<button data-k="list" onclick="v2List()">'+icon('file',24)+'Kiểm kê</button>'
@@ -7402,7 +7486,7 @@ store.boot(function(){
   var saved=store.load();
   if(saved&&saved.periods)db=sanitizeDb(saved);
   if(store.bad){
-    try{localStorage.setItem('kk_db_corrupt_'+Date.now(),store.bad);}catch(e){}
+    try{localStorage.setItem('kk_db_corrupt_'+Date.now(),store.bad);}catch(e){klog("localStorage.setItem('kk_db_corrupt_'+Date.now()",e)}
     setTimeout(function(){
       var b=document.createElement('div');b.id='badbar';
       b.style.cssText='position:fixed;left:8px;right:8px;top:70px;z-index:220;background:#fde8e8;color:#7a1218;border:1px solid #e0383d;border-radius:12px;padding:12px;font-size:13px;line-height:1.45';
@@ -7416,7 +7500,7 @@ store.boot(function(){
   store.save();
   if(!db.counters)db.counters={};
   if(!db.profile)db.profile={ten:'',chucVu:'',chiNhanh:'',ma:'',maManual:false};
-  try{if(navigator.storage&&navigator.storage.persist)navigator.storage.persist();}catch(e){}
+  try{if(navigator.storage&&navigator.storage.persist)navigator.storage.persist();}catch(e){klog("if(navigator.storage&&navigator.storage.persist)",e)}
   render();
   /* Watermark */
   try{
@@ -7435,7 +7519,7 @@ store.boot(function(){
     var wm=document.createElement('div');
     wm.style.cssText='position:fixed;inset:0;z-index:9000;pointer-events:none;background-image:url('+url+');background-repeat:repeat;background-size:'+W+'px '+H+'px';
     document.body.appendChild(wm);
-  }catch(e){}
+  }catch(e){klog("var W=300,H=170; var c=document.createElement('c",e)}
 });
 /* ===== ĐỐI CHIẾU DOANH THU – XUẤT KHO V5 (khớp theo mã KH + vật tư + số lượng; không dùng nhóm vật tư) ===== */
 var RC_SEED={"dv":[["Osstem","Trụ Osstem (Hàn)","TRỤ OSSTEM (HÀN)"],["Hiossen","Trụ Hiossen (Mỹ) - AET3","TRỤ HIOSSEN"],["Biotem","Trụ Biotem","TRỤ BIOTEM"],["Nobel","Trụ NobelActive","TRỤ NOBEL"],["Ti Ultra","Trụ NobelActive cổ vàng","TRỤ NOBEL TI ULTRA"],["Neobiotech","Trụ Neobiotech","TRỤ NEOBIOTECH"],["Straumann","Trụ straumann","TRỤ STRAUMANN"],["SLActive","Trụ Straumann Active","TRỤ STRAUMANN ACTIVE"],["Neodent","Trụ Neodent","TRỤ NEODENT"],["Neodent","Trụ Neodent","TRỤ NEODENT"],["Neodent Straumann","Trụ Neodent","TRỤ NEODENT"],["Neoporos","Trụ Neodent Neoporos","TRỤ NEODENT NEOPOROS"],["mắc cài","Mắc cài kim loại thường","MẮC CÀI KIM LOẠI THƯỜNG"],["tự buộc","Mắc cài kim loại tự buộc MBT 022","MẮC CÀI TỰ BUỘC MBT 022"],["mắc cài sứ","Mắc cài sứ thường AO","MẮC CÀI SỨ AO"],["bột xương","Bột xương","BỘT XƯƠNG"],["Osteon","Bột xương","BỘT XƯƠNG"],["ghép xương","Bột xương","BỘT XƯƠNG"],["màng xương","Màng xương","MÀNG XƯƠNG"],["vít chỉnh nha","Vít chỉnh nha","VÍT CHỈNH NHA"],["Minivis","Vít chỉnh nha","VÍT CHỈNH NHA"],["NANCE","Vít chỉnh nha","VÍT CHỈNH NHA"],["Comprehensive 3","Invisalign Comprehensive 3","INVISALIGN COMPREHENSIVE 3"],["Comprehensive 5","Invisalign Comprehensive 5","INVISALIGN COMPREHENSIVE 5"],["Moderate","Invisalign Moderate","INVISALIGN MODERATE"],["First Phase I","Invisalign First Phase I","INVISALIGN FIRST PHASE I"],["Essential","Invisalign Essential","INVISALIGN ESSENTIAL"],["sứ tự buộc","Mắc cài sứ tự buộc empower 2.0","MẮC CÀI SỨ TỰ BUỘC EMPOWER 2.0"],["hướng dẫn phẫu thuật","Dụng cụ cố định vị trí băng nhựa sử dụng trên máy định vị Pdent","MÁY ĐỊNH VỊ PHẪU THUẬT"],["Osstem + abutment + sứ Katana","Trụ Osstem (Hàn) - NoMount","TRỤ OSSTEM (HÀN) - NOMOUNT"]],"vt":[["Bột xương","BỘT XƯƠNG"],["Bột xương cerabone 1cc","BỘT XƯƠNG"],["Bột xương dùng trong nha khoa Osteon 1cc","BỘT XƯƠNG"],["Vật liệu ghép xương OSTEON 1CC","BỘT XƯƠNG"],["Màng xương","MÀNG XƯƠNG"],["Màng xương CM 20x30S","MÀNG XƯƠNG"],["Màng xương GCM 15x20","MÀNG XƯƠNG"],["Màng xương GCM 20x30","MÀNG XƯƠNG"],["Màng xương jason colagent","MÀNG XƯƠNG"],["Trụ Biotem","TRỤ BIOTEM"],["Chân trụ răng Hiossen - AET3 (NH)","TRỤ HIOSSEN"],["Trụ Hiossen (Mỹ) - AET3","TRỤ HIOSSEN"],["Trụ Hiossen AET3 NH/ Trụ Hiossen AET3","TRỤ HIOSSEN"],["Trụ Hiossen AET3/ Trụ Hiossen AET3 NH","TRỤ HIOSSEN"],["Trụ Neobiotech","TRỤ NEOBIOTECH"],["Trụ chân răng NeoBiotech","TRỤ NEOBIOTECH"],["Trụ Neodent","TRỤ NEODENT"],["Trụ Neodent Neoporos","TRỤ NEODENT NEOPOROS"],["Trụ neodent","TRỤ NEODENT"],["Trụ neodent Neoporos","TRỤ NEODENT NEOPOROS"],["Nobel Active cổ vàng","TRỤ NOBEL TI ULTRA"],["Trụ Nobel Active","TRỤ NOBEL"],["Trụ NobelActive","TRỤ NOBEL"],["Trụ NobelActive cổ vàng","TRỤ NOBEL TI ULTRA"],["Trụ Straumann Active","TRỤ STRAUMANN ACTIVE"],["Trụ straumann","TRỤ STRAUMANN"],["Vít chỉnh nha","VÍT CHỈNH NHA"],["Vít chỉnh nha Hoặc Vít chỉnh nha Jeli / Vít chỉnh nha KMS","VÍT CHỈNH NHA"],["Vít chỉnh nha Jeil","VÍT CHỈNH NHA"],["Vít chỉnh nha KMS","VÍT CHỈNH NHA"],["Invisalign Comprehensive 3","Invisalign Comprehensive 3"],["Invisalign Comprehensive 5","Invisalign Comprehensive 5"],["Invisalign Moderate","Invisalign Moderate"],["Invisalign First Phase I","Invisalign First Phase I"],["Invisalign Essential","Invisalign Essential"],["Vít Neo Screw","VÍT CHỈNH NHA"],["Dụng cụ cố định vị trí băng nhựa sử dụng trên máy định vị Pdent","MÁY ĐỊNH VỊ PHẪU THUẬT"],["Trụ Osstem (Hàn)","TRỤ OSSTEM (HÀN)"],["Trụ Osstem (Hàn) - NoMount","TRỤ OSSTEM (HÀN) - NOMOUNT"],["Mắc cài kim loại thường","MẮC CÀI KIM LOẠI THƯỜNG"],["Mắc cài kim loại thường 3m","MẮC CÀI KIM LOẠI THƯỜNG 3M"],["Mắc cài kim loại thường (Hàn quốc)","MẮC CÀI KIM LOẠI THƯỜNG HÀN QUỐC"],["Mắc cài kim loại thường Standard (MBT)","MẮC CÀI KIM LOẠI THƯỜNG MBT"],["Mắc cài kim loại thường BIO","MẮC CÀI KIM LOẠI THƯỜNG BIO"],["Mắc cài sứ thường AO","MẮC CÀI SỨ AO"],["Mắc cài sứ gemini 3m","MẮC CÀI SỨ GEMINI 3M"],["Mắc cài kim loại tự buộc MBT 022","MẮC CÀI TỰ BUỘC MBT 022"],["Mắc cài kim loại tự buộc 3M","MẮC CÀI TỰ BUỘC 3M"],["Mắc cài kim loại tự khóa 3M","MẮC CÀI TỰ KHÓA 3M"],["Mắc cài kim loại tự buộc empower","MẮC CÀI TỰ BUỘC EMPOWER"],["Mắc cài sứ tự buộc empower 2.0","MẮC CÀI SỨ TỰ BUỘC EMPOWER 2.0"],["Mắc cài sứ tự buộc Empower Clear","MẮC CÀI SỨ TỰ BUỘC EMPOWER CLEAR"],["Mắc cài sứ tự buộc Clarus - C","MẮC CÀI SỨ TỰ BUỘC CLARUS-C"],["Mắc cài chỉnh nha Atlas Mini Bracket","MẮC CÀI CHỈNH NHA ATLAS MINI BRACKET"],["Vít chỉnh nha Jiscop","VÍT CHỈNH NHA"],["Xương khối Osteon Collagen","BỘT XƯƠNG"],["Chân trụ răng Hiossen - AET3 (NH)","TRỤ HIOSSEN"],["Trụ Hiossen (Mỹ) - AET3","TRỤ HIOSSEN"],["Trụ Straumann Active size mini 2.9","TRỤ STRAUMANN ACTIVE"],["Vít chỉnh nha Jeil","VÍT CHỈNH NHA"],["Màng xương CM 20x30S","MÀNG XƯƠNG"],["Xương collagen OSTEON 6×10 cm","BỘT XƯƠNG"],["Bột xương dùng trong nha khoa Osteon 1cc","BỘT XƯƠNG"],["Bộ chỉnh nha Invisalign System - Comprehensive 3","Invisalign Comprehensive 3"],["Bộ chỉnh nha Invisalign System - Comprehensive 5","Invisalign Comprehensive 5"],["Bộ chỉnh nha Essential","Invisalign Essential"],["Vít chỉnh nha Jiscop","VÍT CHỈNH NHA"]],"grp":[["TRỤ NEODENT","Trụ Implant","Cao",2900000.0],["TRỤ NEODENT NEOPOROS","Trụ Implant","Cao",2900000.0],["TRỤ HIOSSEN","Trụ Implant","Cao",1583634.0],["TRỤ BIOTEM","Trụ Implant","Cao",814038.0],["TRỤ STRAUMANN","Trụ Implant","Cao",14000000.0],["TRỤ STRAUMANN ACTIVE","Trụ Implant","Cao",14000000.0],["TRỤ NOBEL","Trụ Implant","Cao",4610766.0],["TRỤ NOBEL TI ULTRA","Trụ Implant","Cao",4610766.0],["TRỤ NEOBIOTECH","Trụ Implant","Cao",2000000.0],["BỘT XƯƠNG","Vật tư khác","Thấp",2120400.0],["MÀNG XƯƠNG","Vật tư khác","Thấp",2986800.0],["VÍT CHỈNH NHA","Vật tư khác","Thấp",327444.0],["MÁY ĐỊNH VỊ PHẪU THUẬT","Vật tư khác","Thấp",5000000.0],["INVISALIGN COMPREHENSIVE 3","INVISALIGN","",0.0],["INVISALIGN COMPREHENSIVE 5","INVISALIGN","",0.0],["INVISALIGN MODERATE","INVISALIGN","",0.0],["INVISALIGN FIRST PHASE I","INVISALIGN","",0.0],["INVISALIGN ESSENTIAL","INVISALIGN","",0.0],["TRỤ OSSTEM (HÀN)","Trụ Implant","Cao",1513600.0],["TRỤ OSSTEM (HÀN) - NOMOUNT","Trụ Implant","Cao",1513600.0],["MẮC CÀI KIM LOẠI THƯỜNG","Mắc cài","Trung bình",426667.0],["MẮC CÀI CHỈNH NHA ATLAS MINI BRACKET","Mắc cài","Trung bình",426667.0],["MẮC CÀI KIM LOẠI THƯỜNG 3M","Mắc cài","Trung bình",426667.0],["MẮC CÀI KIM LOẠI THƯỜNG HÀN QUỐC","Mắc cài","Trung bình",426667.0],["MẮC CÀI KIM LOẠI THƯỜNG MBT","Mắc cài","Trung bình",426667.0],["MẮC CÀI KIM LOẠI THƯỜNG BIO","Mắc cài","Trung bình",426667.0],["MẮC CÀI SỨ AO","Mắc cài","Trung bình",426667.0],["MẮC CÀI SỨ GEMINI 3M","Mắc cài","Trung bình",426667.0],["MẮC CÀI TỰ BUỘC MBT 022","Mắc cài","Trung bình",2095238.0],["MẮC CÀI TỰ BUỘC 3M","Mắc cài","Trung bình",2095238.0],["MẮC CÀI TỰ KHÓA 3M","Mắc cài","Trung bình",2095238.0],["MẮC CÀI TỰ BUỘC EMPOWER","Mắc cài","Trung bình",2095238.0],["MẮC CÀI SỨ TỰ BUỘC EMPOWER 2.0","Mắc cài","Trung bình",2095238.0],["MẮC CÀI SỨ TỰ BUỘC EMPOWER CLEAR","Mắc cài","Trung bình",2095238.0],["MẮC CÀI SỨ TỰ BUỘC CLARUS-C","Mắc cài","Trung bình",2095238.0]],"dm":[["all-on-4",4],["all on 4",4],["allon4",4],["all-on 4",4],["all-on-5",5],["all on 5",5],["all-on-6",6],["all on 6",6],["allon6",6],["all-on 6",6],["all-on-8",8],["all on 8",8],["toàn hàm",1]],"cs":[["Ba Đình - Nghĩa Dũng","41 Nghĩa Dũng"],["41 Nghĩa Dũng-Ba Đình","41 Nghĩa Dũng"],["41 Nghĩa Dũng - Ba Đình","41 Nghĩa Dũng"],["Nghĩa Dũng","41 Nghĩa Dũng"],["Bùi Thị Xuân","Bùi Thị Xuân"],["Hà Nội","Cát Linh"],["Cát Linh","Cát Linh"],["Cát Linh (Hà Nội)","Cát Linh"],["Lê Văn Lương","Lê Văn Lương"],["Quảng Ninh","Quảng Ninh"]],"dvvt":[["Phẫu thuật cấy ghép Implant (Biotem + abutment)","13000102"],["Phẫu thuật cấy ghép Implant (Biotem + abutment + sứ Katana)","13000102"],["Phẫu thuật cấy ghép Implant (Neobiotech + abutment + sứ Katana)","13000163"],["Phẫu thuật cấy ghép Implant (Osstem + abutment)","13000089"],["Phẫu thuật cấy ghép Implant (Osstem + abutment)","13000090"],["Phẫu thuật cấy ghép Implant (Osstem + abutment + sứ Katana)","13000089"],["Phẫu thuật cấy ghép Implant (Osstem + abutment + sứ Katana)","13000090"],["Phẫu thuật cấy ghép Implant (Hiossen + abutment + sứ Katana)","13000087"],["Phẫu thuật cấy ghép Implant (Neodent Neoporos + abutment cá nhân + sứ Katana)","13000170"],["Phẫu thuật cấy ghép Implant (Neodent Neoporos + abutment)","13000170"],["Phẫu thuật cấy ghép Implant (Neodent Acqua + abutment cá nhân + sứ Katana)","13000088"],["Phẫu thuật cấy ghép Implant (Straumann BLT SLA Titanium + abutment cá nhân + sứ Katana)","13000091"],["Phẫu thuật cấy ghép Implant (Straumann BLT SLActive Roxolid + abutment cá nhân + sứ Katana)","13000169"],["Phẫu thuật cấy ghép Implant (Nobel Ti Ultra + abutment)","13000160"],["Phẫu thuật cấy ghép Implant (Nobel Ti Unite + abutment)","13000103"],["Phẫu thuật ghép xương nhân tạo để cấy ghép implant","13000057"],["Phẫu thuật ghép xương nhân tạo để cấy ghép implant","13000058"],["Phẫu thuật ghép xương nhân tạo để cấy ghép implant","13000130"],["Phẫu thuật ghép xương nhân tạo để cấy ghép implant","13000168"],["Phẫu thuật ghép xương nhân tạo để cấy ghép implant","13000182"],["Phẫu thuật ghép xương nhân tạo để cấy ghép implant","13000162"],["Phẫu thuật tái tạo xương ổ răng bằng ghép xương tự thân lấy trong miệng (màng xương nhân tạo)","13000009"],["Phẫu thuật tái tạo xương ổ răng bằng ghép xương tự thân lấy trong miệng (màng xương nhân tạo)","13000034"],["Phẫu thuật tái tạo xương ổ răng bằng ghép xương tự thân lấy trong miệng (màng xương nhân tạo)","13000152"],["Phẫu thuật tái tạo xương ổ răng bằng ghép xương tự thân lấy trong miệng (màng xương nhân tạo)","13000162"],["Phẫu thuật tái tạo xương ổ răng bằng ghép xương tự thân lấy trong miệng (màng xương nhân tạo)","13000181"],["Phẫu thuật tái tạo xương ổ răng bằng ghép xương tự thân lấy trong miệng (màng xương nhân tạo)","13000059"],["Phẫu thuật cấy ghép Implant (All-on-4 Osstem)","13000089"],["Phẫu thuật cấy ghép Implant (All-on-4 Osstem)","13000090"],["Phẫu thuật cấy ghép Implant (All-on-4 Osstem - Hàm nhựa thường)","13000089"],["Phẫu thuật cấy ghép Implant (All-on-4 Osstem - Hàm nhựa thường)","13000090"],["Phẫu thuật cấy ghép Implant (All-on-4 Osstem - Hàm nhựa Ivo base)","13000089"],["Phẫu thuật cấy ghép Implant (All-on-4 Osstem - Hàm nhựa Ivo base)","13000090"],["Phẫu thuật cấy ghép Implant (All-on-4 Osstem - Răng sứ Katana)","13000089"],["Phẫu thuật cấy ghép Implant (All-on-4 Osstem - Răng sứ Katana)","13000090"],["Phẫu thuật cấy ghép Implant (All-on-4 Osstem - Răng sứ Cercon HT)","13000089"],["Phẫu thuật cấy ghép Implant (All-on-4 Osstem - Răng sứ Cercon HT)","13000090"],["Phẫu thuật cấy ghép Implant (All-on-4 Osstem - Răng sứ Lava)","13000089"],["Phẫu thuật cấy ghép Implant (All-on-4 Osstem - Răng sứ Lava)","13000090"],["Phẫu thuật cấy ghép Implant (All-on-6 Osstem)","13000089"],["Phẫu thuật cấy ghép Implant (All-on-6 Osstem)","13000090"],["Phẫu thuật cấy ghép Implant (All-on-6 Osstem - Hàm nhựa thường)","13000089"],["Phẫu thuật cấy ghép Implant (All-on-6 Osstem - Hàm nhựa thường)","13000090"],["Phẫu thuật cấy ghép Implant (All-on-6 Osstem - Hàm nhựa Ivo base)","13000089"],["Phẫu thuật cấy ghép Implant (All-on-6 Osstem - Hàm nhựa Ivo base)","13000090"],["Phẫu thuật cấy ghép Implant (All-on-6 Osstem - Răng sứ Katana)","13000089"],["Phẫu thuật cấy ghép Implant (All-on-6 Osstem - Răng sứ Katana)","13000090"],["Phẫu thuật cấy ghép Implant (All-on-6 Osstem - Răng sứ Cercon HT)","13000089"],["Phẫu thuật cấy ghép Implant (All-on-6 Osstem - Răng sứ Cercon HT)","13000090"],["Phẫu thuật cấy ghép Implant (All-on-6 Osstem - Răng sứ Lava)","13000089"],["Phẫu thuật cấy ghép Implant (All-on-6 Osstem - Răng sứ Lava)","13000090"],["Phẫu thuật cấy ghép Implant (All-on-4 Neodent Neoporos)","13000170"],["Phẫu thuật cấy ghép Implant (All-on-4 Neodent Neoporos - Hàm nhựa thường)","13000170"],["Phẫu thuật cấy ghép Implant (All-on-4 Neodent Neoporos - Hàm nhựa Ivo base)","13000170"],["Phẫu thuật cấy ghép Implant (All-on-4 Neodent Neoporos - Răng sứ Katana)","13000170"],["Phẫu thuật cấy ghép Implant (All-on-4 Neodent Neoporos - Răng sứ Cercon HT)","13000170"],["Phẫu thuật cấy ghép Implant (All-on-4 Neodent Neoporos - Răng sứ Lava)","13000170"],["Phẫu thuật cấy ghép Implant (All-on-6 Neodent Neoporos)","13000170"],["Phẫu thuật cấy ghép Implant (All-on-6 Neodent Neoporos - Hàm nhựa thường)","13000170"],["Phẫu thuật cấy ghép Implant (All-on-6 Neodent Neoporos - Hàm nhựa Ivo base)","13000170"],["Phẫu thuật cấy ghép Implant (All-on-6 Neodent Neoporos - Răng sứ Katana)","13000170"],["Phẫu thuật cấy ghép Implant (All-on-6 Neodent Neoporos - Răng sứ Cercon HT)","13000170"],["Phẫu thuật cấy ghép Implant (All-on-6 Neodent Neoporos - Răng sứ Lava)","13000170"],["Phẫu thuật cấy ghép Implant (All-on-4 Straumann BLT SLA Titaninum)","13000091"],["Phẫu thuật cấy ghép Implant (All-on-4 Straumann BLT SLA Titaninum - Hàm nhựa thường)","13000091"],["Phẫu thuật cấy ghép Implant (All-on-4 Straumann BLT SLA Titaninum - Hàm nhựa Ivo base)","13000091"],["Phẫu thuật cấy ghép Implant (All-on-4 Straumann BLT SLA Titaninum - Răng sứ Katana)","13000091"],["Phẫu thuật cấy ghép Implant (All-on-4 Straumann BLT SLA Titaninum - Răng sứ Cercon HT)","13000091"],["Phẫu thuật cấy ghép Implant (All-on-4 Straumann BLT SLA Titaninum - Răng sứ Lava)","13000091"],["Phẫu thuật cấy ghép Implant (All-on-6 Straumann BLT SLA Titaninum)","13000091"],["Phẫu thuật cấy ghép Implant (All-on-6 Straumann BLT SLA Titaninum - Hàm nhựa thường)","13000091"],["Phẫu thuật cấy ghép Implant (All-on-6 Straumann BLT SLA Titaninum - Hàm nhựa Ivo base)","13000091"],["Phẫu thuật cấy ghép Implant (All-on-6 Straumann BLT SLA Titaninum - Răng sứ Katana)","13000091"],["Phẫu thuật cấy ghép Implant (All-on-6 Straumann BLT SLA Titaninum - Răng sứ Cercon HT)","13000091"],["Phẫu thuật cấy ghép Implant (All-on-6 Straumann BLT SLA Titaninum - Răng sứ Lava)","13000091"],["Cấy ghép implant (máy hướng dẫn phẫu thuật)","10000580"],["Khí cụ neo chặn cố định Minivis","14000398"],["Khí cụ neo chặn cố định Minivis","14000373"],["Khí cụ neo chặn cố định Minivis","14000017"],["Nắn chỉnh răng sử dụng mắc cài trực tiếp mặt ngoài (Mắc cài kim loại - 1 hàm)","14000047"],["Nắn chỉnh răng sử dụng mắc cài trực tiếp mặt ngoài (Mắc cài kim loại - 1 hàm)","14000090"],["Nắn chỉnh răng sử dụng mắc cài trực tiếp mặt ngoài (Mắc cài kim loại - 1 hàm)","14000343"],["Nắn chỉnh răng sử dụng mắc cài trực tiếp mặt ngoài (Mắc cài kim loại - 1 hàm)","14000356"],["Nắn chỉnh răng sử dụng mắc cài trực tiếp mặt ngoài (Mắc cài kim loại - 1 hàm)","14000401"],["Nắn chỉnh răng sử dụng mắc cài trực tiếp mặt ngoài (Mắc cài kim loại - 2 hàm)","14000047"],["Nắn chỉnh răng sử dụng mắc cài trực tiếp mặt ngoài (Mắc cài kim loại - 2 hàm)","14000090"],["Nắn chỉnh răng sử dụng mắc cài trực tiếp mặt ngoài (Mắc cài kim loại - 2 hàm)","14000343"],["Nắn chỉnh răng sử dụng mắc cài trực tiếp mặt ngoài (Mắc cài kim loại - 2 hàm)","14000356"],["Nắn chỉnh răng sử dụng mắc cài trực tiếp mặt ngoài (Mắc cài kim loại - 2 hàm)","14000401"],["Nắn chỉnh răng sử dụng mắc cài trực tiếp mặt ngoài (Mắc cài sứ - 1 hàm)","14000375"],["Nắn chỉnh răng sử dụng mắc cài trực tiếp mặt ngoài (Mắc cài sứ - 1 hàm)","14000056"],["Nắn chỉnh răng sử dụng mắc cài trực tiếp mặt ngoài (Mắc cài sứ - 2 hàm)","14000375"],["Nắn chỉnh răng sử dụng mắc cài trực tiếp mặt ngoài (Mắc cài sứ - 2 hàm)","14000056"],["Nắn chỉnh răng sử dụng mắc cài tự buộc (Mắc cài Titanium - 1 hàm)","14000375"],["Nắn chỉnh răng sử dụng mắc cài tự buộc (Mắc cài Titanium - 1 hàm)","14000056"],["Nắn chỉnh răng sử dụng mắc cài tự buộc (Mắc cài Titanium - 2 hàm)","14000355"],["Nắn chỉnh răng sử dụng mắc cài tự buộc (Mắc cài Titanium - 2 hàm)","14000046"],["Nắn chỉnh răng sử dụng mắc cài tự buộc (Mắc cài Titanium - 2 hàm)","14000078"],["Nắn chỉnh răng sử dụng mắc cài tự buộc (Mắc cài Titanium - 2 hàm)","14000001"],["Sử dụng mắc cài tự buộc trong nắn chỉnh răng (Mắc cài sứ tự buộc - 1 hàm)","14000039"],["Sử dụng mắc cài tự buộc trong nắn chỉnh răng (Mắc cài sứ tự buộc - 1 hàm)","14000111"],["Sử dụng mắc cài tự buộc trong nắn chỉnh răng (Mắc cài sứ tự buộc - 1 hàm)","14000164"],["Sử dụng mắc cài tự buộc trong nắn chỉnh răng (Mắc cài sứ tự buộc - 2 hàm)","14000039"],["Sử dụng mắc cài tự buộc trong nắn chỉnh răng (Mắc cài sứ tự buộc - 2 hàm)","14000111"],["Sử dụng mắc cài tự buộc trong nắn chỉnh răng (Mắc cài sứ tự buộc - 2 hàm)","14000164"],["Nắn chỉnh răng sử dụng hệ thống khay cá nhân (Invisalign Comprehensive 5 năm)","14000342"],["Nắn chỉnh răng sử dụng hệ thống khay cá nhân (Invisalign Comprehensive 3 năm)","14000332"],["Nắn chỉnh răng sử dụng hệ thống khay cá nhân (Invisalign Moderate)","14000154"],["Nắn chỉnh răng sử dụng hệ thống khay cá nhân (Invisalign First Phase I)","14000156"],["Nắn chỉnh răng sử dụng hệ thống khay cá nhân (Invisalign Essential)","14000157"],["Nắn chỉnh răng sử dụng hệ thống khay cá nhân (Hàm duy trì Vivera 1 bộ)","14000329"],["Nắn chỉnh răng sử dụng hệ thống khay cá nhân (Hàm duy trì Vivera 1 bộ)","14000410"],["Nắn chỉnh răng sử dụng hệ thống khay cá nhân (Hàm duy trì Vivera 3 bộ)","14000329"],["Nắn chỉnh răng sử dụng hệ thống khay cá nhân (Hàm duy trì Vivera 3 bộ)","14000410"],["Khí cụ neo chặn cố định Minivis","14000418"],["Nắn chỉnh răng sử dụng mắc cài trực tiếp mặt ngoài (Mắc cài kim loại - 1 hàm)","14000050"],["Nắn chỉnh răng sử dụng mắc cài trực tiếp mặt ngoài (Mắc cài kim loại - 2 hàm)","14000050"],["Phẫu thuật ghép xương nhân tạo để cấy ghép implant","13000092"],["Phẫu thuật ghép xương nhân tạo để cấy ghép implant","13000196"]]};
@@ -9537,15 +9621,40 @@ function payStepsHtml(step,has,nErr){
   }).join('')+'</div>';
 }
 function payNextBtn(n,t){return '<button class="btn btn-primary" style="margin-top:6px" onclick="A.payStep('+n+')">'+t+' →</button>';}
+/* ----- Báo cáo chi tiêu: theo tháng / cơ sở / NCC + NCC hay sai chứng từ ----- */
+function payRepHtml(){
+  var m0=PAY.m,L;PAY.m="all";try{L=payCompute();}finally{PAY.m=m0;}
+  var T=0,TOK=0,N=0,M={},C={},V=[];
+  L.forEach(function(g){var v={n:g.short||g.full,full:g.full,t:0,k:0,r:0,bad:0,mo:{}};
+    g.rows.forEach(function(x){var t=+x.tong||0,ym=x.d?Math.floor(x.d/100):0,cs=x.r[7]||"",bad=x.st!=="ok"||!!x.note;
+      T+=t;N++;if(x.st==="ok")TOK+=t;M[ym]=(M[ym]||0)+t;C[cs]=(C[cs]||0)+t;
+      v.t+=t;v.r++;if(bad)v.bad++;v.mo[ym]=(v.mo[ym]||0)+t;});
+    v.bad+=g.extra.length;v.k=g.extra.length;V.push(v);});
+  var bar=function(p,c){return '<div style="height:6px;border-radius:3px;background:var(--line);margin-top:4px"><div style="height:6px;border-radius:3px;width:'+Math.max(2,Math.min(100,p))+'%;background:'+(c||'var(--teal)')+'"></div></div>';},
+  pc=function(a,b){return b?Math.round(100*a/b)+'%':'–';},
+  row=function(l,r,p,sub){return '<div style="padding:9px 0;border-bottom:1px solid var(--line)"><div style="display:flex;justify-content:space-between;gap:10px;font-size:13.5px"><span>'+l+'</span><b style="white-space:nowrap">'+r+'</b></div>'+(sub?'<div style="font-size:12px;color:var(--mut);margin-top:2px">'+sub+'</div>':'')+(p!=null?bar(p):'')+'</div>';},
+  card=function(t,b){return '<div class="card" style="margin-bottom:12px"><div style="font-weight:700;margin-bottom:4px">'+t+'</div>'+b+'</div>';};
+  var ms=Object.keys(M).map(Number).sort(function(a,b){return b-a;}),mx=Math.max.apply(null,ms.map(function(k){return M[k];}).concat([1]));
+  var h='<div class="card" style="margin-bottom:12px"><div style="font-size:12.5px;color:var(--mut)">Tổng chi theo phiếu mua (mọi tháng)</div><div style="font-size:24px;font-weight:800">'+payF(T)+' đ</div><div style="font-size:12.5px;color:var(--mut)">'+L.length+' NCC · '+N+' phiếu · đã khớp HĐ '+pc(TOK,T)+'</div></div>';
+  h+=card('Theo tháng',ms.map(function(k,i){var pv=M[ms[i+1]],d=pv?Math.round(100*(M[k]-pv)/pv):null;
+    return row(k?payMLab(k):'Chưa rõ ngày',payF(M[k]),100*M[k]/mx,d===null?'':(d>=0?'▲ +':'▼ ')+d+'% so với '+payMLab(ms[i+1]));}).join('')||'<div style="color:var(--mut)">Chưa có dữ liệu</div>');
+  var cs=Object.keys(C).sort(function(a,b){return C[b]-C[a];});
+  h+=card('Theo cơ sở',cs.map(function(k){return row(esc(payCsLabel(k)),payF(C[k]),100*C[k]/(T||1),pc(C[k],T)+' tổng chi');}).join(''));
+  var top=V.slice().sort(function(a,b){return b.t-a.t;}).slice(0,15),cur=ms.filter(Boolean)[0],prv=ms.filter(Boolean)[1];
+  h+=card('Top NCC theo chi tiêu',top.map(function(v){var sub=pc(v.t,T)+' tổng chi';if(cur&&prv)sub+=' · '+payMLab(cur)+': '+payF(v.mo[cur]||0)+' / '+payMLab(prv)+': '+payF(v.mo[prv]||0);return row(esc(v.n),payF(v.t),100*v.t/(top[0].t||1),sub);}).join('')+(V.length>15?'<div style="font-size:12px;color:var(--mut);padding-top:6px">Hiện 15/'+V.length+' NCC.</div>':''));
+  var er=V.filter(function(v){return v.bad>0;}).sort(function(a,b){return b.bad/(b.r+b.k||1)-a.bad/(a.r+a.k||1)||b.bad-a.bad;}).slice(0,10);
+  h+=card('NCC hay sai chứng từ',er.length?er.map(function(v){var tl=Math.round(100*v.bad/(v.r+v.k||1));return row(esc(v.n),v.bad+' lỗi',tl,tl+'% trên '+(v.r+v.k)+' dòng · lỗi gồm lệch/thiếu HĐ, trùng, ghi chú chứng từ');}).join(''):'<div style="color:var(--mut)">Chưa phát hiện NCC nào có lỗi.</div>');
+  return h;
+}
 function renderPay(){
   var P=payDb(),has=P.mua.length>0;
   if(PAY.v==="err"&&has){PAY.step=2;PAY.v="";}
   var E=has?payErrAll():[],nErr=0;E.forEach(function(B){nErr+=B.items.length;});
   var step=!has?1:(PAY.sel?3:(PAY.step||3));
-  var back=PAY.sel?"A.paySel('')":"A.go('dchub')";
-  var body=PAY.sel?payDetailHtml(PAY.sel):step===1?(has?payStep1Html()+payNextBtn(2,'Tiếp: Rà lỗi'):payHomeHtml()):step===2?payErrHtml()+payNextBtn(3,'Tiếp: Xuất / In'):payHomeHtml();
+  var rep=PAY.v==="rep"&&has&&!PAY.sel,back=PAY.sel?"A.paySel('')":rep?"A.payView('')":"A.go('dchub')";
+  var body=rep?payRepHtml():PAY.sel?payDetailHtml(PAY.sel):step===1?(has?payStep1Html()+payNextBtn(2,'Tiếp: Rà lỗi'):payHomeHtml()):step===2?payErrHtml()+payNextBtn(3,'Tiếp: Xuất / In'):payHomeHtml();
   var h='<div class="topbar"><div class="trow wrap"><button class="back" onclick="'+back+'">‹</button><div class="ttl">Đề nghị thanh toán</div></div><div style="height:10px"></div></div><div class="wrap" style="padding-top:12px;padding-bottom:40px">'
-    +(PAY.sel?'':payStepsHtml(step,has,nErr))+body+'</div>';
+    +(PAY.sel?'':(rep?'':payStepsHtml(step,has,nErr))+(has?'<button class="btn btn-outline" style="padding:9px;font-size:13px;margin:0 0 12px" onclick="A.payView(\''+(rep?'':'rep')+'\')">'+(rep?'‹ Về Đề nghị thanh toán':'Báo cáo chi tiêu')+'</button>':''))+body+'</div>';
   document.getElementById("app").innerHTML=h;
 }
 /* ----- Xuất Excel đúng bố cục file mẫu ----- (printArea viết dạng "A$1:H$37" vì ExcelJS tự thêm $ đầu mỗi vế) */
@@ -9945,7 +10054,7 @@ Object.assign(A,{
     if(P.mua.length<u.mua||P.hd.length<u.hd){toast("Không hoàn tác được vì dữ liệu đã thay đổi");return;}
     if(!confirm("Hoàn tác lần bổ sung từ file “"+(l&&l.file||"")+"”? Các phiếu mua và HĐ MISA vừa thêm sẽ bị gỡ ra.\nGhi chú lỗi đã nhập tay vẫn được giữ."))return;
     P.mua.length=u.mua;P.hd.length=u.hd;
-    try{P.ncc=JSON.parse(u.ncc);}catch(e){}
+    try{P.ncc=JSON.parse(u.ncc);}catch(e){klog("P.ncc=JSON.parse(u.ncc);",e)}
     audit("pay-add-undo",l&&l.file||"",null,"");
     delete P.undo;delete P.last;
     store.saveVerified();toast("Đã hoàn tác lần bổ sung gần nhất");renderPay();
@@ -10027,9 +10136,9 @@ Object.assign(A,{
 var D=document;
 /* 1. Lưới an toàn lỗi: không làm gián đoạn thao tác, luôn chốt dữ liệu */
 var lastErr=0;
-function safe(m){var n=Date.now();if(n-lastErr<8000)return;lastErr=n;try{if(window.store&&store.flush)store.flush();}catch(e){}try{toast(m);}catch(e){}}
-window.addEventListener('error',function(e){if(!e||!e.message||/ResizeObserver|Script error/i.test(e.message))return;console.error(e.error||e.message);safe('Có lỗi nhỏ xảy ra, dữ liệu của bạn vẫn được giữ nguyên.');});
-window.addEventListener('unhandledrejection',function(e){var r=e&&e.reason;if(r&&/AbortError|NotAllowedError|cancel/i.test(String(r.name||r)))return;console.error(r);safe('Tác vụ chưa hoàn tất, bạn thử lại nhé.');});
+function safe(m){var n=Date.now();if(n-lastErr<8000)return;lastErr=n;try{if(window.store&&store.flush)store.flush();}catch(e){klog("if(window.store&&store.flush)store.flush();",e)}try{toast(m);}catch(e){klog("toast(m);",e)}}
+window.addEventListener('error',function(e){if(!e||!e.message||/ResizeObserver|Script error/i.test(e.message))return;klog('window.onerror',e.error||e.message);console.error(e.error||e.message);safe('Có lỗi nhỏ xảy ra, dữ liệu của bạn vẫn được giữ nguyên.');});
+window.addEventListener('unhandledrejection',function(e){var r=e&&e.reason;if(r&&/AbortError|NotAllowedError|cancel/i.test(String(r.name||r)))return;klog('unhandledrejection',r);console.error(r);safe('Tác vụ chưa hoàn tất, bạn thử lại nhé.');});
 /* 2. Trạng thái mạng */
 var nb=D.getElementById('netbar');
 function net(){if(nb)nb.hidden=navigator.onLine!==false;}
@@ -10067,13 +10176,13 @@ D.addEventListener('keydown',function(e){
 D.addEventListener('focusin',function(e){
   var t=e.target;if(!t||t.tagName!=='INPUT')return;
   var m=t.getAttribute('inputmode');
-  if(m==='decimal'||m==='numeric'||t.type==='number')setTimeout(function(){try{t.select();}catch(x){}},0);
+  if(m==='decimal'||m==='numeric'||t.type==='number')setTimeout(function(){try{t.select();}catch(x){klog("t.select();",x)}},0);
 });
 /* quét DOM gọn nhẹ, gộp theo khung hình */
 var q=false;
 function run(){q=false;fixInputs(D);a11y(D);}
 function sched(){if(q)return;q=true;(window.requestAnimationFrame||setTimeout)(run);}
-try{new MutationObserver(sched).observe(D.body,{childList:true,subtree:true});}catch(e){}
+try{new MutationObserver(sched).observe(D.body,{childList:true,subtree:true});}catch(e){klog("new MutationObserver(sched).observe(D.body,{chil",e)}
 run();
 })();
 </script>
