@@ -2,8 +2,8 @@
 <html lang="vi">
 <head>
 <meta charset="UTF-8">
-<meta name="app-notes" content="Giao diện Prime sang trọng hơn; sửa lỗi mở màn kiểm kê khi chưa chọn kỳ">
-<meta name="app-version" content="2026110501">
+<meta name="app-notes" content="Nâng cấp phân hệ Kiểm kê: bàn phím số không bị che, thanh Kiểm tuần tự gọn, danh sách 2 cột; vá lỗi">
+<meta name="app-version" content="2026110505">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="color-scheme" content="light">
 <meta name="theme-color" content="#eef3fb">
@@ -941,6 +941,104 @@ body{background:linear-gradient(180deg,#eaf0fb 0,#f3f5fa 340px) fixed;letter-spa
 @media(prefers-reduced-motion:reduce){*{transition:none!important;animation-duration:.01ms!important;animation-iteration-count:1!important}}
 @media print{#gheader::after,#bnav{display:none}}
 </style>
+<style id="ds-layer">
+/* ===== DESIGN SYSTEM v1 · chuẩn hóa dùng chung (không đổi nghiệp vụ) ===== */
+:root{--ok:#12805c;--ok-bg:rgba(18,128,92,.1);--warn:#b45309;--warn-bg:rgba(180,83,9,.1);--err:#c62828;--err-bg:rgba(198,40,40,.09);--info:var(--teal);--info-bg:var(--teal-bg);--r-sm:10px;--r-md:14px;--r-lg:20px;--tap:44px}
+/* Nút & ô nhập: vùng chạm chuẩn, trạng thái rõ */
+.btn{min-height:var(--tap);transition:transform .12s ease,box-shadow .18s ease,filter .18s ease}
+.btn:active:not([disabled]){transform:scale(.98)}
+.btn[disabled],.inp[disabled],button[disabled]{opacity:.5;cursor:not-allowed;filter:saturate(.6)}
+.inp,.sinp,select.inp{min-height:var(--tap)}
+label:has(+ [required])::after,label:has([required])::after{content:" *";color:var(--err);font-weight:700}
+.inp:user-invalid,.sinp:user-invalid{border-color:var(--err)!important;box-shadow:0 0 0 4px var(--err-bg)!important}
+input[type=checkbox],input[type=radio]{accent-color:var(--teal)}
+:focus-visible{outline:2px solid var(--teal);outline-offset:2px;border-radius:6px}
+/* Huy hiệu trạng thái thống nhất */
+.stbadge{display:inline-flex;align-items:center;gap:5px;padding:3px 10px;border-radius:999px;font-weight:700;font-size:12px;background:var(--warn-bg);color:var(--warn)}
+.stbadge.ok{background:var(--ok-bg);color:var(--ok)}
+/* Bảng dữ liệu: tiêu đề cố định, số căn phải, hàng dễ đọc */
+#app .stkwrap,#app .tblwrap{max-height:70vh;overflow:auto;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;border-radius:var(--r-md)}
+#app .stktable,#app .rct,#app .bctbl{font-variant-numeric:tabular-nums;border-collapse:separate;border-spacing:0}
+#app .stktable th,#app .rct th,#app .bctbl th{position:sticky;top:0;z-index:2;white-space:nowrap;text-align:left;padding:11px 12px;font-size:12px;text-transform:uppercase}
+#app .stktable td,#app .rct td,#app .bctbl td{padding:12px;min-height:44px;vertical-align:middle}
+#app .stktable tbody tr:hover td,#app .rct tbody tr:hover td{background:rgba(31,85,214,.045)}
+#app td.num,#app th.num{text-align:right;white-space:nowrap}
+@media(max-width:767px){#app .rct,#app .bctbl{display:block;max-width:100%;overflow-x:auto;-webkit-overflow-scrolling:touch}}
+/* Trạng thái rỗng: có khung, căn giữa, dễ hiểu */
+.pxe{border:1.5px dashed var(--teal-ln);background:linear-gradient(180deg,#fff,#f7f9fe);border-radius:var(--r-lg);padding:28px 20px;text-align:center;color:var(--mut)}
+.pxe b{display:block;color:var(--ink);font-size:15px;margin-bottom:6px}
+/* Hộp thoại & thông báo */
+.ovl,#sigovl,#nmovl,#unmovl,#scanovl{overscroll-behavior:contain}
+.ovl>*,.sigcard{max-height:92vh;overflow:auto;overscroll-behavior:contain}
+#toast .in{border-radius:var(--r-md);font-weight:600}
+/* Loading dùng chung */
+.skel{background:linear-gradient(90deg,#eef2fa 25%,#f8faff 37%,#eef2fa 63%);background-size:400% 100%;animation:skel 1.3s ease infinite;border-radius:var(--r-sm)}
+@keyframes skel{0%{background-position:100% 0}100%{background-position:0 0}}
+@media print{.skel{animation:none}}
+</style>
+<style id="rc-layer">
+/* ===== ĐỐI CHIẾU · giai đoạn 2: đồng bộ Design System, tận dụng màn rộng, dễ chạm ===== */
+#app .rcsec{letter-spacing:-.01em}
+#app .rck{border:1px solid var(--line);box-shadow:var(--sh1);transition:transform .16s ease,box-shadow .2s ease}
+@media(hover:hover){#app .rck.b:hover{transform:translateY(-2px);box-shadow:var(--sh2)}}
+#app .rck .v{font-variant-numeric:tabular-nums;letter-spacing:-.02em}
+#app .rcg{border-radius:var(--r-lg);box-shadow:var(--sh1);transition:box-shadow .2s ease}
+#app .rcg[open]{box-shadow:var(--sh2)}
+#app .rcg>summary{min-height:var(--tap)}
+#app .rcg-act button{min-height:var(--tap);border-radius:var(--r-sm);transition:background-color .15s ease,border-color .15s ease}
+#app .rcg-act button:hover{border-color:var(--teal-ln);background:var(--teal-bg)}
+#app .rct th,#app .rct td{padding:10px 12px}
+#app .rcx{border-radius:var(--r-md);box-shadow:var(--sh1)}
+@media(max-width:767px){#app .rcf input,#app .rcf select{font-size:16px;min-height:var(--tap)}}
+@media(min-width:1100px){
+#app .rck-g{grid-template-columns:repeat(2,minmax(0,1fr))}
+#app .rck-g.q{grid-template-columns:repeat(4,minmax(0,1fr))}
+#app .rcl:has(>.rcg){display:grid;grid-template-columns:repeat(2,minmax(0,1fr));align-items:start;gap:16px}
+#app .rcl:has(>.rcg)>.rcg[open]{grid-column:1/-1}
+#app .rcgrid{grid-template-columns:repeat(4,minmax(0,1fr))}
+}
+@media(min-width:1024px){#app .card>.btn-primary,#app .card>.btn-outline{display:flex;width:fit-content;min-width:260px;max-width:100%;padding-left:28px;padding-right:28px}}
+</style>
+<style id="pay-layer">
+/* ===== THANH TOÁN · giai đoạn 2: đồng bộ Design System, desktop 2 cột, dễ chạm ===== */
+#app .pxs button{min-height:var(--tap)}
+#app .pxch{min-height:36px;transition:background-color .15s ease,border-color .15s ease,color .15s ease}
+#app .pxch:hover{border-color:var(--teal-ln)}
+#app .pxc{border:1px solid var(--line);border-radius:var(--r-lg);box-shadow:var(--sh1);transition:box-shadow .2s ease,transform .16s ease}
+@media(hover:hover){#app .pxc:hover{transform:translateY(-2px);box-shadow:var(--sh2)}}
+#app .pxc-a b{font-variant-numeric:tabular-nums;letter-spacing:-.02em}
+#app .pxa,#app .pxa-main,#app .pxst{min-height:var(--tap)}
+#app .pxa{border-radius:var(--r-md)}
+#app .pxa-main[disabled]{opacity:.5;cursor:not-allowed;box-shadow:none}
+#app .pxh{box-shadow:var(--sh2)}
+@media(max-width:767px){#app .inp,#app .sinp,#app select.inp,#app textarea.inp{font-size:16px}}
+@media(min-width:1024px){#app .pxs{max-width:760px}}
+@media(min-width:1100px){
+#paylist{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;align-items:start}
+#paylist>:not(.pxc){grid-column:1/-1}
+#paylist>.pxc{margin:0}
+}
+</style>
+<style id="kk-layer">
+/* ===== KIỂM KÊ · giai đoạn 2: bàn phím không bị che, thanh nút gọn, danh sách 2 cột trên desktop ===== */
+#app .inp::placeholder,#app .sinp::placeholder{font-size:14px}
+#app .item{border-radius:var(--r-lg);box-shadow:var(--sh1)}
+#app .botin .btn{box-shadow:0 14px 30px -10px rgba(31,85,214,.55),inset 0 1px 0 rgba(255,255,255,.28)}
+@media(max-width:767px) and (max-height:900px){
+.keypad{gap:4px;margin-top:6px}
+.kkey{height:40px;min-height:0;padding:0;font-size:19px;line-height:1}
+}
+@media(min-width:1024px){#app .botin{max-width:520px}}
+@media(min-width:1100px){
+#list{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;align-items:stretch}
+#list>.item{margin-bottom:0}
+#list>:not(.item){grid-column:1/-1}
+}
+</style>
+
+
+
+
 </head>
 <body>
 <header id="gheader">
@@ -10255,6 +10353,14 @@ function sched(){if(q)return;q=true;(window.requestAnimationFrame||setTimeout)(r
 try{new MutationObserver(sched).observe(D.body,{childList:true,subtree:true});}catch(e){klog("new MutationObserver(sched).observe(D.body,{chil",e)}
 run();
 })();
+</script>
+<script id="ds-layer-js">
+/* DS v1: căn phải ô số trong bảng (chỉ thêm class hiển thị, không sửa dữ liệu) */
+(function(){try{
+var Q='#app .stktable td:not(:first-child),#app .rct td:not(:first-child),#app .bctbl td:not(:first-child)',re=/^[\s\-+(]*\d[\d.,\s]*(%|đ|₫|\))?\s*$/i,app=document.getElementById('app'),t;
+function mark(){app.querySelectorAll(Q).forEach(function(td){if(td.dataset.n)return;td.dataset.n=1;if(re.test(td.textContent.trim()))td.classList.add('num');});}
+if(!app)return;new MutationObserver(function(){clearTimeout(t);t=setTimeout(mark,60);}).observe(app,{childList:true,subtree:true});mark();
+}catch(e){if(window.klog)klog('ds-layer',e);}})();
 </script>
 </body>
 </html>
