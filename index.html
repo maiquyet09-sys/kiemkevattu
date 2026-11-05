@@ -742,6 +742,73 @@ body{background:var(--bg)}
   body.sb-min #gsidebar .gnav-item{justify-content:center;padding:11px 0}
 }
 @media(max-width:899px){.h2.h5{padding:10px 6px 10px 16px}.h2.h5 .h2art{max-width:104px}.h2.h5 .h2c{display:none}}
+/* ===== Đề nghị thanh toán · giao diện mới ===== */
+.pxs{display:flex;margin:4px 0 18px}
+.pxs button{flex:1;position:relative;border:0;background:none;padding:0;font:inherit;font-size:13px;font-weight:600;color:var(--mut);display:flex;flex-direction:column;align-items:center;gap:7px;cursor:pointer}
+.pxs button:disabled{cursor:default;opacity:.5}
+.pxs button+button::before{content:"";position:absolute;top:13px;right:50%;width:100%;height:2px;background:rgba(15,40,90,.14)}
+.pxs button.lk::before{background:var(--green)}
+.pxs i{position:relative;z-index:1;width:28px;height:28px;border-radius:50%;display:grid;place-items:center;font-style:normal;font-size:13px;font-weight:800;background:#fff;border:2px solid rgba(15,40,90,.18);color:var(--mut)}
+.pxs .done i{background:var(--green);border-color:var(--green);color:#fff}
+.pxs .on{color:var(--teal-d);font-weight:800}
+.pxs .on::before{background:var(--teal)!important}
+.pxs .on i{background:var(--teal);border-color:var(--teal);color:#fff;box-shadow:0 0 0 4px var(--teal-bg)}
+.pxs em{font-style:normal;margin-left:6px;background:var(--red);color:#fff;border-radius:99px;font-size:11px;font-weight:700;padding:1px 7px}
+.pxtop{display:grid;gap:12px;margin-bottom:18px}
+@media(min-width:760px){.pxtop{grid-template-columns:1.1fr 1fr}}
+.pxh{background:#0c2d6b;color:#fff;border-radius:20px;padding:20px;display:flex;flex-direction:column;gap:12px}
+.pxh-k{font-size:13px;font-weight:600;color:rgba(255,255,255,.75)}
+.pxh-n{font-size:36px;line-height:1.05;font-weight:800;letter-spacing:-.025em;font-variant-numeric:tabular-nums}
+.pxh-n small{font-size:18px;font-weight:600;margin-left:6px;color:rgba(255,255,255,.72)}
+.pxbar{display:flex;gap:3px;height:10px}
+.pxbar i{border-radius:99px}.pxbar .g{background:#4ade80}.pxbar .r{background:#ff7b7b;min-width:6px}
+.pxh-s{font-size:13px;line-height:1.5;color:rgba(255,255,255,.85)}.pxh-s b{color:#fff}
+.pxst2{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:auto}
+.pxst{border:0;border-radius:14px;padding:11px 12px;text-align:left;font:inherit;color:#fff;background:rgba(255,255,255,.11);cursor:pointer;display:flex;flex-direction:column;gap:2px;transition:background-color .15s}
+.pxst:hover{background:rgba(255,255,255,.18)}
+.pxst b{font-size:22px;font-weight:800;line-height:1.1;font-variant-numeric:tabular-nums}
+.pxst span{font-size:12px;color:rgba(255,255,255,.8)}
+.pxh-m{font-size:11.5px;color:rgba(255,255,255,.66);word-break:break-word}
+.pxact{background:#fff;border-radius:20px;padding:16px;display:flex;flex-direction:column;gap:12px;box-shadow:0 1px 3px rgba(15,40,90,.06),0 6px 20px rgba(15,40,90,.05)}
+.pxact .rcscope-l{margin:0}
+.pxa-main{display:flex;align-items:center;gap:12px;width:100%;border:0;border-radius:16px;padding:16px;background:var(--teal);color:#fff;font:inherit;text-align:left;cursor:pointer;box-shadow:0 6px 18px rgba(15,91,216,.28);transition:transform .12s}
+.pxa-main:active{transform:scale(.98)}
+.pxa-main svg{flex:none}.pxa-main b{display:block;font-size:16px;font-weight:800}.pxa-main small{font-size:12.5px;opacity:.88}
+.pxa-main:disabled{background:rgba(16,24,40,.06);color:rgba(16,24,40,.38);box-shadow:none;cursor:default}
+.pxa-k{font-size:13px;font-weight:700;color:var(--mut);margin-top:2px}
+.pxa-g{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.pxa{border:1px solid var(--line);background:var(--card2);border-radius:14px;padding:11px 10px;font:inherit;text-align:left;color:var(--ink);cursor:pointer;display:flex;flex-direction:column;gap:4px;transition:border-color .15s,background-color .15s}
+.pxa:hover{border-color:var(--teal-ln);background:var(--teal-bg)}
+.pxa svg{color:var(--teal);margin-bottom:2px}.pxa b{font-size:13px;font-weight:700;line-height:1.25}.pxa small{font-size:11.5px;color:var(--mut);line-height:1.3}
+.pxq{position:relative;margin-bottom:14px}
+.pxq svg{position:absolute;left:14px;top:50%;transform:translateY(-50%);color:var(--mut2);pointer-events:none}
+.pxq .inp{padding-left:42px;height:48px;border-radius:14px}
+.pxfk{font-size:12.5px;font-weight:700;color:var(--mut);margin:0 2px 6px}
+.pxrow{display:flex;gap:6px;overflow-x:auto;margin-bottom:12px;padding-bottom:2px;scrollbar-width:none}
+.pxrow::-webkit-scrollbar{display:none}
+.pxch{flex:none;display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line);background:#fff;border-radius:99px;padding:7px 13px;font:inherit;font-size:13px;font-weight:600;color:var(--mut);cursor:pointer;white-space:nowrap}
+.pxch b{color:var(--ink);font-variant-numeric:tabular-nums}
+.pxch.on{background:var(--teal);border-color:var(--teal);color:#fff}.pxch.on b{color:#fff}
+.pxch u{width:8px;height:8px;border-radius:50%;display:inline-block}
+.pxch u.g{background:var(--green)}.pxch u.r{background:var(--red)}.pxch u.a{background:#d99a12}.pxch u.o{background:var(--orange)}
+.pxch.on u{box-shadow:0 0 0 2px #fff}
+.pxg{display:flex;align-items:center;justify-content:space-between;margin:18px 2px 8px;font-size:14px}
+.pxg b{font-weight:800}.pxg span{font-weight:700;border-radius:99px;padding:1px 10px;font-size:12.5px}
+.pxg.r span{background:var(--red-bg);color:var(--red)}.pxg.g span{background:var(--green-bg);color:var(--green)}
+.pxc{display:grid;grid-template-columns:1fr auto;gap:8px 14px;background:#fff;border-radius:16px;padding:14px 16px 14px 20px;margin-bottom:8px;position:relative;cursor:pointer;overflow:hidden;box-shadow:0 1px 2px rgba(15,40,90,.06);transition:box-shadow .15s}
+.pxc::before{content:"";position:absolute;left:0;top:0;bottom:0;width:5px;background:var(--green)}
+.pxc.pt::before{background:#e0a21a}.pxc.bd::before{background:var(--red)}
+.pxc:hover{box-shadow:0 4px 16px rgba(15,40,90,.12)}
+.pxc-n{font-weight:800;font-size:14.5px;word-break:break-word}
+.pxc-f{font-size:12px;color:var(--mut);word-break:break-word;margin-top:1px}
+.pxc-a{text-align:right}.pxc-a b{display:block;font-size:15.5px;font-weight:800;font-variant-numeric:tabular-nums}
+.pxc-a span{font-size:12px;color:var(--mut)}
+.pxc-a em{display:block;font-style:normal;font-size:12px;font-weight:700;color:var(--red);margin-top:2px;font-variant-numeric:tabular-nums}
+.pxc-t{grid-column:1/-1;display:flex;flex-wrap:wrap;gap:6px}
+.pxe{text-align:center;padding:32px 16px;color:var(--mut);background:#fff;border-radius:16px;font-size:13.5px}
+.pxe b{display:block;color:var(--ink);font-size:15px;margin-bottom:4px}
+.pxc:focus-visible,.pxa:focus-visible,.pxst:focus-visible,.pxa-main:focus-visible,.pxch:focus-visible,.pxs button:focus-visible{outline:2px solid var(--teal);outline-offset:2px}
+@media(prefers-reduced-motion:reduce){.pxc,.pxa,.pxst,.pxa-main{transition:none}}
 </style>
 <style id="ux-opt">
 html{-webkit-text-size-adjust:100%}
@@ -9243,59 +9310,66 @@ function payHomeHtml(){
       +'<button class="btn btn-primary" style="margin-bottom:8px" onclick="document.getElementById(\'payin\').click()">'+icon('upload',17)+'Chọn file Excel</button>'
       +'<button class="btn btn-outline" onclick="A.payTemplate()">'+icon('download',17)+'Tải file Excel mẫu</button></div>';
   }
-  var L=payCompute(),ch=0,nk=0,np=0,giu=0;
-  L.forEach(function(g){ch+=g.chot;if(g.chot>0)nk++;if(g.bad)np++;giu+=g.tong-g.chot+g.extraSum;});
-  h+=imp+'<div class="card" style="margin-bottom:12px"><div style="font-size:12px;color:var(--mut)">'+esc(P.file||"File Excel")+' · '+L.length+' NCC · '+P.mua.length+' phiếu mua · '+P.hd.length+' HĐ MISA</div>'
-    +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:12px 0">'
-    +'<div><div style="font-size:11px;color:var(--mut2);font-weight:700">TỔNG CHỐT ĐƯỢC</div><div style="font-size:20px;font-weight:800">'+payF(ch)+'</div></div>'
-    +'<div><div style="font-size:11px;color:var(--mut2);font-weight:700">GIỮ LẠI (LỆCH)</div><div style="font-size:20px;font-weight:800;color:'+(giu?'var(--red)':'var(--green)')+'">'+payF(giu)+'</div></div>'
-    +'<div><div style="font-size:11px;color:var(--mut2);font-weight:700">NCC CHỐT ĐƯỢC</div><div style="font-size:20px;font-weight:800">'+nk+'</div></div>'
-    +'<div><div style="font-size:11px;color:var(--mut2);font-weight:700">NCC CÓ LỆCH</div><div style="font-size:20px;font-weight:800">'+np+'</div></div></div>'
-    +payScopeLine()
-    +'<button class="btn btn-primary" style="margin-bottom:8px" onclick="A.payPrintAll()">'+icon('file',17)+'In phiếu + bảng kê ('+L.filter(function(g){return g.khop;}).length+' NCC khớp)</button>'
-    +'<div class="rcact"><button class="btn btn-outline" onclick="A.payXlsxDs()">'+icon('download',16)+'DS thanh toán</button><button class="btn btn-outline" onclick="A.payXlsxAll()">'+icon('download',16)+'Phiếu hàng loạt</button></div>'
-    +'<button class="btn btn-primary" style="margin-top:8px" onclick="A.payXlsxRecon()">'+icon('download',16)+'Xuất tổng hợp đối chiếu MISA ⇄ Mua hàng (từng phiếu)</button>'
-    +'</div>';
+  var L=payCompute(),ch=0,nk=0,np=0,nOk=0,giu=0;
+  L.forEach(function(g){ch+=g.chot;if(g.chot>0)nk++;if(g.bad)np++;if(g.khop)nOk++;giu+=g.tong-g.chot+g.extraSum;});
+  var tot=ch+giu,pct=tot>0?ch/tot*100:100,pcs=(Math.round(pct*10)/10).toLocaleString('vi-VN');
+  var go=function(f){return 'A.payFilter(\''+f+'\');setTimeout(function(){var e=document.getElementById(\'paylist-h\');if(e)e.scrollIntoView({behavior:\'smooth\',block:\'start\'});},30)';};
+  var chip=function(on,fn,lab,n,dot){return '<button class="pxch'+(on?' on':'')+'" onclick="'+fn+'">'+(dot?'<u class="'+dot+'"></u>':'')+esc(lab)+'<b>'+n+'</b></button>';};
+  var tl=[['payXlsxDs','list','DS thanh toán','Danh sách chi trả'],['payXlsxAll','files','Phiếu hàng loạt','Mỗi NCC một phiếu'],['payXlsxRecon','compare','Đối chiếu MISA','Từng phiếu mua']];
+  h+=imp+'<div class="pxtop"><section class="pxh"><div class="pxh-k">Tổng chốt được</div>'
+    +'<div class="pxh-n">'+payF(ch)+'<small>đ</small></div>'
+    +'<div class="pxbar" role="img" aria-label="Chốt được '+pcs+'% tổng công nợ">'+(giu>0?'<i class="g" style="flex:'+pct+'"></i><i class="r" style="flex:'+(100-pct)+'"></i>':'<i class="g" style="flex:1"></i>')+'</div>'
+    +'<div class="pxh-s">'+(giu>0?'Giữ lại <b>'+payF(giu)+' đ</b> do lệch · chốt được '+pcs+'% công nợ':'Không có khoản nào bị giữ lại — sẵn sàng trình ký')+'</div>'
+    +'<div class="pxst2"><button class="pxst" onclick="'+go('ok')+'"><b>'+nOk+'</b><span>NCC khớp toàn bộ</span></button><button class="pxst" onclick="'+go('bad')+'"><b>'+np+'</b><span>NCC lệch, cần xử lý</span></button></div>'
+    +'<div class="pxh-m">'+esc(P.file||"File Excel")+' · '+L.length+' NCC · '+P.mua.length+' phiếu mua · '+P.hd.length+' HĐ MISA</div></section>'
+    +'<section class="pxact">'+payScopeLine()
+    +'<button class="pxa-main" onclick="A.payPrintAll()"'+(nOk?'':' disabled')+'>'+pxIc('print',26)+'<span><b>In phiếu + bảng kê</b><small>'+(nOk?nOk+' NCC khớp toàn bộ':'Chưa có NCC nào khớp')+'</small></span></button>'
+    +'<div class="pxa-k">Hoặc xuất Excel</div><div class="pxa-g">'+tl.map(function(t){return '<button class="pxa" onclick="A.'+t[0]+'()">'+pxIc(t[1],20)+'<b>'+t[2]+'</b><small>'+t[3]+'</small></button>';}).join('')+'</div></section></div>';
+  h+='<div class="pxq">'+pxIc('search',18)+'<input class="inp" placeholder="Tìm NCC, số HĐ, số phiếu, số tiền, cơ sở…" value="'+esc(PAY.q)+'" oninput="A.paySearch(this.value)"></div>';
   var ms=payMonths();
   if(PAY.m!=="all"&&!ms.some(function(m){return m[0]===PAY.m;}))PAY.m="all";
   if(ms.length>1||PAY.m!=="all"){
-    var tot=0;ms.forEach(function(m){tot+=m[1];});
-    h+='<div style="font-size:11px;font-weight:700;color:var(--mut2);margin:0 2px 6px">LỌC THEO THÁNG (dữ liệu có '+ms.length+' tháng)</div><div class="rcchips">'
-      +[["all","Tất cả",tot]].concat(ms.map(function(m){return [m[0],payMLab(m[0]),m[1]];})).map(function(f){return '<button class="rcchip'+(PAY.m===f[0]?' on':'')+'" onclick="A.payMonth(\''+f[0]+'\')">'+f[1]+'<b>'+f[2]+'</b></button>';}).join("")+'</div>';
+    var mt=0;ms.forEach(function(m){mt+=m[1];});
+    h+='<div class="pxfk">Tháng (dữ liệu có '+ms.length+' tháng)</div><div class="pxrow">'+[["all","Tất cả",mt]].concat(ms.map(function(m){return [m[0],payMLab(m[0]),m[1]];})).map(function(f){return chip(PAY.m===f[0],'A.payMonth(\''+f[0]+'\')',f[1],f[2]);}).join("")+'</div>';
   }
-  var cnt={all:L.length,ok:0,bad:0,stk:0,note:0};
-  L.forEach(function(g){if(g.khop)cnt.ok++;if(g.bad)cnt.bad++;if(!g.stk&&g.chot>0)cnt.stk++;if(g.nNote)cnt.note++;});
   var ccs={},ctot=0,cC=payCsCodes();
   L.forEach(function(g){g.rows.forEach(function(x){var c=x.r[7]||"?";ccs[c]=(ccs[c]||0)+1;ctot++;});});
   var cOrd=cC.filter(function(c){return ccs[c];}).concat(Object.keys(ccs).filter(function(c){return c!=="?"&&cC.indexOf(c)<0;}).sort());
   if(ccs["?"])cOrd.push("?");
   if(PAY.ec!=="all"&&!ccs[PAY.ec])PAY.ec="all";
-  h+='<div style="font-size:11px;font-weight:700;color:var(--mut2);margin:0 2px 6px">LỌC THEO CƠ SỞ (số phiếu mua)</div><div class="rcchips">'+[["all","Tất cả",ctot]].concat(cOrd.map(function(c){return [c,c==="?"?"Chưa rõ":c,ccs[c]];})).map(function(f){return '<button class="rcchip'+(PAY.ec===f[0]?' on':'')+'" onclick="A.payEc(\''+f[0]+'\')">'+esc(f[1])+'<b>'+f[2]+'</b></button>';}).join("")+'</div>';
-  h+='<div class="rcchips">'+[["all","Tất cả"],["ok","Khớp"],["bad","Lệch"],["stk","Thiếu STK"],["note","Có ghi chú lỗi"]].map(function(f){return '<button class="rcchip'+(PAY.f===f[0]?' on':'')+'" onclick="A.payFilter(\''+f[0]+'\')">'+f[1]+'<b>'+cnt[f[0]]+'</b></button>';}).join("")+'</div>';
-  h+='<input class="inp" style="margin-bottom:12px" placeholder="Tìm NCC, số HĐ, số phiếu, số tiền, cơ sở…" value="'+esc(PAY.q)+'" oninput="A.paySearch(this.value)">';
-  h+='<div id="paylist">'+payListHtml(L)+'</div>';
+  h+='<div class="pxfk">Cơ sở <span style="font-weight:500">(số phiếu mua)</span></div><div class="pxrow">'+[["all","Tất cả",ctot]].concat(cOrd.map(function(c){return [c,c==="?"?"Chưa rõ":c,ccs[c]];})).map(function(f){return chip(PAY.ec===f[0],'A.payEc(\''+f[0]+'\')',f[1],f[2]);}).join("")+'</div>';
+  var cnt={all:L.length,ok:0,bad:0,stk:0,note:0};
+  L.forEach(function(g){if(g.khop)cnt.ok++;if(g.bad)cnt.bad++;if(!g.stk&&g.chot>0)cnt.stk++;if(g.nNote)cnt.note++;});
+  h+='<div class="pxfk">Trạng thái</div><div class="pxrow">'+[["all","Tất cả",""],["ok","Khớp","g"],["bad","Lệch","r"],["stk","Thiếu STK","a"],["note","Có ghi chú lỗi","o"]].map(function(f){return chip(PAY.f===f[0],'A.payFilter(\''+f[0]+'\')',f[1],cnt[f[0]],f[2]);}).join("")+'</div>';
+  h+='<div id="paylist-h"></div><div id="paylist">'+payListHtml(L)+'</div>';
   return h;
 }
+function payAttn(g){return !g.khop||(!g.stk&&g.chot>0)||g.nNote>0;}
 function payNccListHtml(L){
-  var q=payK(PAY.q),h='';
+  var q=payK(PAY.q),A1=[],R1=[];
   L.filter(function(g){
     if(PAY.f==="ok"&&!g.khop)return false;if(PAY.f==="bad"&&!g.bad)return false;if(PAY.f==="stk"&&!(!g.stk&&g.chot>0))return false;if(PAY.f==="note"&&!g.nNote)return false;if(PAY.ec!=="all"&&!g.rows.some(function(x){return payEcOk(x.r[7]);}))return false;
     return !q||payK(g.full+" "+g.short).indexOf(q)>=0;
-  }).forEach(function(g){
-    var st=g.khop?payTag("Khớp toàn bộ","green"):(g.chot>0?payTag("Chốt 1 phần · lệch "+g.bad,"amber"):payTag("Lệch · "+g.bad,"red"));
-    h+='<div class="card" style="margin-bottom:10px;cursor:pointer" onclick="A.paySel(\''+g.key+'\')"><div style="display:flex;gap:10px;align-items:flex-start"><div style="flex:1;min-width:0"><div style="font-weight:700;font-size:14px;word-break:break-word">'+esc(g.short)+'</div><div style="font-size:11.5px;color:var(--mut);word-break:break-word">'+esc(g.full)+'</div></div>'
-      +'<div style="text-align:right;flex:none"><div style="font-weight:800;font-variant-numeric:tabular-nums">'+payF(g.tong)+'</div><div style="font-size:11px;color:var(--mut)">'+g.rows.length+' HĐ</div></div></div>'
-      +'<div style="display:flex;flex-wrap:wrap;gap:6px;margin-top:8px">'+st+(g.chot>0?payTag(g.pri,"sky"):"")+(g.stk?"":payTag("Thiếu STK","red"))+(g.nNote?payTag("Ghi chú lỗi · "+g.nNote,"orange"):"")+'</div></div>';
-  });
-  return h;
+  }).forEach(function(g){(payAttn(g)?A1:R1).push(g);});
+  function card(g){
+    var held=g.tong-g.chot+g.extraSum,cls=g.khop?"ok":(g.chot>0?"pt":"bd"),
+    st=g.khop?payTag("Khớp toàn bộ","green"):(g.chot>0?payTag("Chốt 1 phần · lệch "+g.bad,"amber"):payTag("Lệch · "+g.bad,"red"));
+    return '<div class="pxc '+cls+'" onclick="A.paySel(\''+g.key+'\')"><div><div class="pxc-n">'+esc(g.short)+'</div><div class="pxc-f">'+esc(g.full)+'</div></div>'
+      +'<div class="pxc-a"><b>'+payF(g.tong)+'</b><span>'+(g.khop?g.rows.length+' HĐ':g.nOk+'/'+g.rows.length+' HĐ khớp')+'</span>'+(!g.khop&&held>0?'<em>Giữ lại '+payF(held)+'</em>':'')+'</div>'
+      +'<div class="pxc-t">'+st+(g.chot>0?payTag(g.pri,"sky"):"")+(g.stk?"":payTag("Thiếu STK","red"))+(g.nNote?payTag("Ghi chú lỗi · "+g.nNote,"orange"):"")+'</div></div>';
+  }
+  var grp=PAY.f==="all"&&A1.length&&R1.length;
+  function sec(t,arr,c){return arr.length?(grp?'<div class="pxg '+c+'"><b>'+t+'</b><span>'+arr.length+'</span></div>':'')+arr.map(card).join(""):"";}
+  return sec("Cần xử lý",A1,"r")+sec("Sẵn sàng trình ký",R1,"g");
 }
+Object.assign(A,{payClr:function(){PAY.q="";PAY.f="all";PAY.ec="all";payKeep();}});
 function payListHtml(L){
   var h=payNccListHtml(L),qs=String(PAY.q||"").trim(),H=(qs.length>=2||PAY.ec!=="all")?payHits(L,qs.length>=2?qs:""):[],lim=40;
   if(H.length){
     h+='<div style="font-size:12.5px;font-weight:800;margin:14px 2px 8px">'+(qs.length>=2?'Phiếu mua khớp “'+esc(qs)+'”':'Phiếu mua')+(PAY.ec!=="all"?' · cơ sở '+esc(PAY.ec==="?"?"chưa rõ":PAY.ec):'')+' · '+H.length+'</div>'+H.slice(0,lim).map(payHitHtml).join("");
     if(H.length>lim)h+='<div class="card" style="color:var(--mut);text-align:center;font-size:13px">Còn '+(H.length-lim)+' phiếu — gõ thêm ký tự để thu hẹp</div>';
   }
-  return h||'<div class="card" style="color:var(--mut);text-align:center">Không tìm thấy NCC hoặc phiếu mua phù hợp</div>';
+  return h||'<div class="pxe"><b>Không có kết quả phù hợp</b>Thử bỏ bớt bộ lọc hoặc gõ từ khóa khác.<br><button class="btn btn-outline" style="display:inline-flex;width:auto;padding:9px 18px;margin-top:12px" onclick="A.payClr()">Xóa bộ lọc</button></div>';
 }
 /* ----- Rà soát lỗi nhập liệu → báo cơ sở qua Zalo ----- */
 var PAY_ZALO_MAX=1800;
@@ -9422,11 +9496,15 @@ function payStep1Html(){
     +'<button class="btn btn-outline" style="padding:9px;font-size:13px;margin-top:8px" onclick="A.payTemplate()">'+icon('download',16)+'Tải file Excel mẫu</button></div>'
     +payCfgHtml()+payCsCfgHtml();
 }
+function pxIc(n,s){
+  var P={print:'<path d="M6 9V3h12v6"/><rect x="6" y="14" width="12" height="7" rx="1"/><path d="M6 17H4a2 2 0 0 1-2-2v-4a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v4a2 2 0 0 1-2 2h-2"/>',list:'<path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/>',files:'<path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7z"/><path d="M14 2v6h6M9 13h6M9 17h6"/>',compare:'<path d="M7 4 3 8l4 4M3 8h14M17 20l4-4-4-4M21 16H7"/>',search:'<circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/>'};
+  return '<svg width="'+(s||18)+'" height="'+(s||18)+'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">'+P[n]+'</svg>';
+}
 function payStepsHtml(step,has,nErr){
   var d=[has,has&&nErr===0,false],lb=['Nạp dữ liệu','Rà lỗi','Xuất / In'];
-  return '<div class="paysteps">'+lb.map(function(t,i){
-    var on=step===i+1,dis=!has&&i>0;
-    return '<button class="'+(on?'on ':'')+(d[i]&&!on?'done ':'')+(dis?'dis':'')+'"'+(dis?' disabled':' onclick="A.payStep('+(i+1)+')"')+'><i>'+(d[i]&&!on?'✓':(i+1))+'</i><span>'+t+'</span>'+(i===1&&nErr&&has?'<em>'+nErr+'</em>':'')+'</button>';
+  return '<div class="pxs">'+lb.map(function(t,i){
+    var on=step===i+1,dis=!has&&i>0,dn=d[i]&&!on;
+    return '<button class="'+(on?'on ':'')+(dn?'done ':'')+(i>0&&d[i-1]?'lk':'')+'"'+(dis?' disabled':' onclick="A.payStep('+(i+1)+')"')+(on?' aria-current="step"':'')+'><i>'+(dn?'✓':(i+1))+'</i><span>'+t+(i===1&&nErr&&has?'<em>'+nErr+'</em>':'')+'</span></button>';
   }).join('')+'</div>';
 }
 function payNextBtn(n,t){return '<button class="btn btn-primary" style="margin-top:6px" onclick="A.payStep('+n+')">'+t+' →</button>';}
