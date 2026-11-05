@@ -2,8 +2,8 @@
 <html lang="vi">
 <head>
 <meta charset="UTF-8">
-<meta name="app-notes" content="Thông báo cập nhật rõ hơn; tối ưu nhập liệu và giao diện mobile/desktop">
-<meta name="app-version" content="2026110403">
+<meta name="app-notes" content="Giao diện Prime sang trọng hơn; sửa lỗi mở màn kiểm kê khi chưa chọn kỳ">
+<meta name="app-version" content="2026110501">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="color-scheme" content="light">
 <meta name="theme-color" content="#eef3fb">
@@ -870,6 +870,76 @@ input:focus-visible,select:focus-visible,textarea:focus-visible{outline-offset:0
 }
 @media(min-width:1366px){#gmain .wrap{padding-left:32px;padding-right:32px}}
 @media(min-width:1024px) and (max-width:1365px){.rck-g.q{grid-template-columns:repeat(2,1fr)}}
+</style>
+<style id="lux-skin">
+/* ===== LUX SKIN · MedDental Prime — chỉ thay giao diện, không đụng logic ===== */
+:root{
+  --bg:#f3f5fa; --card2:#f2f5fb; --ink:#0b1730; --mut:rgba(11,23,48,.6); --mut2:rgba(11,23,48,.4); --line:rgba(11,23,48,.08);
+  --teal:#1f55d6; --teal-d:#163f9f; --teal-bg:rgba(31,85,214,.075); --teal-ln:rgba(31,85,214,.26);
+  --gold:#c99b35; --gold-l:#f2d58a; --gold-ln:rgba(201,155,53,.45);
+  --sh1:0 1px 2px rgba(11,23,48,.04),0 6px 18px -6px rgba(11,23,48,.09);
+  --sh2:0 2px 4px rgba(11,23,48,.05),0 18px 40px -14px rgba(11,23,48,.22);
+}
+::selection{background:rgba(31,85,214,.18)}
+body{background:linear-gradient(180deg,#eaf0fb 0,#f3f5fa 340px) fixed;letter-spacing:-.005em;-webkit-font-smoothing:antialiased}
+.h1{font-weight:800;letter-spacing:-.025em}
+.sec{font-size:13px;letter-spacing:.07em;text-transform:uppercase;color:var(--mut);font-weight:700}
+.eyebrow{letter-spacing:.06em;text-transform:uppercase;font-size:12px}
+
+/* Header kính mờ + đường chỉ vàng */
+#gheader{background:rgba(255,255,255,.9);border-bottom:0;box-shadow:0 8px 24px -18px rgba(11,23,48,.35)}
+@supports((backdrop-filter:blur(1px)) or (-webkit-backdrop-filter:blur(1px))){#gheader{background:rgba(255,255,255,.74);-webkit-backdrop-filter:saturate(1.6) blur(18px);backdrop-filter:saturate(1.6) blur(18px)}}
+#gheader::after{content:"";position:absolute;left:0;right:0;bottom:0;height:1px;background:linear-gradient(90deg,transparent,var(--gold-ln) 22%,var(--gold) 50%,var(--gold-ln) 78%,transparent);pointer-events:none}
+#gbrand .dot,#guser .av{background:linear-gradient(145deg,#2f6ff0,#14388f);color:#fff;box-shadow:0 0 0 2px #fff,0 0 0 3px var(--gold-ln),0 6px 14px -4px rgba(20,56,143,.55)}
+#ghmenu{background:#fff;box-shadow:var(--sh1)}
+
+/* Sidebar desktop */
+#gsidebar{background:linear-gradient(180deg,#fff,#f8faff);border-right:1px solid var(--line);box-shadow:8px 0 30px -24px rgba(11,23,48,.35)}
+.gnav-item{border-radius:12px;transition:background-color .18s ease,color .18s ease,transform .18s ease}
+.gnav-item.on{background:linear-gradient(90deg,rgba(31,85,214,.12),rgba(31,85,214,.04));color:var(--teal);font-weight:700}
+@media(min-width:1024px){.gnav-item.on:not(.gnav-sub)::before{background:linear-gradient(180deg,var(--gold-l),var(--gold))}}
+
+/* Thẻ, nút, ô nhập */
+.card,.item,.hsditem,#mcard,.stkwrap{border:1px solid var(--line);box-shadow:var(--sh1)}
+.card{border-radius:20px}
+.item{transition:transform .16s ease,box-shadow .2s ease}
+@media(hover:hover){.item:hover,.hsdcard:hover{transform:translateY(-2px);box-shadow:var(--sh2)}}
+.btn{border-radius:15px;letter-spacing:.005em}
+.btn-primary{background:linear-gradient(180deg,#2f6ff0 0,#1f55d6 55%,#1a47b8 100%);box-shadow:inset 0 1px 0 rgba(255,255,255,.28),0 10px 22px -8px rgba(31,85,214,.6)}
+.btn-outline{background:#fff;border-color:var(--teal-ln);box-shadow:var(--sh1)}
+.pill{background:#fff;box-shadow:var(--sh1)}
+.chip-on{background:linear-gradient(180deg,#2f6ff0,#1a47b8);box-shadow:0 6px 14px -6px rgba(31,85,214,.6)}
+.inp,.sinp{background:#fff;border-color:rgba(11,23,48,.12);border-radius:13px;transition:border-color .18s ease,box-shadow .18s ease}
+.inp:focus,.sinp:focus{border-color:var(--teal);box-shadow:0 0 0 4px rgba(31,85,214,.12)}
+.bar{background:rgba(11,23,48,.07)}
+.fill,.ring .rf{background:linear-gradient(90deg,#2f6ff0,#1a47b8)}
+.ring .rb{stroke:#e6ecf8}
+
+/* Trang chủ */
+.hero{box-shadow:0 22px 44px -18px rgba(7,18,58,.65),inset 0 0 0 1px rgba(242,213,138,.3)}
+.hsdcard{border-radius:18px!important;border-color:var(--line)!important;box-shadow:var(--sh1)!important;background:linear-gradient(180deg,#fff,#f8faff)!important;transition:transform .16s ease,box-shadow .2s ease}
+.hsdcard .n{font-weight:800;letter-spacing:-.03em}
+#mcard{border-radius:22px;box-shadow:var(--sh2)}
+#mcard .mt{letter-spacing:-.01em}
+
+/* Thanh điều hướng dưới */
+#bnav{background:rgba(255,255,255,.94);border-top:1px solid var(--gold-ln);box-shadow:0 -14px 34px -16px rgba(11,23,48,.28)}
+@supports((backdrop-filter:blur(1px)) or (-webkit-backdrop-filter:blur(1px))){#bnav{background:rgba(255,255,255,.8);-webkit-backdrop-filter:saturate(1.6) blur(18px);backdrop-filter:saturate(1.6) blur(18px)}}
+#bnav button{position:relative;transition:color .18s ease}
+#bnav button.on:not(.fab)::before{content:"";position:absolute;top:0;left:50%;width:26px;height:3px;margin-left:-13px;border-radius:0 0 4px 4px;background:linear-gradient(90deg,var(--gold-l),var(--gold))}
+#bnav .fab i{background:linear-gradient(145deg,#3a7bff,#1747b5);box-shadow:0 0 0 5px #fff,0 0 0 6.5px var(--gold-ln),0 14px 26px -6px rgba(23,71,181,.6)}
+
+/* Bảng, màn chi tiết, hộp thoại */
+.stktable th,table.rct th{background:#eef3fc;color:var(--mut);letter-spacing:.06em}
+.stktable td,table.rct td{border-bottom-color:rgba(11,23,48,.06)}
+.v2hd{background:linear-gradient(160deg,#1a4fc9,#0b2c78)}
+.v2bd{background:#f3f6fc}
+#sigovl,#nmovl,.v2o{background:rgba(7,16,38,.55);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px)}
+.sigcard{border-radius:24px;box-shadow:var(--sh2),0 0 0 1px rgba(201,155,53,.22)}
+#toast .in{box-shadow:var(--sh2)}
+:focus-visible{outline-color:var(--teal)}
+@media(prefers-reduced-motion:reduce){*{transition:none!important;animation-duration:.01ms!important;animation-iteration-count:1!important}}
+@media print{#gheader::after,#bnav{display:none}}
 </style>
 </head>
 <body>
@@ -4173,7 +4243,7 @@ function filteredList(p){
   });
 }
 function renderPeriod(){
-  var p=per(P.id);
+  var p=P&&per(P.id);
   if(!p){route={view:"home"};render();return;}
   var h='<div class="topbar"><div class="trow wrap">'+
     '<button class="back" onclick="A.periodBack()">‹</button>'+
