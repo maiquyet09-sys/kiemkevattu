@@ -2,8 +2,8 @@
 <html lang="vi">
 <head>
 <meta charset="UTF-8">
-<meta name="app-notes" content="Nâng cấp phân hệ Kiểm kê: bàn phím số không bị che, thanh Kiểm tuần tự gọn, danh sách 2 cột; vá lỗi">
-<meta name="app-version" content="2026110505">
+<meta name="app-notes" content="Bảng kê hóa đơn (Đề nghị thanh toán) dạng bảng cột rõ ràng, dễ đọc trên máy tính">
+<meta name="app-version" content="2026110506">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="color-scheme" content="light">
 <meta name="theme-color" content="#eef3fb">
@@ -1035,6 +1035,33 @@ input[type=checkbox],input[type=radio]{accent-color:var(--teal)}
 #list>:not(.item){grid-column:1/-1}
 }
 </style>
+<style id="bk-layer">
+/* ===== ĐỀ NGHỊ THANH TOÁN · Bảng kê hóa đơn dạng bảng cột (desktop); mobile giữ dạng thẻ ===== */
+.bk-head{display:none}
+@media(min-width:900px){
+:root{--bk-cols:48px minmax(180px,1.1fr) 160px minmax(260px,2fr) 160px 140px}
+#app .bk-head{display:grid;grid-template-columns:var(--bk-cols);column-gap:14px;align-items:center;padding:11px 14px;background:#eef3fc;border-radius:12px;font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--mut)}
+#app .bk-head span:first-child{text-align:center}
+#app .bk-head .r{text-align:right}
+#app .bk-row{display:grid!important;grid-template-columns:var(--bk-cols);column-gap:14px;align-items:center;padding:12px 14px!important;font-size:14px!important;transition:background-color .15s ease}
+#app .bk-row:nth-child(even){background:#fafbfe}
+#app .bk-row.bk-x{background:var(--amber-bg)}
+#app .bk-row:hover{background:rgba(31,85,214,.055)}
+#app .bk-main,#app .bk-amt{display:contents!important}
+#app .bk-n{grid-column:1;grid-row:1;text-align:center}
+#app .bk-id{grid-column:2;grid-row:1}
+#app .bk-id b{font-size:15px;letter-spacing:.01em}
+#app .bk-sub{font-size:12.5px!important;margin-top:2px}
+#app .bk-st{grid-column:3;grid-row:1;text-align:left}
+#app .bk-note{grid-column:4;grid-row:1;margin:0!important;font-size:13px!important;line-height:1.45}
+#app .bk-act{grid-column:5;grid-row:1;margin:0!important}
+#app .bk-amt>div{grid-column:6;grid-row:1;text-align:right;font-size:15px;font-weight:700}
+#app .bk-row>:not(.bk-main):not(.bk-note):not(.bk-act){grid-column:1/-1;grid-row:2;margin-top:10px}
+#app .bk-act button{border:1px solid var(--teal-ln)!important;background:#fff!important;border-radius:10px;padding:7px 12px!important;font-size:13px!important;white-space:nowrap;transition:background-color .15s ease}
+#app .bk-act button:hover{background:var(--teal-bg)!important}
+}
+</style>
+
 
 
 
@@ -9753,17 +9780,17 @@ function payDetailHtml(key){
   h+='<div class="card" style="margin-bottom:12px"><div style="font-weight:700;margin-bottom:6px">Kiểm tra trước khi trình ký</div>'
     +ck.items.map(function(c){return '<div style="display:flex;gap:8px;font-size:13px;padding:3px 0"><div style="flex:0 0 130px;color:var(--mut)">'+c[1]+'</div><div style="flex:1;color:'+(c[0]?'var(--green)':'var(--red)')+'">'+esc(c[2])+'</div></div>';}).join("")
     +'<div style="margin-top:8px;font-weight:800;color:'+(ck.ok?'var(--green)':'var(--red)')+'">'+ck.end+'</div></div>';
-  h+='<div class="card"><div style="font-weight:700;margin-bottom:2px">Bảng kê hóa đơn ('+g.rows.length+')</div><div style="font-size:11.5px;color:var(--mut);margin-bottom:8px">Bấm “✎ Ghi lỗi cơ sở” ở từng phiếu để ghi: thiếu nhập kho, thiếu phiếu giao hàng…</div>';
+  h+='<div class="card"><div style="font-weight:700;margin-bottom:2px">Bảng kê hóa đơn ('+g.rows.length+')</div><div style="font-size:11.5px;color:var(--mut);margin-bottom:8px">Bấm “✎ Ghi lỗi cơ sở” ở từng phiếu để ghi: thiếu nhập kho, thiếu phiếu giao hàng…</div><div class="bk-head"><span>#</span><span>Số hóa đơn</span><span>Trạng thái</span><span>Ghi chú chứng từ</span><span>Thao tác</span><span class="r">Số tiền</span></div>';
   g.rows.forEach(function(x,i){
     var s=PAY_ST[x.st],ek=key+"#"+i,open=PAY.ed===ek,nt=x.note,er=nt?payNoteErrs(nt):[];
-    h+='<div style="padding:7px 0;border-top:1px solid var(--line);font-size:12.5px"><div style="display:flex;gap:8px;align-items:center"><div style="flex:0 0 22px;color:var(--mut2)">'+(i+1)+'</div><div style="flex:1"><b>'+esc(x.r[2])+'</b><div style="color:var(--mut);font-size:11px">'+payDs(x.d)+' · '+esc(x.r[7]||"?")+'</div></div><div style="text-align:right"><div style="font-variant-numeric:tabular-nums">'+payF(x.tong)+'</div>'+(x.st==="ok"?"":payTag(s[0],s[1]))+'</div></div>'
-      +(er.length?'<div style="margin:4px 0 0 30px;color:var(--orange);font-weight:600;font-size:12px">⚠ '+esc(er.map(function(z){return z.d;}).filter(function(v,j,a){return a.indexOf(v)===j;}).join("; "))+(nt.imp?' <span style="font-weight:400;color:var(--mut2)">(từ file Excel)</span>':'')+'</div>':'')
-      +(!er.length&&payOkGet(x.r)?'<div style="margin:4px 0 0 30px;color:var(--green);font-weight:600;font-size:12px">✔ Chứng từ đủ</div>':'')
-      +'<div style="margin:4px 0 0 30px"><button style="border:none;background:none;padding:2px 0;font:inherit;font-size:12px;font-weight:700;color:var(--teal);cursor:pointer" onclick="A.payNoteEd(\''+key+'\','+i+')">'+(open?'▾ Đóng':'✎ '+(er.length?'Sửa ghi chú lỗi':'Ghi lỗi cơ sở'))+'</button></div>'
+    h+='<div class="bk-row" style="padding:7px 0;border-top:1px solid var(--line);font-size:12.5px"><div class="bk-main" style="display:flex;gap:8px;align-items:center"><div class="bk-n" style="flex:0 0 22px;color:var(--mut2)">'+(i+1)+'</div><div class="bk-id" style="flex:1"><b>'+esc(x.r[2])+'</b><div class="bk-sub" style="color:var(--mut);font-size:11px">'+payDs(x.d)+' · '+esc(x.r[7]||"?")+'</div></div><div class="bk-amt" style="text-align:right"><div style="font-variant-numeric:tabular-nums">'+payF(x.tong)+'</div><span class="bk-st">'+(x.st==="ok"?"":payTag(s[0],s[1]))+'</span></div></div>'
+      +(er.length?'<div class="bk-note" style="margin:4px 0 0 30px;color:var(--orange);font-weight:600;font-size:12px">⚠ '+esc(er.map(function(z){return z.d;}).filter(function(v,j,a){return a.indexOf(v)===j;}).join("; "))+(nt.imp?' <span style="font-weight:400;color:var(--mut2)">(từ file Excel)</span>':'')+'</div>':'')
+      +(!er.length&&payOkGet(x.r)?'<div class="bk-note" style="margin:4px 0 0 30px;color:var(--green);font-weight:600;font-size:12px">✔ Chứng từ đủ</div>':'')
+      +'<div class="bk-act" style="margin:4px 0 0 30px"><button style="border:none;background:none;padding:2px 0;font:inherit;font-size:12px;font-weight:700;color:var(--teal);cursor:pointer" onclick="A.payNoteEd(\''+key+'\','+i+')">'+(open?'▾ Đóng':'✎ '+(er.length?'Sửa ghi chú lỗi':'Ghi lỗi cơ sở'))+'</button></div>'
       +(open?payNoteEdHtml(key,i,nt):'')+'</div>';
   });
   g.extra.forEach(function(e){
-    h+='<div style="display:flex;gap:8px;align-items:center;padding:7px 0;border-top:1px solid var(--line);font-size:12.5px;background:var(--amber-bg)"><div style="flex:0 0 22px">+</div><div style="flex:1"><b>'+esc(e[2])+'</b><div style="color:var(--mut);font-size:11px">'+(e[0]?payDs(e[0])+' · ':'')+'có trong MISA, không có phiếu mua</div></div><div style="text-align:right"><div>'+payF(e[6])+'</div>'+payTag("HĐ MISA thừa","amber")+'</div></div>';
+    h+='<div class="bk-row bk-x" style="padding:7px 0;border-top:1px solid var(--line);font-size:12.5px;background:var(--amber-bg)"><div class="bk-main" style="display:flex;gap:8px;align-items:center"><div class="bk-n" style="flex:0 0 22px">+</div><div class="bk-id" style="flex:1"><b>'+esc(e[2])+'</b><div class="bk-sub" style="color:var(--mut);font-size:11px">'+(e[0]?payDs(e[0])+' · ':'')+'có trong MISA, không có phiếu mua</div></div><div class="bk-amt" style="text-align:right"><div>'+payF(e[6])+'</div><span class="bk-st">'+payTag("HĐ MISA thừa","amber")+'</span></div></div></div>';
   });
   return h+'</div>';
 }
