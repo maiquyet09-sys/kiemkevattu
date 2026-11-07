@@ -10497,7 +10497,7 @@ function statHtml(){var S=stat(),h='<div class="card" style="margin-bottom:12px;
 Object.keys(S.T).forEach(function(c){var t=S.T[c],p=Object.keys(t.ps).length,n=S.N[c];h+='<tr><td>'+esc(c)+'</td><td class="n">'+t.nl+'</td><td class="n">'+p+(n?'/'+n:'')+'</td><td class="n">'+(n?(p/n*100).toFixed(1)+'%':'–')+'</td><td class="n">'+t.lb+'</td></tr>';});
 h+='</table><div style="font-size:12px;color:var(--mut);margin-top:6px">Tỷ lệ = số phiếu có lỗi / tổng phiếu nhập kho trong file MISA đã nạp (cần nạp file MISA của kỳ đó).</div></div><div class="card"><div style="font-weight:700;margin-bottom:6px">Theo loại lỗi</div><table class="er-tb">';
 Object.keys(S.L).sort(function(a,b){return S.L[b]-S.L[a];}).forEach(function(l){h+='<tr><td>'+esc(l)+'</td><td class="n">'+S.L[l]+'</td></tr>';});return h+'</table></div>';}
-function rEr(){var h='<div class="topbar"><div class="trow wrap"><button class="back" onclick="A.go(\'home\')">‹</button><div class="ttl">Báo lỗi</div></div><div style="height:10px"></div></div><div class="wrap" style="padding-top:16px;padding-bottom:100px">';
+function rEr(){var h='<div class="topbar"><div class="trow wrap"><button class="back" onclick="'+(ER.v==='form'?'ER.cancel()':'A.go(\'home\')')+'">‹</button><div class="ttl">Báo lỗi</div></div><div style="height:10px"></div></div><div class="wrap" style="padding-top:16px;padding-bottom:100px">';
 if(ER.v==='form'){$('app').innerHTML=h+formHtml()+'</div>';var e=$('erSct');if(e)e.addEventListener('input',ER.sctCh);drawSlots();window.scrollTo(0,0);return;}
 var C=ER.misa.length?chk():[];ER._c=C;
 h+='<div style="display:flex;gap:8px;margin-bottom:10px"><button class="btn btn-primary" style="flex:1" onclick="ER.new(\'nl\')">+ Lỗi nhập liệu</button><button class="btn btn-primary" style="flex:1" onclick="ER.new(\'lb\')">+ Lỗi labo</button></div>';
@@ -10509,6 +10509,7 @@ else{if(C.length&&ER.f!=='lb')h+='<details class="card" style="margin-bottom:12p
 var L=cur();h+=L.length?L.map(card).join(''):'<div class="card" style="color:var(--mut);text-align:center">Chưa có lỗi nào. Bấm “+ Lỗi nhập liệu” hoặc “+ Lỗi labo” để ghi.</div>';}
 $('app').innerHTML=h+'</div>';}
 window.renderErr=rEr;
+var _go=A.go;A.go=function(v){if(v==='err'){ER.v='list';ER.form=null;ER._del=[];}return _go.apply(this,arguments);};
 /* ---- xuất ---- */
 ER.xls=function(){if(!kkNeed(['xlsx'],ER.xls))return;var wb=XLSX.utils.book_new(),S=stat(),ts=Object.keys(S.T).map(function(c){var t=S.T[c],p=Object.keys(t.ps).length,n=S.N[c]||'';return {'Cơ sở':c,'Số lỗi nhập liệu':t.nl,'Số phiếu có lỗi':p,'Tổng phiếu nhập kho':n,'Tỷ lệ phiếu lỗi':n?p/n:'','Số lỗi labo':t.lb};});
 XLSX.utils.book_append_sheet(wb,XLSX.utils.json_to_sheet(ts.length?ts:[{}]),'Tổng hợp');
