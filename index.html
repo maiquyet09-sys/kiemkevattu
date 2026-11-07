@@ -6,7 +6,7 @@
 <meta name="app-version" content="2026110506">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="color-scheme" content="light">
-<meta name="theme-color" content="#eef3fb">
+<meta name="theme-color" content="#ffffff">
 <meta name="robots" content="noindex,nofollow,noarchive">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="apple-touch-icon" href="icon-192.png">
@@ -1066,6 +1066,49 @@ input[type=checkbox],input[type=radio]{accent-color:var(--teal)}
 
 
 
+<style id="fc-skin">
+/* FastCons skin: chỉ ghi đè giao diện, không đụng logic */
+@media screen{
+:root,body{--bg:#f2f5f9;--card:#fff;--card2:#f5f7fa;--ink:#14213d;--mut:rgba(20,33,61,.62);--mut2:rgba(20,33,61,.4);--line:#e4e9f0;
+--teal:#1f9d4d;--teal-d:#167c3b;--teal-bg:rgba(31,157,77,.09);--teal-ln:rgba(31,157,77,.32);
+--orange:#f26a1b;--orange-bg:#fff0e4;--orange-ln:rgba(242,106,27,.3);
+--red:#d92d2d;--red-bg:#fde9e9;--red-ln:rgba(217,45,45,.28);
+--sky:#1769c9;--sky-bg:#e6f0fd;--sky-ln:rgba(23,105,201,.28);
+--sh1:0 1px 2px rgba(10,31,107,.05),0 4px 14px -6px rgba(10,31,107,.12);--navy:#0a1f6b;--side:#1f2a33}
+html body{background:var(--bg)!important}
+html body #gheader{background:#fff!important;color:var(--navy)!important;border:0!important;border-bottom:1px solid var(--line)!important;box-shadow:inset 0 -3px 0 var(--teal)}
+#gheader #ghmenu{background:var(--card2);color:var(--navy)}
+#gheader #gbrand,#gheader #guser{color:var(--navy)}
+#guser .av{background:var(--navy);box-shadow:none;color:#fff}
+/* Sidebar tối + mục đang chọn xanh lá */
+html body #gsidebar,html body #gdrawer{background:var(--side)!important;border-right:0!important}
+#gsidebar .gnav-item,#gdrawer .gnav-item{color:rgba(255,255,255,.74);border-radius:8px}
+#gsidebar .gnav-item:hover,#gdrawer .gnav-item:hover{background:rgba(255,255,255,.07);color:#fff}
+#gsidebar .gnav-item.on,#gdrawer .gnav-item.on{background:rgba(31,157,77,.22)!important;color:#fff!important;box-shadow:inset 3px 0 0 #3ddc7a}
+#gsidebar .gnav-cap,#gdrawer .gnav-cap{color:rgba(255,255,255,.42)}
+#gsidebar .gnav-sub .cnt,#gdrawer .gnav-sub .cnt{color:rgba(255,255,255,.55)}
+#gsidebar .gnav-sub.on .cnt,#gdrawer .gnav-sub.on .cnt{color:#7ee6a1}
+/* Thẻ, tiêu đề */
+.card{background:#fff;border:1px solid var(--line);border-radius:12px;box-shadow:var(--sh1)}
+.h1,.sec,.ttl{color:var(--navy)}.h1{font-weight:800}
+.eyebrow{color:var(--orange)}
+.back{background:var(--teal-bg);color:var(--teal-d)}
+/* Nút: cam làm hành động chính, xanh lá làm phụ */
+.btn{border-radius:10px}
+.btn-primary{background:linear-gradient(180deg,#ff7d2b,#f06010);color:#fff;box-shadow:0 6px 16px -6px rgba(240,96,16,.55)}
+.btn-outline{background:#fff;color:var(--teal-d);border:1px solid var(--teal-ln)}
+/* Chip, nhãn trạng thái, ô nhập */
+.chip{background:#fff;border-radius:8px;color:var(--mut)}
+.chip.on,.chip-on{background:var(--navy)!important;border-color:var(--navy)!important;color:#fff!important}
+.pill{border-radius:8px;background:#fff;box-shadow:var(--sh1)}
+.bdg{border-radius:6px;font-weight:700;padding:3px 9px}
+.inp{background:#fff;border:1px solid #d5dce6;border-radius:8px}
+.inp:focus{border-color:var(--teal);box-shadow:0 0 0 3px var(--teal-bg)}
+table th{background:#eef2f8;color:var(--navy);font-weight:700}
+#bnav{border-radius:16px 16px 0 0;box-shadow:0 -6px 22px rgba(10,31,107,.1)}
+#bnav button.on{color:var(--teal)}
+}
+</style>
 </head>
 <body>
 <header id="gheader">
