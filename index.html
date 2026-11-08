@@ -2,8 +2,8 @@
 <html lang="vi">
 <head>
 <meta charset="UTF-8">
-<meta name="app-notes" content="Bảng kê hóa đơn (Đề nghị thanh toán) dạng bảng cột rõ ràng, dễ đọc trên máy tính">
-<meta name="app-version" content="2026110803">
+<meta name="app-notes" content="Menu 5 phân hệ; nút Quay lại, F5 và liên kết trực tiếp giữ đúng màn hình (dữ liệu và chức năng giữ nguyên)">
+<meta name="app-version" content="2026110805">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="format-detection" content="telephone=no">
 <meta name="color-scheme" content="light">
@@ -5090,10 +5090,16 @@ function navCounts(){var C=window.__nbc;if(C&&Date.now()-C.t<4000)return C.v;var
 function navGroups(){
   var nc=navCounts(),v=route.view,cur=navCurFolder(),inFolder=(cur!==null&&(v==='folder'||v==='period'));
   function C(act){return 'A.drawerClose();'+act;}
+  /* 5 phân hệ: Tổng quan · Kho & kiểm kê · Đối chiếu · Thanh toán NCC · Quản trị & tiện ích (chỉ đổi cách xếp menu, không đổi màn hình/dữ liệu) */
   var inv=[
     {label:'Danh sách kỳ kiểm kê',desc:'Gồm các kỳ đang kiểm dở',cnt:nc.o||undefined,act:C('v2List()'),on:v==='lists'||v==='transfer'||(v==='asset'&&LS.back)||(v==='period'&&!inFolder)},
     {label:'Tạo kỳ kiểm kê',act:C("A.go('upload')"),on:v==='upload'},
+    {label:'Vật tư, tồn kho',act:'A.navStock()',on:v==='stock'},
+    {label:'Cảnh báo hạn sử dụng',cnt:nc.ex||undefined,hot:1,act:C("A.go('hsd')"),on:v==='hsd'},
     {label:'Kiểm kê CCDC &amp; TSCĐ',act:C("A.go('assets')"),on:v==='assets'||(v==='asset'&&!LS.back)},
+    {label:'Giải trình chênh lệch',desc:'Giải trình các mã chênh lệch sau kiểm kê',act:C("A.go('explain')"),on:v==='explain'||v==='explainEdit'},
+    {label:'Báo cáo kiểm kê',desc:'Tổng hợp kết quả kiểm kê',act:C("A.go('baocao')"),on:v==='baocao'||v==='reporthub'},
+    {label:'Điều chuyển liên chi nhánh',desc:'Tồn ≥3/6 tháng, gợi ý điều chuyển giữa chi nhánh',act:C("A.go('mgmt')"),on:v==='mgmt'},
     {label:'Quét QR / mã vạch',act:C('v2Scan()'),on:false},
     {cap:'Chi nhánh'}
   ];
@@ -5103,21 +5109,15 @@ function navGroups(){
   inv.push({label:'Thêm chi nhánh',act:'A.navFolderAdd()',on:false,add:true});
   return [
     {k:'ov',icon:'home',label:'Tổng quan',act:"A.navGo('home')",on:v==='home'},
-    {k:'inv',icon:'scan',label:'Kiểm kê và quản lý kho',bd:nc.o,subs:inv,on:['lists','transfer','upload','folder','period','assets','asset'].indexOf(v)>=0},
-    {k:'pay',icon:'swap',label:'Đối chiếu và thanh toán',bd:nc.nl,on:['recon','pay'].indexOf(v)>=0,subs:[
+    {k:'inv',icon:'box',label:'Kho &amp; kiểm kê',bd:((nc.o||0)+(nc.ex||0))||undefined,subs:inv,on:['lists','transfer','upload','folder','period','assets','asset','stock','hsd','baocao','reporthub','explain','explainEdit','mgmt'].indexOf(v)>=0},
+    {k:'rc',icon:'swap',label:'Đối chiếu',on:['recon','err'].indexOf(v)>=0,subs:[
       {label:'Đối chiếu doanh thu – xuất kho',desc:'So doanh thu với giá trị xuất kho theo tháng',act:C("A.go('recon')"),on:v==='recon'},
-      {label:'Đề nghị thanh toán NCC',desc:'Bảng kê hóa đơn, giấy đề nghị và trạng thái',cnt:nc.nl||undefined,hot:1,act:C("A.go('pay')"),on:v==='pay'}]},
-    {k:'ct',icon:'warn',label:'Kiểm soát và quản trị',on:['err','mgmt','dchub'].indexOf(v)>=0,subs:[
-      {label:'Báo lỗi nhập liệu và labo',act:C("A.go('err')"),on:v==='err'},
-      {label:'Quản trị liên chi nhánh',desc:'Tồn ≥3/6 tháng, gợi ý điều chuyển giữa chi nhánh',act:C("A.go('mgmt')"),on:v==='mgmt'},
-      {label:'Trung tâm kiểm soát dữ liệu',desc:'Tổng hợp các công cụ đối chiếu, kiểm soát',act:C("A.go('dchub')"),on:v==='dchub'}]},
-    {k:'wh',icon:'box',label:'Kho và biểu mẫu',bd:nc.ex,on:['stock','hsd','reporthub','baocao','handover','handoverEdit','explain','explainEdit','settings'].indexOf(v)>=0,subs:[
-      {label:'Vật tư, tồn kho',act:'A.navStock()',on:v==='stock'},
-      {label:'Cảnh báo hạn sử dụng',cnt:nc.ex||undefined,hot:1,act:C("A.go('hsd')"),on:v==='hsd'},
-      {label:'Báo cáo kiểm kê',act:C("A.go('baocao')"),on:v==='baocao'},
+      {label:'Báo lỗi nhập liệu và labo',act:C("A.go('err')"),on:v==='err'}]},
+    {k:'pay',icon:'doc',label:'Thanh toán NCC',bd:nc.nl||undefined,act:"A.navGo('pay')",on:v==='pay'},
+    {k:'qt',icon:'file',label:'Quản trị &amp; tiện ích',on:['handover','handoverEdit','dchub','settings'].indexOf(v)>=0,subs:[
       {label:'Biên bản bàn giao',desc:'Bàn giao vật tư, tài sản giữa các bên',act:C("A.go('handover')"),on:v==='handover'||v==='handoverEdit'},
-      {label:'Giải trình chênh lệch',desc:'Giải trình các mã chênh lệch sau kiểm kê',act:C("A.go('explain')"),on:v==='explain'||v==='explainEdit'},
-      {label:'Cài đặt hệ thống',act:C("A.go('settings')"),on:v==='settings'}]}
+      {label:'Trung tâm kiểm soát dữ liệu',desc:'Tổng hợp các công cụ đối chiếu, kiểm soát',act:C("A.go('dchub')"),on:v==='dchub'},
+      {label:'Cài đặt hệ thống',desc:'Hồ sơ, in ấn, người ký, sao lưu và khôi phục',act:C("A.go('settings')"),on:v==='settings'}]}
   ];
 }
 function navActive(gs){
@@ -5130,7 +5130,7 @@ function navHtml(){
   var gs=navGroups(),ac=navActive(gs),h='';
   gs.forEach(function(g){
     var on=ac.g===g;
-    if(!g.subs){h+='<a class="gnav-item'+(on?' on':'')+'" title="'+g.label+'" onclick="'+g.act+'">'+navIco(g)+'<span class="lb">'+g.label+'</span></a>';return;}
+    if(!g.subs){h+='<a class="gnav-item'+(on?' on':'')+'" title="'+g.label+'" onclick="'+g.act+'">'+navIco(g)+'<span class="lb">'+g.label+'</span>'+(g.bd?'<span class="gbd">'+g.bd+'</span>':'')+'</a>';return;}
     h+='<div class="gnav-wrap'+(NAV_OPEN===g.k?' open':'')+'" data-g="'+g.k+'"><a class="gnav-item gnav-grp'+(on?' on':'')+'" title="'+g.label+'" onclick="A.navGroup(\''+g.k+'\')">'+navIco(g)+'<span class="lb">'+g.label+'</span>'+(g.bd?'<span class="gbd">'+g.bd+'</span>':'')+'<span class="chv">'+icon('chev',16)+'</span></a><div class="gnav-subs"><div>';
     g.subs.forEach(function(y){
       if(y.cap){h+='<div class="gnav-cap">'+y.cap+'</div>';return;}
@@ -7657,16 +7657,40 @@ function renderHome(){
   document.getElementById('app').insertAdjacentHTML('afterbegin',fcHello()+v2Hub());
   setTimeout(function(){try{fcDelta();fcHdr();}catch(e){}},80);
 }
+/* ===== Điều hướng theo đường dẫn (#/...): nút Back/Forward, F5 và liên kết trực tiếp giữ đúng màn hình =====
+   Chỉ bọc quanh route hiện có: không đổi dữ liệu, không đổi cách mở màn hình. Màn cần ngữ cảnh (chi tiết kỳ, chi nhánh, soạn biên bản...) khi mở lại từ liên kết sẽ về màn danh sách cha. */
+var HR_SLUG={home:'tong-quan',lists:'ky-kiem-ke',upload:'tao-ky',assets:'ccdc-tscd',hsd:'han-su-dung',baocao:'bao-cao-kiem-ke',reporthub:'trung-tam-bao-cao',handover:'ban-giao',explain:'giai-trinh',settings:'cai-dat',recon:'doi-chieu',pay:'thanh-toan-ncc',err:'bao-loi',mgmt:'dieu-chuyen',dchub:'kiem-soat-du-lieu',stock:'ton-kho',transfer:'chuyen-vat-tu',period:'ky-kiem-ke/chi-tiet',folder:'chi-nhanh',asset:'ccdc-tscd/chi-tiet',handoverEdit:'ban-giao/soan',explainEdit:'giai-trinh/soan'};
+var HR_FALL={stock:'lists',transfer:'lists',period:'lists',folder:'lists',asset:'assets',handoverEdit:'handover',explainEdit:'explain'};
+var HR_REV={},HR_REPL=false;
+Object.keys(HR_SLUG).forEach(function(k){HR_REV[HR_SLUG[k]]=k;});
+function hrView(){var h=String(location.hash||'');if(h.indexOf('#/')!==0)return null;return HR_REV[h.slice(2)]||null;}
+function hrSafe(v){return HR_FALL[v]||v;}
+function hashSync(){
+  try{
+    var s=HR_SLUG[route.view];if(!s)return;
+    var want='#/'+s;if(location.hash===want)return;
+    if(history.pushState){
+      if(HR_REPL||!location.hash||!hrView())history.replaceState(null,'',want);else history.pushState(null,'',want);
+    }else location.hash=want;
+  }catch(e){try{location.hash='/'+HR_SLUG[route.view];}catch(e2){klog('hashSync',e2);}}
+}
+function hrGo(v){
+  var t=hrSafe(v);if(t===route.view)return;
+  HR_REPL=true;
+  try{A.drawerClose();A.go(t);}finally{HR_REPL=false;}
+}
+window.addEventListener('hashchange',function(){var v=hrView();if(v)hrGo(v);});
 function renderNav(){
   renderNavOld();
   var v=route.view,on={
     home:['home','upload','folder'].indexOf(v)>=0,
     list:['lists','period','stock','transfer'].indexOf(v)>=0||(v==='asset'&&LS.back),
-    dc:['dchub','recon','pay','mgmt'].indexOf(v)>=0,
+    dc:['dchub','recon','pay','mgmt','err'].indexOf(v)>=0,
     more:['settings','hsd','assets','reporthub','baocao','handover','handoverEdit','explain','explainEdit'].indexOf(v)>=0||(v==='asset'&&!LS.back)
   };
   Array.prototype.forEach.call(document.querySelectorAll('#bnav [data-k]'),function(b){b.classList.toggle('on',!!on[b.getAttribute('data-k')]);});
   document.getElementById('app').classList.toggle('v2p',v==='period');
+  hashSync();
 }
 function v2PeriodInit(){
   var tb=document.querySelector('#app .topbar');if(!tb||document.getElementById('ringcard'))return;
@@ -8082,7 +8106,8 @@ store.boot(function(){
   if(!db.counters)db.counters={};
   if(!db.profile)db.profile={ten:'',chucVu:'',chiNhanh:'',ma:'',maManual:false};
   try{if(navigator.storage&&navigator.storage.persist)navigator.storage.persist();}catch(e){klog("if(navigator.storage&&navigator.storage.persist)",e)}
-  render();
+  var hv0=hrView();
+  if(hv0&&hrSafe(hv0)!=='home')hrGo(hv0);else render();
   /* Watermark */
   try{
     var W=300,H=170;
