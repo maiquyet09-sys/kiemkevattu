@@ -2,8 +2,8 @@
 <html lang="vi">
 <head>
 <meta charset="UTF-8">
-<meta name="app-notes" content="Menu 5 phân hệ; nút Quay lại, F5 và liên kết trực tiếp giữ đúng màn hình (dữ liệu và chức năng giữ nguyên)">
-<meta name="app-version" content="2026110805">
+<meta name="app-notes" content="Đối chiếu: thêm trạng thái kỳ (Chưa đối chiếu, Đang xử lý, Chờ xác nhận, Hoàn thành) có lịch sử người thực hiện (dữ liệu cũ giữ nguyên)">
+<meta name="app-version" content="2026110808">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="format-detection" content="telephone=no">
 <meta name="color-scheme" content="light">
@@ -1340,6 +1340,45 @@ html body .btn:disabled,html body .btn[aria-busy="true"]{opacity:.6;cursor:not-a
 html body .btn[aria-busy="true"]::after{content:"";display:inline-block;width:14px;height:14px;margin-left:8px;vertical-align:-2px;border:2px solid currentColor;border-right-color:transparent;border-radius:50%;animation:kkspin .7s linear infinite}
 @keyframes kkspin{to{transform:rotate(360deg)}}
 </style>
+<style id="s4-desktop">
+/* ===== Bước 4 · Desktop: bảng dữ liệu cho danh sách kiểm kê (>=1100px); điện thoại giữ dạng thẻ ===== */
+#list>.ptbl{display:none}
+@media(min-width:1100px){
+  #list>.item{display:none}
+  #list>.ptbl{display:block}
+}
+.ptbl .ptn{font-size:12px;color:var(--mut);padding:0 2px 8px}
+.ptbl .stktable{table-layout:auto}
+.ptbl .stktable th.srt{cursor:pointer;user-select:none}
+.ptbl .stktable th.srt:hover{color:var(--ink)}
+.ptbl .stktable th .ar{font-size:9px;margin-left:4px}
+.ptbl .stktable tbody tr{cursor:pointer}
+.ptbl .stktable td.r{white-space:nowrap}
+.ptbl .stktable td .hs{margin-left:6px}
+.ptbl .dpos{color:var(--green);font-weight:700}
+.ptbl .dneg{color:var(--red);font-weight:700}
+.rcb-gray{background:rgba(16,24,40,.07);color:var(--mut)}
+.rcb-blue{background:rgba(31,85,214,.12);color:#1f55d6}
+.kyc .kyh{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}
+.kyc .kyt{font-weight:700;font-size:15px}
+.kyc .kym{font-size:12.5px;color:var(--mut);margin-top:6px;line-height:1.5}
+.kyc .kyw{font-size:12.5px;color:var(--red);font-weight:600;margin-top:6px}
+.kyc .kyb{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+.kyc .kyb button[disabled]{opacity:.45;pointer-events:none}
+.kyc .kyf{font-size:12px;margin-top:6px;color:var(--mut2)}
+table.rct tr.kyr{cursor:pointer}
+.pgbar{display:flex;flex-wrap:wrap;align-items:center;justify-content:flex-end;gap:8px;padding:10px 2px 2px;font-size:13px;color:var(--mut)}
+.pgbar label{display:inline-flex;align-items:center;gap:6px;margin-right:auto}
+.pgbar .pill[disabled]{opacity:.4;cursor:default;pointer-events:none}
+.pgbar b{color:var(--ink)}
+.ptbl,#stkarea{scroll-margin-top:150px}
+@media(min-width:1100px){#list>.addbat{display:none!important}}
+@media(min-width:1500px){
+  html body[data-view="period"] #gmain .wrap,html body[data-view="stock"] #gmain .wrap{max-width:1360px}
+  html body[data-view="period"] #gmain .stkwrap,html body[data-view="stock"] #gmain .stkwrap{max-width:none}
+}
+</style>
+
 </head>
 <body>
 <header id="gheader">
@@ -4721,6 +4760,67 @@ function renderChips(p,base){
   });
   document.getElementById("chips").innerHTML=h;
 }
+/* ===== Bước 4 · Phân trang dùng chung cho bảng kiểm kê (k='p') và bảng tồn kho (k='s') ===== */
+function pgBar(k,total,pg,ps){
+  if(total<=50)return '';
+  var pages=Math.max(1,Math.ceil(total/ps));
+  var b=function(lb,n,dis,t){return '<button class="pill" '+(dis?'disabled ':'')+'title="'+t+'" onclick="A.pgGo(\''+k+'\','+n+')">'+lb+'</button>';};
+  return '<div class="pgbar"><label>Số dòng/trang <select class="chip" onchange="A.pgSize(\''+k+'\',this.value)">'
+    +[50,100,200].map(function(n){return '<option value="'+n+'"'+(n===ps?' selected':'')+'>'+n+'</option>';}).join('')+'</select></label>'
+    +b('«',0,pg<=0,'Trang đầu')+b('‹ Trước',pg-1,pg<=0,'Trang trước')
+    +'<span>Trang <b>'+(pg+1)+'</b> / '+pages+'</span>'
+    +b('Sau ›',pg+1,pg>=pages-1,'Trang sau')+b('»',pages-1,pg>=pages-1,'Trang cuối')+'</div>';
+}
+/* ===== Bước 4 · Bảng kiểm kê (desktop): sắp xếp theo cột, hiển thị x / tổng; không đổi dữ liệu ===== */
+function pSortList(list){
+  if(!P||!P.sk)return list;
+  var k=P.sk,d=P.sd||1;
+  var g=function(i){
+    switch(k){
+      case 'code':return String(i.code||i.name||'');
+      case 'name':return String(i.name||'');
+      case 'unit':return String(i.unit||'');
+      case 'branch':return String(i.branch||'');
+      case 'close':return Number(i.close)||0;
+      case 'qty':return i.counted?(Number(i.countQty)||0):-1e18;
+      case 'diff':{var x=i.counted?diffOf(i):null;return x===null?-1e18:x;}
+    }
+    return 0;
+  };
+  return list.slice().sort(function(a,b){
+    var x=g(a),y=g(b);
+    var c=(typeof x==='number')?(x-y):String(x).localeCompare(String(y),'vi',{numeric:true});
+    return c*d;
+  });
+}
+function pTableHtml(list,multi){
+  var rows=pSortList(list);
+  var sig=[P.flt,P.q,P.br,P.sk,P.sd,P.ps].join('|');if(P.sig!==sig){P.sig=sig;P.pg=0;}
+  var ps=P.ps||50,pages=Math.max(1,Math.ceil(rows.length/ps));if(!(P.pg>=0))P.pg=0;if(P.pg>=pages)P.pg=pages-1;
+  var from=P.pg*ps,shown=rows.slice(from,from+ps);
+  var cols=[['code','Mã hàng',''],['name','Tên hàng','']].concat([['unit','ĐVT','']]);
+  if(multi)cols.push(['branch','Kho','']);
+  cols.push(['close','Tồn hệ thống','r'],['qty','Thực tế','r'],['diff','Chênh lệch','r'],[null,'Trạng thái','']);
+  var h='<div class="ptbl"><div class="ptn">Hiển thị <b>'+(rows.length?from+1:0)+'–'+(from+shown.length)+'</b> / <b>'+rows.length+'</b> mã'+(P.sk?' · sắp xếp theo cột (bấm lại để đổi chiều hoặc bỏ)':'')+'</div>'
+    +'<div class="stkwrap"><table class="stktable"><thead><tr>';
+  cols.forEach(function(c){
+    var ar=(P.sk&&P.sk===c[0])?'<span class="ar">'+((P.sd||1)>0?'▲':'▼')+'</span>':'';
+    h+='<th class="'+(c[2]||'')+(c[0]?' srt':'')+'"'+(c[0]?' onclick="A.pSort(\''+c[0]+'\')"':'')+'>'+c[1]+ar+'</th>';
+  });
+  h+='</tr></thead><tbody>';
+  shown.forEach(function(it){
+    var d=diffOf(it),worst=null;
+    (it.batches||[]).forEach(function(b){var x=daysTo(b.exp);if(x!==null&&(worst===null||x<worst))worst=x;});
+    var st=!it.counted?'<span class="pl">Chưa kiểm</span>':(d===null||d===0)?'<span class="pl pl-ok">Khớp</span>':d>0?'<span class="pl pl-plus">Thừa</span>':'<span class="pl pl-minus">Thiếu</span>';
+    var hs=(worst!==null&&worst<=90)?'<span class="hs'+(worst<0?' r':'')+'">HSD '+(worst<0?'quá hạn':'còn '+worst+' ngày')+'</span>':'';
+    var dc=(it.counted&&d!==null)?(d===0?'0':'<span class="'+(d>0?'dpos':'dneg')+'">'+(d>0?'+':'−')+fmt(Math.abs(d))+'</span>'):'–';
+    h+='<tr onclick="A.openItem(\''+it.id+'\',false)"><td><b>'+esc(it.code||it.name)+'</b></td><td class="stkname">'+esc(it.name)+'</td><td>'+esc(it.unit)+'</td>'
+      +(multi?'<td>'+esc(it.branch)+'</td>':'')
+      +'<td class="r tnum">'+fmt(it.close)+'</td><td class="r tnum">'+(it.counted?fmt(it.countQty):'–')+'</td><td class="r tnum">'+dc+'</td><td>'+st+hs+'</td></tr>';
+  });
+  if(!shown.length)h+='<tr><td colspan="'+cols.length+'" style="text-align:center;color:var(--mut2);padding:24px 0">Không có vật tư nào khớp bộ lọc.</td></tr>';
+  return h+'</tbody></table></div>'+pgBar('p',rows.length,P.pg,ps)+'</div>';
+}
 function renderList(){
   var p=per(P.id);if(!p)return;
   var base=baseList(p);
@@ -4774,6 +4874,7 @@ function renderList(){
       +'<div class="ift"><span>ĐVT: '+esc(it.unit)+(branchesMulti?' · '+esc(it.branch):'')+'</span><span>Tồn: '+fmt(it.close)+' <i>|</i> Thực tế: '+(it.counted?fmt(it.countQty):'-')+'</span></div>'+hs+'</div>'
       +'<span class="ich">'+icon('chev',18)+'</span></div>';
   });
+  h+=pTableHtml(list,branchesMulti);
   if(list.length>P.limit){
     h+='<button class="addbat" style="display:block;width:100%;text-align:center;padding:12px 0" onclick="A.more()">Xem thêm ('+(list.length-P.limit)+' mã còn lại)</button>';
   }
@@ -4813,7 +4914,10 @@ function renderStockRows(){
     if(nq&&skey(i).indexOf(nq)<0)return false;
     return true;
   });
-  var h='<div style="font-size:12px;color:var(--mut);padding-bottom:8px">'+rows.length+' mã còn tồn kho</div>'+
+  var ssig=[ST.q,ST.br,ST.ps].join('|');if(ST.sig!==ssig){ST.sig=ssig;ST.pg=0;}
+  var sps=ST.ps||100,spages=Math.max(1,Math.ceil(rows.length/sps));if(!(ST.pg>=0))ST.pg=0;if(ST.pg>=spages)ST.pg=spages-1;
+  var spFrom=ST.pg*sps;
+  var h='<div style="font-size:12px;color:var(--mut);padding-bottom:8px">'+rows.length+' mã còn tồn kho'+(rows.length>sps?' · hiển thị '+(spFrom+1)+'–'+Math.min(rows.length,spFrom+sps):'')+'</div>'+
     '<div class="stkwrap"><table class="stktable"><thead><tr>'+
     (multi?'<th style="width:22%">Kho</th>':'')+
     '<th style="width:'+(multi?"18%":"22%")+'">Mã hàng</th>'+
@@ -4821,7 +4925,7 @@ function renderStockRows(){
     '<th style="width:13%">ĐVT</th>'+
     '<th class="r" style="width:17%">Tồn cuối</th>'+
     '</tr></thead><tbody>'+
-    (rows.length?rows.slice(0,ST.limit).map(function(it){
+    (rows.length?rows.slice(spFrom,spFrom+sps).map(function(it){
       return '<tr>'+(multi?'<td>'+esc(it.branch)+'</td>':'')+
         '<td>'+esc(it.code)+'</td>'+
         '<td class="stkname">'+esc(it.name)+'</td>'+
@@ -4829,7 +4933,7 @@ function renderStockRows(){
         '<td class="r tnum" style="font-weight:700">'+fmt(it.close)+'</td></tr>';
     }).join(""):'<tr><td colspan="'+(multi?5:4)+'" style="text-align:center;color:var(--mut2);padding:24px 0">Không có mã nào khớp.</td></tr>')+
     '</tbody></table></div>'+
-    (rows.length>ST.limit?'<button class="addbat" style="display:block;width:100%;text-align:center;padding:12px 0" onclick="A.stMore()">Xem thêm ('+(rows.length-ST.limit)+' mã còn lại)</button>':'');
+    pgBar('s',rows.length,ST.pg,sps);
   document.getElementById("stkarea").innerHTML=h;
 }
 
@@ -7218,6 +7322,9 @@ var A={
   setFlt:function(k){P.flt=k;P.limit=80;renderList();},
   setBr:function(v){P.br=v;P.limit=80;renderList();},
   more:function(){P.limit+=100;renderList();},
+  pgGo:function(k,n){var o=k==='p'?P:ST;o.pg=Math.max(0,parseInt(n,10)||0);if(k==='p')renderList();else renderStockRows();var t=document.querySelector(k==='p'?'.ptbl':'#stkarea');if(t&&t.scrollIntoView)t.scrollIntoView({block:'start'});},
+  pgSize:function(k,v){var o=k==='p'?P:ST;o.ps=parseInt(v,10)||50;o.pg=0;if(k==='p')renderList();else renderStockRows();},
+  pSort:function(k){if(P.sk!==k){P.sk=k;P.sd=1;}else if((P.sd||1)>0){P.sd=-1;}else{P.sk=null;P.sd=1;}renderList();},
   exportCur:function(){
     var p=per(P.id);if(!p)return;
     try{exportExcel(p);}catch(e){console.error(e);toast("Không xuất được file trên thiết bị này");}
@@ -7690,6 +7797,7 @@ function renderNav(){
   };
   Array.prototype.forEach.call(document.querySelectorAll('#bnav [data-k]'),function(b){b.classList.toggle('on',!!on[b.getAttribute('data-k')]);});
   document.getElementById('app').classList.toggle('v2p',v==='period');
+  document.body.setAttribute('data-view',v);
   hashSync();
 }
 function v2PeriodInit(){
@@ -8542,6 +8650,64 @@ function renderRecon(){
   else if(RC.tab===0)h+=rcViewSum();else if(RC.tab===1)h+=rcViewList();else if(RC.tab===2)h+=rcViewChk();else if(RC.tab===3)h+=rcViewMap();else if(RC.tab===4)h+=rcViewImp();else if(RC.tab===5)h+=rcViewApx();else if(RC.tab===6)h+=rcViewMapX();
   document.getElementById("app").innerHTML=h+'</div>';
 }
+/* ===== Bước 5 · Trạng thái kỳ đối chiếu (Cơ sở × Tháng): Chưa đối chiếu → Đang xử lý → Chờ xác nhận → Hoàn thành =====
+   Dữ liệu mới lưu ở db.recon.kyst (tạo khi dùng lần đầu, dữ liệu cũ không bị đổi). Trạng thái KHÔNG tự sửa dữ liệu gốc;
+   mọi chuyển trạng thái ghi người thực hiện, thời gian, ghi chú và nhật ký thao tác. */
+var KY_BADGE={'Chưa đối chiếu':'gray','Đang xử lý':'amber','Chờ xác nhận':'blue','Hoàn thành':'green'};
+var RC_KYL=[];
+function kyKey(cs,mo){return cs+'|'+mo;}
+function kyTime(ts){if(!ts)return '';var d=new Date(ts),p=function(n){return ('0'+n).slice(-2);};return p(d.getDate())+'/'+p(d.getMonth()+1)+'/'+d.getFullYear()+' '+p(d.getHours())+':'+p(d.getMinutes());}
+function rcKyBadge(st,stale){return '<span class="rcb rcb-'+(KY_BADGE[st]||'gray')+'">'+esc(st)+'</span>'+(stale?' <span class="rcb rcb-red" title="Dữ liệu của kỳ đã thay đổi kể từ lần cập nhật trạng thái gần nhất">Dữ liệu đã đổi</span>':'');}
+function rcKyStat(cs,mo){
+  var Z=RC_RES,F=Z.dt.filter(function(o){return o.first&&o.cs===cs&&o.mo===mo;}),X=Z.xk.filter(function(x){return x.cs===cs&&x.mo===mo;});
+  var nd=F.filter(function(o){return o.need;}).length,nx=X.filter(function(x){return x.need;}).length,rev=0,val=0;
+  Z.rows.forEach(function(o){if(o.cs===cs&&o.mo===mo)rev+=rcNum(o.r.dt);});X.forEach(function(x){val+=x.val;});
+  return {n:F.length,x:X.length,need:nd+nx,nd:nd,nx:nx,rev:rev,val:val,sig:[F.length,X.length,nd+nx,Math.round(rev),Math.round(val)].join('/')};
+}
+function rcKyGet(cs,mo){
+  var R=rcDb(),S=rcKyStat(cs,mo),rec=(R.kyst||{})[kyKey(cs,mo)],has=S.n+S.x>0;
+  var st=(rec&&rec.st)?rec.st:(has?'Đang xử lý':'Chưa đối chiếu');
+  var stale=!!(rec&&(rec.st==='Chờ xác nhận'||rec.st==='Hoàn thành')&&rec.sig&&rec.sig!==S.sig);
+  return {st:st,rec:rec,S:S,stale:stale,has:has};
+}
+function rcKyCard(){
+  var R=rcDb(),h;
+  if(RC.cs==='Tất cả'||RC.th==='Tất cả'){
+    return '<div class="card kyc" style="margin-bottom:12px"><div class="kyt">Trạng thái kỳ đối chiếu</div><div class="kym">Chọn 1 cơ sở và 1 tháng ở bộ lọc phía trên để cập nhật trạng thái kỳ (Chưa đối chiếu → Đang xử lý → Chờ xác nhận → Hoàn thành). Bảng “Các kỳ đối chiếu” bên dưới cho xem tất cả các kỳ.</div></div>';
+  }
+  var cs=RC.cs,mo=+RC.th,g=rcKyGet(cs,mo),rec=g.rec,S=g.S;
+  h='<div class="card kyc" style="margin-bottom:12px"><div class="kyh"><div class="kyt">Kỳ đối chiếu · '+esc(cs)+' · Tháng '+mo+'</div><div>'+rcKyBadge(g.st,g.stale)+'</div></div>'
+    +'<div class="kym">'+S.n+' lượt doanh thu · '+S.x+' phiếu xuất · <b>'+S.need+'</b> ca cần xử lý'+(rec&&rec.at?' · cập nhật '+esc(kyTime(rec.at))+(rec.by?' bởi '+esc(rec.by):''):'')+'</div>';
+  if(g.stale)h+='<div class="kyw">Dữ liệu của kỳ đã thay đổi sau lần cập nhật trạng thái gần nhất. Hãy rà soát lại trước khi xác nhận.</div>';
+  h+='<div class="kyb">';
+  if(g.st==='Chưa đối chiếu')h+='<span class="kym" style="margin:0">Chưa có dữ liệu của kỳ này. Nhập doanh thu và xuất kho ở mục Dữ liệu.</span>';
+  if(g.st==='Đang xử lý')h+='<button class="btn btn-primary" '+(S.need>0?'disabled ':'')+'onclick="A.kyAct(\'submit\')">Gửi xác nhận</button>'+(S.need>0?'<span class="kym" style="margin:0;align-self:center">Còn '+S.need+' ca cần xử lý nên chưa gửi xác nhận được.</span>':'');
+  if(g.st==='Chờ xác nhận')h+='<button class="btn btn-primary" '+(S.need>0?'disabled ':'')+'onclick="A.kyAct(\'confirm\')">Xác nhận hoàn thành</button><button class="btn btn-outline" onclick="A.kyAct(\'return\')">Trả lại xử lý</button>';
+  if(g.st==='Hoàn thành'){if(g.stale)h+='<button class="btn btn-primary" '+(S.need>0?'disabled ':'')+'onclick="A.kyAct(\'confirm\')">Xác nhận lại</button>';h+='<button class="btn btn-outline" onclick="A.kyAct(\'reopen\')">Mở lại</button>';}
+  h+='</div>';
+  var hist=(rec&&rec.hist)||[];
+  if(hist.length){
+    h+='<div class="kyf"><b>Lịch sử trạng thái</b></div>'+rcTbl(['Thời gian','Từ','Sang','Người thực hiện','Ghi chú'],hist.slice(-8).reverse().map(function(e){return [esc(kyTime(e.at)),esc(e.from||''),rcKyBadge(e.st),esc(e.by||''),esc(e.note||'')];}),5);
+  }
+  return h+'</div>';
+}
+function rcKyTable(){
+  var Z=RC_RES,seen={},L=[];
+  function add(cs,mo){if(!cs||!mo)return;var k=kyKey(cs,mo);if(seen[k])return;seen[k]=1;L.push({cs:cs,mo:mo});}
+  Z.dt.forEach(function(o){add(o.cs,o.mo);});Z.xk.forEach(function(x){add(x.cs,x.mo);});
+  L.sort(function(a,b){return String(a.cs).localeCompare(String(b.cs),'vi')||a.mo-b.mo;});
+  RC_KYL=L;
+  if(!L.length)return '';
+  var c={'Chưa đối chiếu':0,'Đang xử lý':0,'Chờ xác nhận':0,'Hoàn thành':0};
+  var rows=L.map(function(k,i){
+    var g=rcKyGet(k.cs,k.mo);c[g.st]=(c[g.st]||0)+1;
+    var rec=g.rec;
+    return '<tr class="kyr" onclick="A.kyGo('+i+')"><td>'+esc(k.cs)+'</td><td>Tháng '+k.mo+'</td><td class="n">'+g.S.n+'</td><td class="n" style="'+(g.S.need?'color:var(--red);font-weight:700':'')+'">'+g.S.need+'</td><td>'+rcKyBadge(g.st,g.stale)+'</td><td>'+esc(rec&&rec.by?rec.by:'')+(rec&&rec.at?'<br><span style="font-size:11px;color:var(--mut2)">'+esc(kyTime(rec.at))+'</span>':'')+'</td></tr>';
+  }).join('');
+  var sum='Hoàn thành <b>'+c['Hoàn thành']+'</b> · Chờ xác nhận <b>'+c['Chờ xác nhận']+'</b> · Đang xử lý <b>'+c['Đang xử lý']+'</b> · Chưa đối chiếu <b>'+c['Chưa đối chiếu']+'</b>';
+  var body='<div class="kym" style="margin:0 0 8px">'+sum+' · bấm một dòng để chuyển bộ lọc sang kỳ đó</div><div style="overflow-x:auto"><table class="rct"><tr><th>Cơ sở</th><th>Tháng</th><th class="n">Lượt DT</th><th class="n">Cần xử lý</th><th>Trạng thái</th><th>Cập nhật</th></tr>'+rows+'</table></div>';
+  return rcAcc('kyall','Các kỳ đối chiếu ('+L.length+')',body,RC.cs==='Tất cả'||RC.th==='Tất cả');
+}
 function rcViewSum(){
   var s=rcSum(),Z=RC_RES,h=rcFilter(),n=s.F.length,nd=s.needD.length,nx=s.needX.length,need=nd+nx,pct=n?(s.ok/n*100):0;
   var rest=Math.max(0,n-s.ok-s.apprD-nd),fp=function(x){return (Math.round(x*10)/10).toLocaleString("vi-VN");},sc=rcScopeTxt();
@@ -8554,6 +8720,7 @@ function rcViewSum(){
     +'<div class="pxh-m">'+n+' lượt đối chiếu · '+esc(sc.cs)+' · '+esc(sc.th)+'</div>'
     +(need?'<button class="pxst rcgo" onclick="A.rcGoList('+(nd?0:1)+')"><span><b>Xử lý '+need+' ca lệch</b><br><span>'+nd+' ca doanh thu · '+nx+' phiếu xuất</span></span><i>›</i></button>'
           :'<button class="pxst rcgo" onclick="A.rcTab(5)"><span><b>✓ Đã xử lý hết — lập Phụ lục 01</b><br><span>Bước tiếp theo: xuất báo cáo đối chiếu</span></span><i>›</i></button>')+'</section>';
+  h+=rcKyCard()+rcKyTable();
   h+='<div class="rck-g">'+kp("Tổng doanh thu (VND)",rcF(s.rev),"","","0,2,''")+kp("Giá trị xuất kho (VND)",rcF(s.val),s.rev?'Bằng '+fp(s.val/s.rev*100)+'% doanh thu':'',"","1,2,''")+'</div>'
     +'<div class="rck-g q">'+kp("Ca cần xử lý (DT)",nd,"",nd?"red":"green","0,1,''")+kp("Phiếu xuất cần xử lý",nx,"",nx?"red":"green","1,1,''")
     +kp("Phiếu xuất SAI VẬT TƯ",s.badVt,"",s.badVt?"red":"green","1,0,'XUẤT SAI VẬT TƯ'")+kp("Ca đã duyệt – hợp lệ",s.apprD,"","","0,4,''")+'</div>';
@@ -8991,6 +9158,37 @@ Object.assign(A,{
   rcS:function(k,v){RC[RC_KEYS[k]]=(k===3||k===4)?+v:v;RC.lim=40;if(k===6)RC.q="";renderRecon();},
   rcMore:function(){RC.lim+=40;renderRecon();},
   rcMapF:function(v){RC.mf=v;RC.mlim=60;renderRecon();},
+  kyGo:function(i){var k=RC_KYL[i];if(!k)return;RC.cs=k.cs;RC.th=String(k.mo);RC.lim=40;renderRecon();},
+  kyAct:function(a){
+    if(RC.cs==='Tất cả'||RC.th==='Tất cả'){toast('Chọn 1 cơ sở và 1 tháng trước');return;}
+    var R=rcDb(),cs=RC.cs,mo=+RC.th,g=rcKyGet(cs,mo),key=kyKey(cs,mo),S=g.S;
+    var who=(db.profile&&db.profile.ten)||'';
+    if(!who){toast('Nhập họ tên ở Cài đặt → Hồ sơ trước, để ghi người thực hiện');return;}
+    var to='',note='';
+    if(a==='submit'){
+      if(g.st!=='Đang xử lý'){toast('Kỳ không ở trạng thái Đang xử lý');return;}
+      if(S.need>0){toast('Còn '+S.need+' ca cần xử lý, chưa gửi xác nhận được');return;}
+      to='Chờ xác nhận';
+    }else if(a==='confirm'){
+      if(g.st!=='Chờ xác nhận'&&!(g.st==='Hoàn thành'&&g.stale)){toast('Kỳ chưa ở trạng thái chờ xác nhận');return;}
+      if(S.need>0){toast('Còn '+S.need+' ca cần xử lý, chưa xác nhận được');return;}
+      if(!confirm('Xác nhận kỳ '+cs+' · Tháng '+mo+' đã đối chiếu xong?\n\n'+S.n+' lượt doanh thu · '+S.x+' phiếu xuất · 0 ca cần xử lý\nNgười xác nhận: '+who))return;
+      to='Hoàn thành';
+    }else if(a==='return'||a==='reopen'){
+      if(a==='return'&&g.st!=='Chờ xác nhận'){toast('Kỳ không ở trạng thái chờ xác nhận');return;}
+      if(a==='reopen'&&g.st!=='Hoàn thành'){toast('Kỳ chưa hoàn thành');return;}
+      var n=prompt(a==='return'?'Lý do trả lại xử lý:':'Lý do mở lại kỳ đã hoàn thành:');
+      if(n===null)return;n=String(n).trim();
+      if(!n){toast('Cần nhập lý do');return;}
+      note=n;to='Đang xử lý';
+    }else return;
+    var kyst=R.kyst||(R.kyst={}),rec=kyst[key]||(kyst[key]={st:'',hist:[]});
+    if(!Array.isArray(rec.hist))rec.hist=[];
+    rec.hist.push({st:to,from:g.st,by:who,at:Date.now(),note:note,sig:S.sig});
+    if(rec.hist.length>50)rec.hist.splice(0,rec.hist.length-50);
+    rec.st=to;rec.by=who;rec.at=Date.now();rec.sig=S.sig;
+    audit('recon-ky',key,g.st,to);saveSoon();renderRecon();
+  },
   rcMapMore:function(){RC.mlim=(RC.mlim||60)+60;A.rcMapRe();},
   rcMapRe:function(){var e=document.getElementById("mpbody");if(!e){renderRecon();return;}var y=window.scrollY,w=e.querySelector(".mpw"),l=w?w.scrollLeft:0,t=w?w.scrollTop:0;e.innerHTML=rcMapBody(rcMapB());w=e.querySelector(".mpw");if(w){w.scrollLeft=l;w.scrollTop=t;}window.scrollTo(0,y);},
   rcMapX:function(k){RC.mx=(RC.mx===k)?"":k;A.rcMapRe();},
