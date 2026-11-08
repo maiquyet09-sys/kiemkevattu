@@ -3,8 +3,9 @@
 <head>
 <meta charset="UTF-8">
 <meta name="app-notes" content="Bảng kê hóa đơn (Đề nghị thanh toán) dạng bảng cột rõ ràng, dễ đọc trên máy tính">
-<meta name="app-version" content="2026110506">
+<meta name="app-version" content="2026110801">
 <meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="format-detection" content="telephone=no">
 <meta name="color-scheme" content="light">
 <meta name="theme-color" content="#ffffff">
 <meta name="robots" content="noindex,nofollow,noarchive">
@@ -10423,7 +10424,7 @@ function payPrintBk(g){
     +'<p><b>Tổng số HĐ: &nbsp; '+g.rows.length+' hóa đơn</b></p></div>';
 }
 function payPrintOpen(L,title){
-  var h='<!doctype html><html><head><meta charset="utf-8"><title>'+esc(title)+'</title><style>'+PAY_PCSS+'</style></head><body>'
+  var h='<!doctype html><html><head><meta charset="utf-8"><meta name="format-detection" content="telephone=no"><title>'+esc(title)+'</title><style>'+PAY_PCSS+'</style></head><body>'
     +L.map(function(g){return payPrintDn(g)+payPrintBk(g);}).join("")+'</body></html>';
   printPreviewHtml(h);
 }
