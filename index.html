@@ -9833,6 +9833,11 @@ function payCompute(){
       g.rows.push(row);g.tong+=r[4];if(st==="ok")g.chot+=r[4];else g.bad++;if(row.note)g.nNote++;
     });
     g.hd.forEach(function(h){if(!seen[h[7]]&&h[6]&&payInM(h[0])){g.extra.push(h);g.bad++;}});
+    /* Sắp xếp số hóa đơn từ nhỏ đến lớn (lấy cụm số cuối: 00003324, C26TAA/3324 → 3324); phiếu chưa có số xếp cuối */
+    var hdN=function(v){var m=String(v==null?"":v).match(/(\d+)\D*$/);return m?parseInt(m[1],10):NaN;},
+        hdCmp=function(a,b){var x=hdN(a),y=hdN(b),nx=isNaN(x),ny=isNaN(y);if(nx!==ny)return nx?1:-1;if(!nx&&x!==y)return x-y;return String(a||"").localeCompare(String(b||""),"vi",{numeric:true});};
+    g.rows.sort(function(a,b){return hdCmp(a.r[2],b.r[2])||((a.d||0)-(b.d||0));});
+    g.extra.sort(function(a,b){return hdCmp(a[2],b[2]);});
     g.nOk=g.rows.filter(function(x){return x.st==="ok";}).length;
     g.extraSum=g.extra.reduce(function(s,h){return s+h[6];},0);
     g.khop=g.rows.length>0&&!g.bad;
