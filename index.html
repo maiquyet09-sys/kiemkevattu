@@ -2,8 +2,8 @@
 <html lang="vi">
 <head>
 <meta charset="UTF-8">
-<meta name="app-notes" content="Đối chiếu: thêm trạng thái kỳ (Chưa đối chiếu, Đang xử lý, Chờ xác nhận, Hoàn thành) có lịch sử người thực hiện (dữ liệu cũ giữ nguyên)">
-<meta name="app-version" content="2026110808">
+<meta name="app-notes" content="Mới: Phân tích mua hàng – tiêu hao (menu Đối chiếu): tải sổ chi tiết vật tư MISA, so sánh 2 tháng theo cơ sở, xuất Excel (dữ liệu cũ giữ nguyên)">
+<meta name="app-version" content="2026111101">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="format-detection" content="telephone=no">
 <meta name="color-scheme" content="light">
@@ -5214,8 +5214,9 @@ function navGroups(){
   return [
     {k:'ov',icon:'home',label:'Tổng quan',act:"A.navGo('home')",on:v==='home'},
     {k:'inv',icon:'box',label:'Kho &amp; kiểm kê',bd:((nc.o||0)+(nc.ex||0))||undefined,subs:inv,on:['lists','transfer','upload','folder','period','assets','asset','stock','hsd','baocao','reporthub','explain','explainEdit','mgmt'].indexOf(v)>=0},
-    {k:'rc',icon:'swap',label:'Đối chiếu',on:['recon','err'].indexOf(v)>=0,subs:[
+    {k:'rc',icon:'swap',label:'Đối chiếu',on:['recon','err','ana'].indexOf(v)>=0,subs:[
       {label:'Đối chiếu doanh thu – xuất kho',desc:'So doanh thu với giá trị xuất kho theo tháng',act:C("A.go('recon')"),on:v==='recon'},
+      {label:'Phân tích mua hàng – tiêu hao',desc:'So mua hàng với tiêu hao vật tư theo cơ sở, từ sổ chi tiết MISA',act:C("A.go('ana')"),on:v==='ana'},
       {label:'Báo lỗi nhập liệu và labo',act:C("A.go('err')"),on:v==='err'}]},
     {k:'pay',icon:'doc',label:'Thanh toán NCC',bd:nc.nl||undefined,act:"A.navGo('pay')",on:v==='pay'},
     {k:'qt',icon:'file',label:'Quản trị &amp; tiện ích',on:['handover','handoverEdit','dchub','settings'].indexOf(v)>=0,subs:[
@@ -5324,6 +5325,7 @@ function renderDcHub(){
   var n=0;try{if(db.pay&&db.pay.mua&&db.pay.mua.length)payCompute().forEach(function(g){if(g.bad)n++;});}catch(e){klog("if(db.pay&&db.pay.mua&&db.pay.mua.length)payComp",e)}
   hubCards('Đối chiếu & thanh toán','home',[
     {icon:'swap',title:'Đối chiếu doanh thu – xuất kho',desc:'Đối chiếu doanh thu với phiếu xuất kho, xuất Excel kèm sheet map, bôi đỏ phần lệch.',route:'recon'},
+    {icon:'swap',title:'Phân tích mua hàng – tiêu hao',desc:'Tải sổ chi tiết vật tư MISA, so mua hàng với tiêu hao 2 tháng theo cơ sở, cảnh báo tồn kho, xuất Excel.',route:'ana'},
     {icon:'monitor',title:'Quản trị liên chi nhánh',desc:'Dashboard chi nhánh, tồn ≥3/6 tháng, gợi ý điều chuyển, đối chiếu doanh thu – xuất kho – kiểm kê.',route:'mgmt'},
     {icon:'file',title:'Đề nghị thanh toán NCC',desc:'Nạp / bổ sung mua hàng và hóa đơn MISA, rà lỗi, lập giấy đề nghị, bảng kê, danh sách thanh toán.',route:'pay',badge:n?n+' NCC lệch':''}]);
 }
@@ -6667,6 +6669,7 @@ function render(){
   else if(route.view==="mgmt")renderMgmt();
   else if(route.view==="pay")renderPay();
   else if(route.view==="err"&&window.renderErr)renderErr();
+  else if(route.view==="ana"&&window.renderAna)renderAna();
   renderNav();
   window.scrollTo(0,0);
 }
@@ -7766,7 +7769,7 @@ function renderHome(){
 }
 /* ===== Điều hướng theo đường dẫn (#/...): nút Back/Forward, F5 và liên kết trực tiếp giữ đúng màn hình =====
    Chỉ bọc quanh route hiện có: không đổi dữ liệu, không đổi cách mở màn hình. Màn cần ngữ cảnh (chi tiết kỳ, chi nhánh, soạn biên bản...) khi mở lại từ liên kết sẽ về màn danh sách cha. */
-var HR_SLUG={home:'tong-quan',lists:'ky-kiem-ke',upload:'tao-ky',assets:'ccdc-tscd',hsd:'han-su-dung',baocao:'bao-cao-kiem-ke',reporthub:'trung-tam-bao-cao',handover:'ban-giao',explain:'giai-trinh',settings:'cai-dat',recon:'doi-chieu',pay:'thanh-toan-ncc',err:'bao-loi',mgmt:'dieu-chuyen',dchub:'kiem-soat-du-lieu',stock:'ton-kho',transfer:'chuyen-vat-tu',period:'ky-kiem-ke/chi-tiet',folder:'chi-nhanh',asset:'ccdc-tscd/chi-tiet',handoverEdit:'ban-giao/soan',explainEdit:'giai-trinh/soan'};
+var HR_SLUG={home:'tong-quan',lists:'ky-kiem-ke',upload:'tao-ky',assets:'ccdc-tscd',hsd:'han-su-dung',baocao:'bao-cao-kiem-ke',reporthub:'trung-tam-bao-cao',handover:'ban-giao',explain:'giai-trinh',settings:'cai-dat',recon:'doi-chieu',pay:'thanh-toan-ncc',err:'bao-loi',ana:'phan-tich-mua-tieu-hao',mgmt:'dieu-chuyen',dchub:'kiem-soat-du-lieu',stock:'ton-kho',transfer:'chuyen-vat-tu',period:'ky-kiem-ke/chi-tiet',folder:'chi-nhanh',asset:'ccdc-tscd/chi-tiet',handoverEdit:'ban-giao/soan',explainEdit:'giai-trinh/soan'};
 var HR_FALL={stock:'lists',transfer:'lists',period:'lists',folder:'lists',asset:'assets',handoverEdit:'handover',explainEdit:'explain'};
 var HR_REV={},HR_REPL=false;
 Object.keys(HR_SLUG).forEach(function(k){HR_REV[HR_SLUG[k]]=k;});
@@ -7792,7 +7795,7 @@ function renderNav(){
   var v=route.view,on={
     home:['home','upload','folder'].indexOf(v)>=0,
     list:['lists','period','stock','transfer'].indexOf(v)>=0||(v==='asset'&&LS.back),
-    dc:['dchub','recon','pay','mgmt','err'].indexOf(v)>=0,
+    dc:['dchub','recon','pay','mgmt','err','ana'].indexOf(v)>=0,
     more:['settings','hsd','assets','reporthub','baocao','handover','handoverEdit','explain','explainEdit'].indexOf(v)>=0||(v==='asset'&&!LS.back)
   };
   Array.prototype.forEach.call(document.querySelectorAll('#bnav [data-k]'),function(b){b.classList.toggle('on',!!on[b.getAttribute('data-k')]);});
@@ -11212,5 +11215,560 @@ var b=new Blob(['\ufeff'+h+'</div></body></html>'],{type:'application/msword'}),
 })();
 </script>
 
+<style id="ana-css">
+/* ===== Phân tích mua hàng – tiêu hao ===== */
+@media(min-width:900px){#gmain .wrap.an-full{max-width:1240px}}
+.an-sc{overflow-x:auto;-webkit-overflow-scrolling:touch;border:1px solid var(--line);border-radius:14px;background:#fff}
+.an-t{border-collapse:separate;border-spacing:0;width:100%;font-size:12.5px;font-variant-numeric:tabular-nums}
+.an-t th{background:var(--card2);color:var(--mut);font-weight:700;text-align:right;padding:9px 10px;white-space:nowrap;border-bottom:1px solid var(--line);vertical-align:bottom}
+.an-t td{padding:9px 10px;text-align:right;border-bottom:1px solid var(--line);white-space:nowrap}
+.an-t th:first-child,.an-t td:first-child{text-align:left;position:sticky;left:0;background:#fff;z-index:1;max-width:210px;white-space:normal;min-width:120px}
+.an-t th:first-child{background:var(--card2);z-index:2}
+.an-t tbody tr:last-child td{border-bottom:0}
+.an-t tr.tot td{font-weight:800;background:var(--card2)}
+.an-t tr.oth td{color:var(--mut);background:#fafbfd}
+.an-t tr.an-rk td{text-align:left;white-space:normal;min-width:120px;line-height:1.3}
+.an-t small{color:var(--mut);font-weight:600}
+.an-up{color:#b4780a;font-weight:700}.an-dn{color:#15803d;font-weight:600}
+.an-h{font-weight:800;font-size:15px;margin:20px 0 8px;color:var(--ink)}
+.an-note{font-size:12px;color:var(--mut);margin:8px 2px 0;line-height:1.55}
+.an-err{margin-top:10px;padding:10px 12px;background:var(--red-bg);color:#7a1218;border-radius:12px;font-size:13px}
+.an-tabs{display:flex;gap:6px;overflow-x:auto;margin:14px 0 6px;padding-bottom:4px;-webkit-overflow-scrolling:touch}
+.an-opt{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:6px}.an-opt>div{flex:1 1 130px}
+.an-lab{font-size:12px;color:var(--mut);font-weight:700;margin-bottom:4px}
+.an-sw{display:flex;gap:10px;align-items:flex-start;padding:10px 0 4px;border-top:1px solid var(--line);margin-top:6px;cursor:pointer}
+.an-sw input{margin-top:2px;width:20px;height:20px;accent-color:var(--teal);flex:none}
+.an-sw b{font-size:14px;display:block}.an-sw small{display:block;color:var(--mut);font-size:12px;font-weight:500}
+.an-kg{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin:14px 0 4px}
+@media(min-width:900px){.an-kg{grid-template-columns:repeat(4,minmax(0,1fr))}}
+.an-k{background:#fff;border:1px solid var(--line);border-radius:16px;padding:12px 14px}
+.an-kt{font-size:12px;color:var(--mut);font-weight:600;line-height:1.3}
+.an-kv{font-size:19px;font-weight:800;color:var(--teal);margin:4px 0 2px;font-variant-numeric:tabular-nums;word-break:break-all}
+.an-ks{font-size:12px;color:var(--mut)}
+.an-al{margin-top:12px;padding:12px 14px}
+.an-ai{font-size:13px;padding:5px 0 5px 10px;border-left:3px solid var(--line);margin:5px 0;line-height:1.45}
+.an-ai.w{border-color:#f59e0b}.an-ai.i{border-color:var(--teal-ln)}
+.an-how ol{margin:0;padding-left:18px;font-size:13px;line-height:1.55}.an-how li{margin:5px 0}
+.an-chk div{display:flex;flex-direction:column;gap:2px;padding:9px 0;border-top:1px solid var(--line);font-size:13px}
+.an-chk div:first-child{border-top:0}.an-chk span{color:var(--mut)}
+</style>
+<script id="ana-logic">
+"use strict";
+/* ===== Phân tích mua hàng – tiêu hao vật tư (logic thuần, không đụng giao diện) =====
+   Đầu vào: "Sổ chi tiết vật tư hàng hóa" xuất từ MISA (2 dòng tiêu đề, 20 cột).
+   Quy tắc tính (đã chốt với người dùng):
+   - Mua   = chứng từ "Mua hàng…nhập kho"; hàng khuyến mại (TK đối ứng 711) tính 0 đồng (bật/tắt được)
+   - Mua của cơ sở = mua trực tiếp + vật tư nhận điều chuyển từ kho/cơ sở khác (bật/tắt được); bên chuyển đi không trừ
+   - Tiêu hao = "Xuất kho khác" đối ứng TK 632x, gán cơ sở theo TK (6321, 6322, 6326, 6328, 6329…) — tự dò theo sổ
+   - Xuất đối ứng TK khác 632 (vd 6422F: QLDN) tách riêng, không cộng vào cơ sở
+   - Điều chuyển nội bộ KHÔNG tính vào tiêu hao; mặt hàng loại trừ (nước súc miệng, máy tăm nước, kem đánh răng) chỉ loại khỏi tiêu hao */
+(function(){
+var ANA=window.ANA=window.ANA||{};
+var KHO_ALIAS={'KHOBĐ2':'Nghĩa Dũng','KHOCL':'Ba Đình (Cát Linh)','KHOBTX':'Bùi Thị Xuân','KHOLVL':'Lê Văn Lương','KHOQN':'Quảng Ninh','KHOHH':'Hà Nội (Kho HH)','KHOCCDC':'Kho CCDC'};
+var KHO_ORDER=['Nghĩa Dũng','Ba Đình (Cát Linh)','Bùi Thị Xuân','Lê Văn Lương','Quảng Ninh','Hà Nội (Kho HH)','Kho CCDC'];
+var NHOM={'10':'VTTH chung','11':'Dụng cụ PT/nhổ răng','12':'Labo/Phục hình/Abutment','13':'Implant/Ghép xương','14':'Chỉnh nha (gồm Invisalign)','16':'Nội nha/điều trị','88':'Thuốc/dịch truyền','90':'HHTM (mã 90xxx)','99':'Khác'};
+var NHOM_GHIDE={'rang su lava plus':'Labo/Phục hình/Abutment','phi xu ly don hang invi':'Chỉnh nha (gồm Invisalign)'};
+ANA.DEFAULT_EXCL='súc miệng, tăm nước, kem đánh răng';
+
+function nz(s){return String(s==null?'':s).toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/đ/g,'d').replace(/\s+/g,' ').trim();}
+ANA.nz=nz;
+function pad(n){return n<10?'0'+n:''+n;}
+function num(v){
+  if(typeof v==='number')return isFinite(v)?v:0;
+  if(v==null)return 0;
+  var s=String(v).replace(/\s/g,'');
+  if(!s)return 0;
+  if(/^-?[\d.,]+$/.test(s)){
+    if(/,\d{1,2}$/.test(s)&&s.indexOf('.')>=0)s=s.replace(/\./g,'').replace(',','.');
+    else s=s.replace(/,/g,'');
+  }
+  var x=Number(s);return isFinite(x)?x:0;
+}
+function tk(v){var s=String(v==null?'':v).trim();return /^\d+\.0$/.test(s)?s.slice(0,-2):s;}
+function ymdOf(v,SSF){
+  if(v==null||v==='')return '';
+  if(typeof v==='number'){
+    var o=null;
+    try{if(SSF&&SSF.parse_date_code)o=SSF.parse_date_code(v);}catch(e){o=null;}
+    if(!o){var d0=new Date(Date.UTC(1899,11,30)+Math.floor(v)*864e5);o={y:d0.getUTCFullYear(),m:d0.getUTCMonth()+1,d:d0.getUTCDate()};}
+    return o.y+'-'+pad(o.m)+'-'+pad(o.d);
+  }
+  if(v instanceof Date)return v.getFullYear()+'-'+pad(v.getMonth()+1)+'-'+pad(v.getDate());
+  var s=String(v).trim(),m=s.match(/^(\d{1,2})[\/\-.](\d{1,2})[\/\-.](\d{4})/);
+  if(m)return m[3]+'-'+pad(+m[2])+'-'+pad(+m[1]);
+  m=s.match(/^(\d{4})-(\d{2})-(\d{2})/);
+  return m?m[1]+'-'+m[2]+'-'+m[3]:'';
+}
+function aliasKho(ma,ten){
+  var k=String(ma||'').trim().toUpperCase();
+  if(KHO_ALIAS[k])return KHO_ALIAS[k];
+  return String(ten||ma||'').trim().replace(/^kho\s+/i,'')||k;
+}
+function nhomOf(ma,ten){
+  var g=NHOM_GHIDE[nz(ten)];if(g)return g;
+  var m=String(ma||'').trim().toUpperCase();
+  if(/^H[ÀA]NG\s?T[ẶA]NG/.test(m)||nz(ten).indexOf('hang tang')===0)return 'Hàng tặng';
+  return NHOM[m.slice(0,2)]||'Khác';
+}
+function classify(loai){
+  var n=nz(loai);
+  if(n.indexOf('mua hang')===0)return 'mua';
+  if(n.indexOf('chuyen kho')>=0)return 'chuyen';
+  if(n.indexOf('xuat kho khac')>=0)return 'xk';
+  return 'khac';
+}
+
+/* ---- Đọc bảng (mảng các dòng) thành danh sách dòng chuẩn ---- */
+ANA.parse=function(aoa,SSF){
+  var h=-1,i,j;
+  for(i=0;i<Math.min(40,aoa.length);i++){
+    var cells=(aoa[i]||[]).map(nz);
+    if(cells.indexOf('ma hang')>=0&&cells.indexOf('loai chung tu')>=0){h=i;break;}
+  }
+  if(h<0)return {error:'Không thấy dòng tiêu đề của "Sổ chi tiết vật tư hàng hóa" (cần các cột Mã hàng, Loại chứng từ…).'};
+  var hd=(aoa[h]||[]).map(nz),C={};
+  function ix(n){return hd.indexOf(n);}
+  var need=[['kho','ma kho'],['tenKho','ten kho'],['ma','ma hang'],['ten','ten hang'],['ngay','ngay hach toan'],['sct','so chung tu'],['loai','loai chung tu'],['tkk','tk kho'],['tkd','tk doi ung'],['nhap','nhap'],['xuat','xuat'],['ton','ton']],miss=[];
+  need.forEach(function(p){var k=ix(p[1]);if(k<0)miss.push(p[1]);else C[p[0]]=k;});
+  if(miss.length)return {error:'Thiếu cột: '+miss.join(', ')};
+  C.dg=ix('dien giai');
+  var start=h+1,sub=(aoa[h+1]||[]).map(nz);
+  if(sub.indexOf('so luong')>=0||sub.indexOf('gia tri')>=0)start=h+2;
+  var rows=[],months={},khos={},bad=0,ord=0;
+  for(i=start;i<aoa.length;i++){
+    var r=aoa[i];if(!r)continue;
+    var ma=String(r[C.ma]==null?'':r[C.ma]).trim(),ng=ymdOf(r[C.ngay],SSF);
+    if(!ma||!ng){if(ma||r[C.ngay])bad++;continue;}
+    var ym=ng.slice(0,7),kho=aliasKho(r[C.kho],r[C.tenKho]);
+    var o={ord:ord++,mk:String(r[C.kho]||'').trim(),kho:kho,ma:ma,ten:String(r[C.ten]==null?'':r[C.ten]).trim(),ngay:ng,ym:ym,
+      sct:String(r[C.sct]==null?'':r[C.sct]).trim(),dg:C.dg>=0?String(r[C.dg]==null?'':r[C.dg]):'',
+      nSL:num(r[C.nhap]),nGT:num(r[C.nhap+1]),xSL:num(r[C.xuat]),xGT:num(r[C.xuat+1]),tSL:num(r[C.ton]),tGT:num(r[C.ton+1]),
+      loai:String(r[C.loai]==null?'':r[C.loai]).trim(),tkk:tk(r[C.tkk]),tkd:tk(r[C.tkd])};
+    o.lc=classify(o.loai);o.nhom=nhomOf(ma,o.ten);
+    rows.push(o);months[ym]=1;khos[kho]=(khos[kho]||0)+1;
+  }
+  if(!rows.length)return {error:'Không có dòng dữ liệu hợp lệ (cần Mã hàng và Ngày hạch toán).'};
+  return {rows:rows,months:Object.keys(months).sort(),khos:khos,skipped:bad};
+};
+
+function add(o,a,b,v){var x=o[a]||(o[a]={});x[b]=(x[b]||0)+v;}
+function g(o,a,b){return (o[a]&&o[a][b])||0;}
+function sumObj(o,b){var s=0;Object.keys(o).forEach(function(k){s+=g(o,k,b);});return s;}
+
+/* ---- Tính toán chính ---- */
+ANA.calc=function(P,opt){
+  var R=P.rows,m1=opt.m1,m2=opt.m2,MS=[m1,m2];
+  var ex=String(opt.excl||'').split(',').map(nz).filter(Boolean);
+  function isEx(name){var n=nz(name);for(var i=0;i<ex.length;i++)if(n.indexOf(ex[i])>=0)return true;return false;}
+  function inW(r){return r.ym===m1||r.ym===m2;}
+  /* 1. TK 632x → cơ sở (kho có giá trị xuất lớn nhất với TK đó) */
+  var acc={};
+  R.forEach(function(r){if(r.lc==='xk'&&r.tkd.indexOf('632')===0)add(acc,r.tkd,r.kho,Math.abs(r.xGT));});
+  var tkMap={},csSet={};
+  Object.keys(acc).forEach(function(t){var best=null;Object.keys(acc[t]).forEach(function(k){if(!best||acc[t][k]>acc[t][best])best=k;});tkMap[t]=best;csSet[best]=1;});
+  if(opt.tkMap)Object.keys(opt.tkMap).forEach(function(t){tkMap[t]=opt.tkMap[t];csSet[opt.tkMap[t]]=1;});
+  /* 2. Nguồn điều chuyển theo số chứng từ */
+  var srcBy={},srcVo={};
+  R.forEach(function(r){if(r.lc==='chuyen'&&r.xGT>0){(srcBy[r.sct+'|'+r.ma]=srcBy[r.sct+'|'+r.ma]||{})[r.kho]=1;(srcVo[r.sct]=srcVo[r.sct]||{})[r.kho]=1;}});
+  function srcOf(r){
+    var a=srcBy[r.sct+'|'+r.ma],ks=a?Object.keys(a):[];if(ks.length===1)return ks[0];
+    var b=srcVo[r.sct];ks=b?Object.keys(b):[];if(ks.length===1)return ks[0];
+    return '(không xác định)';
+  }
+  /* 3. Mua, điều chuyển nhận, tiêu hao */
+  var D={},KM={},C={},CCs={},CTong={},TH={},QL={},EXV={},NH_TH={},NH_MUA={},IT={},DCX={},m4Mua={};
+  var khosAll={};
+  R.forEach(function(r){
+    khosAll[r.kho]=1;
+    if(!inW(r))return;
+    if(r.lc==='mua'){
+      var isKM=r.tkd==='711',ek=isEx(r.ten);
+      if(isKM){add(KM,r.kho,r.ym,r.nGT);if(!opt.km0&&!(opt.exMua&&ek)){add(D,r.kho,r.ym,r.nGT);add(NH_MUA,r.nhom,r.ym,r.nGT);}}
+      else{
+        if(ek)add(m4Mua,r.kho,r.ym,r.nGT);
+        if(!(opt.exMua&&ek)){add(D,r.kho,r.ym,r.nGT);add(NH_MUA,r.nhom,r.ym,r.nGT);}
+      }
+    }else if(r.lc==='chuyen'&&r.nGT>0){
+      var s=srcOf(r);
+      add(DCX,s,r.kho+'|'+r.ym,r.nGT);
+      if(opt.dc&&!(opt.exMua&&isEx(r.ten))){
+        add(C,r.kho,r.ym,r.nGT);
+        if(csSet[s])add(CCs,r.kho,r.ym,r.nGT);else add(CTong,r.kho,r.ym,r.nGT);
+      }
+    }else if(r.lc==='xk'){
+      var cs=r.tkd.indexOf('632')===0?tkMap[r.tkd]:null;
+      if(isEx(r.ten)){add(EXV,cs||('QLDN: '+r.kho),r.ym,r.xGT);return;}
+      if(cs){add(TH,cs,r.ym,r.xGT);add(NH_TH,r.nhom,r.ym,r.xGT);
+        var key=r.ma+'|'+r.ten;add(IT,key,r.ym,r.xGT);add(IT,key,'@'+cs+'|'+r.ym,r.xGT);IT[key].nhom=r.nhom;IT[key].ten=r.ten;}
+      else add(QL,r.kho,r.ym,r.xGT);
+    }
+  });
+  /* 4. Bảng theo kho */
+  var names=Object.keys(khosAll),ord=[];
+  KHO_ORDER.forEach(function(k){if(names.indexOf(k)>=0)ord.push(k);});
+  names.sort().forEach(function(k){if(ord.indexOf(k)<0)ord.push(k);});
+  var csList=ord.filter(function(k){return csSet[k];}),otherList=ord.filter(function(k){return !csSet[k];});
+  function rowOf(k){
+    var isCs=!!csSet[k],o={kho:k,isCs:isCs};
+    MS.forEach(function(m,i){
+      var t=i?'2':'1';
+      o['d'+t]=g(D,k,m);o['km'+t]=g(KM,k,m);o['c'+t]=g(C,k,m);o['cc'+t]=g(CCs,k,m);o['ct'+t]=g(CTong,k,m);
+      o['t'+t]=o['d'+t]+o['c'+t];
+      o['th'+t]=isCs?g(TH,k,m):g(QL,k,m);
+      o['ch'+t]=isCs?o['t'+t]-o['th'+t]:null;
+    });
+    return o;
+  }
+  var rows=ord.map(rowOf),cs=rows.filter(function(r){return r.isCs;});
+  function S(arr,f){var s=0;arr.forEach(function(r){s+=r[f];});return s;}
+  var tot={
+    muaThuc1:sumObj(D,m1),muaThuc2:sumObj(D,m2),km1:sumObj(KM,m1),km2:sumObj(KM,m2),
+    cong1:S(rows,'t1'),cong2:S(rows,'t2'),
+    cs:{d1:S(cs,'d1'),d2:S(cs,'d2'),c1:S(cs,'c1'),c2:S(cs,'c2'),t1:S(cs,'t1'),t2:S(cs,'t2'),th1:S(cs,'th1'),th2:S(cs,'th2')},
+    ql1:sumObj(QL,m1),ql2:sumObj(QL,m2),
+    th1:sumObj(TH,m1)+sumObj(QL,m1),th2:sumObj(TH,m2)+sumObj(QL,m2),
+    ex1:sumObj(EXV,m1),ex2:sumObj(EXV,m2)
+  };
+  tot.cs.ch1=tot.cs.t1-tot.cs.th1;tot.cs.ch2=tot.cs.t2-tot.cs.th2;
+  /* 5. Nhóm hàng & mặt hàng biến động */
+  var nhom=Object.keys(NH_TH).map(function(n){return {nhom:n,a:g(NH_TH,n,m1),b:g(NH_TH,n,m2),ma:g(NH_MUA,n,m1),mb:g(NH_MUA,n,m2)};});
+  Object.keys(NH_MUA).forEach(function(n){if(!NH_TH[n])nhom.push({nhom:n,a:0,b:0,ma:g(NH_MUA,n,m1),mb:g(NH_MUA,n,m2)});});
+  nhom.sort(function(x,y){return y.b-x.b;});
+  var items=Object.keys(IT).map(function(k){var o=IT[k];return {ten:o.ten,nhom:o.nhom,a:g(IT,k,m1),b:g(IT,k,m2),d:g(IT,k,m2)-g(IT,k,m1)};});
+  items.sort(function(x,y){return y.d-x.d;});
+  var movers={all:{up:items.filter(function(i){return i.d>0;}).slice(0,10),down:items.filter(function(i){return i.d<0;}).slice(-10).reverse()},byCs:{}};
+  csList.forEach(function(c){
+    var arr=[];Object.keys(IT).forEach(function(k){var a=g(IT,k,'@'+c+'|'+m1),b=g(IT,k,'@'+c+'|'+m2);if(a||b)arr.push({ten:IT[k].ten,nhom:IT[k].nhom,a:a,b:b,d:b-a});});
+    arr.sort(function(x,y){return y.d-x.d;});
+    movers.byCs[c]={up:arr.filter(function(i){return i.d>0;}).slice(0,3),down:arr.filter(function(i){return i.d<0;}).slice(-3).reverse()};
+  });
+  /* 6. Tồn kho theo sổ (số dư ghi trên từng dòng) */
+  var byKey={};
+  R.forEach(function(r){(byKey[r.kho+'|'+r.ma]=byKey[r.kho+'|'+r.ma]||[]).push(r);});
+  var stock=[];
+  Object.keys(byKey).forEach(function(k){
+    var L=byKey[k],f=L[0],open=f.tGT-f.nGT+f.xGT,t0=open,t1,t2,i;
+    function bal(pred){var v=null;for(i=0;i<L.length;i++)if(pred(L[i]))v=L[i].tGT;return v;}
+    var b0=bal(function(r){return r.ym<m1;}),b1=bal(function(r){return r.ym<=m1;}),b2=bal(function(r){return r.ym<=m2;});
+    t0=b0===null?open:b0;t1=b1===null?open:b1;t2=b2===null?t1:b2;
+    var xall=0;L.forEach(function(r){if(inW(r)&&r.xGT>0)xall+=r.xGT;});
+    stock.push({kho:f.kho,ma:f.ma,ten:f.ten,nhom:f.nhom,t0:t0,t1:t1,t2:t2,xall:xall});
+  });
+  var stockKho=ord.map(function(k){var o={kho:k,t0:0,t1:0,t2:0};stock.forEach(function(s){if(s.kho===k){o.t0+=s.t0;o.t1+=s.t1;o.t2+=s.t2;}});return o;});
+  var stT={t0:0,t1:0,t2:0};stockKho.forEach(function(s){stT.t0+=s.t0;stT.t1+=s.t1;stT.t2+=s.t2;});
+  function idleOf(filter){
+    var I=stock.filter(function(s){return s.t2>0&&s.xall===0&&(!filter||filter(s));});
+    var by={},bn={},v=0;
+    I.forEach(function(s){v+=s.t2;by[s.kho]=by[s.kho]||{n:0,v:0};by[s.kho].n++;by[s.kho].v+=s.t2;bn[s.nhom]=(bn[s.nhom]||0)+s.t2;});
+    I.sort(function(a,b){return b.t2-a.t2;});
+    return {n:I.length,v:v,byKho:by,byNhom:bn,top:I.slice(0,20),all:I};
+  }
+  var idle=idleOf(null),idleEx=idleOf(function(s){return !isEx(s.ten);});
+  /* 7. Ma trận điều chuyển: kho đi → kho nhận */
+  var dcm=[];
+  Object.keys(DCX).forEach(function(s){Object.keys(DCX[s]).forEach(function(k){var p=k.split('|');if(p[1]===m1||p[1]===m2)dcm.push({from:s,to:p[0],ym:p[1],v:DCX[s][k]});});});
+  /* 8. Kiểm tra dữ liệu */
+  var chk={other:{},neg:[],vmis:[],tkLech:{n:0,v:0,list:[]},hhtmTk:{},zeroX:0};
+  var vo={};
+  R.forEach(function(r){
+    if(!inW(r))return;
+    if(r.lc==='khac')chk.other[r.loai]=(chk.other[r.loai]||0)+1;
+    if(r.tGT<0||r.tSL<0)chk.neg.push({kho:r.kho,ten:r.ten,ngay:r.ngay,sl:r.tSL,gt:r.tGT});
+    if(r.lc==='chuyen'){var o=vo[r.sct]||(vo[r.sct]={n:0,x:0});o.n+=r.nGT;o.x+=r.xGT;}
+    if(r.lc==='xk'&&r.tkd.indexOf('632')===0&&tkMap[r.tkd]!==r.kho&&r.tkk!=='1538'){chk.tkLech.n++;chk.tkLech.v+=r.xGT;if(chk.tkLech.list.length<8)chk.tkLech.list.push({kho:r.kho,cs:tkMap[r.tkd],ten:r.ten,v:r.xGT});}
+    if(r.lc==='mua'&&/^90/.test(r.ma)&&r.tkk!=='1561')chk.hhtmTk[r.ym]=(chk.hhtmTk[r.ym]||0)+r.nGT;
+    if(r.xSL>0&&r.xGT===0)chk.zeroX++;
+  });
+  Object.keys(vo).forEach(function(s){if(Math.round(vo[s].n)!==Math.round(vo[s].x))chk.vmis.push({sct:s,n:vo[s].n,x:vo[s].x});});
+  return {m1:m1,m2:m2,opt:opt,tkMap:tkMap,csList:csList,otherList:otherList,rows:rows,tot:tot,nhom:nhom,items:items,movers:movers,
+    stock:stock,stockKho:stockKho,stT:stT,idle:idle,idleEx:idleEx,dcm:dcm,chk:chk,m4Mua:m4Mua,
+    ex:ex,exTH:{a:tot.ex1,b:tot.ex2}};
+};
+})();
+
+</script>
+<script id="ana-ui">
+"use strict";
+/* ===== Phân tích mua hàng – tiêu hao vật tư: giao diện ===== */
+(function(){
+var KO='kk_ana_opt';
+function $(i){return document.getElementById(i);}
+function ldOpt(){var o={};try{o=JSON.parse(localStorage.getItem(KO)||'{}')||{};}catch(e){o={};}
+  return {excl:o.excl!=null?o.excl:ANA.DEFAULT_EXCL,km0:o.km0!==false,dc:o.dc!==false,exMua:!!o.exMua,m1:'',m2:''};}
+var AN=window.AN={P:null,R:null,file:'',tab:'sum',opt:ldOpt(),err:''};
+function svOpt(){try{localStorage.setItem(KO,JSON.stringify({excl:AN.opt.excl,km0:AN.opt.km0,dc:AN.opt.dc,exMua:AN.opt.exMua}));}catch(e){}}
+/* ---- định dạng: số đầy đủ (không làm tròn), phần trăm 2 chữ số ---- */
+function fv(n){n=Math.round(n||0);var s=String(Math.abs(n)).replace(/\B(?=(\d{3})+(?!\d))/g,'.');return (n<0?'-':'')+s;}
+function sg(n){return (n>0?'+':'')+fv(n);}
+function pcv(a,b){if(!b)return null;return (a/b-1)*100;}
+function pt(p){if(p===null||p===undefined)return '—';return (p>0?'+':'')+p.toFixed(2).replace('.',',')+'%';}
+function rt(a,b){return b?(a/b).toFixed(2).replace('.',','):'—';}
+function lb(m){return 'T'+Number(String(m).slice(5));}
+function lbf(m){return 'T'+Number(String(m).slice(5))+'/'+String(m).slice(0,4);}
+function up(v){return v>0?' an-up':(v<0?' an-dn':'');}
+/* ---- bảng ---- */
+function tbl(head,body){return '<div class="an-sc"><table class="an-t"><thead><tr>'+head.map(function(x){return '<th>'+x+'</th>';}).join('')+'</tr></thead><tbody>'+body+'</tbody></table></div>';}
+function tr(cells,cls){return '<tr'+(cls?' class="'+cls+'"':'')+'>'+cells.map(function(c){
+  if(c&&typeof c==='object')return '<td class="'+(c.c||'')+'">'+c.t+'</td>';
+  return '<td>'+c+'</td>';}).join('')+'</tr>';}
+function ct(t,c){return {t:t,c:c};}
+function note(t){return '<div class="an-note">'+t+'</div>';}
+function h2(t){return '<div class="an-h">'+t+'</div>';}
+function top(t,back){return '<div class="topbar"><div class="trow wrap"><button class="back" onclick="A.go(\''+(back||'dchub')+'\')">‹</button><div class="ttl">'+t+'</div></div><div style="height:10px"></div></div>';}
+/* ---- nạp file ---- */
+AN.onFile=function(input){
+  var f=input.files&&input.files[0];if(!f)return;
+  AN.load(f);input.value='';
+};
+AN.drop=function(e){e.preventDefault();var f=e.dataTransfer&&e.dataTransfer.files&&e.dataTransfer.files[0];if(f)AN.load(f);};
+AN.load=function(f){
+  if(!kkNeed(['xlsx'],function(){AN.load(f);}))return;
+  var isCsv=/\.csv$/i.test(f.name),rd=new FileReader();
+  rd.onload=function(e){
+    try{
+      var wb=isCsv?XLSX.read(e.target.result,{type:'string'}):XLSX.read(new Uint8Array(e.target.result),{type:'array'}),P=null,last='';
+      for(var i=0;i<wb.SheetNames.length&&!P;i++){
+        var aoa=XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[i]],{header:1,raw:true,defval:null}),r=ANA.parse(aoa,XLSX.SSF);
+        if(r.error)last=r.error;else P=r;
+      }
+      if(!P){AN.err=last||'File không đúng định dạng';AN.R=null;AN.P=null;toast(AN.err);rAna();return;}
+      if(P.months.length<2){AN.err='Sổ chỉ có 1 tháng ('+P.months[0]+') — cần ít nhất 2 tháng để so sánh.';AN.R=null;AN.P=null;toast(AN.err);rAna();return;}
+      AN.err='';AN.P=P;AN.file=f.name;AN.opt.m1=P.months[P.months.length-2];AN.opt.m2=P.months[P.months.length-1];AN.tab='sum';
+      AN.run();toast('Đã đọc '+P.rows.length+' dòng · '+P.months.length+' tháng · '+Object.keys(P.khos).length+' kho');
+    }catch(err){console.error(err);klog('ana.load',err);toast('Không đọc được file — kiểm tra định dạng .xlsx/.csv');}
+  };
+  rd.onerror=function(){toast('Không đọc được file');};
+  if(isCsv)rd.readAsText(f);else rd.readAsArrayBuffer(f);
+};
+AN.run=function(){
+  try{AN.R=ANA.calc(AN.P,AN.opt);}catch(e){console.error(e);klog('ana.calc',e);AN.R=null;toast('Lỗi khi tính — xem lại file');}
+  rAna();
+};
+AN.set=function(k,v){
+  if(k==='m1'||k==='m2'){AN.opt[k]=v;if(AN.opt.m1===AN.opt.m2){toast('Chọn hai tháng khác nhau');}if(AN.opt.m1>AN.opt.m2){var t=AN.opt.m1;AN.opt.m1=AN.opt.m2;AN.opt.m2=t;}}
+  else{AN.opt[k]=v;svOpt();}
+  if(AN.opt.m1===AN.opt.m2)return;
+  AN.run();
+};
+AN.tab_=function(t){AN.tab=t;rAna();window.scrollTo(0,0);};
+AN.reset=function(){AN.P=null;AN.R=null;AN.file='';AN.err='';rAna();};
+/* ---- giao diện ---- */
+function upCard(){
+  var h='<div class="card an-up-card" ondragover="event.preventDefault()" ondrop="AN.drop(event)">';
+  if(AN.P){
+    h+='<div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap"><div style="flex:1;min-width:180px"><div style="font-weight:800">'+esc(AN.file)+'</div><div class="an-note" style="margin:2px 0 0">'+AN.P.rows.length+' dòng · '+AN.P.months.map(lbf).join(', ')+' · '+Object.keys(AN.P.khos).length+' kho</div></div>'
+      +'<label class="pill" style="cursor:pointer">Tải file khác<input type="file" accept=".xlsx,.xls,.csv" hidden onchange="AN.onFile(this)"></label>'
+      +'<button class="pill" onclick="AN.xls()">Tải Excel kết quả</button></div>';
+  }else{
+    h+='<div style="font-weight:800;font-size:16px;margin-bottom:4px">Phân tích mua hàng – tiêu hao vật tư</div>'
+      +'<div class="an-note" style="margin:0 0 12px">Tải file <b>Sổ chi tiết vật tư hàng hóa</b> xuất từ MISA (gồm 2 tháng trở lên). App tự tách mua hàng, điều chuyển nội bộ và xuất tiêu hao theo từng cơ sở rồi so sánh 2 tháng.</div>'
+      +'<label class="btn btn-primary" style="cursor:pointer">'+icon('upload',18)+' Chọn file Excel (.xlsx)<input type="file" accept=".xlsx,.xls,.csv" hidden onchange="AN.onFile(this)"></label>'
+      +'<div class="an-note" style="margin-top:10px">Có thể kéo thả file vào khung này. Dữ liệu chỉ xử lý trên máy của cậu và không được lưu lại — mỗi lần mở lại cần tải file.</div>';
+    if(AN.err)h+='<div class="an-err">'+esc(AN.err)+'</div>';
+  }
+  return h+'</div>';
+}
+function sw(k,t,d){return '<label class="an-sw"><input type="checkbox"'+(AN.opt[k]?' checked':'')+' onchange="AN.set(\''+k+'\',this.checked)"><span><b>'+t+'</b><small>'+d+'</small></span></label>';}
+function optCard(){
+  var P=AN.P;function sel(k){return '<select class="inp" onchange="AN.set(\''+k+'\',this.value)">'+P.months.map(function(m){return '<option value="'+m+'"'+(AN.opt[k]===m?' selected':'')+'>'+lbf(m)+'</option>';}).join('')+'</select>';}
+  return '<div class="card" style="margin-top:12px"><div class="an-opt"><div><div class="an-lab">Tháng trước</div>'+sel('m1')+'</div><div><div class="an-lab">Tháng sau</div>'+sel('m2')+'</div>'
+    +'<div style="flex:2 1 260px"><div class="an-lab">Mặt hàng loại khỏi tiêu hao (cách nhau dấu phẩy)</div><input class="inp" value="'+esc(AN.opt.excl)+'" onchange="AN.set(\'excl\',this.value)" placeholder="súc miệng, tăm nước, kem đánh răng"></div></div>'
+    +sw('km0','Hàng khuyến mại (TK 711) tính 0 đồng','Bỏ giá trị hàng nhận khuyến mại khỏi phần mua')
+    +sw('dc','Tính vật tư nhận điều chuyển là mua của cơ sở nhận','Cơ sở chuyển đi không bị trừ')
+    +sw('exMua','Loại cả các mặt hàng trên khỏi phần mua','Mặc định chỉ loại khỏi tiêu hao')+'</div>';
+}
+var TABS=[['sum','Tổng hợp'],['grp','Nhóm hàng'],['mv','Biến động mặt hàng'],['stk','Tồn kho'],['idl','Mã không xuất'],['chk','Cách tính & kiểm tra']];
+function tabsHtml(){return '<div class="an-tabs">'+TABS.map(function(t){return '<span class="chip'+(AN.tab===t[0]?' chip-on':'')+'" onclick="AN.tab_(\''+t[0]+'\')">'+t[1]+'</span>';}).join('')+'</div>';}
+/* ---- Tab: Tổng hợp ---- */
+function kpi(t,v,s,c){return '<div class="an-k"><div class="an-kt">'+t+'</div><div class="an-kv">'+v+'</div><div class="an-ks'+(c||'')+'">'+s+'</div></div>';}
+function tabSum(R){
+  var t=R.tot,c=t.cs,L1=lb(R.m1),L2=lb(R.m2),n=R.csList.length,h='';
+  h+='<div class="an-kg">'
+    +kpi('Mua thực toàn hệ thống '+L2,fv(t.muaThuc2),pt(pcv(t.muaThuc2,t.muaThuc1))+' so với '+L1)
+    +kpi('Mua '+n+' cơ sở '+L2+(R.opt.dc?' (gồm ĐC)':''),fv(c.t2),pt(pcv(c.t2,c.t1))+' so với '+L1)
+    +kpi('Tiêu hao '+n+' cơ sở '+L2,fv(c.th2),pt(pcv(c.th2,c.th1))+' so với '+L1)
+    +kpi('Mua − tiêu hao '+L2,sg(c.ch2),(c.th2?'Mua = '+rt(c.t2,c.th2)+' lần tiêu hao':''),up(c.ch2))+'</div>';
+  h+=alertsHtml(R);
+  /* Bảng mua */
+  var b='';
+  R.rows.forEach(function(r){b+=tr([esc(r.kho),fv(r.d1),fv(r.c1),'<b>'+fv(r.t1)+'</b>',fv(r.d2),fv(r.c2),'<b>'+fv(r.t2)+'</b>',ct(pt(pcv(r.t2,r.t1)),up(pcv(r.t2,r.t1)))],r.isCs?'':'oth');});
+  b+=tr([n+' cơ sở',fv(c.d1),fv(c.c1),fv(c.t1),fv(c.d2),fv(c.c2),fv(c.t2),pt(pcv(c.t2,c.t1))],'tot');
+  b+=tr(['Mua thực toàn hệ thống (không tính điều chuyển)','','',fv(t.muaThuc1),'','',fv(t.muaThuc2),pt(pcv(t.muaThuc2,t.muaThuc1))],'tot');
+  b+=tr(['Cộng các dòng (có tính trùng điều chuyển)','','',fv(t.cong1),'','',fv(t.cong2),pt(pcv(t.cong2,t.cong1))],'oth');
+  h+=h2('1. Mua hàng theo cơ sở (đồng) — '+lbf(R.m1)+' so với '+lbf(R.m2))
+    +tbl(['Cơ sở','Mua trực tiếp '+L1,'Nhận ĐC '+L1,'Tổng mua '+L1,'Mua trực tiếp '+L2,'Nhận ĐC '+L2,'Tổng mua '+L2,'%'],b)
+    +note('Mua trực tiếp = chứng từ mua hàng nhập kho'+(R.opt.km0?', hàng khuyến mại (TK 711) tính 0 đồng — bỏ '+fv(t.km1)+' ('+L1+') và '+fv(t.km2)+' ('+L2+')':', gồm cả hàng khuyến mại')+'. Nhận ĐC = vật tư nhận điều chuyển từ kho/cơ sở khác'+(R.opt.dc?'':' (đang TẮT, không tính)')+'. Cơ sở chuyển đi không bị trừ nên cộng các dòng sẽ trùng phần điều chuyển; mua thực toàn hệ thống không bị trùng.');
+  /* Bảng mua vs tiêu hao */
+  b='';
+  R.rows.forEach(function(r){
+    if(r.isCs)b+=tr([esc(r.kho),fv(r.t1),fv(r.th1),ct(sg(r.ch1),up(r.ch1)),fv(r.t2),fv(r.th2),ct(sg(r.ch2),up(r.ch2)),rt(r.t2,r.th2)]);
+    else b+=tr([esc(r.kho)+' (xuất QLDN, không tính vào cơ sở)','','',fv(r.th1),'','',fv(r.th2),''],'oth');
+  });
+  b+=tr([n+' cơ sở',fv(c.t1),fv(c.th1),ct(sg(c.ch1),up(c.ch1)),fv(c.t2),fv(c.th2),ct(sg(c.ch2),up(c.ch2)),rt(c.t2,c.th2)],'tot');
+  b+=tr(['Tiêu hao toàn hệ thống (gồm QLDN)','',fv(t.th1),'','',fv(t.th2),'',pt(pcv(t.th2,t.th1))],'tot');
+  h+=h2('2. Mua so với tiêu hao (đồng)')+tbl(['Cơ sở','Tổng mua '+L1,'Tiêu hao '+L1,'Chênh '+L1,'Tổng mua '+L2,'Tiêu hao '+L2,'Chênh '+L2,'Mua/tiêu hao '+L2],b)
+    +note('Tiêu hao = xuất kho khác đối ứng TK 632x, loại điều chuyển nội bộ'+(R.ex.length?' và loại các mặt hàng: '+esc(R.opt.excl)+' (đã loại '+fv(R.exTH.a)+' ở '+L1+', '+fv(R.exTH.b)+' ở '+L2+')':'')+'. Chênh dương = mua nhiều hơn tiêu hao.');
+  /* Tiêu hao % riêng */
+  b='';
+  R.rows.filter(function(r){return r.isCs;}).forEach(function(r){b+=tr([esc(r.kho),fv(r.th1),fv(r.th2),ct(sg(r.th2-r.th1),''),ct(pt(pcv(r.th2,r.th1)),up(pcv(r.th2,r.th1)))]);});
+  b+=tr([n+' cơ sở',fv(c.th1),fv(c.th2),sg(c.th2-c.th1),pt(pcv(c.th2,c.th1))],'tot');
+  h+=h2('3. Biến động tiêu hao theo cơ sở (đồng)')+tbl(['Cơ sở','Tiêu hao '+L1,'Tiêu hao '+L2,'Chênh','%'],b);
+  /* Xếp hạng */
+  var cs=R.rows.filter(function(r){return r.isCs;});
+  function rank(f,asc){return cs.slice().sort(function(a,b2){return asc?f(a)-f(b2):f(b2)-f(a);});}
+  var A1=rank(function(r){return r.t2;}),A2=rank(function(r){return r.th2;}),A3=rank(function(r){var p=pcv(r.t2,r.t1);return p===null?-1e9:p;}),A4=rank(function(r){var p=pcv(r.th2,r.th1);return p===null?-1e9:p;});
+  b='';
+  for(var i=0;i<cs.length;i++)b+=tr([String(i+1),esc(A1[i].kho)+'<br><small>'+fv(A1[i].t2)+'</small>',esc(A2[i].kho)+'<br><small>'+fv(A2[i].th2)+'</small>',esc(A3[i].kho)+'<br><small>'+pt(pcv(A3[i].t2,A3[i].t1))+'</small>',esc(A4[i].kho)+'<br><small>'+pt(pcv(A4[i].th2,A4[i].th1))+'</small>'],'an-rk');
+  h+=h2('4. Xếp hạng cơ sở')+tbl(['Hạng','Giá trị mua '+L2,'Giá trị tiêu hao '+L2,'Biến động mua','Biến động tiêu hao'],b);
+  return h;
+}
+function alertsHtml(R){
+  var a=[],L1=lb(R.m1),L2=lb(R.m2),cs=R.rows.filter(function(r){return r.isCs;});
+  cs.forEach(function(r){
+    if(r.th2>0&&r.t2/r.th2>1.1)a.push(['w',esc(r.kho)+': tổng mua '+L2+' vượt tiêu hao '+fv(r.ch2)+' đ ('+rt(r.t2,r.th2)+' lần).']);
+    var pm=pcv(r.t2,r.t1),pth=pcv(r.th2,r.th1);
+    if(pm!==null&&Math.abs(pm)>=10)a.push(['i',esc(r.kho)+': mua '+(pm>0?'tăng ':'giảm ')+pt(Math.abs(pm)).replace('+','')+' so với '+L1+'.']);
+    if(pth!==null&&pth>=10)a.push(['w',esc(r.kho)+': tiêu hao tăng '+pt(pth).replace('+','')+' so với '+L1+' (+'+fv(r.th2-r.th1)+' đ).']);
+  });
+  var I=R.idleEx;
+  if(I.n)a.push(['w',I.n+' mã (tồn '+fv(I.v)+' đ) không có xuất nào trong cả 2 tháng — xem tab "Mã không xuất".']);
+  if(R.ex.length&&!R.opt.exMua){var s=0;Object.keys(R.m4Mua).forEach(function(k){s+=(R.m4Mua[k][R.m2]||0);});if(s)a.push(['i','Các mặt hàng đã loại khỏi tiêu hao vẫn nằm trong phần mua '+L2+': '+fv(s)+' đ — làm chênh mua − tiêu hao cao hơn thực tế.']);}
+  if(!a.length)return '';
+  return '<div class="card an-al"><div class="an-lab" style="margin-bottom:6px">Lưu ý nhanh</div>'+a.slice(0,10).map(function(x){return '<div class="an-ai '+x[0]+'">'+x[1]+'</div>';}).join('')+'</div>';
+}
+/* ---- Tab: Nhóm hàng ---- */
+function tabGrp(R){
+  var L1=lb(R.m1),L2=lb(R.m2),b='',s={a:0,b:0,ma:0,mb:0};
+  R.nhom.forEach(function(n){s.a+=n.a;s.b+=n.b;s.ma+=n.ma;s.mb+=n.mb;b+=tr([esc(n.nhom),fv(n.a),fv(n.b),ct(sg(n.b-n.a),''),ct(pt(pcv(n.b,n.a)),up(pcv(n.b,n.a))),fv(n.ma),fv(n.mb)]);});
+  b+=tr(['Tổng',fv(s.a),fv(s.b),sg(s.b-s.a),pt(pcv(s.b,s.a)),fv(s.ma),fv(s.mb)],'tot');
+  return h2('Tiêu hao và mua trực tiếp theo nhóm hàng (đồng)')+tbl(['Nhóm hàng','Tiêu hao '+L1,'Tiêu hao '+L2,'Chênh','%','Mua '+L1,'Mua '+L2],b)
+    +note('Nhóm hàng suy từ 2 số đầu của mã hàng: 10 vật tư chung, 11 dụng cụ, 12 labo/phục hình/abutment, 13 implant/ghép xương, 14 chỉnh nha, 16 nội nha, 88 thuốc, 90 HHTM. Riêng "Răng sứ Lava Plus" xếp vào labo, "Phí xử lý đơn hàng Invi" xếp vào chỉnh nha. Chỉ tính cơ sở (TK 632x), chưa tính xuất QLDN. Implant và chỉnh nha tiêu hao theo ca bệnh nên cần đối chiếu số ca trước khi kết luận bất thường.');
+}
+/* ---- Tab: Biến động mặt hàng ---- */
+function itRows(a){return a.map(function(i){return tr([esc(i.ten),esc(i.nhom),fv(i.a),fv(i.b),ct(sg(i.d),up(i.d))]);}).join('');}
+function tabMv(R){
+  var L1=lb(R.m1),L2=lb(R.m2),H=['Mặt hàng','Nhóm','Tiêu hao '+L1,'Tiêu hao '+L2,'Chênh'],h='';
+  h+=h2('Tăng mạnh nhất (toàn bộ cơ sở)')+tbl(H,itRows(R.movers.all.up))+h2('Giảm mạnh nhất (toàn bộ cơ sở)')+tbl(H,itRows(R.movers.all.down));
+  R.csList.forEach(function(c){
+    var m=R.movers.byCs[c];if(!m||(!m.up.length&&!m.down.length))return;
+    h+=h2(esc(c))+tbl(H,itRows(m.up)+itRows(m.down));
+  });
+  return h+note('Mỗi cơ sở hiển thị tối đa 3 mặt hàng tăng và 3 mặt hàng giảm nhiều nhất. Danh sách đầy đủ có trong file Excel.');
+}
+/* ---- Tab: Tồn kho ---- */
+function tabStk(R){
+  var L1=lb(R.m1),L2=lb(R.m2),b='',T=R.stT;
+  R.stockKho.forEach(function(s){
+    var r=R.rows.filter(function(x){return x.kho===s.kho;})[0],th=r&&r.isCs?r.th2:0;
+    b+=tr([esc(s.kho),fv(s.t1),fv(s.t2),ct(sg(s.t2-s.t1),up(s.t2-s.t1)),ct(pt(pcv(s.t2,s.t1)),up(pcv(s.t2,s.t1))),th?fv(th):'—',th?rt(s.t2,th):'—'],r&&r.isCs?'':'oth');
+  });
+  b+=tr(['Tổng',fv(T.t1),fv(T.t2),sg(T.t2-T.t1),pt(pcv(T.t2,T.t1)),fv(R.tot.cs.th2),rt(T.t2,R.tot.th2)],'tot');
+  return h2('Tồn cuối kỳ theo kho (đồng)')+tbl(['Kho','Tồn cuối '+L1,'Tồn cuối '+L2,'Chênh','%','Tiêu hao '+L2,'Tồn/tiêu hao (tháng)'],b)
+    +note('Tồn lấy theo số dư ghi trên sổ. Sổ chỉ gồm mã có phát sinh trong kỳ nên tồn thực tế còn cao hơn. Tồn/tiêu hao cho biết kho đủ dùng khoảng bao nhiêu tháng theo mức tiêu hao tháng sau. Hàng bán (HHTM) xuất bán không nằm trong sổ nên tồn nhóm này chỉ để tham khảo.');
+}
+/* ---- Tab: Mã không xuất ---- */
+function tabIdl(R){
+  var I=R.idle,E=R.idleEx,h='',b='',tot=R.stT.t2;
+  h+='<div class="an-kg">'+kpi('Mã không xuất nào trong 2 tháng',String(I.n),fv(I.v)+' đ · '+(tot?(I.v/tot*100).toFixed(2).replace('.',','):'0')+'% tồn cuối '+lb(R.m2))
+    +kpi('Nếu loại các mặt hàng đã loại khỏi tiêu hao',String(E.n),fv(E.v)+' đ')+'</div>';
+  Object.keys(I.byKho).sort(function(a,b2){return I.byKho[b2].v-I.byKho[a].v;}).forEach(function(k){b+=tr([esc(k),String(I.byKho[k].n),fv(I.byKho[k].v)]);});
+  h+=h2('Theo kho')+tbl(['Kho','Số mã','Giá trị tồn'],b);
+  b='';Object.keys(I.byNhom).sort(function(a,b2){return I.byNhom[b2]-I.byNhom[a];}).forEach(function(k){b+=tr([esc(k),fv(I.byNhom[k])]);});
+  h+=h2('Theo nhóm hàng')+tbl(['Nhóm hàng','Giá trị tồn'],b);
+  b='';I.top.forEach(function(s){b+=tr([esc(s.kho),esc(s.ma),esc(s.ten),esc(s.nhom),fv(s.t2)]);});
+  h+=h2('20 mã tồn lớn nhất')+tbl(['Kho','Mã','Tên hàng','Nhóm','Tồn cuối '+lb(R.m2)],b)
+    +note('"Không xuất" tính cả xuất tiêu hao lẫn chuyển kho. Sổ chỉ có 2 tháng nên chưa xét được mốc tồn ≥3 tháng hoặc ≥6 tháng không xuất — cần sổ chi tiết dài hơn. Hàng HHTM có thể đang bán ra nhưng xuất bán không nằm trong sổ này.');
+  return h;
+}
+/* ---- Tab: Cách tính & kiểm tra ---- */
+function tabChk(R){
+  var L1=lb(R.m1),L2=lb(R.m2),h='',c=R.chk;
+  var tkm=Object.keys(R.tkMap).sort().map(function(t){return t+' → '+esc(R.tkMap[t]);}).join(' · ');
+  h+=h2('Cách tính')+'<div class="card an-how"><ol>'
+    +'<li><b>Mua</b>: chứng từ “Mua hàng…nhập kho”, cộng cột Nhập – Giá trị theo kho và tháng hạch toán.</li>'
+    +'<li><b>Hàng khuyến mại</b> (đối ứng TK 711): '+(R.opt.km0?'tính 0 đồng, tách riêng để theo dõi.':'đang được tính theo giá trị ghi sổ.')+'</li>'
+    +'<li><b>Điều chuyển nội bộ</b>: không tính vào tiêu hao. '+(R.opt.dc?'Phần nhập về được tính là mua của cơ sở nhận; kho đi xác định theo số chứng từ; bên chuyển đi không trừ.':'Đang TẮT nên không tính vào mua.')+'</li>'
+    +'<li><b>Tiêu hao</b>: “Xuất kho khác” đối ứng TK 632x, gán cơ sở theo TK: '+(tkm||'(không có)')+'. Xuất đối ứng TK khác (vd 6422F – chi phí QLDN) tách riêng.</li>'
+    +'<li><b>Mặt hàng loại khỏi tiêu hao</b>: '+(R.ex.length?esc(R.opt.excl):'(không có)')+(R.opt.exMua?' — cũng loại khỏi phần mua.':' — chỉ loại khỏi tiêu hao.')+'</li>'
+    +'<li>Giá xuất trong sổ là giá bình quân đã gồm cả giá trị hàng khuyến mại, nên tiêu hao và giá trị điều chuyển lấy nguyên theo sổ, chưa định giá lại theo “khuyến mại = 0”.</li>'
+    +'<li>Sổ không có chứng từ xuất bán, xuất trả, điều chỉnh nên app không tách được các loại này.</li></ol></div>';
+  var b='';R.dcm.sort(function(a,b2){return b2.v-a.v;}).forEach(function(d){b+=tr([esc(d.from),esc(d.to),lb(d.ym),fv(d.v)]);});
+  h+=h2('Điều chuyển nội bộ (kho đi → kho nhận)')+tbl(['Kho đi','Kho nhận','Tháng','Giá trị'],b||tr(['Không có','','','']));
+  var rows=[];
+  var oth=Object.keys(c.other);
+  rows.push(['Loại chứng từ khác ngoài mua / chuyển kho / xuất kho khác',oth.length?oth.map(function(k){return esc(k)+': '+c.other[k]+' dòng';}).join('; '):'Không có']);
+  rows.push(['Dòng tồn âm (số lượng hoặc giá trị)',c.neg.length?c.neg.length+' dòng, ví dụ: '+c.neg.slice(0,3).map(function(x){return esc(x.ten)+' ('+esc(x.kho)+', '+x.ngay.split('-').reverse().join('/')+')';}).join('; '):'Không có']);
+  rows.push(['Chứng từ điều chuyển nhập ≠ xuất',c.vmis.length?c.vmis.length+' chứng từ: '+c.vmis.slice(0,3).map(function(x){return esc(x.sct);}).join(', '):'Khớp hết']);
+  rows.push(['Xuất 632x ghi lệch kho so với TK cơ sở (không tính kho CCDC)',c.tkLech.n?c.tkLech.n+' dòng, '+fv(c.tkLech.v)+' đ — đang tính theo TK đối ứng':'Không có']);
+  rows.push(['Mua mã 90xxx (HHTM) hạch toán ngoài TK 1561',Object.keys(c.hhtmTk).length?Object.keys(c.hhtmTk).sort().map(function(k){return lb(k)+': '+fv(c.hhtmTk[k]);}).join('; '):'Không có']);
+  rows.push(['Dòng xuất có số lượng nhưng giá trị 0',c.zeroX?c.zeroX+' dòng':'Không có']);
+  h+=h2('Kiểm tra dữ liệu')+'<div class="card an-chk">'+rows.map(function(r){return '<div><b>'+r[0]+'</b><span>'+r[1]+'</span></div>';}).join('')+'</div>';
+  return h;
+}
+function rAna(){
+  var h=top('Phân tích mua – tiêu hao')+'<div class="wrap an-full" style="padding-top:16px;padding-bottom:100px">'+upCard();
+  if(AN.P&&AN.R){
+    h+=optCard()+tabsHtml();
+    var R=AN.R,body={sum:tabSum,grp:tabGrp,mv:tabMv,stk:tabStk,idl:tabIdl,chk:tabChk}[AN.tab]||tabSum;
+    h+='<div id="anBody">'+body(R)+'</div>';
+  }
+  $('app').innerHTML=h+'</div>';
+}
+window.renderAna=rAna;
+/* ---- xuất Excel ---- */
+function mk(aoa,pct,rat){
+  var ws=XLSX.utils.aoa_to_sheet(aoa),w=[],i,j,a;
+  for(i=0;i<aoa.length;i++)for(j=0;j<(aoa[i]||[]).length;j++){
+    var v=aoa[i][j],l=v==null?0:String(v).length;if(w[j]==null||l>w[j])w[j]=Math.min(l,60);
+    a=XLSX.utils.encode_cell({r:i,c:j});
+    if(ws[a]&&ws[a].t==='n')ws[a].z=(pct&&pct.indexOf(j)>=0)?'0.00%':((rat&&rat.indexOf(j)>=0)?'0.00':'#,##0');
+  }
+  ws['!cols']=w.map(function(x){return {wch:Math.max(10,(x||8)+2)};});
+  return ws;
+}
+function fr(a,b){return b?(a/b-1):'';}
+AN.xls=function(){
+  if(!AN.R)return;
+  if(!kkNeed(['xlsx'],AN.xls))return;
+  var R=AN.R,L1=lb(R.m1),L2=lb(R.m2),wb=XLSX.utils.book_new(),t=R.tot,c=t.cs,A=[];
+  A.push(['Cơ sở / kho','Mua trực tiếp '+L1,'Nhận điều chuyển '+L1,'Tổng mua '+L1,'Mua trực tiếp '+L2,'Nhận điều chuyển '+L2,'Tổng mua '+L2,'% mua','Tiêu hao '+L1,'Tiêu hao '+L2,'% tiêu hao','Chênh mua − tiêu hao '+L1,'Chênh mua − tiêu hao '+L2,'Mua/tiêu hao '+L2]);
+  R.rows.forEach(function(r){A.push([r.kho+(r.isCs?'':' (xuất QLDN)'),r.d1,r.c1,r.t1,r.d2,r.c2,r.t2,fr(r.t2,r.t1),r.th1,r.th2,fr(r.th2,r.th1),r.isCs?r.ch1:'',r.isCs?r.ch2:'',r.isCs&&r.th2?r.t2/r.th2:'']);});
+  A.push([R.csList.length+' cơ sở',c.d1,c.c1,c.t1,c.d2,c.c2,c.t2,fr(c.t2,c.t1),c.th1,c.th2,fr(c.th2,c.th1),c.ch1,c.ch2,c.th2?c.t2/c.th2:'']);
+  A.push(['Mua thực toàn hệ thống (không tính điều chuyển)','','',t.muaThuc1,'','',t.muaThuc2,fr(t.muaThuc2,t.muaThuc1),'','','','','','']);
+  A.push(['Cộng các dòng (có trùng điều chuyển)','','',t.cong1,'','',t.cong2,fr(t.cong2,t.cong1),'','','','','','']);
+  A.push(['Tiêu hao toàn hệ thống (gồm QLDN)','','','','','','','',t.th1,t.th2,fr(t.th2,t.th1),'','','']);
+  A.push(['Hàng khuyến mại TK 711 '+(R.opt.km0?'(đã tính 0 đồng)':'(đã tính vào mua)'),'','',t.km1,'','',t.km2,'','','','','','','']);
+  XLSX.utils.book_append_sheet(wb,mk(A,[7,10],[13]),'Mua - Tiêu hao');
+  var G=[['Nhóm hàng','Tiêu hao '+L1,'Tiêu hao '+L2,'Chênh','%','Mua '+L1,'Mua '+L2]];
+  R.nhom.forEach(function(n){G.push([n.nhom,n.a,n.b,n.b-n.a,fr(n.b,n.a),n.ma,n.mb]);});
+  XLSX.utils.book_append_sheet(wb,mk(G,[4]),'Nhóm hàng');
+  var M=[['Mặt hàng','Nhóm','Tiêu hao '+L1,'Tiêu hao '+L2,'Chênh']];
+  R.items.forEach(function(i){M.push([i.ten,i.nhom,i.a,i.b,i.d]);});
+  XLSX.utils.book_append_sheet(wb,mk(M),'Biến động mặt hàng');
+  var D=[['Kho đi','Kho nhận','Tháng','Giá trị']];
+  R.dcm.forEach(function(d){D.push([d.from,d.to,lbf(d.ym),d.v]);});
+  XLSX.utils.book_append_sheet(wb,mk(D),'Điều chuyển');
+  var S=[['Kho','Tồn cuối '+L1,'Tồn cuối '+L2,'Chênh','%']];
+  R.stockKho.forEach(function(s){S.push([s.kho,s.t1,s.t2,s.t2-s.t1,fr(s.t2,s.t1)]);});
+  S.push(['Tổng',R.stT.t1,R.stT.t2,R.stT.t2-R.stT.t1,fr(R.stT.t2,R.stT.t1)]);
+  S.push([]);S.push(['Kho','Mã hàng','Tên hàng','Nhóm','Tồn cuối '+L1,'Tồn cuối '+L2,'Xuất 2 tháng (mọi loại)']);
+  R.stock.slice().sort(function(a,b){return b.t2-a.t2;}).forEach(function(s){S.push([s.kho,s.ma,s.ten,s.nhom,s.t1,s.t2,s.xall]);});
+  XLSX.utils.book_append_sheet(wb,mk(S,[4]),'Tồn kho');
+  var I=[['Kho','Mã hàng','Tên hàng','Nhóm','Tồn cuối '+L2]];
+  R.idle.all.forEach(function(s){I.push([s.kho,s.ma,s.ten,s.nhom,s.t2]);});
+  XLSX.utils.book_append_sheet(wb,mk(I),'Mã không xuất');
+  var H=[['Cách tính'],['Mua: chứng từ "Mua hàng…nhập kho"; hàng khuyến mại TK 711 '+(R.opt.km0?'tính 0 đồng.':'tính theo giá trị ghi sổ.')],
+    ['Điều chuyển nội bộ không tính vào tiêu hao. '+(R.opt.dc?'Vật tư nhận về tính là mua của cơ sở nhận, bên chuyển đi không trừ.':'Không tính vào mua.')],
+    ['Tiêu hao: xuất kho khác đối ứng TK 632x, gán cơ sở theo TK: '+Object.keys(R.tkMap).sort().map(function(k){return k+' → '+R.tkMap[k];}).join('; ')],
+    ['Mặt hàng loại khỏi tiêu hao: '+(R.ex.length?R.opt.excl:'(không)')+(R.opt.exMua?' (cũng loại khỏi mua)':'')],
+    ['Giá xuất trong sổ là giá bình quân đã gồm giá trị hàng khuyến mại; tiêu hao và giá trị điều chuyển lấy nguyên theo sổ.'],
+    ['Tồn kho chỉ gồm mã có phát sinh trong kỳ. Sổ không có xuất bán/xuất trả/điều chỉnh.'],['File nguồn: '+AN.file]];
+  XLSX.utils.book_append_sheet(wb,mk(H),'Cách tính');
+  var out=XLSX.write(wb,{bookType:'xlsx',type:'array'}),blob=new Blob([out],{type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'}),fn='PhanTich_Mua_TieuHao_'+R.m1+'_'+R.m2+'.xlsx';
+  if(typeof shareOrDownload==='function')shareOrDownload(blob,fn);else dlAnchor(blob,fn);
+};
+})();
+
+</script>
 </body>
 </html>
