@@ -2,8 +2,8 @@
 <html lang="vi">
 <head>
 <meta charset="UTF-8">
-<meta name="app-notes" content="Mới: Phân tích mua hàng – tiêu hao (menu Đối chiếu): tải sổ chi tiết vật tư MISA, so sánh 2 tháng theo cơ sở, xuất Excel (dữ liệu cũ giữ nguyên)">
-<meta name="app-version" content="2026111101">
+<meta name="app-notes" content="Màn hình chính: lỗi báo (nhập liệu/labo) đã tích nhắc hàng ngày và chưa xử lý nay hiện trong Công việc cần xử lý; bấm vào để xem danh sách (dữ liệu cũ giữ nguyên)">
+<meta name="app-version" content="2026111103">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="format-detection" content="telephone=no">
 <meta name="color-scheme" content="light">
@@ -7748,6 +7748,10 @@ function fcPanels(){
   var ex=en.filter(function(e){return e.days<0;}).length,m1=en.filter(function(e){return e.days>=0&&e.days<=30;}).length;
   try{o=db.periods.filter(function(p){return p.items.some(function(i){return !i.counted&&i.close!==0;});}).length;}catch(e){}
   try{if(db.pay&&db.pay.mua&&db.pay.mua.length)payCompute().forEach(function(g){if(g.bad)nl++;});}catch(e){}
+  /* Lỗi nhập liệu/labo đã tích "Nhắc hàng ngày" và chưa xử lý xong: luôn hiện ở đây */
+  var en=0,enT=0,enO=0;
+  try{var EI=(window.ER&&ER.items)||JSON.parse(localStorage.getItem('kk_err_v1')||'[]'),d0=new Date(),td=d0.getFullYear()+'-'+('0'+(d0.getMonth()+1)).slice(-2)+'-'+('0'+d0.getDate()).slice(-2);
+    EI.forEach(function(x){if(x&&x.nhac&&x.st!=='Đã xử lý'){en++;if(x.nhacNgay!==td)enT++;if(x.han&&x.han<td)enO++;}});}catch(e){en=0;}
   function row(c,ic,tx,n,go){return '<div class="fc-tr" onclick="'+go+'"><span class="fc-ti '+c+'">'+ic+'</span><span class="fc-tx">'+tx+'</span><b class="fc-tn '+c+'">'+n+'</b></div>';}
   var I1='<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4 3 20h18Z"/><path d="M12 10v4M12 17v.5"/></svg>',
       I2='<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="5" width="16" height="15" rx="3"/><path d="M8 3v4M16 3v4M4 10h16"/></svg>',
@@ -7757,7 +7761,8 @@ function fcPanels(){
   if(m1)rows.push(row('a',I2,m1+' vật tư còn ≤ 1 tháng',m1,"A.go('hsd')"));
   if(o)rows.push(row('i',I3,o+' kỳ kiểm kê chưa hoàn thành',o,'v2List()'));
   if(nl)rows.push(row('p',I4,nl+' đề nghị thanh toán NCC cần xử lý',nl,"A.go('pay')"));
-  var tot=ex+m1+o+nl;
+  if(en)rows.push(row(enT||enO?'r':'a',I1,en+' lỗi báo đang bật nhắc chưa xử lý'+(enT?' · '+enT+' chưa nhắc hôm nay':'')+(enO?' · '+enO+' quá hạn':''),en,"A.go('err');ER.nhacView&&ER.nhacView()"));
+  var tot=ex+m1+o+nl+en;
   (db.periods||[]).slice(0,5).forEach(function(p){act+='<div class="fc-tr"><span class="fc-ti i">'+I3+'</span><span class="fc-tx">Kiểm kê vật tư – '+esc(p.name||'Kỳ kiểm kê')+'</span><span class="fc-ago">'+(p.createdAt?fcAgo(p.createdAt):'')+'</span></div>';});
   return '<div class="fc-pn"><div class="fc-ph">Công việc cần xử lý'+(tot?' <em>('+tot+')</em>':'')+'</div>'+(rows.join('')||'<div class="fc-empty">Không có công việc tồn đọng</div>')+'</div>'
     +'<div class="fc-pn"><div class="fc-ph">Hoạt động gần đây</div>'+(act||'<div class="fc-empty">Chưa có hoạt động</div>')+'</div>';
@@ -11115,7 +11120,7 @@ ER.nx=function(id){var x=ER.items.filter(function(i){return i.id===id;})[0];x.st
 ER.del=function(id){if(!confirm('Xoá lỗi này và ảnh đính kèm?'))return;var x=ER.items.filter(function(i){return i.id===id;})[0];idbDel(x.bad.concat(x.ok));ER.items=ER.items.filter(function(i){return i.id!==id;});sv(KEY,ER.items);rEr();};
 ER.set=function(k,v){ER[k]=v;ER.n=30;rEr();};
 /* ---- danh sách + thống kê ---- */
-function cur(){return ER.items.filter(function(x){return (ER.f==='all'||ER.f==='stat'||x.type===ER.f)&&(!ER.ky||x.ky===ER.ky)&&(!ER.st||x.st===ER.st)&&(!ER.cs||x.cs===ER.cs)&&(!ER.q||qm(hay(x)));});}
+function cur(){return ER.items.filter(function(x){return (ER.f==='all'||ER.f==='stat'||x.type===ER.f)&&(!ER.ky||x.ky===ER.ky)&&(!ER.st||x.st===ER.st)&&(!ER.cs||x.cs===ER.cs)&&(!ER.nh||(x.nhac&&x.st!==STS[2]))&&(!ER.q||qm(hay(x)));});}
 function card(x){var nl=x.type==='nl',t=nl?esc(x.sct)+' · '+esc(x.ncc):esc(x.kh||x.labo)+(x.pid?' · '+esc(x.pid):''),d=nl?esc(x.loai.join(', '))+((x.sai||x.dung)?'<br>Sai: '+esc(x.sai)+' → Đúng: '+esc(x.dung):'')+((x.lines&&x.lines.length)?'<br>'+x.lines.map(function(l){return esc(lnTxt(l));}).join('<br>'):''):(x.loai1?esc(x.loai1)+'<br>':'')+'Labo báo: '+esc(x.dvLabo||'–')+(x.slLabo?' · SL '+esc(x.slLabo):'')+(x.rLabo?' · '+esc(x.rLabo)+' răng':'')+'<br>VT: '+esc(x.dvVT||'–')+(x.slVT?' · SL '+esc(x.slVT):'');
 var k=STS.indexOf(x.st),od=x.han&&x.st!==STS[2]&&x.han<ymd(new Date()),sub=(!nl&&x.kh?'Labo: '+esc(x.labo)+' · ':'')+esc(x.cs)+' · '+esc(x.ky)+(x.tien?' · '+esc(x.tien)+'đ':'')+hanTxt(x);
 return '<div class="card er-c s'+k+(od?' od':'')+'"><div style="display:flex;justify-content:space-between;gap:8px"><div class="er-ttl">'+t+'</div><span class="er-st">'+esc(x.st)+'</span></div><div class="er-sub">'+sub+'</div><div class="er-d">'+d+(x.note?'<br><i>'+esc(x.note)+'</i>':'')+'</div><div style="font-size:12px;color:var(--mut2);margin-top:6px">'+(x.cl&&!x.bad.length&&!x.ok.length?'Ảnh đã xoá sau khi xuất file':'Ảnh: '+x.bad.length+' bằng chứng, '+x.ok.length+' đúng')+(x.by?' · '+esc(x.by):'')+'</div>'+actHtml(x)+'</div>';}
@@ -11139,11 +11144,12 @@ if(ER.clean)h+=cleanHtml();
 h+='<div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px">'+[['all','Tất cả'+(pend()?' ('+pend()+' chưa xử lý)':'')],['nl','Nhập liệu'+cn('nl')],['lb','Labo'+cn('lb')],['stat','Thống kê']].map(function(x){return '<span class="chip'+(ER.f===x[0]?' chip-on':'')+'" onclick="ER.set(\'f\',\''+x[0]+'\')">'+x[1]+'</span>';}).join('')+'</div>';
 if(ER.f!=='stat')h+='<input class="inp" id="erQ" type="search" placeholder="Tìm số phiếu, tên cơ sở, nhà cung cấp, labo, khách hàng, PID…" value="'+esc(ER.q)+'" oninput="ER.q=this.value;ER.n=30;clearTimeout(ER._t);ER._t=setTimeout(ER.res,200)" style="margin-bottom:10px;width:100%;box-sizing:border-box">';
 h+='<div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px"><input class="inp" type="month" value="'+esc(ER.ky)+'" onchange="ER.set(\'ky\',this.value)" style="flex:1 1 140px"><select class="inp" onchange="ER.set(\'cs\',this.value)" style="flex:1 1 140px">'+csF()+'</select><select class="inp" onchange="ER.set(\'st\',this.value)" style="flex:1 1 140px"><option value="">Mọi trạng thái</option>'+opt(STS,ER.st)+'</select></div>';
+if(ER.nh)h+='<div style="margin-bottom:10px"><span class="chip chip-on" onclick="ER.set(\'nh\',false)">Đang lọc: lỗi bật nhắc chưa xử lý (mọi tháng) ✕</span></div>';
 h+='<div id="erRes">'+resHtml()+'</div>';
 $('app').innerHTML=h+'</div>';if(ER.clean)est();warnChk();}
 window.renderErr=rEr;
 try{if(navigator.storage&&navigator.storage.persist)navigator.storage.persist();}catch(e){}
-var _go=A.go;A.go=function(v){if(v==='err'){ER.v='list';ER.form=null;ER._del=[];ER.q='';ER.clean=false;}return _go.apply(this,arguments);};
+var _go=A.go;A.go=function(v){if(v==='err'){ER.v='list';ER.form=null;ER._del=[];ER.q='';ER.clean=false;ER.nh=false;}return _go.apply(this,arguments);};
 /* ---- dọn dữ liệu sau khi xuất ---- */
 function mk(t,k){return t+'|'+k;}
 function mark(t){var ks=ER.ky?[ER.ky]:ER.items.map(function(x){return x.ky;});ks.forEach(function(k){ER.ex[mk(t,k)]=Date.now();});sv(KX,ER.ex);}
@@ -11181,6 +11187,7 @@ ER.pasteRow=function(){var t=val('erPbL');if(!t)return;var c=t.split('\t').map(f
 ER.cpVT=function(){if($('erDvVT'))$('erDvVT').value=val('erDvLb');if($('erSlVT'))$('erSlVT').value=val('erSlLb');};
 ER.dupImg=function(id){var x=byId(id),ids=x.bad.concat(x.ok);idbGet(ids,function(){var c=JSON.parse(JSON.stringify(x));delete c.id;delete c.ngay;delete c.by;delete c.cl;delete c.han;c.nhacNgay='';c.soNhac=0;c.st=STS[0];c.im={};var mp=function(a){return a.filter(function(i){return ER.cache[i];}).map(function(i){var n=uid();ER.cache[n]=ER.cache[i];idbPut(n,ER.cache[i]);c.im[n]={t:Date.now(),by:who()};return n;});};c.bad=mp(x.bad);c.ok=mp(x.ok);ER.form=c;ER.v='form';rEr();toast('Đã nhân bản kèm ảnh — sửa dịch vụ, ghi chú rồi lưu');});};
 ER.nhac=function(id){var x=byId(id);x.nhac=!x.nhac;if(x.nhac)x.nhacNgay='';sv(KEY,ER.items);rEr();};
+ER.nhacView=function(){ER.f='all';ER.ky='';ER.st='';ER.cs='';ER.q='';ER.nh=true;ER.n=30;ER.v='list';ER.form=null;rEr();};
 ER.ack=function(id){var x=byId(id);x.nhacNgay=ymd(new Date());x.soNhac=(x.soNhac||0)+1;sv(KEY,ER.items);rEr();};
 ER.share=function(id){var x=byId(id),ids=x.bad.concat(x.ok);idbGet(ids,function(){Promise.all(ids.filter(function(i){return ER.cache[i];}).map(function(i,k){return fetch(ER.cache[i]).then(function(r){return r.blob();}).then(function(b){return new File([b],'loi-'+(k+1)+'.jpg',{type:'image/jpeg'});});})).then(function(fs){if(navigator.canShare&&navigator.canShare({files:fs}))return navigator.share({files:fs,title:'Lỗi labo '+x.labo,text:(x.dvLabo||'')+(x.note?' — '+x.note:'')});toast('Trình duyệt không hỗ trợ chia sẻ ảnh — dùng Xuất Word kèm ảnh');}).catch(function(){});});};
 ER.pack=function(){if(!ER.ky){toast('Chọn tháng cần xuất');return;}ER.f='all';ER.q='';ER.st='';ER.cs='';ER.xls();setTimeout(ER.doc,800);};
@@ -11251,6 +11258,13 @@ var b=new Blob(['\ufeff'+h+'</div></body></html>'],{type:'application/msword'}),
 .an-how ol{margin:0;padding-left:18px;font-size:13px;line-height:1.55}.an-how li{margin:5px 0}
 .an-chk div{display:flex;flex-direction:column;gap:2px;padding:9px 0;border-top:1px solid var(--line);font-size:13px}
 .an-chk div:first-child{border-top:0}.an-chk span{color:var(--mut)}
+
+.an-kho summary{font-weight:800;font-size:14px;cursor:pointer;list-style:none;display:flex;align-items:center;gap:8px}
+.an-kho summary::-webkit-details-marker{display:none}
+.an-kho summary::after{content:'▾';margin-left:auto;color:var(--mut)}
+.an-kho[open] summary::after{content:'▴'}
+.an-badge{font-size:11px;font-weight:700;background:var(--teal-bg);color:var(--teal);border-radius:999px;padding:2px 8px}
+.an-kt2 td:nth-child(3){min-width:200px;padding:6px 8px}.an-kt2 td:first-child{min-width:90px}
 </style>
 <script id="ana-logic">
 "use strict";
@@ -11265,7 +11279,7 @@ var b=new Blob(['\ufeff'+h+'</div></body></html>'],{type:'application/msword'}),
 (function(){
 var ANA=window.ANA=window.ANA||{};
 var KHO_ALIAS={'KHOBĐ2':'Nghĩa Dũng','KHOCL':'Ba Đình (Cát Linh)','KHOBTX':'Bùi Thị Xuân','KHOLVL':'Lê Văn Lương','KHOQN':'Quảng Ninh','KHOHH':'Hà Nội (Kho HH)','KHOCCDC':'Kho CCDC'};
-var KHO_ORDER=['Nghĩa Dũng','Ba Đình (Cát Linh)','Bùi Thị Xuân','Lê Văn Lương','Quảng Ninh','Hà Nội (Kho HH)','Kho CCDC'];
+var KHO_ORDER_MK=['KHOBĐ2','KHOCL','KHOBTX','KHOLVL','KHOQN','KHOHH','KHOCCDC'];
 var NHOM={'10':'VTTH chung','11':'Dụng cụ PT/nhổ răng','12':'Labo/Phục hình/Abutment','13':'Implant/Ghép xương','14':'Chỉnh nha (gồm Invisalign)','16':'Nội nha/điều trị','88':'Thuốc/dịch truyền','90':'HHTM (mã 90xxx)','99':'Khác'};
 var NHOM_GHIDE={'rang su lava plus':'Labo/Phục hình/Abutment','phi xu ly don hang invi':'Chỉnh nha (gồm Invisalign)'};
 ANA.DEFAULT_EXCL='súc miệng, tăm nước, kem đánh răng';
@@ -11304,6 +11318,14 @@ function aliasKho(ma,ten){
   if(KHO_ALIAS[k])return KHO_ALIAS[k];
   return String(ten||ma||'').trim().replace(/^kho\s+/i,'')||k;
 }
+/* Tên hiển thị của kho: tên người dùng cấu hình (theo mã kho) > tên mặc định */
+function nameOf(mk,ten,custom){
+  var c=custom&&custom[String(mk||'').trim().toUpperCase()];
+  c=c==null?'':String(c).trim();
+  return c||aliasKho(mk,ten);
+}
+function mkIdx(mk){var i=KHO_ORDER_MK.indexOf(String(mk||'').trim().toUpperCase());return i<0?99:i;}
+ANA.defaultName=aliasKho;
 function nhomOf(ma,ten){
   var g=NHOM_GHIDE[nz(ten)];if(g)return g;
   var m=String(ma||'').trim().toUpperCase();
@@ -11319,7 +11341,7 @@ function classify(loai){
 }
 
 /* ---- Đọc bảng (mảng các dòng) thành danh sách dòng chuẩn ---- */
-ANA.parse=function(aoa,SSF){
+ANA.parse=function(aoa,SSF,custom){
   var h=-1,i,j;
   for(i=0;i<Math.min(40,aoa.length);i++){
     var cells=(aoa[i]||[]).map(nz);
@@ -11339,8 +11361,8 @@ ANA.parse=function(aoa,SSF){
     var r=aoa[i];if(!r)continue;
     var ma=String(r[C.ma]==null?'':r[C.ma]).trim(),ng=ymdOf(r[C.ngay],SSF);
     if(!ma||!ng){if(ma||r[C.ngay])bad++;continue;}
-    var ym=ng.slice(0,7),kho=aliasKho(r[C.kho],r[C.tenKho]);
-    var o={ord:ord++,mk:String(r[C.kho]||'').trim(),kho:kho,ma:ma,ten:String(r[C.ten]==null?'':r[C.ten]).trim(),ngay:ng,ym:ym,
+    var ym=ng.slice(0,7),mk0=String(r[C.kho]==null?'':r[C.kho]).trim(),ten0=String(r[C.tenKho]==null?'':r[C.tenKho]).trim(),kho=nameOf(mk0,ten0,custom);
+    var o={ord:ord++,mk:mk0,tenSo:ten0,kho:kho,ma:ma,ten:String(r[C.ten]==null?'':r[C.ten]).trim(),ngay:ng,ym:ym,
       sct:String(r[C.sct]==null?'':r[C.sct]).trim(),dg:C.dg>=0?String(r[C.dg]==null?'':r[C.dg]):'',
       nSL:num(r[C.nhap]),nGT:num(r[C.nhap+1]),xSL:num(r[C.xuat]),xGT:num(r[C.xuat+1]),tSL:num(r[C.ton]),tGT:num(r[C.ton+1]),
       loai:String(r[C.loai]==null?'':r[C.loai]).trim(),tkk:tk(r[C.tkk]),tkd:tk(r[C.tkd])};
@@ -11348,7 +11370,28 @@ ANA.parse=function(aoa,SSF){
     rows.push(o);months[ym]=1;khos[kho]=(khos[kho]||0)+1;
   }
   if(!rows.length)return {error:'Không có dòng dữ liệu hợp lệ (cần Mã hàng và Ngày hạch toán).'};
-  return {rows:rows,months:Object.keys(months).sort(),khos:khos,skipped:bad};
+  var P={rows:rows,months:Object.keys(months).sort(),khos:khos,skipped:bad};
+  ANA.rename(P,custom);
+  return P;
+};
+/* Đổi tên kho trên dữ liệu đã nạp (không cần nạp lại file). Trả về danh sách tên trùng nếu có. */
+ANA.rename=function(P,custom){
+  var L={},khos={};
+  P.rows.forEach(function(r){
+    r.kho=nameOf(r.mk,r.tenSo,custom);
+    khos[r.kho]=(khos[r.kho]||0)+1;
+    var k=r.mk.toUpperCase();
+    if(!L[k])L[k]={mk:r.mk,tenSo:r.tenSo,def:aliasKho(r.mk,r.tenSo),name:r.kho,n:0};
+    L[k].n++;
+  });
+  P.khos=khos;
+  P.khoList=Object.keys(L).map(function(k){return L[k];}).sort(function(a,b){return mkIdx(a.mk)-mkIdx(b.mk)||(a.name<b.name?-1:1);});
+  return P;
+};
+ANA.dupNames=function(P,custom){
+  var seen={},dup={};
+  P.khoList.forEach(function(k){var n=nameOf(k.mk,k.tenSo,custom);if(seen[n])dup[n]=1;seen[n]=1;});
+  return Object.keys(dup);
 };
 
 function add(o,a,b,v){var x=o[a]||(o[a]={});x[b]=(x[b]||0)+v;}
@@ -11377,9 +11420,9 @@ ANA.calc=function(P,opt){
   }
   /* 3. Mua, điều chuyển nhận, tiêu hao */
   var D={},KM={},C={},CCs={},CTong={},TH={},QL={},EXV={},NH_TH={},NH_MUA={},IT={},DCX={},m4Mua={};
-  var khosAll={};
+  var khosAll={},mkOf={};
   R.forEach(function(r){
-    khosAll[r.kho]=1;
+    khosAll[r.kho]=1;mkOf[r.kho]=r.mk;
     if(!inW(r))return;
     if(r.lc==='mua'){
       var isKM=r.tkd==='711',ek=isEx(r.ten);
@@ -11404,9 +11447,7 @@ ANA.calc=function(P,opt){
     }
   });
   /* 4. Bảng theo kho */
-  var names=Object.keys(khosAll),ord=[];
-  KHO_ORDER.forEach(function(k){if(names.indexOf(k)>=0)ord.push(k);});
-  names.sort().forEach(function(k){if(ord.indexOf(k)<0)ord.push(k);});
+  var ord=Object.keys(khosAll).sort(function(a,b){return mkIdx(mkOf[a])-mkIdx(mkOf[b])||(a<b?-1:1);});
   var csList=ord.filter(function(k){return csSet[k];}),otherList=ord.filter(function(k){return !csSet[k];});
   function rowOf(k){
     var isCs=!!csSet[k],o={kho:k,isCs:isCs};
@@ -11495,7 +11536,10 @@ var KO='kk_ana_opt';
 function $(i){return document.getElementById(i);}
 function ldOpt(){var o={};try{o=JSON.parse(localStorage.getItem(KO)||'{}')||{};}catch(e){o={};}
   return {excl:o.excl!=null?o.excl:ANA.DEFAULT_EXCL,km0:o.km0!==false,dc:o.dc!==false,exMua:!!o.exMua,m1:'',m2:''};}
-var AN=window.AN={P:null,R:null,file:'',tab:'sum',opt:ldOpt(),err:''};
+var KK='kk_ana_kho';
+function ldKho(){var o={};try{o=JSON.parse(localStorage.getItem(KK)||'{}')||{};}catch(e){o={};}return o;}
+var AN=window.AN={P:null,R:null,file:'',tab:'sum',opt:ldOpt(),err:'',kho:ldKho(),khoOpen:false};
+function svKho(){try{localStorage.setItem(KK,JSON.stringify(AN.kho));}catch(e){}}
 function svOpt(){try{localStorage.setItem(KO,JSON.stringify({excl:AN.opt.excl,km0:AN.opt.km0,dc:AN.opt.dc,exMua:AN.opt.exMua}));}catch(e){}}
 /* ---- định dạng: số đầy đủ (không làm tròn), phần trăm 2 chữ số ---- */
 function fv(n){n=Math.round(n||0);var s=String(Math.abs(n)).replace(/\B(?=(\d{3})+(?!\d))/g,'.');return (n<0?'-':'')+s;}
@@ -11528,7 +11572,7 @@ AN.load=function(f){
     try{
       var wb=isCsv?XLSX.read(e.target.result,{type:'string'}):XLSX.read(new Uint8Array(e.target.result),{type:'array'}),P=null,last='';
       for(var i=0;i<wb.SheetNames.length&&!P;i++){
-        var aoa=XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[i]],{header:1,raw:true,defval:null}),r=ANA.parse(aoa,XLSX.SSF);
+        var aoa=XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[i]],{header:1,raw:true,defval:null}),r=ANA.parse(aoa,XLSX.SSF,AN.kho);
         if(r.error)last=r.error;else P=r;
       }
       if(!P){AN.err=last||'File không đúng định dạng';AN.R=null;AN.P=null;toast(AN.err);rAna();return;}
@@ -11550,6 +11594,14 @@ AN.set=function(k,v){
   if(AN.opt.m1===AN.opt.m2)return;
   AN.run();
 };
+AN.setKho=function(mk,val){
+  var key=String(mk).trim().toUpperCase(),old=AN.kho[key],v=String(val==null?'':val).trim();
+  if(v)AN.kho[key]=v;else delete AN.kho[key];
+  var d=ANA.dupNames(AN.P,AN.kho);
+  if(d.length){if(old==null)delete AN.kho[key];else AN.kho[key]=old;toast('Tên kho bị trùng: '+d.join(', ')+' — chọn tên khác');rAna();return;}
+  svKho();ANA.rename(AN.P,AN.kho);AN.run();
+};
+AN.khoReset=function(){AN.kho={};svKho();ANA.rename(AN.P,AN.kho);AN.run();toast('Đã khôi phục tên kho mặc định');};
 AN.tab_=function(t){AN.tab=t;rAna();window.scrollTo(0,0);};
 AN.reset=function(){AN.P=null;AN.R=null;AN.file='';AN.err='';rAna();};
 /* ---- giao diện ---- */
@@ -11569,6 +11621,16 @@ function upCard(){
   return h+'</div>';
 }
 function sw(k,t,d){return '<label class="an-sw"><input type="checkbox"'+(AN.opt[k]?' checked':'')+' onchange="AN.set(\''+k+'\',this.checked)"><span><b>'+t+'</b><small>'+d+'</small></span></label>';}
+function khoCard(){
+  var P=AN.P,custom=Object.keys(AN.kho).length;
+  var b=P.khoList.map(function(k){
+    return '<tr><td>'+esc(k.mk)+'</td><td>'+esc(k.tenSo)+'</td><td><input class="inp" style="padding:8px 10px" value="'+esc(AN.kho[k.mk.toUpperCase()]||'')+'" placeholder="'+esc(k.def)+'" onchange="AN.setKho(\''+esc(k.mk).replace(/'/g,"\\'")+'\',this.value)"></td><td style="text-align:right">'+k.n+'</td></tr>';
+  }).join('');
+  return '<details class="card an-kho" style="margin-top:12px"'+(AN.khoOpen?' open':'')+' ontoggle="AN.khoOpen=this.open"><summary>Cấu hình tên kho'+(custom?' <span class="an-badge">'+custom+' tên đã đổi</span>':'')+'</summary>'
+    +'<div class="an-note" style="margin:8px 0 10px">Đặt tên hiển thị cho từng kho theo mã kho trong sổ. Để trống = dùng tên mặc định (hiện trong ô). Tên được nhớ trên máy này và áp dụng cho các lần tải file sau; bảng và file Excel xuất ra dùng đúng tên này.</div>'
+    +'<div class="an-sc"><table class="an-t an-kt2"><thead><tr><th>Mã kho</th><th>Tên trong sổ</th><th>Tên hiển thị</th><th>Số dòng</th></tr></thead><tbody>'+b+'</tbody></table></div>'
+    +(custom?'<button class="pill" style="margin-top:10px" onclick="AN.khoReset()">Khôi phục tên mặc định</button>':'')+'</details>';
+}
 function optCard(){
   var P=AN.P;function sel(k){return '<select class="inp" onchange="AN.set(\''+k+'\',this.value)">'+P.months.map(function(m){return '<option value="'+m+'"'+(AN.opt[k]===m?' selected':'')+'>'+lbf(m)+'</option>';}).join('')+'</select>';}
   return '<div class="card" style="margin-top:12px"><div class="an-opt"><div><div class="an-lab">Tháng trước</div>'+sel('m1')+'</div><div><div class="an-lab">Tháng sau</div>'+sel('m2')+'</div>'
@@ -11708,7 +11770,7 @@ function tabChk(R){
 function rAna(){
   var h=top('Phân tích mua – tiêu hao')+'<div class="wrap an-full" style="padding-top:16px;padding-bottom:100px">'+upCard();
   if(AN.P&&AN.R){
-    h+=optCard()+tabsHtml();
+    h+=optCard()+khoCard()+tabsHtml();
     var R=AN.R,body={sum:tabSum,grp:tabGrp,mv:tabMv,stk:tabStk,idl:tabIdl,chk:tabChk}[AN.tab]||tabSum;
     h+='<div id="anBody">'+body(R)+'</div>';
   }
