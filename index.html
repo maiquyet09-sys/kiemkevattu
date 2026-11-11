@@ -2,8 +2,8 @@
 <html lang="vi">
 <head>
 <meta charset="UTF-8">
-<meta name="app-notes" content="Màn hình chính: lỗi báo (nhập liệu/labo) đã tích nhắc hàng ngày và chưa xử lý nay hiện trong Công việc cần xử lý; bấm vào để xem danh sách (dữ liệu cũ giữ nguyên)">
-<meta name="app-version" content="2026111103">
+<meta name="app-notes" content="Trang chủ điện thoại: thẻ nhắc lỗi báo bật nhắc chưa xử lý; rà soát lỗi chung (dữ liệu cũ giữ nguyên)">
+<meta name="app-version" content="2026111105">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="format-detection" content="telephone=no">
 <meta name="color-scheme" content="light">
@@ -7742,16 +7742,21 @@ function fcHdr(){
   try{if(b)b.textContent=(db.folders&&db.folders[0])||'12M Cát Linh (HO)';}catch(e){}
   if(bl)bl.classList.toggle('has',!!document.querySelector('#app .fc-ph em'));}
 document.addEventListener('keydown',function(e){if((e.ctrlKey||e.metaKey)&&e.key==='k'){var q=document.getElementById('fcq');if(q){e.preventDefault();q.focus();}}});
+/* Lỗi nhập liệu/labo đã tích "Nhắc hàng ngày" và chưa xử lý xong — dùng cho Công việc cần xử lý (máy tính) và thẻ nhắc ở trang chủ (điện thoại) */
+function fcErrCnt(){var r={en:0,t:0,o:0};
+  try{var EI=(window.ER&&ER.items)||JSON.parse(localStorage.getItem('kk_err_v1')||'[]'),d0=new Date(),td=d0.getFullYear()+'-'+('0'+(d0.getMonth()+1)).slice(-2)+'-'+('0'+d0.getDate()).slice(-2);
+    EI.forEach(function(x){if(x&&x.nhac&&x.st!=='Đã xử lý'){r.en++;if(x.nhacNgay!==td)r.t++;if(x.han&&x.han<td)r.o++;}});}catch(e){r={en:0,t:0,o:0};}
+  return r;}
+function fcErrMsg(c){return c.en+' lỗi báo đang bật nhắc chưa xử lý'+(c.t?' · '+c.t+' chưa nhắc hôm nay':'')+(c.o?' · '+c.o+' quá hạn':'');}
+function fcMobTask(){var c=fcErrCnt();if(!c.en)return '';
+  return '<div class="fc-mt'+(c.t||c.o?' hot':'')+'" onclick="A.go(\'err\');ER.nhacView&&ER.nhacView()">'+icon('warn',20)+'<div><b>Công việc cần xử lý</b><span>'+fcErrMsg(c)+'</span></div><em>'+c.en+'</em></div>';}
 function fcPanels(){
   var en=[],o=0,nl=0,rows=[],act='',i;
   try{en=hsdEntries();}catch(e){}
   var ex=en.filter(function(e){return e.days<0;}).length,m1=en.filter(function(e){return e.days>=0&&e.days<=30;}).length;
   try{o=db.periods.filter(function(p){return p.items.some(function(i){return !i.counted&&i.close!==0;});}).length;}catch(e){}
   try{if(db.pay&&db.pay.mua&&db.pay.mua.length)payCompute().forEach(function(g){if(g.bad)nl++;});}catch(e){}
-  /* Lỗi nhập liệu/labo đã tích "Nhắc hàng ngày" và chưa xử lý xong: luôn hiện ở đây */
-  var en=0,enT=0,enO=0;
-  try{var EI=(window.ER&&ER.items)||JSON.parse(localStorage.getItem('kk_err_v1')||'[]'),d0=new Date(),td=d0.getFullYear()+'-'+('0'+(d0.getMonth()+1)).slice(-2)+'-'+('0'+d0.getDate()).slice(-2);
-    EI.forEach(function(x){if(x&&x.nhac&&x.st!=='Đã xử lý'){en++;if(x.nhacNgay!==td)enT++;if(x.han&&x.han<td)enO++;}});}catch(e){en=0;}
+  var ec=fcErrCnt(),eN=ec.en,eT=ec.t,eO=ec.o;
   function row(c,ic,tx,n,go){return '<div class="fc-tr" onclick="'+go+'"><span class="fc-ti '+c+'">'+ic+'</span><span class="fc-tx">'+tx+'</span><b class="fc-tn '+c+'">'+n+'</b></div>';}
   var I1='<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4 3 20h18Z"/><path d="M12 10v4M12 17v.5"/></svg>',
       I2='<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="5" width="16" height="15" rx="3"/><path d="M8 3v4M16 3v4M4 10h16"/></svg>',
@@ -7761,15 +7766,15 @@ function fcPanels(){
   if(m1)rows.push(row('a',I2,m1+' vật tư còn ≤ 1 tháng',m1,"A.go('hsd')"));
   if(o)rows.push(row('i',I3,o+' kỳ kiểm kê chưa hoàn thành',o,'v2List()'));
   if(nl)rows.push(row('p',I4,nl+' đề nghị thanh toán NCC cần xử lý',nl,"A.go('pay')"));
-  if(en)rows.push(row(enT||enO?'r':'a',I1,en+' lỗi báo đang bật nhắc chưa xử lý'+(enT?' · '+enT+' chưa nhắc hôm nay':'')+(enO?' · '+enO+' quá hạn':''),en,"A.go('err');ER.nhacView&&ER.nhacView()"));
-  var tot=ex+m1+o+nl+en;
+  if(eN)rows.push(row(eT||eO?'r':'a',I1,fcErrMsg(ec),eN,"A.go('err');ER.nhacView&&ER.nhacView()"));
+  var tot=ex+m1+o+nl+eN;
   (db.periods||[]).slice(0,5).forEach(function(p){act+='<div class="fc-tr"><span class="fc-ti i">'+I3+'</span><span class="fc-tx">Kiểm kê vật tư – '+esc(p.name||'Kỳ kiểm kê')+'</span><span class="fc-ago">'+(p.createdAt?fcAgo(p.createdAt):'')+'</span></div>';});
   return '<div class="fc-pn"><div class="fc-ph">Công việc cần xử lý'+(tot?' <em>('+tot+')</em>':'')+'</div>'+(rows.join('')||'<div class="fc-empty">Không có công việc tồn đọng</div>')+'</div>'
     +'<div class="fc-pn"><div class="fc-ph">Hoạt động gần đây</div>'+(act||'<div class="fc-empty">Chưa có hoạt động</div>')+'</div>';
 }
 function renderHome(){
   renderHomeOld();
-  document.getElementById('app').insertAdjacentHTML('afterbegin',fcHello()+v2Hub());
+  document.getElementById('app').insertAdjacentHTML('afterbegin',fcHello()+fcMobTask()+v2Hub());
   setTimeout(function(){try{fcDelta();fcHdr();}catch(e){}},80);
 }
 /* ===== Điều hướng theo đường dẫn (#/...): nút Back/Forward, F5 và liên kết trực tiếp giữ đúng màn hình =====
@@ -11056,7 +11061,7 @@ function idbPut(id,url){idb(function(d){if(!d){toast('Trình duyệt không lưu
 function idbGet(ids,cb){var need=ids.filter(function(i){return !ER.cache[i];});if(!need.length){cb();return;}idb(function(d){if(!d){cb();return;}var n=need.length;need.forEach(function(i){var q=d.transaction('i').objectStore('i').get(i);q.onsuccess=function(){if(q.result)ER.cache[i]=q.result.url;if(!--n)cb();};q.onerror=function(){if(!--n)cb();};});});}
 function idbDel(ids){idb(function(d){if(d)ids.forEach(function(i){d.transaction('i','readwrite').objectStore('i').delete(i);});});}
 function pack(file,cb){var u=URL.createObjectURL(file),im=new Image();im.onload=function(){var s=Math.min(1,1600/Math.max(im.width,im.height)),c=document.createElement('canvas');c.width=Math.round(im.width*s);c.height=Math.round(im.height*s);var x=c.getContext('2d');x.fillStyle='#fff';x.fillRect(0,0,c.width,c.height);x.drawImage(im,0,0,c.width,c.height);URL.revokeObjectURL(u);cb(c.toDataURL('image/jpeg',.85));};im.onerror=function(){toast('Không đọc được ảnh');};im.src=u;}
-ER.addImg=function(files){var f=ER.form;if(!f)return;[].forEach.call(files,function(file){if(!/^image\//.test(file.type))return;if(f[ER.slot].length>=5){toast('Tối đa 5 ảnh mỗi ô');return;}pack(file,function(url){var id=uid();ER.cache[id]=url;idbPut(id,url);f[ER.slot].push(id);f.im[id]={t:Date.now(),by:who()};drawSlots();if(ER.slot==='bad'&&f.bad.length===1&&!f.ok.length)ER.pick('ok');});});};
+ER.addImg=function(files){var f=ER.form;if(!f)return;[].forEach.call(files,function(file){if(!/^image\//.test(file.type))return;if(f[ER.slot].length>=5){toast('Tối đa 5 ảnh mỗi ô');return;}pack(file,function(url){var id=uid();ER.cache[id]=url;idbPut(id,url);f[ER.slot].push(id);f.im[id]={t:Date.now(),by:who()};drawSlots();if(ER.slot==='bad'&&f.bad.length===1&&!f.ok.length&&$('erS_ok'))ER.pick('ok');});});};
 ER.pick=function(s){ER.slot=s;['bad','ok'].forEach(function(x){var b=$('erS_'+x);if(b){b.classList.toggle('on',x===s);if(x===s)b.style.borderColor='';}});};
 ER.paste=function(){if(!navigator.clipboard||!navigator.clipboard.read){toast('Nhấn Ctrl+V (Cmd+V) để dán ảnh');return;}navigator.clipboard.read().then(function(a){a.forEach(function(it){var t=it.types.filter(function(x){return /^image\//.test(x);})[0];if(t)it.getType(t).then(function(b){ER.addImg([new File([b],'p.png',{type:t})]);});else toast('Clipboard không có ảnh');});}).catch(function(){toast('Nhấn Ctrl+V (Cmd+V) để dán ảnh');});};
 ER.rmImg=function(s,k){var id=ER.form[s].splice(k,1)[0];ER._del.push(id);drawSlots();};
@@ -11096,13 +11101,13 @@ h+='<div class="er-f"><label>Cơ sở</label><select class="inp" id="erCs"><opti
 if(nl){h+=fld('erSct','Số chứng từ (phiếu nhập kho)',f.sct,'VD: NK-BTX-11-005','erDlS')+'<datalist id="erDlS">'+ER.misa.map(function(r){return '<option value="'+esc(r.sct)+'">';}).join('')+'</datalist>'+fld('erNcc','Nhà cung cấp',f.ncc);
 h+='<div class="er-f"><label>Loại lỗi (chọn nhiều)</label><div style="display:flex;flex-wrap:wrap;gap:6px">'+LNL.map(function(x){return '<span class="chip'+(f.loai.indexOf(x)>=0?' chip-on':'')+'" onclick="ER.tg(this,\''+x+'\')">'+x+'</span>';}).join('')+'</div></div>';
 }
-else{h+=fld('erLabo','Tên labo (gõ tên mới để tạo, lần sau chọn lại)',f.labo,'','erDlL')+'<datalist id="erDlL">'+labos()+'</datalist>'+'<div class="er-f"><label>Dán nhanh 1 dòng (cách nhau bằng Tab): tên KH, mã KH, dịch vụ labo, SL, số răng, dịch vụ VT, SL VT</label><textarea class="inp" id="erPbL" rows="1" oninput="ER.pasteRow()"></textarea></div>'
+else{h+=fld('erLabo','Tên labo (gõ tên mới để tạo, lần sau chọn lại)',f.labo,'','erDlL')+'<datalist id="erDlL">'+labos()+'</datalist>'
 +'<div style="display:grid;grid-template-columns:2fr 1fr;gap:8px">'+fld('erKh','Tên khách hàng',f.kh)+fld('erPid','Mã KH (PID)',f.pid)+'</div>'+'<div class="card" style="padding:10px;margin-bottom:12px"><div style="font-weight:700;margin-bottom:8px">Labo báo</div>'+fld('erDvLb','Dịch vụ',f.dvLabo,'','erDlD')+'<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">'+fld('erSlLb','Số lượng',f.slLabo)+fld('erRLb','Số răng',f.rLabo)+'</div></div>'
 +'<div class="card" style="padding:10px;margin-bottom:12px"><div style="display:flex;justify-content:space-between;font-weight:700;margin-bottom:8px"><span>Trên phần mềm VT</span><button type="button" class="addbat" onclick="ER.cpVT()">Sao chép từ Labo báo</button></div>'+fld('erDvVT','Dịch vụ',f.dvVT,'','erDlD')+fld('erSlVT','Số lượng',f.slVT)+'</div><datalist id="erDlD">'+uniq(['dvVT','dvLabo'])+'</datalist>'
 +'<div class="er-f"><label>Ghi chú: lỗi gì, cần bổ sung gì, yêu cầu gì</label><div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:6px">'+NT.map(function(x,i){return '<span class="chip" onclick="ER.tpl('+i+')">'+x[0]+'</span>';}).join('')+'</div><textarea class="inp" id="erNoteLb" rows="3">'+esc(f.note||'')+'</textarea></div>'
 +'<label style="display:flex;gap:8px;align-items:center;margin-bottom:12px;font-weight:600"><input type="checkbox" id="erNhac"'+(f.nhac?' checked':'')+'> Nhắc hàng ngày đến khi xử lý xong</label>';}
 
-h+=slotHtml('bad','Ảnh bằng chứng lỗi',nl?'Màn hình MISA đang nhập sai':'Màn hình VT / dòng labo báo')+slotHtml('ok','Ảnh đúng','Chứng từ / hóa đơn / màn hình có thông tin đúng');
+h+=slotHtml('bad','Ảnh bằng chứng lỗi',nl?'Màn hình MISA đang nhập sai':'Màn hình VT / dòng labo báo')+(nl||(f.ok&&f.ok.length)?slotHtml('ok','Ảnh đúng','Chứng từ / hóa đơn / màn hình có thông tin đúng'):'');
 h+='<details style="margin-bottom:12px"'+(f.id?' open':'')+'><summary style="font-weight:700;cursor:pointer;margin-bottom:8px">Tùy chọn thêm (kỳ, trạng thái)</summary><div class="er-f"><label>Kỳ (tháng)</label><input class="inp" type="month" id="erKy" value="'+esc(f.ky||kyOf())+'"></div><div class="er-f"><label>Trạng thái</label><select class="inp" id="erSt">'+opt(STS,f.st)+'</select></div></details>';
 h+='<div style="position:sticky;bottom:0;background:#fff;padding:10px 0 calc(10px + env(safe-area-inset-bottom));display:flex;gap:8px;flex-wrap:wrap;border-top:1px solid var(--line)"><button class="btn btn-primary" style="flex:1" onclick="ER.save()">Lưu lỗi</button>'+(f.id?'<button class="btn btn-outline" onclick="ER.dup(\''+f.id+'\')">Nhân bản</button>':'<button class="btn btn-outline" onclick="ER.save(1)">Lưu &amp; ghi tiếp</button>')+'<button class="btn btn-outline" onclick="ER.cancel()">Hủy</button></div></div>';return h;}
 ER.tg=function(el,x){var l=ER.form.loai,i=l.indexOf(x);if(i<0)l.push(x);else l.splice(i,1);el.classList.toggle('chip-on',i<0);};
@@ -11223,6 +11228,14 @@ var b=new Blob(['\ufeff'+h+'</div></body></html>'],{type:'application/msword'}),
 </script>
 
 <style id="ana-css">
+/* thẻ nhắc lỗi báo ở trang chủ điện thoại */
+.fc-mt{display:flex;align-items:center;gap:12px;margin:12px 16px 0;padding:12px 14px;border-radius:14px;background:#fff8e6;border:1px solid #f3dfae;cursor:pointer;color:#7a5a00}
+.fc-mt.hot{background:#fff1f0;border-color:#f5c6c2;color:#8a1c14}
+.fc-mt b{display:block;font-size:14px;color:#101828}
+.fc-mt span{display:block;font-size:12.5px;margin-top:2px;line-height:1.4}
+.fc-mt em{margin-left:auto;font-style:normal;font-weight:800;background:rgba(0,0,0,.07);border-radius:999px;padding:2px 10px;font-size:13px}
+.fc-mt svg{flex:none}
+@media screen and (min-width:900px){.fc-mt{display:none}}
 /* ===== Phân tích mua hàng – tiêu hao ===== */
 @media(min-width:900px){#gmain .wrap.an-full{max-width:1240px}}
 .an-sc{overflow-x:auto;-webkit-overflow-scrolling:touch;border:1px solid var(--line);border-radius:14px;background:#fff}
@@ -11293,8 +11306,12 @@ function num(v){
   var s=String(v).replace(/\s/g,'');
   if(!s)return 0;
   if(/^-?[\d.,]+$/.test(s)){
-    if(/,\d{1,2}$/.test(s)&&s.indexOf('.')>=0)s=s.replace(/\./g,'').replace(',','.');
-    else s=s.replace(/,/g,'');
+    var neg=s.charAt(0)==='-';if(neg)s=s.slice(1);
+    var c=s.indexOf(','),d=s.indexOf('.');
+    if(c>=0&&d>=0){var dec=s.lastIndexOf(',')>s.lastIndexOf('.')?',':'.',th=dec===','?'.':',';s=s.split(th).join('').replace(dec,'.');}
+    else if(c>=0){s=/^\d{1,3}(,\d{3})+$/.test(s)?s.replace(/,/g,''):s.replace(',','.');}
+    else if(d>=0){if(/^\d{1,3}(\.\d{3}){2,}$/.test(s))s=s.replace(/\./g,'');}
+    if(neg)s='-'+s;
   }
   var x=Number(s);return isFinite(x)?x:0;
 }
@@ -11601,6 +11618,7 @@ AN.setKho=function(mk,val){
   if(d.length){if(old==null)delete AN.kho[key];else AN.kho[key]=old;toast('Tên kho bị trùng: '+d.join(', ')+' — chọn tên khác');rAna();return;}
   svKho();ANA.rename(AN.P,AN.kho);AN.run();
 };
+AN.setKhoI=function(ix,val){var k=AN.P&&AN.P.khoList&&AN.P.khoList[ix];if(k)AN.setKho(k.mk,val);};
 AN.khoReset=function(){AN.kho={};svKho();ANA.rename(AN.P,AN.kho);AN.run();toast('Đã khôi phục tên kho mặc định');};
 AN.tab_=function(t){AN.tab=t;rAna();window.scrollTo(0,0);};
 AN.reset=function(){AN.P=null;AN.R=null;AN.file='';AN.err='';rAna();};
@@ -11623,8 +11641,8 @@ function upCard(){
 function sw(k,t,d){return '<label class="an-sw"><input type="checkbox"'+(AN.opt[k]?' checked':'')+' onchange="AN.set(\''+k+'\',this.checked)"><span><b>'+t+'</b><small>'+d+'</small></span></label>';}
 function khoCard(){
   var P=AN.P,custom=Object.keys(AN.kho).length;
-  var b=P.khoList.map(function(k){
-    return '<tr><td>'+esc(k.mk)+'</td><td>'+esc(k.tenSo)+'</td><td><input class="inp" style="padding:8px 10px" value="'+esc(AN.kho[k.mk.toUpperCase()]||'')+'" placeholder="'+esc(k.def)+'" onchange="AN.setKho(\''+esc(k.mk).replace(/'/g,"\\'")+'\',this.value)"></td><td style="text-align:right">'+k.n+'</td></tr>';
+  var b=P.khoList.map(function(k,ix){
+    return '<tr><td>'+esc(k.mk)+'</td><td>'+esc(k.tenSo)+'</td><td><input class="inp" style="padding:8px 10px" value="'+esc(AN.kho[k.mk.toUpperCase()]||'')+'" placeholder="'+esc(k.def)+'" onchange="AN.setKhoI('+ix+',this.value)"></td><td style="text-align:right">'+k.n+'</td></tr>';
   }).join('');
   return '<details class="card an-kho" style="margin-top:12px"'+(AN.khoOpen?' open':'')+' ontoggle="AN.khoOpen=this.open"><summary>Cấu hình tên kho'+(custom?' <span class="an-badge">'+custom+' tên đã đổi</span>':'')+'</summary>'
     +'<div class="an-note" style="margin:8px 0 10px">Đặt tên hiển thị cho từng kho theo mã kho trong sổ. Để trống = dùng tên mặc định (hiện trong ô). Tên được nhớ trên máy này và áp dụng cho các lần tải file sau; bảng và file Excel xuất ra dùng đúng tên này.</div>'
