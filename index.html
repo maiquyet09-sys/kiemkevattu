@@ -2,8 +2,8 @@
 <html lang="vi">
 <head>
 <meta charset="UTF-8">
-<meta name="app-notes" content="Báo lỗi: công tắc Đã gửi cơ sở / Đã xử lý, bật tắt được; lỗi đã xử lý nằm ở tab Công việc đã xử lý (dữ liệu cũ giữ nguyên)">
-<meta name="app-version" content="2026111203">
+<meta name="app-notes" content="Báo lỗi: thẻ gọn hơn, 1 công tắc Đã xử lý; lỗi đã xử lý nằm ở tab Công việc đã xử lý (dữ liệu cũ giữ nguyên)">
+<meta name="app-version" content="2026111204">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="format-detection" content="telephone=no">
 <meta name="color-scheme" content="light">
@@ -11038,6 +11038,14 @@ if(!app)return;new MutationObserver(function(){clearTimeout(t);t=setTimeout(mark
 .er-sw.on i:after{left:18px}
 .er-sw.sent.on{border-color:#2563eb;color:#1e3a8a}.er-sw.sent.on i{background:#2563eb}
 .er-sw.done.on{border-color:#16a34a;color:#166534;background:#f0faf3}.er-sw.done.on i{background:#16a34a}
+.er-c .er-chips{margin-top:6px;gap:6px}.er-c .er-ch{font-size:12.5px;padding:2px 9px;border-radius:7px}
+.er-c .er-err{margin-top:8px;padding:7px 11px;border:0;border-left:4px solid #dc2626;border-radius:0 8px 8px 0;background:#fef2f2;color:#991b1b;font-size:14px;line-height:1.45}
+.er-c.s2 .er-err{background:#f2f8f4;border-left-color:#16a34a;color:#166534}
+.er-c .er-d{background:none;border-radius:0;padding:0;margin-top:8px;font-size:13px;line-height:1.55;color:var(--mut)}
+.er-c .er-sub{margin-top:8px;font-size:12px;color:var(--mut2)}
+.er-ft{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin-top:10px;padding-top:10px;border-top:1px solid var(--line)}
+.er-ft .btn{flex:none;width:auto;min-width:0;padding:8px 14px;font-size:13px}.er-ft .btn:not(.btn-primary){background:#fff;border:1px solid var(--line)}.er-ft .er-mn summary{padding:8px 12px}.er-ft .er-sp{flex:1}
+.er-c .er-sw{min-height:34px;font-size:13px}
 .er-chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
 .er-ch{display:inline-block;font-size:13px;font-weight:700;padding:3px 10px;border-radius:8px;line-height:1.35}
 .er-ch.lb{background:#fff1d6;color:#92400e;border:1px solid #f1bd5c}
@@ -11155,10 +11163,10 @@ function card(x){var nl=x.type==='nl',
 t=nl?esc(x.sct)+' · '+esc(x.ncc):esc(x.kh||x.labo)+(x.pid?' · '+esc(x.pid):''),
 chips='<div class="er-chips">'+(!nl&&x.labo?'<span class="er-ch lb">Labo: '+esc(x.labo)+'</span>':'')+(x.cs?'<span class="er-ch cs">Kho: '+esc(x.cs)+'</span>':'')+'</div>',
 eb=nl?((x.loai&&x.loai.length?x.loai.map(function(l){return '<span class="er-tag">'+esc(l)+'</span>';}).join(''):'')+((x.sai||x.dung)?'<div><span class="er-bad">'+esc(x.sai||'–')+'</span> → <span class="er-good">'+esc(x.dung||'–')+'</span></div>':'')):((x.loai1?'<span class="er-tag">'+esc(x.loai1)+'</span>':'')),
-err=(eb||x.note)?'<div class="er-err"><small>Lỗi cần xử lý</small>'+eb+(x.note?'<div>'+esc(x.note)+'</div>':'')+'</div>':'',
+err=(eb||x.note)?'<div class="er-err">'+eb+(x.note?'<div>'+esc(x.note)+'</div>':'')+'</div>':'',
 d=nl?((x.lines&&x.lines.length)?x.lines.map(function(l){return esc(lnTxt(l));}).join('<br>'):''):'<b>Labo báo:</b> '+esc(x.dvLabo||'–')+(x.slLabo?' · SL '+esc(x.slLabo):'')+(x.rLabo?' · '+esc(x.rLabo)+' răng':'')+'<br><b>VT:</b> '+esc(x.dvVT||'–')+(x.slVT?' · SL '+esc(x.slVT):'');
-var k=STS.indexOf(x.st),od=x.han&&x.st!==STS[2]&&x.han<ymd(new Date()),sub=esc(x.ky)+(x.tien?' · '+esc(x.tien)+'đ':'')+hanTxt(x);
-return '<div class="card er-c s'+k+(od?' od':'')+'"><div style="display:flex;justify-content:space-between;gap:8px"><div class="er-ttl">'+t+'</div><span class="er-st">'+esc(x.st)+'</span></div>'+chips+'<div class="er-sub">'+sub+'</div>'+err+(d?'<div class="er-d">'+d+'</div>':'')+'<div style="font-size:12px;color:var(--mut2);margin-top:6px">'+(x.cl&&!x.bad.length&&!x.ok.length?'Ảnh đã xoá sau khi xuất file':'Ảnh: '+x.bad.length+' bằng chứng, '+x.ok.length+' đúng')+(x.by?' · '+esc(x.by):'')+'</div>'+actHtml(x)+'</div>';}
+var k=STS.indexOf(x.st),od=x.han&&x.st!==STS[2]&&x.han<ymd(new Date()),sub=esc(x.ky)+(x.tien?' · '+esc(x.tien)+'đ':'')+hanTxt(x)+' · '+(x.cl&&!x.bad.length&&!x.ok.length?'Ảnh đã xoá sau khi xuất file':'Ảnh: '+x.bad.length+' bằng chứng, '+x.ok.length+' đúng')+(x.by?' · '+esc(x.by):'');
+return '<div class="card er-c s'+k+(od?' od':'')+'"><div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px"><div class="er-ttl">'+t+'</div>'+(k===1?'<span class="er-st">'+esc(x.st)+'</span>':'')+'</div>'+chips+err+(d?'<div class="er-d">'+d+'</div>':'')+'<div class="er-sub">'+sub+'</div>'+actHtml(x)+'</div>';}
 function stat(){var T={},L={},N={};ER.items.forEach(function(x){if(ER.ky&&x.ky!==ER.ky)return;var t=T[x.cs]=T[x.cs]||{nl:0,ps:{},lb:0},nl=x.type==='nl';if(nl){t.nl++;t.ps[nz(x.sct)]=1;}else t.lb++;(nl?x.loai:[x.loai1]).filter(Boolean).forEach(function(l){L[l]=(L[l]||0)+1;});});
 ER.misa.forEach(function(r){if(ER.ky&&r.d.slice(0,7)!==ER.ky)return;var m=nz(r.sct).match(/^NK-([A-Z]+)-/),c=m&&ER.map[m[1]];if(c)N[c]=(N[c]||0)+1;});
 return {T:T,L:L,N:N};}
@@ -11208,10 +11216,10 @@ function cn(t){var n=ER.items.filter(function(x){return x.type===t&&x.st!==STS[2
 function toolsHtml(){return '<details class="er-mn"><summary>Công cụ</summary><div class="er-pop"><label class="addbat" style="cursor:pointer">Nạp file MISA'+(ER.misa.length?' ('+ER.misa.length+' phiếu NK)':'')+'<input type="file" accept=".xlsx,.xls" hidden onchange="ER.misaUp(this)"></label><button class="addbat" onclick="ER.xls()">Xuất Excel</button><button class="addbat" onclick="ER.doc()">Xuất Word kèm ảnh</button><button class="addbat" onclick="ER.bk()">Sao lưu</button><label class="addbat" style="cursor:pointer">Khôi phục<input type="file" accept=".json" hidden onchange="ER.rs(this)"></label><button class="addbat" style="color:var(--red)" onclick="ER.cl()">Dọn dữ liệu</button></div></details>';}
 function sw(q,k,on,lab){return '<button type="button" role="switch" aria-checked="'+(on?'true':'false')+'" class="er-sw '+k+(on?' on':'')+'" onclick="ER.tg('+q+',\''+k+'\',this)"><i></i>'+lab+'</button>';}
 function actHtml(x){var done=x.st===STS[2],lb=x.type==='lb',t=ymd(new Date()),q="'"+x.id+"'",ack=lb&&x.nhac&&!done&&x.nhacNgay!==t,nx=done?'':'Chuyển: '+STS[STS.indexOf(x.st)+1],
-m='<button class="addbat" onclick="ER.dup('+q+')">Nhân bản</button>'+(lb?'<button class="addbat" onclick="ER.dupImg('+q+')">Nhân bản kèm ảnh</button>':'')+(lb&&!done?'<button class="addbat" onclick="ER.nhac('+q+')">'+(x.nhac?'Tắt nhắc hàng ngày':'Bật nhắc hàng ngày')+'</button>':'')+(lb&&x.bad.length?'<button class="addbat" onclick="ER.share('+q+')">Gửi ảnh cho labo</button>':'')+'<button class="addbat" style="color:var(--red)" onclick="ER.del('+q+')">Xoá</button>',
+m='<button class="addbat" onclick="ER.dup('+q+')">Nhân bản</button>'+(lb?'<button class="addbat" onclick="ER.dupImg('+q+')">Nhân bản kèm ảnh</button>':'')+(!done?'<button class="addbat" onclick="ER.tg('+q+',\'sent\')">'+(x.st===STS[0]?'Đánh dấu đã gửi cơ sở':'Bỏ đánh dấu đã gửi cơ sở')+'</button>':'')+(lb&&!done?'<button class="addbat" onclick="ER.nhac('+q+')">'+(x.nhac?'Tắt nhắc hàng ngày':'Bật nhắc hàng ngày')+'</button>':'')+(lb&&x.bad.length?'<button class="addbat" onclick="ER.share('+q+')">Gửi ảnh cho labo</button>':'')+'<button class="addbat" style="color:var(--red)" onclick="ER.del('+q+')">Xoá</button>',
 cta=ack?'<button class="btn btn-primary" onclick="ER.ack('+q+')">Đã nhắc hôm nay</button>':'',
-tg='<div class="er-tg">'+sw(q,'sent',x.st!==STS[0],'Đã gửi cơ sở')+sw(q,'done',done,'Đã xử lý')+'</div>';
-return tg+'<div class="er-row">'+cta+'<button class="btn" onclick="ER.edit('+q+')">Sửa</button><details class="er-mn"><summary>⋯</summary><div class="er-pop">'+m+'</div></details></div>';}
+tg=sw(q,'done',done,'Đã xử lý');
+return '<div class="er-ft">'+tg+'<span class="er-sp"></span>'+cta+'<button class="btn" onclick="ER.edit('+q+')">Sửa</button><details class="er-mn"><summary>⋯</summary><div class="er-pop">'+m+'</div></details></div>';}
 document.addEventListener('click',function(e){document.querySelectorAll('.er-mn[open]').forEach(function(d){if(!d.contains(e.target))d.removeAttribute('open');});});
 function byId(id){return ER.items.filter(function(i){return i.id===id;})[0];}
 function due(){var t=ymd(new Date());return ER.items.filter(function(x){return x.type==='lb'&&x.nhac&&x.st!==STS[2]&&x.nhacNgay!==t;});}
