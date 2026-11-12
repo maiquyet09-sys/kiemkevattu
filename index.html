@@ -2,8 +2,8 @@
 <html lang="vi">
 <head>
 <meta charset="UTF-8">
-<meta name="app-notes" content="Trang chủ điện thoại: thẻ nhắc lỗi báo bật nhắc chưa xử lý; rà soát lỗi chung (dữ liệu cũ giữ nguyên)">
-<meta name="app-version" content="2026111105">
+<meta name="app-notes" content="Báo lỗi: thẻ lỗi nổi bật phần lỗi, tên labo, tên kho (dữ liệu cũ giữ nguyên)">
+<meta name="app-version" content="2026111201">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="format-detection" content="telephone=no">
 <meta name="color-scheme" content="light">
@@ -11030,6 +11030,16 @@ if(!app)return;new MutationObserver(function(){clearTimeout(t);t=setTimeout(mark
 .er-sus{border-left:3px solid #f59e0b}
 .er-c{margin-bottom:10px;border-left:4px solid var(--line)}.er-c.s0{border-left-color:#f59e0b}.er-c.s1{border-left-color:#2563eb}.er-c.s2{border-left-color:#16a34a}.er-c.od{border-left-color:#dc2626}
 .er-ttl{font-weight:700;font-size:15px}.er-sub{font-size:13px;color:var(--mut);margin-top:2px}.er-d{background:#f6f8fb;border-radius:10px;padding:8px 10px;margin-top:8px;font-size:13px;color:var(--mut)}
+.er-d b{color:var(--ink)}
+.er-chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+.er-ch{display:inline-block;font-size:13px;font-weight:700;padding:3px 10px;border-radius:8px;line-height:1.35}
+.er-ch.lb{background:#fff1d6;color:#92400e;border:1px solid #f1bd5c}
+.er-ch.cs{background:#e1ecff;color:#1e3a8a;border:1px solid #9db9f0}
+.er-err{margin-top:8px;padding:9px 11px;border-radius:10px;background:#fdecec;border:1px solid #f4b4b4;border-left:5px solid #dc2626;color:#7f1d1d;font-size:14.5px;font-weight:700;line-height:1.5}
+.er-err small{display:block;font-size:11px;letter-spacing:.05em;text-transform:uppercase;color:#dc2626;font-weight:800;margin-bottom:2px}
+.er-tag{display:inline-block;background:#dc2626;color:#fff;padding:1px 9px;border-radius:99px;font-size:12px;font-weight:700;margin:0 4px 3px 0}
+.er-bad{color:#b91c1c;text-decoration:line-through}.er-good{color:#15803d}
+.er-c.s2 .er-err{background:#f1f5f2;border-color:#cfe3d5;border-left-color:#16a34a;color:#14532d}.er-c.s2 .er-err small{color:#16a34a}
 .er-row{display:flex;gap:8px;align-items:center;margin-top:10px}.er-row .btn{flex:1;padding:9px 10px;font-size:13px}
 .er-mn{position:relative}.er-mn summary{list-style:none;cursor:pointer;padding:9px 12px;border:1px solid var(--line);border-radius:10px;font-weight:700;background:#fff;font-size:13px;white-space:nowrap}.er-mn summary::-webkit-details-marker{display:none}
 .er-pop{position:absolute;right:0;z-index:20;min-width:200px;background:#fff;border:1px solid var(--line);border-radius:12px;box-shadow:0 8px 24px rgba(0,0,0,.15);padding:6px;display:flex;flex-direction:column;margin-top:4px}.er-pop .addbat{padding:10px;text-align:left;display:block}
@@ -11126,9 +11136,14 @@ ER.del=function(id){if(!confirm('Xoá lỗi này và ảnh đính kèm?'))return
 ER.set=function(k,v){ER[k]=v;ER.n=30;rEr();};
 /* ---- danh sách + thống kê ---- */
 function cur(){return ER.items.filter(function(x){return (ER.f==='all'||ER.f==='stat'||x.type===ER.f)&&(!ER.ky||x.ky===ER.ky)&&(!ER.st||x.st===ER.st)&&(!ER.cs||x.cs===ER.cs)&&(!ER.nh||(x.nhac&&x.st!==STS[2]))&&(!ER.q||qm(hay(x)));});}
-function card(x){var nl=x.type==='nl',t=nl?esc(x.sct)+' · '+esc(x.ncc):esc(x.kh||x.labo)+(x.pid?' · '+esc(x.pid):''),d=nl?esc(x.loai.join(', '))+((x.sai||x.dung)?'<br>Sai: '+esc(x.sai)+' → Đúng: '+esc(x.dung):'')+((x.lines&&x.lines.length)?'<br>'+x.lines.map(function(l){return esc(lnTxt(l));}).join('<br>'):''):(x.loai1?esc(x.loai1)+'<br>':'')+'Labo báo: '+esc(x.dvLabo||'–')+(x.slLabo?' · SL '+esc(x.slLabo):'')+(x.rLabo?' · '+esc(x.rLabo)+' răng':'')+'<br>VT: '+esc(x.dvVT||'–')+(x.slVT?' · SL '+esc(x.slVT):'');
-var k=STS.indexOf(x.st),od=x.han&&x.st!==STS[2]&&x.han<ymd(new Date()),sub=(!nl&&x.kh?'Labo: '+esc(x.labo)+' · ':'')+esc(x.cs)+' · '+esc(x.ky)+(x.tien?' · '+esc(x.tien)+'đ':'')+hanTxt(x);
-return '<div class="card er-c s'+k+(od?' od':'')+'"><div style="display:flex;justify-content:space-between;gap:8px"><div class="er-ttl">'+t+'</div><span class="er-st">'+esc(x.st)+'</span></div><div class="er-sub">'+sub+'</div><div class="er-d">'+d+(x.note?'<br><i>'+esc(x.note)+'</i>':'')+'</div><div style="font-size:12px;color:var(--mut2);margin-top:6px">'+(x.cl&&!x.bad.length&&!x.ok.length?'Ảnh đã xoá sau khi xuất file':'Ảnh: '+x.bad.length+' bằng chứng, '+x.ok.length+' đúng')+(x.by?' · '+esc(x.by):'')+'</div>'+actHtml(x)+'</div>';}
+function card(x){var nl=x.type==='nl',
+t=nl?esc(x.sct)+' · '+esc(x.ncc):esc(x.kh||x.labo)+(x.pid?' · '+esc(x.pid):''),
+chips='<div class="er-chips">'+(!nl&&x.labo?'<span class="er-ch lb">Labo: '+esc(x.labo)+'</span>':'')+(x.cs?'<span class="er-ch cs">Kho: '+esc(x.cs)+'</span>':'')+'</div>',
+eb=nl?((x.loai&&x.loai.length?x.loai.map(function(l){return '<span class="er-tag">'+esc(l)+'</span>';}).join(''):'')+((x.sai||x.dung)?'<div><span class="er-bad">'+esc(x.sai||'–')+'</span> → <span class="er-good">'+esc(x.dung||'–')+'</span></div>':'')):((x.loai1?'<span class="er-tag">'+esc(x.loai1)+'</span>':'')),
+err=(eb||x.note)?'<div class="er-err"><small>Lỗi cần xử lý</small>'+eb+(x.note?'<div>'+esc(x.note)+'</div>':'')+'</div>':'',
+d=nl?((x.lines&&x.lines.length)?x.lines.map(function(l){return esc(lnTxt(l));}).join('<br>'):''):'<b>Labo báo:</b> '+esc(x.dvLabo||'–')+(x.slLabo?' · SL '+esc(x.slLabo):'')+(x.rLabo?' · '+esc(x.rLabo)+' răng':'')+'<br><b>VT:</b> '+esc(x.dvVT||'–')+(x.slVT?' · SL '+esc(x.slVT):'');
+var k=STS.indexOf(x.st),od=x.han&&x.st!==STS[2]&&x.han<ymd(new Date()),sub=esc(x.ky)+(x.tien?' · '+esc(x.tien)+'đ':'')+hanTxt(x);
+return '<div class="card er-c s'+k+(od?' od':'')+'"><div style="display:flex;justify-content:space-between;gap:8px"><div class="er-ttl">'+t+'</div><span class="er-st">'+esc(x.st)+'</span></div>'+chips+'<div class="er-sub">'+sub+'</div>'+err+(d?'<div class="er-d">'+d+'</div>':'')+'<div style="font-size:12px;color:var(--mut2);margin-top:6px">'+(x.cl&&!x.bad.length&&!x.ok.length?'Ảnh đã xoá sau khi xuất file':'Ảnh: '+x.bad.length+' bằng chứng, '+x.ok.length+' đúng')+(x.by?' · '+esc(x.by):'')+'</div>'+actHtml(x)+'</div>';}
 function stat(){var T={},L={},N={};ER.items.forEach(function(x){if(ER.ky&&x.ky!==ER.ky)return;var t=T[x.cs]=T[x.cs]||{nl:0,ps:{},lb:0},nl=x.type==='nl';if(nl){t.nl++;t.ps[nz(x.sct)]=1;}else t.lb++;(nl?x.loai:[x.loai1]).filter(Boolean).forEach(function(l){L[l]=(L[l]||0)+1;});});
 ER.misa.forEach(function(r){if(ER.ky&&r.d.slice(0,7)!==ER.ky)return;var m=nz(r.sct).match(/^NK-([A-Z]+)-/),c=m&&ER.map[m[1]];if(c)N[c]=(N[c]||0)+1;});
 return {T:T,L:L,N:N};}
