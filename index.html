@@ -2,8 +2,8 @@
 <html lang="vi">
 <head>
 <meta charset="UTF-8">
-<meta name="app-notes" content="Báo lỗi: thẻ lỗi nổi bật phần lỗi, tên labo, tên kho (dữ liệu cũ giữ nguyên)">
-<meta name="app-version" content="2026111201">
+<meta name="app-notes" content="Báo lỗi: công tắc Đã gửi cơ sở / Đã xử lý, bật tắt được; lỗi đã xử lý nằm ở tab Công việc đã xử lý (dữ liệu cũ giữ nguyên)">
+<meta name="app-version" content="2026111203">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="format-detection" content="telephone=no">
 <meta name="color-scheme" content="light">
@@ -11031,6 +11031,13 @@ if(!app)return;new MutationObserver(function(){clearTimeout(t);t=setTimeout(mark
 .er-c{margin-bottom:10px;border-left:4px solid var(--line)}.er-c.s0{border-left-color:#f59e0b}.er-c.s1{border-left-color:#2563eb}.er-c.s2{border-left-color:#16a34a}.er-c.od{border-left-color:#dc2626}
 .er-ttl{font-weight:700;font-size:15px}.er-sub{font-size:13px;color:var(--mut);margin-top:2px}.er-d{background:#f6f8fb;border-radius:10px;padding:8px 10px;margin-top:8px;font-size:13px;color:var(--mut)}
 .er-d b{color:var(--ink)}
+.er-tg{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+.er-sw{display:inline-flex;align-items:center;gap:8px;padding:6px 12px 6px 7px;border:1px solid var(--line);border-radius:99px;background:#fff;font:inherit;font-size:13px;font-weight:700;color:var(--mut);cursor:pointer;min-height:36px}
+.er-sw i{position:relative;flex:none;width:38px;height:22px;border-radius:99px;background:#c5ccd8;transition:background .2s}
+.er-sw i:after{content:'';position:absolute;top:2px;left:2px;width:18px;height:18px;border-radius:50%;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.3);transition:left .2s}
+.er-sw.on i:after{left:18px}
+.er-sw.sent.on{border-color:#2563eb;color:#1e3a8a}.er-sw.sent.on i{background:#2563eb}
+.er-sw.done.on{border-color:#16a34a;color:#166534;background:#f0faf3}.er-sw.done.on i{background:#16a34a}
 .er-chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
 .er-ch{display:inline-block;font-size:13px;font-weight:700;padding:3px 10px;border-radius:8px;line-height:1.35}
 .er-ch.lb{background:#fff1d6;color:#92400e;border:1px solid #f1bd5c}
@@ -11131,11 +11138,19 @@ if(nl){f.sct=val('erSct');f.ncc=val('erNcc');if(!f.sct){toast('Nhập số chứ
 else{f.labo=val('erLabo');f.kh=val('erKh');f.pid=val('erPid');f.dvLabo=val('erDvLb');f.slLabo=val('erSlLb');f.rLabo=val('erRLb');f.dvVT=val('erDvVT');f.slVT=val('erSlVT');f.note=val('erNoteLb');f.nhac=!!($('erNhac')&&$('erNhac').checked);if(!f.labo||!f.kh||!f.pid){toast('Nhập tên labo, tên khách hàng và mã KH');miss('erLabo');return;}if(!f.bad.length&&!f.cl){toast('Cần ít nhất 1 ảnh bằng chứng');miss('bad');return;}if(ER.labos.indexOf(f.labo)<0){ER.labos.push(f.labo);sv(KL,ER.labos);}}
 f.cs=cs;f.ky=val('erKy')||kyOf();f.st=val('erSt');if(!f.id){var dp=ER.items.filter(function(x){return x.type===f.type&&(nl?(nz(x.sct)===nz(f.sct)&&x.loai.some(function(l){return f.loai.indexOf(l)>=0;})):(!!f.pid&&x.pid===f.pid&&x.labo===f.labo));});if(dp.length&&!confirm('Đã có '+dp.length+' lỗi giống ('+(nl?f.sct:f.pid+' – '+f.labo)+'). Vẫn ghi thêm?'))return;}var i=ER.items.map(function(x){return x.id;}).indexOf(f.id);if(i>=0)ER.items[i]=f;else{f.id=uid();f.ngay=new Date().toISOString();f.by=who();f.han=ymd(new Date(Date.now()+3*864e5));ER.items.unshift(f);}
 if(ER._del.length)idbDel(ER._del);ER._del=[];sv(KEY,ER.items);toast('Đã lưu lỗi');if(more){var g=ER.form;ER.new(g.type);var n=ER.form;n.cs=g.cs;n.ky=g.ky;if(g.type==='lb')n.labo=g.labo;ER.slot='bad';rEr();return;}ER.form=null;ER.v='list';rEr();};
-ER.nx=function(id){var x=ER.items.filter(function(i){return i.id===id;})[0];x.st=STS[Math.min(2,STS.indexOf(x.st)+1)];sv(KEY,ER.items);rEr();};
+ER.tg=function(id,k,el){var x=byId(id);if(!x)return;var was=x.st;
+if(k==='done'){if(was===STS[2]){x.st=x.stPrev&&x.stPrev!==STS[2]?x.stPrev:STS[1];delete x.stPrev;}else{x.stPrev=was;x.st=STS[2];}}
+else{if(was===STS[0])x.st=STS[1];else{x.st=STS[0];delete x.stPrev;}}
+sv(KEY,ER.items);
+var on=x.st===STS[2];if(k==='done'&&el){el.classList.toggle('on',on);el.setAttribute('aria-checked',on?'true':'false');}
+var DN=STS[2],leave=ER.f==='done'?x.st!==DN:(x.st===DN&&ER.st!==DN);
+if(x.st===DN&&was!==DN)toast('Đã xử lý — chuyển sang “Công việc đã xử lý”');else if(was===DN)toast('Đã mở lại — trạng thái: '+x.st);
+if(leave)setTimeout(rEr,350);else rEr();};
+ER.nx=function(id){var x=ER.items.filter(function(i){return i.id===id;})[0];x.st=STS[Math.min(2,STS.indexOf(x.st)+1)];sv(KEY,ER.items);if(x.st===STS[2])toast('Đã chuyển sang “Công việc đã xử lý”');rEr();};
 ER.del=function(id){if(!confirm('Xoá lỗi này và ảnh đính kèm?'))return;var x=ER.items.filter(function(i){return i.id===id;})[0];idbDel(x.bad.concat(x.ok));ER.items=ER.items.filter(function(i){return i.id!==id;});sv(KEY,ER.items);rEr();};
 ER.set=function(k,v){ER[k]=v;ER.n=30;rEr();};
 /* ---- danh sách + thống kê ---- */
-function cur(){return ER.items.filter(function(x){return (ER.f==='all'||ER.f==='stat'||x.type===ER.f)&&(!ER.ky||x.ky===ER.ky)&&(!ER.st||x.st===ER.st)&&(!ER.cs||x.cs===ER.cs)&&(!ER.nh||(x.nhac&&x.st!==STS[2]))&&(!ER.q||qm(hay(x)));});}
+function cur(){return ER.items.filter(function(x){return (ER.f==='all'||ER.f==='stat'||(ER.f==='done'?x.st===STS[2]:x.type===ER.f))&&(!ER.ky||x.ky===ER.ky)&&(!ER.st||x.st===ER.st)&&(!ER.cs||x.cs===ER.cs)&&(!ER.nh||(x.nhac&&x.st!==STS[2]))&&(!ER.q||qm(hay(x)));});}
 function card(x){var nl=x.type==='nl',
 t=nl?esc(x.sct)+' · '+esc(x.ncc):esc(x.kh||x.labo)+(x.pid?' · '+esc(x.pid):''),
 chips='<div class="er-chips">'+(!nl&&x.labo?'<span class="er-ch lb">Labo: '+esc(x.labo)+'</span>':'')+(x.cs?'<span class="er-ch cs">Kho: '+esc(x.cs)+'</span>':'')+'</div>',
@@ -11152,8 +11167,8 @@ Object.keys(S.T).forEach(function(c){var t=S.T[c],p=Object.keys(t.ps).length,n=S
 h+='</table><div style="font-size:12px;color:var(--mut);margin-top:6px">Tỷ lệ = số phiếu có lỗi / tổng phiếu nhập kho trong file MISA đã nạp (cần nạp file MISA của kỳ đó).</div></div><div class="card"><div style="font-weight:700;margin-bottom:6px">Theo loại lỗi</div><table class="er-tb">';
 Object.keys(S.L).sort(function(a,b){return S.L[b]-S.L[a];}).forEach(function(l){h+='<tr><td>'+esc(l)+'</td><td class="n">'+S.L[l]+'</td></tr>';});return h+'</table></div>';}
 function resHtml(){if(ER.f==='stat')return statHtml();var h='',C=ER._c||[],q=ER.q,Cs=q?C.filter(function(c){return qm(c.r.sct+' '+c.r.ncc+' '+(ER.map[c.r.c]||'')+' '+(c.r.c||'')+' '+c.k);}):C;
-if(Cs.length&&ER.f!=='lb')h+='<details class="card" style="margin-bottom:12px"'+(q?' open':'')+'><summary style="font-weight:700;cursor:pointer">Nghi vấn từ file MISA ('+Cs.length+(q?'/'+C.length:'')+' mục)</summary>'+Cs.map(function(c){return '<div class="er-sus" style="padding:6px 8px;margin-top:8px;font-size:13px"><b>'+esc(c.r.sct)+'</b> '+esc(c.r.ncc)+'<br>'+esc(c.k)+' <button class="addbat" onclick="ER.fromChk('+C.indexOf(c)+')">Ghi lỗi</button></div>';}).join('')+'</details>';
-var L=cur(),sh=L.slice(0,ER.n);return h+(L.length?sh.map(card).join('')+(L.length>ER.n?'<button class="btn btn-outline" onclick="ER.n+=30;ER.res()">Xem thêm ('+(L.length-ER.n)+')</button>':''):'<div class="card" style="color:var(--mut);text-align:center">'+(q?'Không có kết quả cho “'+esc(q)+'”.':'Chưa có lỗi nào. Bấm “+ Lỗi nhập liệu” hoặc “+ Lỗi labo” để ghi.')+'</div>');}
+if(Cs.length&&ER.f!=='lb'&&ER.f!=='done')h+='<details class="card" style="margin-bottom:12px"'+(q?' open':'')+'><summary style="font-weight:700;cursor:pointer">Nghi vấn từ file MISA ('+Cs.length+(q?'/'+C.length:'')+' mục)</summary>'+Cs.map(function(c){return '<div class="er-sus" style="padding:6px 8px;margin-top:8px;font-size:13px"><b>'+esc(c.r.sct)+'</b> '+esc(c.r.ncc)+'<br>'+esc(c.k)+' <button class="addbat" onclick="ER.fromChk('+C.indexOf(c)+')">Ghi lỗi</button></div>';}).join('')+'</details>';
+var L=cur(),dn=ER.f==='done',hid=0;if(!dn&&ER.st!==STS[2]){var L0=L.length;L=L.filter(function(x){return x.st!==STS[2];});hid=L0-L.length;}var sh=L.slice(0,ER.n);return h+(L.length?sh.map(card).join('')+(L.length>ER.n?'<button class="btn btn-outline" onclick="ER.n+=30;ER.res()">Xem thêm ('+(L.length-ER.n)+')</button>':''):'<div class="card" style="color:var(--mut);text-align:center">'+(q?'Không có kết quả cho “'+esc(q)+'”.':(dn?'Chưa có công việc nào đã xử lý.':hid?'Không còn lỗi chưa xử lý. '+hid+' lỗi đã xử lý nằm ở tab “Công việc đã xử lý”.':'Chưa có lỗi nào. Bấm “+ Lỗi nhập liệu” hoặc “+ Lỗi labo” để ghi.'))+'</div>');}
 ER.res=function(){var e=$('erRes');if(e)e.innerHTML=resHtml();};
 function rEr(){var h='<div class="topbar"><div class="trow wrap"><button class="back" onclick="'+(ER.v==='form'?'ER.cancel()':'A.go(\'home\')')+'">‹</button><div class="ttl">Báo lỗi</div></div><div style="height:10px"></div></div><div class="wrap" style="padding-top:16px;padding-bottom:100px">';
 if(ER.v==='form'){$('app').innerHTML=h+formHtml()+'</div>';var e=$('erSct');if(e)e.addEventListener('input',ER.sctCh);drawSlots();window.scrollTo(0,0);return;}
@@ -11161,7 +11176,7 @@ var C=ER.misa.length?chk():[];ER._c=C;h+=banHtml();
 h+='<div style="display:flex;gap:8px;margin-bottom:10px"><button class="btn btn-primary" style="flex:1" onclick="ER.new(\'nl\')">+ Lỗi nhập liệu</button><button class="btn btn-primary" style="flex:1" onclick="ER.new(\'lb\')">+ Lỗi labo</button>'+toolsHtml()+'</div>';
 
 if(ER.clean)h+=cleanHtml();
-h+='<div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px">'+[['all','Tất cả'+(pend()?' ('+pend()+' chưa xử lý)':'')],['nl','Nhập liệu'+cn('nl')],['lb','Labo'+cn('lb')],['stat','Thống kê']].map(function(x){return '<span class="chip'+(ER.f===x[0]?' chip-on':'')+'" onclick="ER.set(\'f\',\''+x[0]+'\')">'+x[1]+'</span>';}).join('')+'</div>';
+h+='<div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px">'+[['all','Tất cả'+(pend()?' ('+pend()+' chưa xử lý)':'')],['nl','Nhập liệu'+cn('nl')],['lb','Labo'+cn('lb')],['done','Công việc đã xử lý'+dnN()],['stat','Thống kê']].map(function(x){return '<span class="chip'+(ER.f===x[0]?' chip-on':'')+'" onclick="ER.set(\'f\',\''+x[0]+'\')">'+x[1]+'</span>';}).join('')+'</div>';
 if(ER.f!=='stat')h+='<input class="inp" id="erQ" type="search" placeholder="Tìm số phiếu, tên cơ sở, nhà cung cấp, labo, khách hàng, PID…" value="'+esc(ER.q)+'" oninput="ER.q=this.value;ER.n=30;clearTimeout(ER._t);ER._t=setTimeout(ER.res,200)" style="margin-bottom:10px;width:100%;box-sizing:border-box">';
 h+='<div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px"><input class="inp" type="month" value="'+esc(ER.ky)+'" onchange="ER.set(\'ky\',this.value)" style="flex:1 1 140px"><select class="inp" onchange="ER.set(\'cs\',this.value)" style="flex:1 1 140px">'+csF()+'</select><select class="inp" onchange="ER.set(\'st\',this.value)" style="flex:1 1 140px"><option value="">Mọi trạng thái</option>'+opt(STS,ER.st)+'</select></div>';
 if(ER.nh)h+='<div style="margin-bottom:10px"><span class="chip chip-on" onclick="ER.set(\'nh\',false)">Đang lọc: lỗi bật nhắc chưa xử lý (mọi tháng) ✕</span></div>';
@@ -11191,10 +11206,12 @@ var KL='kk_err_labo';ER.labos=ld(KL,[]);
 function labos(){var o={};ER.labos.concat(ER.items.map(function(x){return x.labo;})).forEach(function(v){if(v)o[v]=1;});return Object.keys(o).sort().map(function(v){return '<option value="'+esc(v)+'">';}).join('');}
 function cn(t){var n=ER.items.filter(function(x){return x.type===t&&x.st!==STS[2]&&(!ER.ky||x.ky===ER.ky);}).length;return n?' ('+n+')':'';}
 function toolsHtml(){return '<details class="er-mn"><summary>Công cụ</summary><div class="er-pop"><label class="addbat" style="cursor:pointer">Nạp file MISA'+(ER.misa.length?' ('+ER.misa.length+' phiếu NK)':'')+'<input type="file" accept=".xlsx,.xls" hidden onchange="ER.misaUp(this)"></label><button class="addbat" onclick="ER.xls()">Xuất Excel</button><button class="addbat" onclick="ER.doc()">Xuất Word kèm ảnh</button><button class="addbat" onclick="ER.bk()">Sao lưu</button><label class="addbat" style="cursor:pointer">Khôi phục<input type="file" accept=".json" hidden onchange="ER.rs(this)"></label><button class="addbat" style="color:var(--red)" onclick="ER.cl()">Dọn dữ liệu</button></div></details>';}
+function sw(q,k,on,lab){return '<button type="button" role="switch" aria-checked="'+(on?'true':'false')+'" class="er-sw '+k+(on?' on':'')+'" onclick="ER.tg('+q+',\''+k+'\',this)"><i></i>'+lab+'</button>';}
 function actHtml(x){var done=x.st===STS[2],lb=x.type==='lb',t=ymd(new Date()),q="'"+x.id+"'",ack=lb&&x.nhac&&!done&&x.nhacNgay!==t,nx=done?'':'Chuyển: '+STS[STS.indexOf(x.st)+1],
-m='<button class="addbat" onclick="ER.dup('+q+')">Nhân bản</button>'+(lb?'<button class="addbat" onclick="ER.dupImg('+q+')">Nhân bản kèm ảnh</button>':'')+(lb&&!done?'<button class="addbat" onclick="ER.nhac('+q+')">'+(x.nhac?'Tắt nhắc hàng ngày':'Bật nhắc hàng ngày')+'</button>':'')+(lb&&x.bad.length?'<button class="addbat" onclick="ER.share('+q+')">Gửi ảnh cho labo</button>':'')+(ack?'<button class="addbat" onclick="ER.nx('+q+')">'+nx+'</button>':'')+'<button class="addbat" style="color:var(--red)" onclick="ER.del('+q+')">Xoá</button>',
-cta=ack?'<button class="btn btn-primary" onclick="ER.ack('+q+')">Đã nhắc hôm nay</button>':(done?'':'<button class="btn btn-primary" onclick="ER.nx('+q+')">'+nx+'</button>');
-return '<div class="er-row">'+cta+'<button class="btn" onclick="ER.edit('+q+')">Sửa</button><details class="er-mn"><summary>⋯</summary><div class="er-pop">'+m+'</div></details></div>';}
+m='<button class="addbat" onclick="ER.dup('+q+')">Nhân bản</button>'+(lb?'<button class="addbat" onclick="ER.dupImg('+q+')">Nhân bản kèm ảnh</button>':'')+(lb&&!done?'<button class="addbat" onclick="ER.nhac('+q+')">'+(x.nhac?'Tắt nhắc hàng ngày':'Bật nhắc hàng ngày')+'</button>':'')+(lb&&x.bad.length?'<button class="addbat" onclick="ER.share('+q+')">Gửi ảnh cho labo</button>':'')+'<button class="addbat" style="color:var(--red)" onclick="ER.del('+q+')">Xoá</button>',
+cta=ack?'<button class="btn btn-primary" onclick="ER.ack('+q+')">Đã nhắc hôm nay</button>':'',
+tg='<div class="er-tg">'+sw(q,'sent',x.st!==STS[0],'Đã gửi cơ sở')+sw(q,'done',done,'Đã xử lý')+'</div>';
+return tg+'<div class="er-row">'+cta+'<button class="btn" onclick="ER.edit('+q+')">Sửa</button><details class="er-mn"><summary>⋯</summary><div class="er-pop">'+m+'</div></details></div>';}
 document.addEventListener('click',function(e){document.querySelectorAll('.er-mn[open]').forEach(function(d){if(!d.contains(e.target))d.removeAttribute('open');});});
 function byId(id){return ER.items.filter(function(i){return i.id===id;})[0];}
 function due(){var t=ymd(new Date());return ER.items.filter(function(x){return x.type==='lb'&&x.nhac&&x.st!==STS[2]&&x.nhacNgay!==t;});}
@@ -11215,6 +11232,7 @@ setTimeout(function(){var n=due().length;if(n)toast('Hôm nay cần nhắc '+n+'
 ER.hintOff=function(){sv(KH,1);rEr();};
 function warnChk(){if(!(navigator.storage&&navigator.storage.estimate))return;navigator.storage.estimate().then(function(e){var w=$('erWarn');if(w&&e.quota&&e.usage/e.quota>.7)w.innerHTML='<div class="card" style="margin-bottom:12px;border-left:3px solid #dc2626;font-size:13px">Bộ nhớ trình duyệt đã dùng '+Math.round(e.usage/e.quota*100)+'%. Hãy xuất Word/Excel rồi bấm “Dọn dữ liệu”.</div>';});}
 /* ---- tiện ích thao tác nhanh + sao lưu ---- */
+function dnN(){var n=ER.items.filter(function(x){return x.st===STS[2]&&(!ER.ky||x.ky===ER.ky);}).length;return n?' ('+n+')':'';}
 function pend(){return ER.items.filter(function(x){return x.st!==STS[2];}).length;}
 function csF(){var a=((window.db&&db.folders)||[]).slice();ER.items.forEach(function(x){if(x.cs&&a.indexOf(x.cs)<0)a=a.concat(x.cs);});return '<option value="">Mọi cơ sở</option>'+opt(a,ER.cs);}
 function miss(s){var b=$('erS_'+s);if(b){b.style.borderColor='#dc2626';b.scrollIntoView({block:'center'});}}
