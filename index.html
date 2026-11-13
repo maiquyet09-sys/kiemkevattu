@@ -1453,6 +1453,9 @@ html body .nx-r.amb .nx-n{background:#fbf1d9;color:#7a5a12}
 html body .nx-r.grn .nx-n{background:#e3f5ec;color:#1f6b4a}
 html body .nx-c{flex:none;display:flex;color:#a3a9bb}
 html body .nx-tot{min-width:22px;height:22px;padding:0 7px;border-radius:99px;display:inline-grid;place-items:center;font-size:12.5px;font-weight:800;background:#dc4a4a;color:#fff}
+/* ===== Cần xử lý → nhảy thẳng tới chỗ có vấn đề: viền nhấn chớp nhẹ ===== */
+@keyframes nxFlash{0%,55%{outline:3px solid rgba(217,130,43,.9);outline-offset:3px}100%{outline:3px solid rgba(217,130,43,0);outline-offset:7px}}
+html body .nx-flash{animation:nxFlash 2.4s ease-out 1;border-radius:14px}
 /* ===== Mục đang chọn: nền chuyển màu + thanh vàng đều 2 đầu (thay cho viền inset hình liềm) ===== */
 html body #gsidebar .gnav-item.on:not(.gnav-sub),html body #gdrawer .gnav-item.on:not(.gnav-sub){position:relative;border-radius:12px;background:linear-gradient(90deg,rgba(244,220,156,.30) 0%,rgba(212,175,95,.14) 45%,rgba(212,175,95,0) 100%)!important;box-shadow:none!important}
 html body #gsidebar .gnav-item.on:not(.gnav-sub)::before,html body #gdrawer .gnav-item.on:not(.gnav-sub)::before{content:"";position:absolute;left:5px;top:12px;bottom:12px;width:4px;border-radius:999px;background:linear-gradient(180deg,#c9a24f 0%,#f7e3a8 50%,#c9a24f 100%);box-shadow:0 0 8px rgba(212,175,95,.45)}
@@ -4628,12 +4631,12 @@ function renderHomeOld(){
   try{nxo=db.periods.filter(function(p){return p.items.some(function(i){return !i.counted&&i.close!==0;});}).length;}catch(e){}
   try{if(db.pay&&db.pay.mua&&db.pay.mua.length)payCompute().forEach(function(g){if(g.bad)nxl++;});}catch(e){}
   function nxRow(cls,ico,label,n,act){nxr+='<div class="nx-r '+cls+'" onclick="'+act+'"><span class="nx-i">'+ico+'</span><div class="nx-t">'+label+'</div><span class="nx-n tnum">'+n+'</span><span class="nx-c">'+icon('chev',16)+'</span></div>';}
-  if(nxc.expired)nxRow('red',KIC.expired,'Đã hết hạn',nxc.expired,"A.go('hsd')");
-  if(nxc.m1)nxRow('org',KCAL,'Còn ≤ 1 tháng',nxc.m1,"A.go('hsd')");
-  if(nxo)nxRow('blu',icon('clock',18),'Kỳ đang kiểm dở',nxo,"v2List()");
-  if(nxl)nxRow('amb',icon('doc',18),'Thanh toán NCC có lỗi',nxl,"A.go('pay')");
-  if(nxc.m3)nxRow('amb',KCAL,'Còn ≤ 3 tháng',nxc.m3,"A.go('hsd')");
-  if(nxc.m6)nxRow('grn',KCAL,'Còn ≤ 6 tháng',nxc.m6,"A.go('hsd')");
+  if(nxc.expired)nxRow('red',KIC.expired,'Đã hết hạn',nxc.expired,"NX.go('expired')");
+  if(nxc.m1)nxRow('org',KCAL,'Còn ≤ 1 tháng',nxc.m1,"NX.go('m1')");
+  if(nxo)nxRow('blu',icon('clock',18),'Kỳ đang kiểm dở',nxo,"NX.go('open')");
+  if(nxl)nxRow('amb',icon('doc',18),'Thanh toán NCC có lỗi',nxl,"NX.go('pay')");
+  if(nxc.m3)nxRow('amb',KCAL,'Còn ≤ 3 tháng',nxc.m3,"NX.go('m3')");
+  if(nxc.m6)nxRow('grn',KCAL,'Còn ≤ 6 tháng',nxc.m6,"NX.go('m6')");
   nxt=(nxc.expired||0)+(nxc.m1||0)+nxo+nxl;
   if(!nxr)nxr='<div class="nx-r grn" style="cursor:default"><span class="nx-i">'+icon('check',18)+'</span><div class="nx-t">Không có việc cần xử lý</div></div>';
   h+='<div class="wrap mt20"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px"><span class="sec" style="margin:0;display:flex;align-items:center;gap:8px">Cần xử lý'+(nxt?'<span class="nx-tot tnum">'+nxt+'</span>':'')+'</span><button class="addbat" style="color:var(--teal);display:flex;align-items:center;gap:5px" onclick="showHsdEmailPicker()">'+icon('mail',15)+'Email</button></div><div class="nx">'+nxr+'</div></div>';
@@ -5179,7 +5182,7 @@ function renderHsd(){
   }
   BUCKETS.forEach(function(b){
     var rows=entries.filter(function(e){return b.test(e.days);});
-    h+='<div style="margin-bottom:20px"><div style="font-size:14px;font-weight:700;color:'+b.strong+';margin-bottom:8px">'+b.label+' · '+rows.length+'</div>';
+    h+='<div id="hsd-b-'+b.k+'" style="margin-bottom:20px"><div style="font-size:14px;font-weight:700;color:'+b.strong+';margin-bottom:8px">'+b.label+' · '+rows.length+'</div>';
     if(!rows.length)h+='<div style="font-size:12px;color:var(--mut2)">Không có.</div>';
     rows.forEach(function(e){
       h+='<div class="hsditem"><div style="flex:1;min-width:0">'+
@@ -7856,10 +7859,10 @@ function fcPanels(){
       I2='<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="5" width="16" height="15" rx="3"/><path d="M8 3v4M16 3v4M4 10h16"/></svg>',
       I3='<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="4" width="12" height="17" rx="3"/><path d="m9.5 12 1.8 1.8 3.2-3.6"/></svg>',
       I4='<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8"/><path d="M12 8v8M9.5 10.5h5"/></svg>';
-  if(ex)rows.push(row('r',I1,'Có '+ex+' vật tư đã hết hạn sử dụng',ex,"A.go('hsd')"));
-  if(m1)rows.push(row('a',I2,m1+' vật tư còn ≤ 1 tháng',m1,"A.go('hsd')"));
-  if(o)rows.push(row('i',I3,o+' kỳ kiểm kê chưa hoàn thành',o,'v2List()'));
-  if(nl)rows.push(row('p',I4,nl+' đề nghị thanh toán NCC cần xử lý',nl,"A.go('pay')"));
+  if(ex)rows.push(row('r',I1,'Có '+ex+' vật tư đã hết hạn sử dụng',ex,"NX.go('expired')"));
+  if(m1)rows.push(row('a',I2,m1+' vật tư còn ≤ 1 tháng',m1,"NX.go('m1')"));
+  if(o)rows.push(row('i',I3,o+' kỳ kiểm kê chưa hoàn thành',o,"NX.go('open')"));
+  if(nl)rows.push(row('p',I4,nl+' đề nghị thanh toán NCC cần xử lý',nl,"NX.go('pay')"));
   if(eN)rows.push(row(eT||eO?'r':'a',I1,fcErrMsg(ec),eN,"A.go('err');ER.nhacView&&ER.nhacView()"));
   var tot=ex+m1+o+nl+eN;
   (db.periods||[]).slice(0,5).forEach(function(p){act+='<div class="fc-tr"><span class="fc-ti i">'+I3+'</span><span class="fc-tx">Kiểm kê vật tư – '+esc(p.name||'Kỳ kiểm kê')+'</span><span class="fc-ago">'+(p.createdAt?fcAgo(p.createdAt):'')+'</span></div>';});
@@ -12383,6 +12386,85 @@ function init(){
   window.addEventListener('resize',pos);
 }
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init);else init();
+})();
+
+/* ===== "Cần xử lý": bấm vào là vào thẳng chỗ có vấn đề (không dừng ở thư mục / danh sách chung) =====
+   - Hết hạn / ≤1-3-6 tháng  → màn Cảnh báo HSD, cuộn tới đúng nhóm và nhấn viền
+   - Kỳ đang kiểm dở         → 1 kỳ: vào thẳng kỳ đó, bộ lọc "Chưa kiểm"; nhiều kỳ: chọn kỳ rồi vào thẳng
+   - Thanh toán NCC có lỗi   → 1 NCC: mở thẳng phiếu, cuộn tới hóa đơn lỗi đầu tiên; nhiều NCC: danh sách đã lọc "Lệch"
+   Nếu có lỗi bất ngờ thì quay về cách mở cũ, không làm treo app. */
+var NX={
+  from:'',
+  focus:function(el){
+    if(!el)return;
+    el.style.scrollMarginTop='84px';
+    try{el.scrollIntoView({behavior:'smooth',block:'start'});}catch(e){el.scrollIntoView();}
+    el.classList.remove('nx-flash');void el.offsetWidth;el.classList.add('nx-flash');
+    setTimeout(function(){el.classList.remove('nx-flash');},2600);
+  },
+  openPeriods:function(){
+    var ops=db.periods.filter(function(p){return p.items.some(needsCount);});
+    if(!ops.length){v2List();return;}
+    if(ops.length===1){NX.openP(ops[0].id);return;}
+    var o=document.getElementById('nmovl');if(o)o.remove();
+    o=document.createElement('div');o.id='nmovl';
+    var h='<div class="sigcard"><div style="font-weight:800;font-size:16px;margin-bottom:2px">Kỳ đang kiểm dở</div>'
+      +'<div style="font-size:12.5px;color:var(--mut);margin-bottom:10px">Chọn kỳ để vào thẳng danh sách mã chưa kiểm.</div>';
+    ops.map(function(p){return {p:p,n:p.items.filter(needsCount).length};}).sort(function(a,b){return b.n-a.n;}).forEach(function(x){
+      h+='<button class="btn btn-outline" style="display:flex;justify-content:space-between;align-items:center;gap:10px;padding:11px 12px;margin-bottom:8px;text-align:left" onclick="renameClose();NX.openP(\''+x.p.id+'\')">'
+        +'<span style="min-width:0"><span style="display:block;font-weight:700">'+esc(x.p.name||'Kỳ kiểm kê')+'</span>'
+        +(x.p.folder?'<span style="display:block;font-size:11.5px;font-weight:500;color:var(--mut)">'+esc(x.p.folder)+'</span>':'')+'</span>'
+        +'<b class="tnum" style="flex:none;color:var(--red)">'+x.n+' mã</b></button>';
+    });
+    h+='<button class="btn btn-outline" style="padding:11px;margin-top:2px" onclick="renameClose()">Đóng</button></div>';
+    o.innerHTML=h;document.body.appendChild(o);
+  },
+  openP:function(id){
+    A.openPeriod(id);      /* mở kỳ */
+    NX.from='home';        /* nút ‹ quay về Trang chủ thay vì thư mục */
+    A.setFlt('todo');      /* chỉ hiện mã chưa kiểm */
+    window.scrollTo(0,0);
+  },
+  pay:function(){
+    var bad=payCompute().filter(function(g){return g.bad;});
+    PAY.v='';PAY.step=3;PAY.q='';PAY.ec='all';PAY.ed='';
+    if(bad.length===1){PAY.sel=bad[0].key;}
+    else{PAY.sel='';PAY.f='bad';}
+    A.go('pay');
+    setTimeout(function(){
+      if(PAY.sel){
+        var t=null;
+        [].slice.call(document.querySelectorAll('#app .bk-row')).forEach(function(r){
+          if(t)return;
+          if(r.classList.contains('bk-x')){t=r;return;}
+          var st=r.querySelector('.bk-st');if(st&&st.textContent.trim())t=r;
+        });
+        NX.focus(t||document.querySelector('#app .bk-head'));
+      }else{
+        var h=document.getElementById('paylist-h');
+        NX.focus(document.querySelector('#paylist .pxc')||h);
+      }
+    },80);
+  },
+  go:function(k){
+    try{
+      if(k==='open'){NX.openPeriods();return;}
+      if(k==='pay'){NX.pay();return;}
+      A.go('hsd');
+      setTimeout(function(){
+        var b=document.getElementById('hsd-b-'+k);
+        if(b)NX.focus(b);
+      },60);
+    }catch(e){
+      try{klog('NX.go '+k,e);}catch(_){}
+      if(k==='open')v2List();else A.go(k==='pay'?'pay':'hsd');
+    }
+  }
+};
+(function(){
+  var oo=A.openPeriod,pb=A.periodBack;
+  A.openPeriod=function(id){NX.from='';return oo.apply(this,arguments);};
+  A.periodBack=function(){if(NX.from==='home'){NX.from='';A.go('home');return;}return pb.apply(this,arguments);};
 })();
 </script>
 </body>
