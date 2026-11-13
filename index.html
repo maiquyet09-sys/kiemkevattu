@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="app-notes" content="Mới: mục Ký số PDF (chọn vị trí ký, xác nhận mật khẩu/Face ID, thư mục bản đã ký riêng). Báo lỗi: thẻ gọn hơn, 1 công tắc Đã xử lý; lỗi đã xử lý nằm ở tab Công việc đã xử lý (dữ liệu cũ giữ nguyên)">
-<meta name="app-version" content="2026111301">
+<meta name="app-version" content="2026111302">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="format-detection" content="telephone=no">
 <meta name="color-scheme" content="light">
@@ -11904,6 +11904,7 @@ AN.xls=function(){
 .sgbox img{width:100%;height:100%;display:block;pointer-events:none}
 .sgf{background:#fff;border-top:1px solid var(--line);padding:10px 12px calc(env(safe-area-inset-bottom,0px) + 10px);display:grid;gap:8px}
 .sgf .row{display:flex;gap:8px;align-items:center}
+html body #toast{z-index:400}
 #sgpad,#sgauth{position:fixed;inset:0;z-index:170;background:rgba(7,16,38,.55);display:flex;align-items:center;justify-content:center;padding:16px}
 #sgcv2{width:100%;height:160px;border:1.5px dashed var(--line);border-radius:12px;touch-action:none;background:#fff;display:block}
 .sgc{border:1px solid var(--line);border-radius:16px;padding:12px;background:#fff;margin-bottom:10px}
@@ -11942,7 +11943,7 @@ function libs(){if(LP)return LP;
     var b=await kkTry(['lib/pdf.min.js',CD+'pdf.js/3.11.174/pdf.min.js'],function(){return !!window.pdfjsLib;});
     if(!a||!b)throw new Error('lib');
     var ws=CD+'pdf.js/3.11.174/pdf.worker.min.js',u=['lib/pdf.worker.min.js',ws];
-    for(var i=0;i<u.length;i++){try{var r=await fetch(u[i]);if(r.ok){var t=await r.text();if(t.length>1e5){ws=URL.createObjectURL(new Blob([t],{type:'text/javascript'}));break;}}}catch(e){}}
+    for(var i=0;i<u.length;i++){try{var r=await fetch(u[i]);if(r.ok){var t=await r.text();if(t.length>1e5&&!/^\s*</.test(t)){ws=URL.createObjectURL(new Blob([t],{type:'text/javascript'}));break;}}}catch(e){}}
     pdfjsLib.GlobalWorkerOptions.workerSrc=ws;
   })();
   LP.catch(function(){LP=null;});return LP;}
@@ -11984,7 +11985,7 @@ function authOpen(cb){
   if(!waOk()){toast('Trình duyệt này không hỗ trợ Face ID — hãy mở app bằng HTTPS trên Safari/Chrome');return;}
   waSign((SGP&&SGP.name)||(db.profile&&db.profile.ten)||'').then(function(){db.waFail=0;cb('Face ID / vân tay');}).catch(function(e){
     db.waFail=(db.waFail||0)+1;if(db.waFail>=2){db.webauthn=null;db.waFail=0;}store.save();
-    toast('Chưa xác thực được Face ID'+(e&&e.name==='NotAllowedError'?' (đã huỷ hoặc không khớp)':'')+' — chưa ký');});
+    klog('sgAuth',e);toast('Chưa xác thực được Face ID'+(e&&e.name==='NotAllowedError'?' (đã huỷ hoặc không khớp)':' ('+((e&&e.name)||'lỗi')+')')+' — chưa ký');});
 }
 function sec(){
   var s=S(),o=box0();o.id='sgauth';
@@ -12010,7 +12011,7 @@ async function showPage(){
   cv.width=v.width;cv.height=v.height;cv.style.width=cw+'px';cv.style.height=v0.height*sc+'px';P.cw=cw;P.ch=v0.height*sc;
   if(P.task){try{P.task.cancel();}catch(e){}}
   P.task=page.render({canvasContext:cv.getContext('2d'),viewport:v});
-  try{await P.task.promise;}catch(e){return;}
+  try{await P.task.promise;}catch(e){if(e&&e.name==='RenderingCancelledException')return;klog('sgRender',e);toast('Lỗi hiển thị trang PDF — vẫn có thể chạm để đặt chữ ký');}
   boxPos();
 }
 async function pick(id){
@@ -12039,7 +12040,7 @@ async function pick(id){
 function closePick(){var o=$('sgovl');if(o)o.remove();document.body.style.overflow='';if(SGP){try{SGP.pdf.destroy();}catch(e){}}SGP=null;}
 /* ---- ghi chữ ký vào PDF, lưu BẢN ĐÃ KÝ thành file riêng (bản gốc giữ nguyên) ---- */
 async function doSign(auth){
-  var P=SGP,d=P.d,s=S();toast('Đang ký…');
+  var P=SGP,d=P.d,s=S();if(P.busy)return;P.busy=true;toast('Đang ký…');
   try{
     var buf=await IDBM.get('sgsrc:'+d.id),srcHash=await sha(buf),pdf=await PDFLib.PDFDocument.load(buf,{ignoreEncryption:true}),when=nowLabel();
     var st=await stamp({sig:s.sig,name:P.name,dev:s.dev,when:when,auth:auth,txt:P.txt}),img=await pdf.embedPng(st.url),pls=[];
@@ -12054,6 +12055,7 @@ async function doSign(auth){
     Object.assign(d,{status:'signed',signedAt:Date.now(),signer:P.name,auth:auth,srcHash:srcHash,outHash:oh,outSize:ob.byteLength,pl:pls,folder:(typeof d.folder==='number'&&s.folders[d.folder])?d.folder:(SG.fo>=0?SG.fo:0)});
     s.name=P.name;if(!s.fixed&&s.sig)s.fixed=true;store.save();closePick();SG.tab='done';SG.fo=d.folder;renderSign();toast('Đã ký xong, lưu trong thư mục “'+s.folders[d.folder]+'”');
   }catch(e){klog('sgSign',e);toast('Lỗi khi ký PDF: '+((e&&e.message)||''));}
+  finally{P.busy=false;}
 }
 async function fileOut(id,kind,dl){
   var d=D(id),buf=await IDBM.get((kind==='out'?'sgout:':'sgsrc:')+id);if(!d||!buf){toast('Không còn file này trên máy (có thể đang mở ở máy khác)');return;}
@@ -12070,7 +12072,8 @@ window.SGX={
   nm:function(v){if(fixed())return;SGP.name=v.trim();refStamp().then(boxPos);},
   txt:function(c){SGP.txt=!!c;refStamp().then(boxPos);},
   draw:function(){if(fixed())return;pad(function(){refStamp().then(boxPos);});},
-  sign:function(){if(!S().sig){toast('Chưa có chữ ký — bấm “Chữ ký” để vẽ trước');return;}if(!SGP.name){toast('Nhập họ tên người ký');return;}S().name=SGP.name;authOpen(doSign);},
+  sign:function(){var P=SGP;if(!P||P.busy)return;var ni=document.querySelector('#sgovl .sgf input.inp');if(ni&&!fixed())P.name=ni.value.trim();
+    if(!S().sig){toast('Chưa có chữ ký — bấm “Chữ ký” để vẽ trước');return;}if(!P.name){toast('Nhập họ tên người ký');return;}S().name=P.name;authOpen(doSign);},
   add:async function(inp){
     var fs=Array.prototype.slice.call(inp.files||[]),s=S(),n=0,bufs=[];
     try{
