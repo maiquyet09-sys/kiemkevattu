@@ -11949,10 +11949,10 @@ function stamp(o){return new Promise(function(res){
   function fin(im){
     var W=640,iw=300,ih=90,c=document.createElement('canvas');
     if(im){var k=Math.min(560/im.width,150/im.height);iw=im.width*k;ih=im.height*k;}
-    var H=Math.round(ih+20+(o.txt?116:0));c.width=W;c.height=H;var x=c.getContext('2d');
+    var H=Math.round(ih+20+(o.txt?150:0));c.width=W;c.height=H;var x=c.getContext('2d');
     if(im)x.drawImage(im,(W-iw)/2,10,iw,ih);
     else{x.strokeStyle='#98a2b3';x.setLineDash([8,6]);x.strokeRect(170,10,300,90);x.fillStyle='#98a2b3';x.font='22px Arial,sans-serif';x.textAlign='center';x.fillText('Chưa có chữ ký',W/2,62);x.textAlign='left';}
-    if(o.txt){x.fillStyle='#1e3a6b';['Ký bởi: '+String(o.name||'').slice(0,34),'Thời gian: '+o.when,'Xác thực: '+o.auth].forEach(function(t,i){x.font=(i?'':'bold ')+'24px Arial,sans-serif';x.fillText(t,14,ih+42+i*34);});}
+    if(o.txt){x.fillStyle='#1e3a6b';['Ký bởi: '+String(o.name||'').slice(0,34),'Thời gian: '+o.when,'Ký bằng: '+deviceLabel(),'Xác thực: '+o.auth].forEach(function(t,i){x.font=(i?'':'bold ')+'24px Arial,sans-serif';x.fillText(t,14,ih+42+i*34);});}
     res({url:c.toDataURL('image/png'),ar:H/W});
   }
   if(o.sig){var im=new Image();im.onload=function(){fin(im);};im.src=o.sig.img;}else fin(null);
@@ -11977,63 +11977,29 @@ function pad(cb){
     oc.width=ow;oc.height=oh;oc.getContext('2d').drawImage(cv,sx*dpr,sy*dpr,w*dpr,h*dpr,0,0,ow,oh);
     S().sig={img:oc.toDataURL('image/png'),w:ow,h:oh};store.save();o.remove();cb();};
 }
-/* ---- mật khẩu ký số (PBKDF2, chỉ lưu bản băm trên máy) ---- */
-function pwModal(cb){
-  var s=S(),o=box0(),ok0=false,fb=waOk()&&db.webauthn;o.id='sgauth';
-  o.innerHTML='<div class="sigcard"><div style="font-weight:800;font-size:16px;margin-bottom:4px">'+(s.pw?'Đổi mật khẩu ký số':'Tạo mật khẩu ký số')+'</div><div style="font-size:12px;color:var(--mut);margin-bottom:10px">Mỗi lần ký phải xác nhận bằng mật khẩu này hoặc Face ID. Mật khẩu chỉ lưu dạng băm trên máy này; quên thì không khôi phục được, chỉ đặt lại được khi xác thực Face ID.</div>'
-    +(s.pw?'<div id="sgo0"><label class="lbl">Mật khẩu hiện tại</label><input class="inp" id="sgp0" type="password" autocomplete="current-password" style="margin-bottom:6px">'+(fb?'<button class="addbat" id="sgpf" style="margin-bottom:10px">Quên mật khẩu? Dùng Face ID</button>':'<div style="height:6px"></div>')+'</div>':'')
-    +'<label class="lbl">Mật khẩu mới (từ 6 ký tự)</label><input class="inp" id="sgp1" type="password" autocomplete="new-password" style="margin-bottom:10px"><label class="lbl">Nhập lại mật khẩu mới</label><input class="inp" id="sgp2" type="password" autocomplete="new-password" style="margin-bottom:12px"><div style="display:flex;gap:8px"><button class="btn btn-outline" style="flex:1;padding:12px" id="sgpx">Huỷ</button><button class="btn btn-primary" style="flex:1.3;padding:12px" id="sgpo">Lưu</button></div></div>';
-  document.body.appendChild(o);
-  $('sgpx').onclick=function(){o.remove();};
-  if($('sgpf'))$('sgpf').onclick=function(){waSign('').then(function(){ok0=true;$('sgo0').style.display='none';}).catch(function(){toast('Chưa xác thực được Face ID');});};
-  $('sgpo').onclick=async function(){
-    if(!(window.crypto&&crypto.subtle)){toast('Cần mở app bằng HTTPS để dùng mật khẩu ký số');return;}
-    var a=$('sgp1').value,b=$('sgp2').value;
-    if(s.pw&&!ok0&&await pwHash($('sgp0').value,s.pw.s,s.pw.i)!==s.pw.h){toast('Mật khẩu hiện tại không đúng');return;}
-    if(a.length<6){toast('Mật khẩu mới cần ít nhất 6 ký tự');return;}
-    if(a!==b){toast('Hai mật khẩu nhập lại chưa khớp');return;}
-    var salt=waB64(waRand(16));s.pw={s:salt,i:150000,h:await pwHash(a,salt,150000)};s.fail=0;s.lock=0;store.save();o.remove();toast('Đã lưu mật khẩu ký số');if(cb)cb();};
-}
-/* ---- BẮT BUỘC xác nhận trước khi ký: mật khẩu HOẶC Face ID (hoặc cả hai nếu bật) ---- */
+/* ---- BẮT BUỘC xác thực khuôn mặt / vân tay (như mở khoá điện thoại) trước khi ký ---- */
 function authOpen(cb){
-  var s=S();if(!s.pw){pwModal(function(){authOpen(cb);});return;}
-  var fid=waOk(),both=!!s.both&&fid,ok={p:0,f:0},o=box0();o.id='sgauth';document.body.appendChild(o);
-  function fin(){if(both?(ok.p&&ok.f):(ok.p||ok.f)){o.remove();cb((ok.p?'Mật khẩu':'')+(ok.p&&ok.f?' + ':'')+(ok.f?'Face ID/vân tay':''));}else draw();}
-  function draw(){
-    o.innerHTML='<div class="sigcard"><div style="font-weight:800;font-size:16px;margin-bottom:4px">Xác nhận trước khi ký</div><div style="font-size:12px;color:var(--mut);margin-bottom:12px">'+(both?'Cần xác nhận cả mật khẩu và Face ID.':fid?'Xác nhận bằng mật khẩu hoặc Face ID.':'Nhập mật khẩu ký số để tiếp tục.')+'</div>'
-      +(ok.p?'<div style="color:var(--green);font-weight:700;margin-bottom:10px">✓ Đã xác nhận mật khẩu</div>':'<input class="inp" id="sgpw" type="password" placeholder="Mật khẩu ký số" autocomplete="current-password" style="margin-bottom:8px"><button class="btn btn-primary" style="margin-bottom:10px;padding:12px" id="sgpk">Xác nhận mật khẩu</button>')
-      +(fid?(ok.f?'<div style="color:var(--green);font-weight:700;margin-bottom:10px">✓ Đã xác thực Face ID / vân tay</div>':'<button class="btn btn-outline" style="margin-bottom:10px;padding:12px" id="sgfk">'+(db.webauthn?'Xác nhận bằng Face ID / vân tay':'Bật & dùng Face ID / vân tay')+'</button>'):'')
-      +'<button class="btn btn-outline" style="padding:12px" id="sgpx">Huỷ</button></div>';
-    $('sgpx').onclick=function(){o.remove();};
-    if($('sgpk')){var go=async function(){
-      var w=Math.ceil(((s.lock||0)-Date.now())/1000);if(w>0){toast('Nhập sai nhiều lần, thử lại sau '+w+' giây');return;}
-      if(!(window.crypto&&crypto.subtle)){toast('Cần mở app bằng HTTPS để dùng mật khẩu ký số');return;}
-      if(await pwHash($('sgpw').value,s.pw.s,s.pw.i)===s.pw.h){s.fail=0;ok.p=1;store.save();fin();}
-      else{s.fail=(s.fail||0)+1;if(s.fail>=5){s.lock=Date.now()+60000;s.fail=0;}store.save();toast('Sai mật khẩu'+(s.lock>Date.now()?' — tạm khoá 60 giây':''));}};
-      $('sgpk').onclick=go;$('sgpw').onkeydown=function(e){if(e.key==='Enter')go();};}
-    if($('sgfk'))$('sgfk').onclick=function(){waSign(s.name||(db.profile&&db.profile.ten)||'').then(function(){ok.f=1;fin();}).catch(function(e){toast('Chưa xác thực được Face ID'+(e&&e.name==='NotAllowedError'?' (đã huỷ hoặc không khớp)':''));});};
-  }
-  draw();
+  if(!waOk()){toast('Trình duyệt này không hỗ trợ Face ID — hãy mở app bằng HTTPS trên Safari/Chrome');return;}
+  waSign((SGP&&SGP.name)||(db.profile&&db.profile.ten)||'').then(function(){db.waFail=0;cb('Face ID / vân tay');}).catch(function(e){
+    db.waFail=(db.waFail||0)+1;if(db.waFail>=2){db.webauthn=null;db.waFail=0;}store.save();
+    toast('Chưa xác thực được Face ID'+(e&&e.name==='NotAllowedError'?' (đã huỷ hoặc không khớp)':'')+' — chưa ký');});
 }
 function sec(){
   var s=S(),o=box0();o.id='sgauth';
-  o.innerHTML='<div class="sigcard"><div style="font-weight:800;font-size:16px;margin-bottom:10px">Bảo mật ký số</div><div style="font-size:13px;line-height:1.7;margin-bottom:10px">Mật khẩu ký số: <b>'+(s.pw?'đã đặt':'chưa đặt')+'</b><br>Face ID / vân tay: <b>'+(!waOk()?'không hỗ trợ trên trình duyệt này':db.webauthn?'đã bật':'chưa bật (bật ở lần xác nhận đầu)')+'</b><br>Chữ ký đã lưu: <b>'+(s.sig?'có':'chưa có')+'</b></div>'
-    +'<label style="display:flex;gap:8px;align-items:flex-start;font-size:13px;margin-bottom:12px"><input type="checkbox" id="sgbo" '+(s.both?'checked ':'')+(waOk()?'':'disabled ')+'style="margin-top:3px"><span>Bắt buộc <b>cả</b> mật khẩu và Face ID mỗi lần ký<br><span style="color:var(--mut);font-size:12px">Tắt: chỉ cần một trong hai.</span></span></label>'
-    +'<button class="btn btn-outline" style="margin-bottom:8px;padding:12px" id="sgs1">'+(s.pw?'Đổi mật khẩu':'Tạo mật khẩu')+'</button>'+(s.sig?'<button class="btn btn-outline" style="margin-bottom:8px;padding:12px;color:var(--red)" id="sgs2">Xoá chữ ký đã lưu</button>':'')+'<button class="btn btn-primary" style="padding:12px" id="sgpx">Xong</button></div>';
+  o.innerHTML='<div class="sigcard"><div style="font-weight:800;font-size:16px;margin-bottom:10px">Bảo mật ký số</div><div style="font-size:13px;line-height:1.7;margin-bottom:12px">Khi ký: <b>bắt buộc xác thực Face ID / vân tay</b><br>Trạng thái: <b>'+(!waOk()?'trình duyệt này không hỗ trợ':db.webauthn?'đã bật':'chưa bật (tự bật ở lần ký đầu tiên)')+'</b><br>Chữ ký đã lưu: <b>'+(s.sig?'có':'chưa có')+'</b></div>'+(s.sig?'<button class="btn btn-outline" style="margin-bottom:8px;padding:12px;color:var(--red)" id="sgs2">Xoá chữ ký đã lưu</button>':'')+'<button class="btn btn-primary" style="padding:12px" id="sgpx">Xong</button></div>';
   document.body.appendChild(o);
-  $('sgpx').onclick=function(){s.both=!!$('sgbo').checked;store.save();o.remove();};
-  $('sgs1').onclick=function(){s.both=!!$('sgbo').checked;o.remove();pwModal();};
+  $('sgpx').onclick=function(){o.remove();};
   if($('sgs2'))$('sgs2').onclick=function(){delete s.sig;store.save();o.remove();toast('Đã xoá chữ ký đã lưu');};
 }
 /* ---- chọn vị trí ký trên từng trang ---- */
-async function refStamp(){SGP.st=await stamp({sig:S().sig,name:SGP.name||'Họ tên người ký',when:'(ghi lúc ký)',auth:'Mật khẩu / Face ID',txt:SGP.txt});}
+async function refStamp(){SGP.st=await stamp({sig:S().sig,name:SGP.name||'Họ tên người ký',when:'(ghi lúc ký)',auth:'Face ID / vân tay',txt:true});}
 function boxPos(){
   var P=SGP,b=P.pl[P.pg],e=$('sgbox'),ks=Object.keys(P.pl).sort(function(a,c){return a-c;});
   if(!b)e.style.display='none';
   else{var w=P.w*P.cw,h=w*P.st.ar;b.x=Math.min(Math.max(b.x,0),Math.max(0,1-P.w));b.y=Math.min(Math.max(b.y,0),Math.max(0,1-h/P.ch));
     e.style.display='block';e.style.left=b.x*P.cw+'px';e.style.top=b.y*P.ch+'px';e.style.width=w+'px';e.style.height=h+'px';$('sgimg').src=P.st.url;}
   $('sgpn').textContent=P.pg+' / '+P.n;
-  $('sgcnt').textContent=ks.length?'Đã chọn '+ks.length+' vị trí (trang '+ks.join(', ')+')':'Chạm vào trang để đặt chữ ký, kéo để di chuyển';
+  $('sgcnt').textContent=ks.length?'Đã chọn '+ks.length+' vị trí (trang '+ks.join(', ')+')':'Chạm vào trang để đặt chữ ký, kéo đến đúng chỗ cần ký';
   $('sgok').disabled=!ks.length;$('sgdl').style.visibility=b?'visible':'hidden';
 }
 async function showPage(){
@@ -12056,7 +12022,6 @@ async function pick(id){
     +'<div class="sgf"><div id="sgcnt" style="font-size:12.5px;color:var(--mut)"></div>'
     +'<div class="row"><span style="font-size:13px;font-weight:600">Cỡ</span><input type="range" min="12" max="60" value="30" style="flex:1" oninput="SGX.size(this.value)"><button class="sgbt rd" id="sgdl" onclick="SGX.delPl()">Bỏ ô trang này</button></div>'
     +'<div class="row"><input class="inp" placeholder="Họ tên người ký" value="'+esc(SGP.name)+'" onchange="SGX.nm(this.value)" style="flex:1"><button class="sgbt" onclick="SGX.draw()">'+icon('edit',14)+' Chữ ký</button></div>'
-    +'<label style="display:flex;gap:8px;align-items:center;font-size:13px"><input type="checkbox" checked onchange="SGX.txt(this.checked)">Kèm họ tên, thời gian, hình thức xác thực</label>'
     +'<button class="btn btn-primary" id="sgok" style="padding:13px" onclick="SGX.sign()">'+icon('check',16)+'Xác nhận &amp; ký</button></div>';
   document.body.appendChild(o);document.body.style.overflow='hidden';
   var w=$('sgwrap'),bx=$('sgbox'),drag=null;
@@ -12065,6 +12030,7 @@ async function pick(id){
   bx.onpointermove=function(e){if(!drag)return;var r=w.getBoundingClientRect(),b=SGP.pl[SGP.pg];b.x=(e.clientX-r.left-drag.ox)/SGP.cw;b.y=(e.clientY-r.top-drag.oy)/SGP.ch;boxPos();};
   bx.onpointerup=bx.onpointercancel=function(){drag=null;};
   await refStamp();await showPage();
+  if(!S().sig)SGX.draw();
 }
 function closePick(){var o=$('sgovl');if(o)o.remove();document.body.style.overflow='';if(SGP){try{SGP.pdf.destroy();}catch(e){}}SGP=null;}
 /* ---- ghi chữ ký vào PDF, lưu BẢN ĐÃ KÝ thành file riêng (bản gốc giữ nguyên) ---- */
