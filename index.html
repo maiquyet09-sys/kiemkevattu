@@ -1435,6 +1435,24 @@ html body .brc .bpt{flex:1;height:5px;border-radius:99px;background:#e9ecf4;over
 html body .brc .bpt i{display:block;height:100%;border-radius:99px;background:linear-gradient(90deg,#1e3a6b,#3f64a8 65%,#d4af5f)}
 html body .brc .bpg span{font-size:11.5px;font-weight:700;color:#1e3a6b;font-variant-numeric:tabular-nums}
 html body .brc .bc{flex:none;width:30px;height:30px;border-radius:50%;display:grid;place-items:center;background:#eef1f8;color:#1e3a6b}
+/* ===== Khối "Cần xử lý" ===== */
+html body .nx{background:#fff;border:1px solid #e8e4da;border-radius:18px;box-shadow:0 1px 2px rgba(20,30,60,.05),0 10px 22px -16px rgba(20,40,75,.3);overflow:hidden}
+html body .nx-r{display:flex;align-items:center;gap:12px;padding:10px 14px;min-height:50px;cursor:pointer;border-top:1px solid #f0ece1;transition:background-color .12s ease}
+html body .nx-r:first-child{border-top:0}
+html body .nx-r:active{background:#f7f5ee}
+html body .nx-i{flex:none;width:34px;height:34px;border-radius:11px;display:grid;place-items:center;background:#e9edf6;color:#1e3a6b}
+html body .nx-r.red .nx-i{background:#fdecea;color:#dc4a4a}
+html body .nx-r.org .nx-i{background:#ffefdc;color:#d9822b}
+html body .nx-r.amb .nx-i{background:#fbf1d9;color:#9a7416}
+html body .nx-r.grn .nx-i{background:#e3f5ec;color:#1f8a5b}
+html body .nx-t{flex:1;min-width:0;font-size:15px;font-weight:600;color:#14203a}
+html body .nx-n{min-width:26px;height:26px;padding:0 8px;border-radius:99px;display:grid;place-items:center;font-size:14px;font-weight:800;background:#eef1f8;color:#1e3a6b}
+html body .nx-r.red .nx-n{background:#dc4a4a;color:#fff}
+html body .nx-r.org .nx-n{background:#ffefdc;color:#b8651a}
+html body .nx-r.amb .nx-n{background:#fbf1d9;color:#7a5a12}
+html body .nx-r.grn .nx-n{background:#e3f5ec;color:#1f6b4a}
+html body .nx-c{flex:none;display:flex;color:#a3a9bb}
+html body .nx-tot{min-width:22px;height:22px;padding:0 7px;border-radius:99px;display:inline-grid;place-items:center;font-size:12.5px;font-weight:800;background:#dc4a4a;color:#fff}
 /* ===== Mục đang chọn: nền chuyển màu + thanh vàng đều 2 đầu (thay cho viền inset hình liềm) ===== */
 html body #gsidebar .gnav-item.on:not(.gnav-sub),html body #gdrawer .gnav-item.on:not(.gnav-sub){position:relative;border-radius:12px;background:linear-gradient(90deg,rgba(244,220,156,.30) 0%,rgba(212,175,95,.14) 45%,rgba(212,175,95,0) 100%)!important;box-shadow:none!important}
 html body #gsidebar .gnav-item.on:not(.gnav-sub)::before,html body #gdrawer .gnav-item.on:not(.gnav-sub)::before{content:"";position:absolute;left:5px;top:12px;bottom:12px;width:4px;border-radius:999px;background:linear-gradient(180deg,#c9a24f 0%,#f7e3a8 50%,#c9a24f 100%);box-shadow:0 0 8px rgba(212,175,95,.45)}
@@ -4605,12 +4623,20 @@ function renderHomeOld(){
     h+='<div class="wrap mt12"><div class="note-warn">Trình duyệt đang chặn bộ nhớ lưu trữ — dữ liệu chỉ tồn tại trong phiên này. Mở file bằng Chrome/Safari hoặc đưa lên hosting để lưu lâu dài. Kiểm xong nhớ Xuất Excel ngay.</div></div>';
   }
   h+=homeNoticesHtml();
-  h+='<div class="wrap mt20"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px"><span class="sec" style="margin:0">Cảnh báo hạn sử dụng</span><div style="display:flex;gap:14px;align-items:center"><button class="addbat" style="color:var(--teal);display:flex;align-items:center;gap:5px" onclick="showHsdEmailPicker()">'+icon('mail',15)+'Email</button><button class="addbat" style="display:flex;align-items:center;gap:3px" onclick="A.go(\'hsd\')">Xem chi tiết'+icon('chev',15)+'</button></div></div><div class="hsdgrid">';
-  BUCKETS.forEach(function(b){
-    var n=entries.filter(function(e){return b.test(e.days);}).length;
-    h+='<div class="hsdcard '+b.cls+(n?'':' z')+'" onclick="A.go(\'hsd\')"><span class="kic k-'+b.k+'">'+(KIC[b.k]||KCAL)+'</span><div class="kb"><div class="t">'+b.label+'</div><div class="n tnum">'+n+'</div></div></div>';
-  });
-  h+='</div></div>';
+  var nxc={},nxo=0,nxl=0,nxr='',nxt=0;
+  BUCKETS.forEach(function(b){nxc[b.k]=entries.filter(function(e){return b.test(e.days);}).length;});
+  try{nxo=db.periods.filter(function(p){return p.items.some(function(i){return !i.counted&&i.close!==0;});}).length;}catch(e){}
+  try{if(db.pay&&db.pay.mua&&db.pay.mua.length)payCompute().forEach(function(g){if(g.bad)nxl++;});}catch(e){}
+  function nxRow(cls,ico,label,n,act){nxr+='<div class="nx-r '+cls+'" onclick="'+act+'"><span class="nx-i">'+ico+'</span><div class="nx-t">'+label+'</div><span class="nx-n tnum">'+n+'</span><span class="nx-c">'+icon('chev',16)+'</span></div>';}
+  if(nxc.expired)nxRow('red',KIC.expired,'Đã hết hạn',nxc.expired,"A.go('hsd')");
+  if(nxc.m1)nxRow('org',KCAL,'Còn ≤ 1 tháng',nxc.m1,"A.go('hsd')");
+  if(nxo)nxRow('blu',icon('clock',18),'Kỳ đang kiểm dở',nxo,"v2List()");
+  if(nxl)nxRow('amb',icon('doc',18),'Thanh toán NCC có lỗi',nxl,"A.go('pay')");
+  if(nxc.m3)nxRow('amb',KCAL,'Còn ≤ 3 tháng',nxc.m3,"A.go('hsd')");
+  if(nxc.m6)nxRow('grn',KCAL,'Còn ≤ 6 tháng',nxc.m6,"A.go('hsd')");
+  nxt=(nxc.expired||0)+(nxc.m1||0)+nxo+nxl;
+  if(!nxr)nxr='<div class="nx-r grn" style="cursor:default"><span class="nx-i">'+icon('check',18)+'</span><div class="nx-t">Không có việc cần xử lý</div></div>';
+  h+='<div class="wrap mt20"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px"><span class="sec" style="margin:0;display:flex;align-items:center;gap:8px">Cần xử lý'+(nxt?'<span class="nx-tot tnum">'+nxt+'</span>':'')+'</span><button class="addbat" style="color:var(--teal);display:flex;align-items:center;gap:5px" onclick="showHsdEmailPicker()">'+icon('mail',15)+'Email</button></div><div class="nx">'+nxr+'</div></div>';
   var tileL='display:flex;flex-direction:column;gap:8px;padding:18px 8px;line-height:1.25;font-size:14px';
   var tileS='display:flex;flex-direction:column;gap:8px;padding:13px 4px;line-height:1.25;font-size:13px';
   var open=db.periods.filter(function(p){return p.items.some(function(i){return !i.counted&&i.close!==0;});}).length,nl=0;
@@ -4618,9 +4644,9 @@ function renderHomeOld(){
   function tile(ic,lb,act,bd){return '<button class="btn tile" style="'+tileS+';position:relative" onclick="'+act+'"><span class="tic">'+(fcKey(lb)?fcIco(fcKey(lb),38):icon(ic,24))+'</span>'+lb+(bd?'<b style="position:absolute;top:6px;right:8px;min-width:20px;padding:1px 6px;border-radius:99px;background:var(--red);color:#fff;font-size:11px">'+bd+'</b>':'')+'</button>';}
   h+='<div class="wrap mt24"><div class="sec fc-cap">Kiểm kê</div><div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">'
     +tile('box','Kiểm kê vật tư',"A.go('upload')",'')+tile('monitor','Kiểm kê CCDC &amp; TSCĐ',"A.go('assets')",'')
-    +tile('file','Kỳ đang kiểm dở','v2List()',open||'')+tile('qr','Quét QR','v2Scan()','')+'</div>'
+    +tile('file','Kỳ đang kiểm dở','v2List()','')+tile('qr','Quét QR','v2Scan()','')+'</div>'
     +'<div class="sec fc-cap" style="margin-top:22px">Đối chiếu & thanh toán</div><div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">'
-    +tile('swap','Đối chiếu DT – xuất kho',"A.go('recon')",'')+tile('file','Đề nghị thanh toán NCC',"A.go('pay')",nl||'')+tile('warn','Báo lỗi nhập liệu & labo',"A.go('err')",'')+tile('monitor','Quản trị liên chi nhánh',"A.go('mgmt')",'')+'</div>'
+    +tile('swap','Đối chiếu DT – xuất kho',"A.go('recon')",'')+tile('file','Đề nghị thanh toán NCC',"A.go('pay')",'')+tile('warn','Báo lỗi nhập liệu & labo',"A.go('err')",'')+tile('monitor','Quản trị liên chi nhánh',"A.go('mgmt')",'')+'</div>'
     +'<div class="sec fc-cap" style="margin-top:22px">Kho & biểu mẫu</div><div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px">'
     +tile('box','Tồn kho','A.navStock()','')+tile('edit','Biểu mẫu',"A.go('reporthub')",'')+tile('gear','Cài đặt',"A.go('settings')",'')+'</div>'
     +'<div style="height:24px"></div></div>';
