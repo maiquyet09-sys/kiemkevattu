@@ -11929,6 +11929,7 @@ function dt(t){var d=new Date(t),p=function(n){return String(n).padStart(2,'0');
 function idbDel(k){return new Promise(function(r){try{var t=IDBM.db.transaction('kv','readwrite');t.objectStore('kv').delete(k);t.oncomplete=function(){r(1);};t.onerror=function(){r(0);};}catch(e){r(0);}});}
 function sha(b){return crypto.subtle.digest('SHA-256',b).then(function(h){return Array.from(new Uint8Array(h)).map(function(x){return x.toString(16).padStart(2,'0');}).join('');});}
 function pwHash(pw,salt,it){return crypto.subtle.importKey('raw',new TextEncoder().encode(pw),'PBKDF2',false,['deriveBits']).then(function(k){return crypto.subtle.deriveBits({name:'PBKDF2',hash:'SHA-256',salt:waUn(salt),iterations:it},k,256);}).then(waB64);}
+function rdFile(f){return new Promise(function(res,rej){var r=new FileReader();r.onload=function(){res(r.result);};r.onerror=function(){rej(r.error||new Error('read'));};r.readAsArrayBuffer(f);});}
 function box0(){var o=document.createElement('div');return o;}
 /* ---- nạp pdf-lib (ghi chữ ký vào PDF) + pdf.js (xem trang để chọn vị trí): ưu tiên lib/, rồi CDN ---- */
 function libs(){if(LP)return LP;
@@ -12099,15 +12100,19 @@ window.SGX={
   draw:function(){pad(function(){refStamp().then(boxPos);});},
   sign:function(){if(!S().sig){toast('Chưa có chữ ký — bấm “Chữ ký” để vẽ trước');return;}if(!SGP.name){toast('Nhập họ tên người ký');return;}S().name=SGP.name;authOpen(doSign);},
   add:async function(inp){
-    var fs=Array.prototype.slice.call(inp.files||[]),s=S(),n=0;inp.value='';
-    for(var i=0;i<fs.length;i++){var f=fs[i];
-      if(!/\.pdf$/i.test(f.name)&&f.type!=='application/pdf'){toast('“'+f.name+'” không phải file PDF');continue;}
-      if(f.size>40*1048576){toast('“'+f.name+'” lớn hơn 40 MB');continue;}
-      var buf=await f.arrayBuffer();
-      if(String.fromCharCode.apply(null,new Uint8Array(buf.slice(0,5))).indexOf('%PDF')<0){toast('“'+f.name+'” không đúng định dạng PDF');continue;}
-      var id=uid();if(!(await IDBM.set('sgsrc:'+id,buf))){toast('Không lưu được file — bộ nhớ trình duyệt đầy hoặc bị chặn');break;}
-      s.docs.unshift({id:id,name:f.name,size:f.size,addedAt:Date.now(),status:'todo'});n++;}
-    if(n){store.save();SG.tab='todo';toast('Đã thêm '+n+' file PDF');}renderSign();},
+    var fs=Array.prototype.slice.call(inp.files||[]),s=S(),n=0,bufs=[];
+    try{
+      for(var i=0;i<fs.length;i++){try{bufs.push(await rdFile(fs[i]));}catch(e){klog('sgRead',e);bufs.push(null);}}
+      inp.value='';
+      for(var j=0;j<fs.length;j++){var f=fs[j],buf=bufs[j];
+        if(!buf){toast('Không đọc được “'+f.name+'” — thử chọn lại file từ mục Tệp (Files)');continue;}
+        if(String.fromCharCode.apply(null,new Uint8Array(buf.slice(0,5))).indexOf('%PDF')<0){toast('“'+f.name+'” không đúng định dạng PDF');continue;}
+        if(buf.byteLength>40*1048576){toast('“'+f.name+'” lớn hơn 40 MB');continue;}
+        var id=uid();if(!(await IDBM.set('sgsrc:'+id,buf))){toast('Không lưu được file — bộ nhớ trình duyệt đầy hoặc bị chặn');break;}
+        s.docs.unshift({id:id,name:f.name||'tai-lieu.pdf',size:buf.byteLength,addedAt:Date.now(),status:'todo'});n++;}
+      if(n){store.save();SG.tab='todo';toast('Đã thêm '+n+' file PDF');}
+    }catch(e){klog('sgAdd',e);toast('Không thêm được file: '+((e&&e.message)||e));}
+    renderSign();},
   tab:function(t){SG.tab=t;renderSign();},
   fo:function(i){SG.fo=i;renderSign();},
   newFo:function(){renameModal('Tên thư mục PDF đã ký',' ',function(v){var s=S();if(s.folders.indexOf(v)<0)s.folders.push(v);store.save();SG.fo=s.folders.indexOf(v);SG.tab='done';renderSign();});},
