@@ -6832,7 +6832,7 @@ var A={
       }).then(function(ph){
         var out=Object.assign({},db);
         if(Object.keys(ph).length)out.__photos=ph;
-        delete out.webauthn;if(out.sg){out.sg=Object.assign({},out.sg);delete out.sg.pw;delete out.sg.sig;}out.__sync={v:2,schema:BK_SCHEMA,at:Date.now(),by:(db.profile&&db.profile.ten)||'',full:true,photos:Object.keys(ph).length,ky:(out.periods||[]).length};
+        delete out.webauthn;if(out.sg){out.sg=Object.assign({},out.sg);delete out.sg.pw;delete out.sg.sig;delete out.sg.fixed;delete out.sg.name;delete out.sg.dev;}out.__sync={v:2,schema:BK_SCHEMA,at:Date.now(),by:(db.profile&&db.profile.ten)||'',full:true,photos:Object.keys(ph).length,ky:(out.periods||[]).length};
         out.__sync.sum=bkSum(bkCore(out));
         shareOrDownload(new Blob([JSON.stringify(out)],{type:'application/json'}),fname);
         toast('Đã sao lưu toàn bộ dữ liệu ('+Object.keys(ph).length+' ảnh)');
@@ -6900,7 +6900,7 @@ var A={
       var prev=JSON.stringify(db);
       try{localStorage.setItem('kk_db_prev',prev);}
       catch(x){if(!confirm('KHÔNG tạo được bản tạm để quay lui (bộ nhớ đầy).\nHãy bấm Huỷ rồi "Sao lưu dữ liệu" trước. Vẫn thay thế ngay?'))return;}
-      var old=db,keep=db.webauthn,nd=sanitizeDb(Object.assign({},d));if(keep)nd.webauthn=keep;if(old.sg&&old.sg.pw){nd.sg=nd.sg||{};nd.sg.pw=old.sg.pw;nd.sg.sig=old.sg.sig;}
+      var old=db,keep=db.webauthn,nd=sanitizeDb(Object.assign({},d));if(keep)nd.webauthn=keep;if(old.sg&&(old.sg.pw||old.sg.sig)){nd.sg=nd.sg||{};nd.sg.pw=old.sg.pw;nd.sg.sig=old.sg.sig;nd.sg.fixed=old.sg.fixed;nd.sg.name=old.sg.name;nd.sg.dev=old.sg.dev;}
       db=nd;
       Promise.all(Object.keys(ph).map(function(k){return PH.put(k,ph[k]);})).then(function(rs){
         if(!store.saveVerified()){db=old;store.save();toast('Thay thế THẤT BẠI: không ghi được. Dữ liệu cũ được giữ nguyên.');return;}
@@ -11931,6 +11931,8 @@ function sha(b){return crypto.subtle.digest('SHA-256',b).then(function(h){return
 function pwHash(pw,salt,it){return crypto.subtle.importKey('raw',new TextEncoder().encode(pw),'PBKDF2',false,['deriveBits']).then(function(k){return crypto.subtle.deriveBits({name:'PBKDF2',hash:'SHA-256',salt:waUn(salt),iterations:it},k,256);}).then(waB64);}
 function rdFile(f){return new Promise(function(res,rej){var r=new FileReader();r.onload=function(){res(r.result);};r.onerror=function(){rej(r.error||new Error('read'));};r.readAsArrayBuffer(f);});}
 function uid(){return 'sg'+Date.now().toString(36)+Math.random().toString(36).slice(2,7);}
+function devId(){var k='kk_sg_did',v='';try{v=localStorage.getItem(k)||'';if(!v){v=Array.from(crypto.getRandomValues(new Uint8Array(4))).map(function(x){return x.toString(16).padStart(2,'0');}).join('').toUpperCase();localStorage.setItem(k,v);}}catch(e){v=v||'N/A';}return v;}
+function fixed(){var d=S();return !!(d.fixed&&d.sig&&d.name);}
 function box0(){var o=document.createElement('div');return o;}
 /* ---- nạp pdf-lib (ghi chữ ký vào PDF) + pdf.js (xem trang để chọn vị trí): ưu tiên lib/, rồi CDN ---- */
 function libs(){if(LP)return LP;
@@ -11949,10 +11951,10 @@ function stamp(o){return new Promise(function(res){
   function fin(im){
     var W=640,iw=300,ih=90,c=document.createElement('canvas');
     if(im){var k=Math.min(560/im.width,150/im.height);iw=im.width*k;ih=im.height*k;}
-    var H=Math.round(ih+20+(o.txt?150:0));c.width=W;c.height=H;var x=c.getContext('2d');
+    var H=Math.round(ih+20+(o.txt?184:0));c.width=W;c.height=H;var x=c.getContext('2d');
     if(im)x.drawImage(im,(W-iw)/2,10,iw,ih);
     else{x.strokeStyle='#98a2b3';x.setLineDash([8,6]);x.strokeRect(170,10,300,90);x.fillStyle='#98a2b3';x.font='22px Arial,sans-serif';x.textAlign='center';x.fillText('Chưa có chữ ký',W/2,62);x.textAlign='left';}
-    if(o.txt){x.fillStyle='#1e3a6b';['Ký bởi: '+String(o.name||'').slice(0,34),'Thời gian: '+o.when,'Ký bằng: '+deviceLabel(),'Xác thực: '+o.auth].forEach(function(t,i){x.font=(i?'':'bold ')+'24px Arial,sans-serif';x.fillText(t,14,ih+42+i*34);});}
+    if(o.txt){x.fillStyle='#1e3a6b';['Ký bởi: '+String(o.name||'').slice(0,34),'Thời gian: '+o.when,'Ký bằng: '+deviceLabel(),'Mã máy: '+devId()+(db.webauthn?' · Khoá FaceID '+db.webauthn.id.slice(0,6).toUpperCase():''),'Xác thực: '+o.auth].forEach(function(t,i){x.font=(i?'':'bold ')+'24px Arial,sans-serif';x.fillText(t,14,ih+42+i*34);});}
     res({url:c.toDataURL('image/png'),ar:H/W});
   }
   if(o.sig){var im=new Image();im.onload=function(){fin(im);};im.src=o.sig.img;}else fin(null);
@@ -11986,13 +11988,14 @@ function authOpen(cb){
 }
 function sec(){
   var s=S(),o=box0();o.id='sgauth';
-  o.innerHTML='<div class="sigcard"><div style="font-weight:800;font-size:16px;margin-bottom:10px">Bảo mật ký số</div><div style="font-size:13px;line-height:1.7;margin-bottom:12px">Khi ký: <b>bắt buộc xác thực Face ID / vân tay</b><br>Trạng thái: <b>'+(!waOk()?'trình duyệt này không hỗ trợ':db.webauthn?'đã bật':'chưa bật (tự bật ở lần ký đầu tiên)')+'</b><br>Chữ ký đã lưu: <b>'+(s.sig?'có':'chưa có')+'</b></div>'+(s.sig?'<button class="btn btn-outline" style="margin-bottom:8px;padding:12px;color:var(--red)" id="sgs2">Xoá chữ ký đã lưu</button>':'')+'<button class="btn btn-primary" style="padding:12px" id="sgpx">Xong</button></div>';
+  o.innerHTML='<div class="sigcard"><div style="font-weight:800;font-size:16px;margin-bottom:10px">Bảo mật ký số</div><div style="font-size:13px;line-height:1.7;margin-bottom:12px">Khi ký: <b>bắt buộc xác thực Face ID / vân tay</b><br>Trạng thái: <b>'+(!waOk()?'trình duyệt này không hỗ trợ':db.webauthn?'đã bật':'chưa bật (tự bật ở lần ký đầu tiên)')+'</b><br>Người ký cố định: <b>'+(fixed()?esc(s.name):'chưa đăng ký (khoá ở lần ký đầu)')+'</b><br>Chữ ký đã lưu: <b>'+(s.sig?'có':'chưa có')+'</b></div>'+(fixed()?'<button class="btn btn-outline" style="margin-bottom:8px;padding:12px;color:var(--red)" id="sgs3">Gỡ đăng ký người ký (cần Face ID)</button>':s.sig?'<button class="btn btn-outline" style="margin-bottom:8px;padding:12px;color:var(--red)" id="sgs2">Xoá chữ ký đã lưu</button>':'')+'<button class="btn btn-primary" style="padding:12px" id="sgpx">Xong</button></div>';
   document.body.appendChild(o);
   $('sgpx').onclick=function(){o.remove();};
+  if($('sgs3'))$('sgs3').onclick=function(){o.remove();authOpen(function(){var d=S();delete d.fixed;delete d.sig;delete d.name;delete d.dev;store.save();toast('Đã gỡ đăng ký người ký của máy này');});};
   if($('sgs2'))$('sgs2').onclick=function(){delete s.sig;store.save();o.remove();toast('Đã xoá chữ ký đã lưu');};
 }
 /* ---- chọn vị trí ký trên từng trang ---- */
-async function refStamp(){SGP.st=await stamp({sig:S().sig,name:SGP.name||'Họ tên người ký',when:'(ghi lúc ký)',auth:'Face ID / vân tay',txt:true});}
+async function refStamp(){SGP.st=await stamp({sig:S().sig,name:SGP.name||'Họ tên người ký',dev:S().dev,when:'(ghi lúc ký)',auth:'Face ID / vân tay',txt:true});}
 function boxPos(){
   var P=SGP,b=P.pl[P.pg],e=$('sgbox'),ks=Object.keys(P.pl).sort(function(a,c){return a-c;});
   if(!b)e.style.display='none';
@@ -12021,7 +12024,8 @@ async function pick(id){
     +'<div class="sgbody" id="sgbody"><div class="sgwrap" id="sgwrap"><canvas id="sgcv"></canvas><div class="sgbox" id="sgbox"><img id="sgimg" alt=""></div></div></div>'
     +'<div class="sgf"><div id="sgcnt" style="font-size:12.5px;color:var(--mut)"></div>'
     +'<div class="row"><span style="font-size:13px;font-weight:600">Cỡ</span><input type="range" min="12" max="60" value="30" style="flex:1" oninput="SGX.size(this.value)"><button class="sgbt rd" id="sgdl" onclick="SGX.delPl()">Bỏ ô trang này</button></div>'
-    +'<div class="row"><input class="inp" placeholder="Họ tên người ký" value="'+esc(SGP.name)+'" onchange="SGX.nm(this.value)" style="flex:1"><button class="sgbt" onclick="SGX.draw()">'+icon('edit',14)+' Chữ ký</button></div>'
+    +'<div class="row"><input class="inp" placeholder="Họ tên người ký" value="'+esc(SGP.name)+'" onchange="SGX.nm(this.value)"'+(fixed()?' readonly':'')+' style="flex:1">'+(fixed()?'':'<button class="sgbt" onclick="SGX.draw()">'+icon('edit',14)+' Chữ ký</button>')+'</div>'
+    +'<div style="font-size:12px;color:var(--mut)">'+(fixed()?'Người ký cố định của máy này. Muốn đổi: Bảo mật → Gỡ đăng ký (cần Face ID).':'Lần ký đầu tiên sẽ khoá tên và chữ ký thành người ký cố định của điện thoại này.')+'</div>'
     +'<button class="btn btn-primary" id="sgok" style="padding:13px" onclick="SGX.sign()">'+icon('check',16)+'Xác nhận &amp; ký</button></div>';
   document.body.appendChild(o);document.body.style.overflow='hidden';
   var w=$('sgwrap'),bx=$('sgbox'),drag=null;
@@ -12038,7 +12042,7 @@ async function doSign(auth){
   var P=SGP,d=P.d,s=S();toast('Đang ký…');
   try{
     var buf=await IDBM.get('sgsrc:'+d.id),srcHash=await sha(buf),pdf=await PDFLib.PDFDocument.load(buf,{ignoreEncryption:true}),when=nowLabel();
-    var st=await stamp({sig:s.sig,name:P.name,when:when,auth:auth,txt:P.txt}),img=await pdf.embedPng(st.url),pls=[];
+    var st=await stamp({sig:s.sig,name:P.name,dev:s.dev,when:when,auth:auth,txt:P.txt}),img=await pdf.embedPng(st.url),pls=[];
     for(var k in P.pl){
       var pg=pdf.getPage(+k-1);
       if(pg.getRotation().angle){toast('Trang '+k+' của file này bị xoay nên chưa hỗ trợ ký — hãy bỏ ô ở trang đó');return;}
@@ -12048,7 +12052,7 @@ async function doSign(auth){
     var out=await pdf.save(),ob=out.buffer.slice(out.byteOffset,out.byteOffset+out.byteLength),oh=await sha(ob);
     if(!(await IDBM.set('sgout:'+d.id,ob))){toast('Không lưu được bản đã ký — bộ nhớ trình duyệt đầy');return;}
     Object.assign(d,{status:'signed',signedAt:Date.now(),signer:P.name,auth:auth,srcHash:srcHash,outHash:oh,outSize:ob.byteLength,pl:pls,folder:(typeof d.folder==='number'&&s.folders[d.folder])?d.folder:(SG.fo>=0?SG.fo:0)});
-    s.name=P.name;store.save();closePick();SG.tab='done';SG.fo=d.folder;renderSign();toast('Đã ký xong, lưu trong thư mục “'+s.folders[d.folder]+'”');
+    s.name=P.name;if(!s.fixed&&s.sig)s.fixed=true;store.save();closePick();SG.tab='done';SG.fo=d.folder;renderSign();toast('Đã ký xong, lưu trong thư mục “'+s.folders[d.folder]+'”');
   }catch(e){klog('sgSign',e);toast('Lỗi khi ký PDF: '+((e&&e.message)||''));}
 }
 async function fileOut(id,kind,dl){
@@ -12062,9 +12066,10 @@ window.SGX={
   pg:function(n){var P=SGP;if(!P)return;var q=Math.min(P.n,Math.max(1,P.pg+n));if(q!==P.pg){P.pg=q;showPage();}},
   size:function(v){SGP.w=v/100;boxPos();},
   delPl:function(){delete SGP.pl[SGP.pg];boxPos();},
-  nm:function(v){SGP.name=v.trim();refStamp().then(boxPos);},
+  dv:function(v){if(fixed())return;S().dev=v.trim().slice(0,40);store.save();refStamp().then(boxPos);},
+  nm:function(v){if(fixed())return;SGP.name=v.trim();refStamp().then(boxPos);},
   txt:function(c){SGP.txt=!!c;refStamp().then(boxPos);},
-  draw:function(){pad(function(){refStamp().then(boxPos);});},
+  draw:function(){if(fixed())return;pad(function(){refStamp().then(boxPos);});},
   sign:function(){if(!S().sig){toast('Chưa có chữ ký — bấm “Chữ ký” để vẽ trước');return;}if(!SGP.name){toast('Nhập họ tên người ký');return;}S().name=SGP.name;authOpen(doSign);},
   add:async function(inp){
     var fs=Array.prototype.slice.call(inp.files||[]),s=S(),n=0,bufs=[];
