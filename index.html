@@ -13187,7 +13187,7 @@ BK.fillInv=async function(){
 /* ---------------- màn hình ---------------- */
 window.renderBackup=function(){
   var cfg=getCfg(),hist=getHist(),last=lsJson(KLAST,null),h='';
-  var lastOk=hist.filter(function(e){return e.kind!=='restore'&&e.kind!=='pre-restore'&&e.status!=='fail';})[0];
+  var lastOk=hist.filter(function(e){return e.kind!=='restore'&&e.kind!=='import'&&e.kind!=='pre-restore'&&e.status!=='fail';})[0];
   var lastDl=hist.filter(function(e){return e.dl;})[0];
   h+='<div class="topbar"><div class="trow wrap"><button class="back" onclick="A.go(\'home\')">‹</button><div class="ttl">Sao lưu &amp; khôi phục</div></div><div style="height:10px"></div></div><div class="wrap" style="padding-top:16px;padding-bottom:40px">';
   if(last&&last.at&&Date.now()-last.at<86400000*2){h+='<div class="card" style="margin-bottom:12px;border-left:4px solid '+(last.status==='fail'?'var(--red)':last.status==='warn'?'var(--amber)':'var(--green)')+'"><div style="font-weight:700">Lần khôi phục gần nhất '+badge(last.status)+'</div><div class="bk-d">'+fdt(last.at)+' · '+esc(last.by||'')+' · '+esc(last.label||'')+(last.rolledBack?' · đã tự quay lui':'')+'</div><button class="addbat" style="color:var(--teal);margin-top:6px" onclick="BK.lastRestore()">Xem kết quả</button></div>';}
@@ -13195,8 +13195,10 @@ window.renderBackup=function(){
     +'<div class="bk-d" style="margin-bottom:12px">'+(lastDl?'Đã tải file về máy lần cuối lúc <b>'+fdt(lastDl.at)+'</b>.':'<b style="color:var(--red)">Chưa tải file sao lưu nào về máy.</b>')+' '+(lastOk?'Bản gần nhất (kể cả trong app): '+fdt(lastOk.at)+' '+badge(lastOk.status)+'.':'')+'</div>'
     +'<button class="btn btn-primary" style="margin-bottom:8px" onclick="BK.manual()">'+icon('download',17)+'Sao lưu toàn bộ</button>'
     +'<input type="file" id="bk_file" accept=".json,application/json" style="display:none" onchange="BK.pickFile(this)">'
-    +'<button class="btn btn-outline" onclick="document.getElementById(\'bk_file\').click()">'+icon('upload',17)+'Khôi phục dữ liệu từ file</button>'
-    +'<div class="bk-d" style="margin-top:8px">Sao lưu gồm mọi nguồn dữ liệu của app (xem “Dữ liệu được sao lưu”), tự đọc lại và kiểm tra toàn vẹn rồi mới báo thành công. Chuyển máy: sao lưu ở máy cũ, gửi file qua Zalo/email, ở máy mới chọn “Khôi phục dữ liệu từ file” → Thay thế toàn bộ.</div></div>';
+    +'<input type="file" id="bk_imp" accept=".json,application/json" style="display:none" onchange="BK.impPick(this)">'
+    +'<button class="btn btn-primary" style="margin-bottom:8px" onclick="document.getElementById(\'bk_imp\').click()">'+icon('upload',17)+'Nhập &amp; hợp nhất từ máy khác</button>'
+    +'<button class="btn btn-outline" onclick="document.getElementById(\'bk_file\').click()">'+icon('upload',17)+'Khôi phục toàn bộ từ file (thay thế)</button>'
+    +'<div class="bk-d" style="margin-top:8px">Sao lưu gồm mọi nguồn dữ liệu của app (xem “Dữ liệu được sao lưu”), tự đọc lại và kiểm tra toàn vẹn rồi mới báo thành công. Chuyển máy: sao lưu ở máy cũ, gửi file qua Zalo/email, muốn thêm dữ liệu từ máy khác mà KHÔNG mất dữ liệu đang có: ở máy này chọn “Nhập & hợp nhất từ máy khác”. Chỉ dùng “Khôi phục toàn bộ” khi muốn đưa máy về đúng trạng thái file.</div></div>';
   h+='<div class="card" style="margin-bottom:12px"><div style="font-weight:700;margin-bottom:8px">Sao lưu tự động</div>'
     +'<label class="lbl">Tần suất</label><select class="inp" style="margin-bottom:10px" onchange="BK.setAuto(\'auto\',this.value)">'+[['off','Tắt'],['daily','Hằng ngày'],['weekly','Hằng tuần'],['monthly','Hằng tháng']].map(function(o){return '<option value="'+o[0]+'"'+(cfg.auto===o[0]?' selected':'')+'>'+o[1]+'</option>';}).join('')+'</select>';
   if(cfg.auto!=='off'){
@@ -13216,9 +13218,9 @@ window.renderBackup=function(){
   h+='<div class="card" style="margin-bottom:12px"><div style="font-weight:700;margin-bottom:8px">Lịch sử sao lưu &amp; khôi phục</div>';
   if(!hist.length)h+='<div class="bk-d">Chưa có lần nào. Bấm “Sao lưu toàn bộ” để bắt đầu.</div>';
   hist.slice(0,25).forEach(function(e){
-    var kn={manual:'Thủ công',auto:'Tự động','pre-restore':'Dự phòng trước khôi phục',restore:'Khôi phục'}[e.kind]||e.kind,c=e.counts||{};
+    var kn={manual:'Thủ công',auto:'Tự động','pre-restore':'Dự phòng trước khôi phục',restore:'Khôi phục',import:'Nhập từ máy khác'}[e.kind]||e.kind,c=e.counts||{};
     h+='<div class="bk-hr"><div style="display:flex;justify-content:space-between;gap:8px;align-items:center"><div style="font-weight:700;font-size:14px">'+fdt(e.at)+'</div>'+badge(e.status)+'</div>'
-      +'<div class="bk-d">'+kn+(e.len?' · '+kb(e.len):'')+(e.by?' · '+esc(e.by):'')+(e.kind==='restore'?' · '+esc(e.name):'')+'</div>'
+      +'<div class="bk-d">'+kn+(e.len?' · '+kb(e.len):'')+(e.by?' · '+esc(e.by):'')+((e.kind==='restore'||e.kind==='import')?' · '+esc(e.name):'')+'</div>'
       +(e.kind!=='restore'&&c.main!=null?'<div class="bk-d">'+(c.main||0)+' bản ghi · '+(c.photos||0)+' ảnh · '+(c.pdf||0)+' PDF · '+(c.errors||0)+' mục Báo lỗi</div>':'')
       +'<div class="bk-d">'+(e.internal?'Có bản trong app':e.expired?'Bản trong app đã hết hạn lưu giữ':e.kind==='restore'?'':'Không có bản trong app')+(e.dl?' · đã tải file':'')+(e.err?' · '+esc(e.err):'')+'</div>'
       +'<div class="bk-act">'+(e.rep?'<button class="addbat" style="color:var(--teal)" onclick="BK.viewRep(\''+e.id+'\')">Báo cáo</button>':'')+(e.internal?'<button class="addbat" style="color:var(--teal)" onclick="BK.dlHist(\''+e.id+'\')">Tải xuống</button><button class="addbat" style="color:var(--teal)" onclick="BK.openInternal(\''+e.id+'\')">Khôi phục</button>':'')+'<button class="addbat" style="color:var(--red)" onclick="BK.delHist(\''+e.id+'\')">Xoá</button></div></div>';
@@ -13231,6 +13233,189 @@ window.renderBackup=function(){
   BK.fillInv();reconcileHist();
 };
 BK.lastRestore=function(){var l=lsJson(KLAST,null);if(!l)return;var h='<div class="bk-h">Kết quả khôi phục '+badge(l.status)+'</div><div class="bk-sub">'+fdt(l.at)+' · '+esc(l.by||'')+' · '+esc(l.label||'')+'</div>'+(l.error?'<div class="note-warn" style="margin:10px 0;background:var(--red-bg);border-color:var(--red-ln);color:var(--red)">'+esc(l.error)+'</div>':'')+chkRows(l.checks||[])+'<button class="btn btn-outline" style="margin-top:12px" onclick="BK.close()">Đóng</button>';ovl(h,false);};
+
+/* ======== NHẬP & HỢP NHẤT TỪ MÁY KHÁC: Merge (mặc định) / Append / Full Restore ======== */
+var IMP_T=[['periods','Kỳ kiểm kê vật tư'],['assets','Kỳ CCDC/TSCĐ'],['handovers','Biên bản bàn giao'],['explains','Phiếu giải trình']];
+function canon(o){if(Array.isArray(o))return '['+o.map(canon).join(',')+']';if(o&&typeof o==='object')return '{'+Object.keys(o).filter(function(k){return k!=='_imp';}).sort().map(function(k){return JSON.stringify(k)+':'+canon(o[k]);}).join(',')+'}';return JSON.stringify(o===undefined?null:o);}
+function rlab(x){return String(x.name||x.title||x.ten||x.so||x.code||x.id).slice(0,60);}
+function rts(x){var t=x.updatedAt||x.createdAt;return t?fdt(t):'không rõ';}
+function impId(){return 'imp'+Date.now().toString(36)+Math.random().toString(36).slice(2,6);}
+function impOrig(loc){var o={};loc.forEach(function(x){if(x&&x._imp&&x._imp.orig!=null)o[x._imp.orig+'|'+x._imp.h]=1;});return o;}
+function impAnalyze(norm,plan){
+  var M=norm.groups.main||{};
+  IMP_T.forEach(function(t){
+    var k=t[0],loc=db[k]||[],idx={},r={l:t[1],tot:0,nw:0,same:0,conf:0,items:0},orig=impOrig(loc);
+    loc.forEach(function(x){if(x&&x.id!=null)idx[x.id]=x;});
+    (M[k]||[]).forEach(function(s){
+      if(!s||s.id==null||((k==='periods'||k==='assets')&&!Array.isArray(s.items))){plan.unimp.push(t[1]+': 1 bản ghi thiếu mã định danh hoặc danh sách mục — không nhập được.');return;}
+      r.tot++;var l=idx[s.id],h=canon(s),bh=bkSum(h);
+      if(!l){r.nw++;return;}
+      if(canon(l)===h||orig[s.id+'|'+bh]){r.same++;return;}
+      var ni=0;if(Array.isArray(s.items)&&Array.isArray(l.items))s.items.forEach(function(it){if(it&&!l.items.some(function(q){return q.id===it.id;}))ni++;});
+      r.conf++;r.items+=ni;plan.conf.push({t:k,id:s.id,tl:t[1],lab:rlab(s),lt:rts(l),st:rts(s),li:(l.items||[]).length,si:(s.items||[]).length,ni:ni});
+    });
+    plan.tab[k]=r;
+  });
+}
+async function impAtt(G,plan){
+  var A=plan.att;
+  function cmp(n,label,src,loc,eq){var r={l:label,tot:0,nw:0,same:0,conf:0};Object.keys(src||{}).forEach(function(k){r.tot++;if(loc[k]===undefined)r.nw++;else if(eq(src[k],loc[k]))r.same++;else r.conf++;});A[n]=r;if(r.conf)plan.unimp.push(label+': '+r.conf+' mục trùng khoá nhưng khác nội dung — giữ bản hiện tại, không ghi đè.');}
+  if(G.photos)cmp('photos','Ảnh kiểm kê',G.photos,await collectPhotos(),function(a,b){return a===b;});
+  if(G.pdf){var kv=await kvKeys(),lk={};for(var i=0;i<kv.length;i++)if(isPdfKey(kv[i])){var v=await IDBM.get(kv[i]);lk[kv[i]]=v?await sha256Buf(v):'';}cmp('pdf','Tệp PDF',G.pdf.files,lk,function(a,b){return a.sha===b;});}
+  if(G.errors){
+    var h=await openStore('kk_err_img','i','id'),li={};try{var all=await dumpStore(h,'i');Object.keys(all).forEach(function(id){li[id]=all[id]&&all[id].url;});}finally{h.close();}
+    cmp('eimg','Ảnh bằng chứng Báo lỗi',G.errors.img,li,function(a,b){return (a&&a.url)===b;});
+    var it=lsJson(ER_KEY.items,[]),lm={},si={};(Array.isArray(it)?it:[]).forEach(function(x){if(x&&x.id!=null)lm[x.id]=canon(x);});
+    (G.errors.items||[]).forEach(function(x){if(x&&x.id!=null)si[x.id]=x;});
+    cmp('eitems','Báo lỗi nhập liệu',si,lm,function(a,b){return canon(a)===b;});
+  }
+  if(G.secrets)plan.unimp.push('Chữ ký đã lưu & mật khẩu ký: không nhập ở chế độ Gộp/Bổ sung (thông tin xác thực, chỉ khôi phục ở “Khôi phục toàn bộ”).');
+  plan.unimp.push('Khoá Face ID/vân tay và mã máy: gắn với từng thiết bị, không thể chuyển sang máy này.');
+}
+function impApplyMain(norm,o){
+  var M=JSON.parse(JSON.stringify(norm.groups.main||{})),st={at:Date.now(),src:norm.header.id||o.label};
+  IMP_T.forEach(function(t){
+    var k=t[0];if(!Array.isArray(db[k]))db[k]=[];
+    var loc=db[k],idx={},orig=impOrig(loc);loc.forEach(function(x){if(x&&x.id!=null)idx[x.id]=x;});
+    (M[k]||[]).forEach(function(s){
+      if(!s||s.id==null||((k==='periods'||k==='assets')&&!Array.isArray(s.items)))return;
+      var bh=bkSum(canon(s)),l=idx[s.id],mk=function(extra){return Object.assign({src:st.src,at:st.at,by:o.by,orig:s.id,h:bh},extra||{});};
+      if(!l){s._imp=mk();loc.push(s);idx[s.id]=s;o.touched[k+':'+s.id]=1;return;}
+      if(canon(l)===canon(s)||orig[s.id+'|'+bh])return;
+      if(o.mode!=='merge')return;
+      var d=o.dec[k+':'+s.id];
+      if(d==='backup'){Object.keys(l).forEach(function(q){delete l[q];});Object.assign(l,s,{_imp:mk({replaced:1})});o.touched[k+':'+s.id]=1;}
+      else if(d==='keep'){if(Array.isArray(s.items)&&Array.isArray(l.items))s.items.forEach(function(it){if(it&&!l.items.some(function(q){return q.id===it.id;})){l.items.push(it);o.touched[k+':'+s.id]=1;}});}
+      else if(d==='new'){var c=JSON.parse(JSON.stringify(s));c.id=impId();if(typeof c.name==='string')c.name+=' (nhập từ máy khác)';else if(typeof c.title==='string')c.title+=' (nhập từ máy khác)';c._imp=mk();loc.push(c);o.touched[k+':'+c.id]=1;}
+    });
+    loc.sort(function(a,b){return (b.createdAt||0)-(a.createdAt||0);});
+  });
+  /* phần không có mã định danh riêng: chỉ thêm cái chưa có, không bao giờ ghi đè */
+  if(!Array.isArray(db.folders))db.folders=[];(M.folders||[]).forEach(function(f){if(f&&db.folders.indexOf(f)<0)db.folders.push(f);});
+  ['barcodes','hsd','boxref','ocrfix','signers','track'].forEach(function(n){if(!db[n]||typeof db[n]!=='object')db[n]={};Object.keys(M[n]||{}).forEach(function(k){if(db[n][k]===undefined)db[n][k]=M[n][k];});});
+  if(!db.counters)db.counters={};Object.keys(M.counters||{}).forEach(function(k){db.counters[k]=Math.max(db.counters[k]||0,M.counters[k]||0);});
+  try{migrateFolders();}catch(e){}
+  try{if(M.recon&&typeof rcMergeRecon==='function')rcMergeRecon(M.recon);}catch(e){console.error(e);}
+  if(M.print&&!db.print)db.print=M.print;
+  if(norm.groups.pdf&&M.sg&&Array.isArray(M.sg.docs)){
+    var S=db.sg=db.sg&&typeof db.sg==='object'?db.sg:{};if(!Array.isArray(S.docs))S.docs=[];if(!Array.isArray(S.folders)||!S.folders.length)S.folders=['Chưa phân loại'];
+    M.sg.docs.forEach(function(x){if(!x||!x.id||S.docs.some(function(y){return y.id===x.id;}))return;var fn=(M.sg.folders||[])[x.folder]||'Chưa phân loại',ix=S.folders.indexOf(fn);if(ix<0){S.folders.push(fn);ix=S.folders.length-1;}x.folder=ix;S.docs.push(x);});
+  }
+}
+async function impApplyAll(norm,o){
+  var G=norm.groups;
+  if(G.photos)await putPhotos(G.photos,false);
+  if(G.pdf)await putPdf(G.pdf.files||{},false);
+  if(G.errors){await putErrImg(G.errors.img||{},false);putErrLs(G.errors,false);}
+  if(G.settings)putSettings(G.settings,false);
+  impApplyMain(norm,o);
+  audit('Nhập từ máy khác ('+o.mode+')',norm.header.id||o.label,null,{by:o.by,moi:Object.keys(o.touched).length,tep:o.label});
+  if(!store.saveVerified())throw new Error('Không ghi được dữ liệu chính vào bộ nhớ');
+  if(!(await flushWait()))throw new Error('Quá thời gian chờ ghi dữ liệu');
+}
+async function impVerify(norm,o,before,c0){
+  var out=[],lost=[],chg=[],miss=[];
+  IMP_T.forEach(function(t){var k=t[0],cur={};(db[k]||[]).forEach(function(x){if(x&&x.id!=null)cur[x.id]=x;});
+    Object.keys(before[k]).forEach(function(id){var x=cur[id];if(!x)lost.push(k+':'+id);else if(bkSum(canon(x))!==before[k][id]&&!o.touched[k+':'+id])chg.push(k+':'+id);});
+    Object.keys(o.touched).forEach(function(key){if(key.indexOf(k+':')===0&&!cur[key.slice(k.length+1)])miss.push(key);});});
+  out.push(lost.length||chg.length?chk('i_old','Dữ liệu cũ còn nguyên','fail',(lost.length?lost.length+' bản ghi bị mất; ':'')+(chg.length?chg.length+' bản ghi bị đổi ngoài ý muốn':'')):chk('i_old','Toàn bộ dữ liệu cũ còn nguyên (ngoài phần bạn chọn thay thế)','ok',Object.keys(before).reduce(function(n,k){return n+Object.keys(before[k]).length;},0)+' bản ghi đối chiếu'));
+  out.push(miss.length?chk('i_new','Dữ liệu mới đã được bổ sung','fail','Thiếu '+miss.length+' bản ghi vừa nhập'):chk('i_new','Dữ liệu mới đã được bổ sung đúng','ok',Object.keys(o.touched).length+' bản ghi thêm/cập nhật'));
+  var c1=await census();
+  out.push(c1.photos<c0.photos||c1.pdf<c0.pdf||c1.errors<c0.errors?chk('i_att','Tệp đính kèm không bị mất','fail','Số ảnh/PDF/Báo lỗi giảm so với trước khi nhập'):chk('i_att','Tệp đính kèm không bị mất','ok',c1.photos+' ảnh · '+c1.pdf+' PDF · '+c1.errors+' mục Báo lỗi'));
+  return out.concat(await verifyApplied(norm,{mode:'merge'}));
+}
+BK.impPick=function(input){var f=input.files&&input.files[0];if(!f)return;input.value='';var r=new FileReader();r.onerror=function(){toast('Không đọc được file');};r.onload=function(){BK.impBegin(String(r.result),f.name);};r.readAsText(f);};
+BK.impBegin=async function(text,label){
+  if(BK.running){toast('Đang có tiến trình khác đang chạy');return;}
+  ovl('<div class="bk-h">Đang phân tích bản sao lưu…</div><div class="bk-bar"><i style="width:60%"></i></div><div class="bk-sub">Kiểm tra toàn vẹn rồi đối chiếu từng bản ghi với dữ liệu trên máy. Chưa thay đổi gì.</div>',true);await tick();
+  var norm,checks=[],plan={tab:{},conf:[],unimp:[],att:{}},fail=function(m){ovl('<div class="bk-h">Không nhập được</div><div class="note-warn" style="margin:10px 0;background:var(--red-bg);border-color:var(--red-ln);color:var(--red)">'+esc(m)+'</div><div class="bk-sub">Dữ liệu trên máy được giữ nguyên.</div><button class="btn btn-outline" style="margin-top:12px" onclick="BK.close()">Đóng</button>',false);};
+  try{norm=normalize(JSON.parse(text));}catch(e){fail(e instanceof SyntaxError?'File không phải JSON hợp lệ (có thể bị cắt hoặc sai file).':e.message);return;}
+  try{checks=(await verifyIntegrity(norm)).concat(await dryRestore(norm,''));}catch(e){checks.push(chk('x','Kiểm tra','fail',e.message));}
+  var st=statusOf(checks,[]);
+  if(st==='fail'){ovl('<div class="bk-h">Bản sao lưu không đạt kiểm tra '+badge(st)+'</div>'+chkRows(checks.filter(function(c){return c.state==='fail';}))+'<div class="bk-sub" style="margin-top:8px">Dữ liệu trên máy được giữ nguyên.</div><button class="btn btn-outline" style="margin-top:12px" onclick="BK.close()">Đóng</button>',false);return;}
+  if(!norm.groups.main){fail('File không có nhóm dữ liệu chính để nhập.');return;}
+  try{impAnalyze(norm,plan);await impAtt(norm.groups,plan);}catch(e){console.error(e);fail('Không đối chiếu được: '+(e.message||e));return;}
+  BK.imp={norm:norm,label:label,plan:plan,text:text};
+  var H=norm.header,rows=IMP_T.map(function(t){return plan.tab[t[0]];}).concat(['photos','pdf','eimg','eitems'].map(function(k){return plan.att[k];}).filter(Boolean)),T={tot:0,nw:0,same:0,conf:0};
+  rows.forEach(function(r){T.tot+=r.tot;T.nw+=r.nw;T.same+=r.same;T.conf+=r.conf;});
+  var h='<div class="bk-h">Nhập dữ liệu từ máy khác</div><div class="bk-sub">Nguồn: '+esc(label)+(H.createdAt?' · tạo lúc '+fdt(H.createdAt):'')+(H.by?' · bởi '+esc(H.by):'')+(H.appVersion?' · bản app '+esc(H.appVersion):'')+(norm.legacy?'<br><b>File định dạng cũ</b>':'')+'</div>';
+  h+='<div class="bk-h2">Kiểm tra bản sao lưu '+badge(st)+'</div>'+chkRows(checks.filter(function(c){return c.state!=='ok';}))+'<div class="bk-d">Đạt '+checks.filter(function(c){return c.state==='ok';}).length+'/'+checks.length+' mục kiểm tra.</div>';
+  h+='<div class="bk-h2">Báo cáo trước khi nhập</div><div style="overflow:auto"><table class="bk-t2"><tr><th>Nhóm</th><th>Trong file</th><th>Mới</th><th>Trùng khớp</th><th>Xung đột</th></tr>'+rows.map(function(r){return '<tr><td>'+esc(r.l)+'</td><td>'+r.tot+'</td><td><b>'+r.nw+'</b></td><td>'+r.same+'</td><td>'+(r.conf?'<b style="color:var(--red)">'+r.conf+'</b>':0)+'</td></tr>';}).join('')+'<tr><td><b>Tổng</b></td><td><b>'+T.tot+'</b></td><td><b>'+T.nw+'</b></td><td><b>'+T.same+'</b></td><td><b>'+T.conf+'</b></td></tr></table></div>';
+  h+='<div class="bk-d" style="margin-top:6px">Tệp đính kèm trong file: '+((norm.groups.photos?Object.keys(norm.groups.photos).length:0)+(norm.groups.pdf?Object.keys(norm.groups.pdf.files||{}).length:0)+(norm.groups.errors?Object.keys(norm.groups.errors.img||{}).length:0))+' (ảnh, PDF, ảnh Báo lỗi).</div>';
+  if(plan.unimp.length)h+='<div class="bk-h2">Không thể nhập / không tự ghi đè</div>'+plan.unimp.map(function(m){return '<div class="bk-ex"><div>'+esc(m)+'</div></div>';}).join('');
+  h+='<label class="lbl" style="margin-top:10px">Chế độ nhập</label><select class="inp" id="imp_mode" style="margin-bottom:10px" onchange="BK.impMode()"><option value="merge">Nhập và hợp nhất (Merge) — mặc định</option><option value="append">Nhập bổ sung (Append) — chỉ thêm bản ghi chưa có</option><option value="restore">Khôi phục toàn bộ (Full Restore) — THAY THẾ dữ liệu</option></select>';
+  h+='<div id="imp_std"><div class="note-warn" style="margin-bottom:10px" id="imp_note"></div>';
+  if(plan.conf.length){
+    h+='<div id="imp_conf"><div class="bk-h2">Xung đột: cùng mã, nội dung khác ('+plan.conf.length+')</div><div class="bk-d" style="margin-bottom:6px">Hãy chọn cách xử lý cho từng mục (hoặc dùng nút chọn nhanh). App không tự chọn thay bạn.</div><div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px"><button class="addbat" style="color:var(--teal)" onclick="BK.impAll(\'keep\')">Giữ hết hiện tại</button><button class="addbat" style="color:var(--teal)" onclick="BK.impAll(\'skip\')">Bỏ qua hết</button></div><div style="max-height:46vh;overflow:auto">'
+      +plan.conf.map(function(c,i){return '<div class="bk-hr"><div style="font-weight:700;font-size:14px">'+esc(c.tl)+': '+esc(c.lab)+'</div><div class="bk-d">Trên máy: '+rts({updatedAt:0,createdAt:0}).replace('không rõ','')+c.lt+' · '+c.li+' mục<br>Trong file: '+c.st+' · '+c.si+' mục'+(c.ni?' · '+c.ni+' mục con chỉ có trong file':'')+'</div><select class="inp" id="cf_'+i+'" onchange="BK.impRv()"><option value="">— Chọn cách xử lý —</option><option value="keep">Giữ dữ liệu hiện tại'+(c.ni?' (vẫn thêm '+c.ni+' mục con mới)':'')+'</option><option value="backup">Dùng dữ liệu từ bản sao lưu (thay bản hiện tại)</option><option value="new">Tạo bản ghi mới từ file</option><option value="skip">Bỏ qua bản ghi này</option></select></div>';}).join('')+'</div></div>';
+  }
+  h+='<label class="lbl">Người thực hiện (bắt buộc)</label><input class="inp" id="bk_who" value="'+esc((db.profile&&db.profile.ten)||'')+'" oninput="BK.impRv()" style="margin-bottom:10px"><label style="display:flex;gap:8px;align-items:flex-start;font-size:13px;margin-bottom:12px"><input type="checkbox" id="bk_ack" onchange="BK.impRv()" style="margin-top:3px"><span>Tôi đã xem báo cáo. App sẽ tự tạo bản dự phòng trước khi nhập và tự quay lui nếu lỗi.</span></label><div style="display:flex;gap:8px"><button class="btn btn-primary" id="imp_go" disabled style="flex:2;opacity:.45" onclick="BK.impGo()">Tạo bản dự phòng &amp; nhập</button><button class="btn btn-outline" style="flex:1" onclick="BK.close()">Huỷ</button></div></div>';
+  h+='<div id="imp_full" style="display:none"><div class="note-warn" style="margin-bottom:10px"><b>Cảnh báo:</b> Khôi phục toàn bộ sẽ THAY THẾ dữ liệu hiện tại bằng nội dung file. Bạn sẽ qua thêm màn xác nhận riêng; app tự sao lưu trạng thái hiện tại trước khi thực hiện.</div><button class="btn btn-primary" onclick="BK.impFull()">Tiếp tục tới Khôi phục toàn bộ…</button> <button class="btn btn-outline" onclick="BK.close()">Huỷ</button></div>';
+  ovl(h,false);BK.impMode();
+};
+BK.impMode=function(){
+  var m=($('imp_mode')||{}).value||'merge',P=BK.imp;if(!P)return;
+  var n=$('imp_note'),c=$('imp_conf');
+  if($('imp_std'))$('imp_std').style.display=m==='restore'?'none':'';
+  if($('imp_full'))$('imp_full').style.display=m==='restore'?'':'none';
+  if(c)c.style.display=m==='merge'?'':'none';
+  if(n)n.innerHTML=m==='merge'?'<b>Merge:</b> giữ nguyên toàn bộ dữ liệu hiện có, chỉ thêm cái chưa có. Bản ghi trùng giống hệt thì bỏ qua; bản ghi cùng mã nhưng khác nội dung chỉ đổi khi bạn chọn.':'<b>Append:</b> chỉ thêm bản ghi chưa tồn tại, không sửa, không cập nhật, không xoá gì. '+P.plan.conf.length+' bản ghi xung đột sẽ được bỏ qua và ghi vào báo cáo.';
+  BK.impRv();
+};
+BK.impAll=function(v){BK.imp.plan.conf.forEach(function(c,i){var e=$('cf_'+i);if(e)e.value=v;});BK.impRv();};
+BK.impRv=function(){
+  var P=BK.imp,m=($('imp_mode')||{}).value||'merge',w=$('bk_who'),a=$('bk_ack'),b=$('imp_go');if(!b||!P)return;
+  var ok=!!(w&&w.value.trim().length>=2&&a&&a.checked);
+  if(ok&&m==='merge')P.plan.conf.forEach(function(c,i){var e=$('cf_'+i);if(!e||!e.value)ok=false;});
+  b.disabled=!ok;b.style.opacity=ok?'1':'.45';
+};
+BK.impFull=function(){var P=BK.imp;if(!P)return;BK.begin(P.text,P.label);};
+BK.impGo=async function(){
+  var P=BK.imp;if(!P||BK.running)return;
+  var by=($('bk_who')||{}).value||'',mode=($('imp_mode')||{}).value||'merge',dec={};
+  if(by.trim().length<2){toast('Nhập tên người thực hiện');return;}
+  if(mode==='merge'){var un=0;P.plan.conf.forEach(function(c,i){var e=$('cf_'+i);dec[c.t+':'+c.id]=e?e.value:'';if(!(e&&e.value))un++;});if(un){toast('Còn '+un+' xung đột chưa chọn cách xử lý');return;}}
+  BK.running=true;BK.showProg=true;
+  newProg('Đang nhập dữ liệu từ máy khác',[['pre','Tạo bản dự phòng trạng thái hiện tại'],['apply',mode==='merge'?'Nhập & hợp nhất':'Nhập bổ sung'],['verify','Kiểm tra toàn vẹn sau nhập'],['done','Hoàn tất']]);await tick();
+  var norm=P.norm,pre=null,o={mode:mode,dec:dec,by:by,label:P.label,touched:{}},res={status:'ok',checks:[],by:by,label:'Nhập: '+P.label,at:Date.now(),id:norm.header.id||''},before={},c0=null;
+  try{
+    ps('pre','run');store.flush();await flushWait();
+    IMP_T.forEach(function(t){before[t[0]]={};(db[t[0]]||[]).forEach(function(x){if(x&&x.id!=null)before[t[0]][x.id]=bkSum(canon(x));});});
+    c0=await census();
+    try{localStorage.setItem('kk_db_prev',JSON.stringify(db));}catch(e){}
+    var sp=BK.prog;pre=await BK.build({kind:'pre-restore',internal:true,quiet:true,pass:''});BK.prog=sp;BK.running=true;BK.showProg=true;drawProg();
+    if(!pre||pre.status==='fail')throw new Error('Không tạo được bản dự phòng hợp lệ — dừng nhập, dữ liệu giữ nguyên.');
+    if(!pre.internal){
+      if(!confirm('Không lưu được bản dự phòng trong app ('+(pre.internalErr||'bộ nhớ đầy')+').\nOK = TẢI bản dự phòng về máy rồi nhập tiếp. Huỷ = dừng, dữ liệu giữ nguyên.'))throw new Error('Đã dừng vì chưa có bản dự phòng an toàn.');
+      shareOrDownload(new Blob([pre.text],{type:'application/json'}),'DuPhong_TruocKhiNhap_'+fstamp(pre.at)+'.json');
+      if(!confirm('Bạn đã lưu file dự phòng chưa? OK = tiếp tục nhập.'))throw new Error('Đã dừng theo yêu cầu.');
+    }
+    ps('pre','ok','Mã '+pre.id+' · '+kb(pre.len));
+    ps('apply','run');await tick();await impApplyAll(norm,o);ps('apply','ok','Đã ghi '+Object.keys(o.touched).length+' bản ghi mới/cập nhật');
+    ps('verify','run');await tick();
+    res.checks=await impVerify(norm,o,before,c0);
+    var bad=res.checks.filter(function(c){return c.state==='fail';});
+    if(bad.length)throw new Error('Kiểm tra sau nhập không đạt: '+bad.map(function(c){return c.label+' ('+c.detail+')';}).join('; '));
+    ps('verify','ok','Dữ liệu cũ nguyên vẹn, dữ liệu mới đã đủ');
+  }catch(e){
+    console.error(e);res.status='fail';res.error=e.message||String(e);
+    if(pre&&pre.internal){try{ps('done','run','Đang tự quay lui…');var t=await loadInternal(pre.id);await applyAll(normalize(JSON.parse(t)),{mode:'replace',pass:'',by:by});res.rolledBack=true;}catch(e2){console.error(e2);res.rolledBack=false;res.rbErr=e2.message||String(e2);}}
+  }
+  var vs=res.status;if(vs==='ok'&&res.checks.some(function(c){return c.state==='warn';}))vs='warn';res.status=vs;
+  var tl=[],tab=P.plan.tab,tc={keep:0,backup:0,new:0,skip:0};Object.keys(dec).forEach(function(k){tc[dec[k]]++;});
+  tl.push('BÁO CÁO NHẬP DỮ LIỆU TỪ MÁY KHÁC','Chế độ: '+mode+' · Nguồn: '+P.label+' · Người thực hiện: '+by+' · '+fdt(res.at),'Kết quả: '+vs+(res.error?' — '+res.error:''),'');
+  IMP_T.forEach(function(t){var r=tab[t[0]];tl.push(r.l+': trong file '+r.tot+', mới '+r.nw+', trùng khớp '+r.same+', xung đột '+r.conf);});
+  if(mode==='merge')tl.push('Xử lý xung đột: giữ hiện tại '+tc.keep+', dùng bản sao lưu '+tc.backup+', tạo mới '+tc.new+', bỏ qua '+tc.skip);
+  tl.push('Bản ghi thêm/cập nhật thực tế: '+Object.keys(o.touched).length,'','Không nhập được / không ghi đè:');P.plan.unimp.forEach(function(m){tl.push('- '+m);});tl.push('','Kiểm tra:');res.checks.forEach(function(c){tl.push('- ['+c.state+'] '+c.label+(c.detail?': '+c.detail:''));});
+  var repTxt=tl.join('\n');BK.impRepTxt=repTxt;
+  try{lsPut(KLAST,JSON.stringify(res));}catch(e){}
+  addHist({id:'IM-'+res.at,at:res.at,kind:'import',status:vs,len:0,name:P.label,internal:false,by:by,ms:0,counts:{},rep:{status:vs,id:res.id,at:res.at,kind:'import',checks:res.checks.concat(res.error?[chk('err','Lỗi','fail',res.error+(res.rolledBack?' — đã tự quay lui.':res.rolledBack===false?' — QUAY LUI LỖI: '+(res.rbErr||'')+'. Dùng bản dự phòng trong Lịch sử.':''))]:[]),failures:[],groups:[],excluded:[]}});
+  BK.running=false;BK.showProg=false;BK.imp=null;
+  var btn='<button class="btn btn-outline" style="margin-top:12px" onclick="shareOrDownload(new Blob([\'\\ufeff\'+BK.impRepTxt],{type:\'text/plain\'}),\'BaoCao_NhapDuLieu.txt\')">Tải báo cáo kết quả</button> ';
+  if(vs==='fail'){ovl('<div class="bk-h">NHẬP KHÔNG THÀNH CÔNG</div><div class="note-warn" style="margin:10px 0;background:var(--red-bg);border-color:var(--red-ln);color:var(--red)">'+esc(res.error)+'</div><div class="bk-sub">'+(res.rolledBack?'<b>Đã tự quay lui</b>, dữ liệu như cũ.':'<b>Quay lui tự động không thành công.</b> '+esc(res.rbErr||'')+'<br>Bản dự phòng nằm trong Lịch sử sao lưu.')+'</div>'+chkRows(res.checks)+btn+'<button class="btn btn-outline" style="margin-top:12px" onclick="BK.close()">Đóng</button>',false);if(res.rolledBack)setTimeout(function(){location.reload();},6000);return;}
+  ovl('<div class="bk-h">Nhập '+(vs==='warn'?'xong, có cảnh báo':'thành công')+'</div><div class="bk-sub">Đã thêm/cập nhật '+Object.keys(o.touched).length+' bản ghi. Dữ liệu cũ còn nguyên. App sẽ tải lại sau vài giây.</div>'+chkRows(res.checks)+btn,true);
+  setTimeout(function(){location.reload();},vs==='warn'?7000:5000);
+};
 
 /* ---------------- chặn hành vi cũ: mọi nút “Sao lưu ngay” dùng trung tâm mới ---------------- */
 try{A.backupNow=function(){BK.manual();};A.syncExport=function(){BK.manual();};}catch(e){}
