@@ -3889,7 +3889,7 @@ function scMount(){
     +'<div style="display:flex;gap:8px;margin-top:8px"><input id="scman" class="inp" inputmode="text" placeholder="Hoặc nhập/dán dãy số, mã VT" style="flex:1;min-width:0;background:#1b1b24;color:#e5e7eb;border-color:#33333d" onkeydown="if(event.key===\'Enter\')A.scManual()"><button class="btn btn-primary" style="width:auto;padding:0 18px" onclick="A.scManual()">Tìm</button></div>'
     +'<div style="display:flex;gap:8px;margin-top:8px"><button id="scautobtn" class="btn" style="flex:1;width:auto;padding:12px;background:#14203a;color:#a9bde0;border:1px solid #2c4f8f" onclick="A.scAuto()">Tự đọc số: BẬT</button>'
     +'<button class="btn" style="flex:1;width:auto;padding:12px;background:#14203a;color:#a9bde0;border:1px solid #2c4f8f;display:flex;align-items:center;justify-content:center;gap:6px" onclick="A.scOcr()">'+icon('scan',16)+'Đọc ngay</button></div>'
-    +'<label style="display:flex;align-items:center;justify-content:center;gap:8px;margin-top:8px;padding:11px;border:1px dashed #44444f;border-radius:12px;color:#9ca3af;font-size:13px;cursor:pointer">'+icon('scan',16)+'Chụp ảnh mã / dãy số (nếu camera trực tiếp không mở được)<input type="file" accept="image/*" capture="environment" style="display:none" onchange="A.scPhoto(this)"></label>'
+    +'<label id="scphoto" style="display:flex;align-items:center;justify-content:center;gap:8px;margin-top:8px;padding:11px;border:1px dashed #44444f;border-radius:12px;color:#9ca3af;font-size:13px;cursor:pointer">'+icon('scan',16)+'<span id="scphotot">Chụp ảnh mã / dãy số (nếu camera trực tiếp không mở được)</span><input type="file" accept="image/*" capture="environment" style="display:none" onchange="A.scPhoto(this)"></label>'
     +'</div>';
   document.body.appendChild(o);
 }
@@ -4382,6 +4382,28 @@ function scJudge(p,lines){
   if(a.dist===0&&(!b||b.dist>0))return {it:a.item,line:a.line,dist:0,need:(scRisky(p,a.item)||a.conf<OCR_CONF||ocrDigits(a.item.code).length<7)?2:1};
   return null;
 }
+/* Phát hiện ảnh trực tiếp bị MỜ thật sự (máy quá gần, chưa lấy nét): so với độ nét tuyệt đối chứ không chỉ so với khung nét nhất đã thấy
+   (nếu cả phiên đều mờ thì phép so tương đối không bao giờ báo). Chỉ dùng để GỢI Ý, không chặn việc đọc. */
+function scIsBlurry(c){
+  var w=c.width,h=c.height,d=c.getContext('2d',{willReadFrequently:true}).getImageData(0,0,w,h).data,L=new Float32Array(w*h),i,x,y,m=0,m2=0,s=0,s2=0,n=0,v;
+  for(i=0;i<w*h;i++){L[i]=d[i*4]*.3+d[i*4+1]*.59+d[i*4+2]*.11;m+=L[i];m2+=L[i]*L[i];}
+  m/=w*h;var lv=m2/(w*h)-m*m;
+  if(lv<25)return false;
+  for(y=1;y<h-1;y++)for(x=1;x<w-1;x++){i=y*w+x;v=4*L[i]-L[i-1]-L[i+1]-L[i-w]-L[i+w];s+=v;s2+=v*v;n++;}
+  var lap=s2/n-(s/n)*(s/n);
+  return lap<25&&lap/lv<0.02;
+}
+function scBlurHint(on){
+  if(!SC)return;
+  SC.blurOn=!!on;
+  var l=document.getElementById('scphoto'),t=document.getElementById('scphotot');
+  if(l){l.style.borderColor=on?'#d9822b':'#44444f';l.style.color=on?'#fbbf24':'#9ca3af';}
+  if(t)t.textContent=on?'Ảnh trực tiếp đang mờ — bấm đây để chụp bằng camera hệ thống (tự lấy nét)':'Chụp ảnh mã / dãy số (nếu camera trực tiếp không mở được)';
+  if(on){
+    scOcrStatus('Số: ảnh mờ — lùi máy ra','#fbbf24');
+    scMsg('Ảnh đang bị mờ (máy quá gần hoặc chưa lấy nét). Lùi máy ra khoảng 15–20 cm, phóng to bằng thanh zoom, chờ nét rồi giữ yên.');
+  }
+}
 function scAutoOcr(v){
   var p=per(SC.pid);if(!p)return;
   var cr=scGuideCrop(v),sig,diff=99,i,now=Date.now();
@@ -4396,6 +4418,7 @@ function scAutoOcr(v){
     c2.width=320;c2.height=Math.max(8,Math.round(cr.h*320/cr.w));
     c2.getContext('2d',{willReadFrequently:true}).drawImage(v,cr.x,cr.y,cr.w,cr.h,0,0,c2.width,c2.height);
     var sh=phSharp(c2);SC.shMax=Math.max((SC.shMax||0)*0.985,sh);
+    if(scIsBlurry(c2))SC.blurN=(SC.blurN||0)+1;else{SC.blurN=0;if(SC.blurOn)scBlurHint(false);}
     if(sh<SC.shMax*0.4&&(SC.blurSkip||0)<2){SC.blurSkip=(SC.blurSkip||0)+1;scOcrStatus('Số: ảnh mờ — giữ yên máy, chờ lấy nét','#fbbf24');return;}
     SC.blurSkip=0;
   }catch(e){klog("var c2=SC.shc||(SC.shc=document.createElement('c",e)}
@@ -4445,6 +4468,7 @@ function scAutoOcr(v){
         var r=unmAdd(p,c.rep,'ocr',c.n);
         scUnmNotice(r.e,r.isNew);
       });
+    }else if(SC.blurN>=4){scBlurHint(true);
     }else scMsg(lines.length?'Chưa đọc rõ — giữ yên máy, đủ sáng, để tem nằm gọn trong khung':scHint());
   }).catch(function(e){if(SC){SC.autoBusy=false;SC.ocrAt=Date.now()+4000;scOcrStatus('Số: lỗi đọc · '+((e&&e.message)||'?'),'#f87171');}});
 }
