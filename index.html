@@ -1251,6 +1251,7 @@ html body #bnav button.on:not(.fab)::before{display:none}
 .fc-row{display:grid;grid-template-columns:1fr 1fr;gap:16px;align-items:start;width:calc(100% - 32px);max-width:1048px;margin:16px auto}
 .fc-row .fc-pn{display:block}
 .fc-row .fc-pn:nth-of-type(n+1){grid-column:auto}
+.fc-row .fc-pn.fc-act{grid-column:1/-1}
 html body .fc-row #mcard{display:block;width:auto;max-width:none;margin:0;padding:20px 22px;--hm-fg:#14203a;--hm-mut:#6b7389;--hm-track:#e6e2d6;--hm-a1:#7d9bd1;--hm-a2:#14284b;--hm-d1:#3f64a8;--hm-d2:#c9d4ea;--hm-d3:#a2a8bb;background:#fff;box-shadow:0 1px 2px rgba(20,30,60,.05),0 8px 20px -12px rgba(40,50,80,.2),inset 0 0 0 1px #e8e4da}
 html body .fc-row #mcard::before{display:none}
 html body .fc-row #mcard .mn button{background:#fff;border:1px solid #ddd8cc;color:#4a5470}
@@ -4659,9 +4660,11 @@ function renderHomeOld(){
   if(nxc.m1)nxRow('org',KCAL,'Còn ≤ 1 tháng',nxc.m1,"NX.go('m1')");
   if(nxo)nxRow('blu',icon('clock',18),'Kỳ đang kiểm dở',nxo,"NX.go('open')");
   if(nxl)nxRow('amb',icon('doc',18),'Thanh toán NCC có lỗi',nxl,"NX.go('pay')");
+  var nxec={en:0,t:0,o:0};try{nxec=fcErrCnt();}catch(e){}
+  if(nxec.en)nxRow((nxec.t||nxec.o)?'red':'amb',icon('warn',18),'Lỗi báo đang nhắc chưa xử lý'+((nxec.t||nxec.o)?'<span style="display:block;font-size:12px;font-weight:500;color:#6b7389;margin-top:1px">'+(nxec.t?nxec.t+' chưa nhắc hôm nay':'')+((nxec.t&&nxec.o)?' · ':'')+(nxec.o?nxec.o+' quá hạn':'')+'</span>':''),nxec.en,"A.go('err');ER.nhacView&&ER.nhacView()");
   if(nxc.m3)nxRow('amb',KCAL,'Còn ≤ 3 tháng',nxc.m3,"NX.go('m3')");
   if(nxc.m6)nxRow('grn',KCAL,'Còn ≤ 6 tháng',nxc.m6,"NX.go('m6')");
-  nxt=(nxc.expired||0)+(nxc.m1||0)+nxo+nxl;
+  nxt=(nxc.expired||0)+(nxc.m1||0)+nxo+nxl+nxec.en;
   if(!nxr)nxr='<div class="nx-r grn" style="cursor:default"><span class="nx-i">'+icon('check',18)+'</span><div class="nx-t">Không có việc cần xử lý</div></div>';
   h+='<div class="wrap mt20"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px"><span class="sec" style="margin:0;display:flex;align-items:center;gap:8px">Cần xử lý'+(nxt?'<span class="nx-tot tnum">'+nxt+'</span>':'')+'</span><button class="addbat" style="color:var(--teal);display:flex;align-items:center;gap:5px" onclick="showHsdEmailPicker()">'+icon('mail',15)+'Email</button></div><div class="nx">'+nxr+'</div></div>';
   var tileL='display:flex;flex-direction:column;gap:8px;padding:18px 8px;line-height:1.25;font-size:14px';
@@ -7861,7 +7864,7 @@ function fcDelta(){
 function fcHdr(){
   var b=document.querySelector('#fcbr span'),bl=document.getElementById('fcbell');
   try{if(b)b.textContent=(db.folders&&db.folders[0])||'12M Cát Linh (HO)';}catch(e){}
-  if(bl)bl.classList.toggle('has',!!document.querySelector('#app .fc-ph em'));}
+  if(bl)bl.classList.toggle('has',!!document.querySelector('#app .nx-tot'));}
 document.addEventListener('keydown',function(e){if((e.ctrlKey||e.metaKey)&&e.key==='k'){var q=document.getElementById('fcq');if(q){e.preventDefault();q.focus();}}});
 /* Lỗi nhập liệu/labo đã tích "Nhắc hàng ngày" và chưa xử lý xong — dùng cho Công việc cần xử lý (máy tính) và thẻ nhắc ở trang chủ (điện thoại) */
 function fcErrCnt(){var r={en:0,t:0,o:0};
@@ -7869,29 +7872,12 @@ function fcErrCnt(){var r={en:0,t:0,o:0};
     EI.forEach(function(x){if(x&&x.nhac&&x.st!=='Đã xử lý'){r.en++;if(x.nhacNgay!==td)r.t++;if(x.han&&x.han<td)r.o++;}});}catch(e){r={en:0,t:0,o:0};}
   return r;}
 function fcErrMsg(c){return c.en+' lỗi báo đang bật nhắc chưa xử lý'+(c.t?' · '+c.t+' chưa nhắc hôm nay':'')+(c.o?' · '+c.o+' quá hạn':'');}
-function fcMobTask(){var c=fcErrCnt();if(!c.en)return '';
-  return '<div class="fc-mt'+(c.t||c.o?' hot':'')+'" onclick="A.go(\'err\');ER.nhacView&&ER.nhacView()">'+icon('warn',20)+'<div><b>Công việc cần xử lý</b><span>'+fcErrMsg(c)+'</span></div><em>'+c.en+'</em></div>';}
+/* Đã gộp vào khối "Cần xử lý" ở đầu Trang chủ — không hiện thêm thẻ riêng nữa */
+function fcMobTask(){return '';}
 function fcPanels(){
-  var en=[],o=0,nl=0,rows=[],act='',i;
-  try{en=hsdEntries();}catch(e){}
-  var ex=en.filter(function(e){return e.days<0;}).length,m1=en.filter(function(e){return e.days>=0&&e.days<=30;}).length;
-  try{o=db.periods.filter(function(p){return p.items.some(function(i){return !i.counted&&i.close!==0;});}).length;}catch(e){}
-  try{if(db.pay&&db.pay.mua&&db.pay.mua.length)payCompute().forEach(function(g){if(g.bad)nl++;});}catch(e){}
-  var ec=fcErrCnt(),eN=ec.en,eT=ec.t,eO=ec.o;
-  function row(c,ic,tx,n,go){return '<div class="fc-tr" onclick="'+go+'"><span class="fc-ti '+c+'">'+ic+'</span><span class="fc-tx">'+tx+'</span><b class="fc-tn '+c+'">'+n+'</b></div>';}
-  var I1='<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4 3 20h18Z"/><path d="M12 10v4M12 17v.5"/></svg>',
-      I2='<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="5" width="16" height="15" rx="3"/><path d="M8 3v4M16 3v4M4 10h16"/></svg>',
-      I3='<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="4" width="12" height="17" rx="3"/><path d="m9.5 12 1.8 1.8 3.2-3.6"/></svg>',
-      I4='<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8"/><path d="M12 8v8M9.5 10.5h5"/></svg>';
-  if(ex)rows.push(row('r',I1,'Có '+ex+' vật tư đã hết hạn sử dụng',ex,"NX.go('expired')"));
-  if(m1)rows.push(row('a',I2,m1+' vật tư còn ≤ 1 tháng',m1,"NX.go('m1')"));
-  if(o)rows.push(row('i',I3,o+' kỳ kiểm kê chưa hoàn thành',o,"NX.go('open')"));
-  if(nl)rows.push(row('p',I4,nl+' đề nghị thanh toán NCC cần xử lý',nl,"NX.go('pay')"));
-  if(eN)rows.push(row(eT||eO?'r':'a',I1,fcErrMsg(ec),eN,"A.go('err');ER.nhacView&&ER.nhacView()"));
-  var tot=ex+m1+o+nl+eN;
+  var act='',I3='<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="4" width="12" height="17" rx="3"/><path d="m9.5 12 1.8 1.8 3.2-3.6"/></svg>';
   (db.periods||[]).slice(0,5).forEach(function(p){act+='<div class="fc-tr"><span class="fc-ti i">'+I3+'</span><span class="fc-tx">Kiểm kê vật tư – '+esc(p.name||'Kỳ kiểm kê')+'</span><span class="fc-ago">'+(p.createdAt?fcAgo(p.createdAt):'')+'</span></div>';});
-  return '<div class="fc-pn"><div class="fc-ph">Công việc cần xử lý'+(tot?' <em>('+tot+')</em>':'')+'</div>'+(rows.join('')||'<div class="fc-empty">Không có công việc tồn đọng</div>')+'</div>'
-    +'<div class="fc-pn"><div class="fc-ph">Hoạt động gần đây</div>'+(act||'<div class="fc-empty">Chưa có hoạt động</div>')+'</div>';
+  return '<div class="fc-pn fc-act"><div class="fc-ph">Hoạt động gần đây</div>'+(act||'<div class="fc-empty">Chưa có hoạt động</div>')+'</div>';
 }
 function renderHome(){
   renderHomeOld();
