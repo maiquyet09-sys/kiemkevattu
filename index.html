@@ -5211,6 +5211,49 @@ function applyItem(item){
 }
 
 /* ================= Dashboard HSD ================= */
+/* ===== Theo dõi hạn sử dụng theo biên bản kiểm kê: đọc trực tiếp lô/hạn đã ghi trong db.periods, không có nguồn HSD riêng ===== */
+var HK={br:'',q:'',b:'',from:'',to:'',lk:0,L:null,at:0},HK_B=[
+{k:'ex',l:'Đã hết hạn',c:'var(--red)',t:function(d){return d<0;}},{k:'m1',l:'Còn dưới 1 tháng',c:'var(--orange)',t:function(d){return d>=0&&d<30;}},
+{k:'m3',l:'Còn dưới 3 tháng',c:'var(--amber)',t:function(d){return d>=30&&d<90;}},{k:'m6',l:'Còn dưới 6 tháng',c:'var(--sky)',t:function(d){return d>=90&&d<180;}},
+{k:'m6p',l:'Còn trên 6 tháng',c:'var(--green)',t:function(d){return d>=180;}},{k:'bad',l:'Cần kiểm tra ngày',c:'var(--red)'},{k:'none',l:'Chưa có thông tin hạn sử dụng',c:'var(--mut)'}];
+function hkLines(){var L={};(db.periods||[]).forEach(function(p){(p.items||[]).forEach(function(it){if(!it.counted)return;var n=0;
+  function add(exp,qty,lot,lb){var k=[p.id,it.branch||'',it.code||it.name,exp,lot].join('|'),o=L[k];if(o){if(qty!=null)o.qty=(o.qty||0)+qty;return;}
+    L[k]={k:k,pid:p.id,pn:p.name||'',lk:!!p.locked,at:p.createdAt||0,br:it.branch||'',code:it.code||'',name:it.name||'',unit:it.unit||'',qty:qty,exp:exp,lot:lot,lb:lb||'',d:exp?daysTo(exp):null};}
+  (it.batches||[]).forEach(function(b){if(b.exp){add(b.exp,b.qty==null?null:+b.qty,'');n++;}});
+  (it.boxes||[]).forEach(function(b){if(b.st!=='out'&&b.seen&&b.exp){add(b.exp,b.qty||1,b.lot||'',b.label);n++;}});
+  if(!n&&(+it.countQty||0)>0)add('',+it.countQty,'');});});return L;}
+function hkSt(l){if(!l.exp)return 'none';if(l.d===null)return 'bad';for(var i=0;i<5;i++)if(HK_B[i].t(l.d))return HK_B[i].k;}
+function hkSync(){var L=hkLines(),T=db.hsdTrack=db.hsdTrack||{},now=Date.now(),ch=0;
+  Object.keys(L).forEach(function(k){var l=L[k],t=T[k];if(!l.exp)return;
+    if(!t){T[k]={pid:l.pid,pn:l.pn,br:l.br,code:l.code,name:l.name,unit:l.unit,qty:l.qty,exp:l.exp,lot:l.lot,first:now,last:now,gone:0};ch=1;}
+    else if(t.gone||t.qty!==l.qty||t.pn!==l.pn){t.gone=0;t.qty=l.qty;t.pn=l.pn;t.last=now;ch=1;}});
+  Object.keys(T).forEach(function(k){var t=T[k];if(!L[k]&&!t.gone){t.gone=now;t.why=per(t.pid)?'Lô hoặc hạn không còn trong biên bản (đã sửa hoặc bỏ)':'Biên bản không còn (đã hủy hoặc xóa)';ch=1;}});
+  HK.L=L;HK.at=now;if(ch)saveSoon();return L;}
+function hkDt(t){if(!t)return '';var d=new Date(t);return ('0'+d.getDate()).slice(-2)+'/'+('0'+(d.getMonth()+1)).slice(-2)+'/'+d.getFullYear();}
+function hkDays(l){return l.d===null?'':l.d<0?'Quá hạn '+(-l.d)+' ngày':l.d===0?'Hết hạn hôm nay':'Còn '+l.d+' ngày';}
+function hkMatch(x){var q=norm(HK.q);if(HK.br&&x.br!==HK.br)return false;if(q&&norm(x.code+' '+x.name+' '+x.lot+' '+x.pn).indexOf(q)<0)return false;return true;}
+function hkRows(){var f=HK.from?new Date(HK.from+'T00:00:00').getTime():0,t=HK.to?new Date(HK.to+'T00:00:00').getTime()+86400000:0;
+  return Object.keys(HK.L).map(function(k){var l=HK.L[k];l.s=hkSt(l);return l;}).filter(function(l){return hkMatch(l)&&(!HK.lk||l.lk)&&(!f||l.at>=f)&&(!t||l.at<t);})
+   .sort(function(a,b){return (a.d===null?1e9:a.d)-(b.d===null?1e9:b.d);});}
+function hkBody(){var R=hkRows(),cnt={},h='';R.forEach(function(l){cnt[l.s]=(cnt[l.s]||0)+1;});
+  h+='<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px;margin-bottom:14px">'+HK_B.map(function(b){return '<button class="card" style="text-align:left;cursor:pointer;padding:10px 12px;border-left:4px solid '+b.c+(HK.b===b.k?';outline:2px solid '+b.c:'')+'" onclick="A.hkSet(\'b\',\''+b.k+'\')"><div style="font-size:12px;color:var(--mut);font-weight:600">'+b.l+'</div><div class="tnum" style="font-size:22px;font-weight:800;color:'+b.c+'">'+(cnt[b.k]||0)+'</div></button>';}).join('')+'</div>';
+  if(!R.length)h+='<div class="card" style="color:var(--mut)">Chưa có dòng nào khớp. Hạn sử dụng được lấy từ mục "Lô hàng / hạn dùng" khi kiểm kê từng mã; chỉ tính các mã đã kiểm.</div>';
+  HK_B.forEach(function(b){if(HK.b&&HK.b!==b.k)return;var rows=R.filter(function(l){return l.s===b.k;});if(!rows.length)return;
+    h+='<div style="font-size:14px;font-weight:700;color:'+b.c+';margin:14px 0 6px">'+b.l+' · '+rows.length+'</div>'+rows.slice(0,80).map(function(l){
+      return '<div class="card" style="margin-bottom:6px;padding:10px 12px"><div style="display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap"><div style="font-weight:700">'+esc(l.name)+' <span style="font-weight:400;color:var(--mut)">· '+esc(l.code)+'</span></div><div style="font-weight:700;color:'+b.c+'">'+(l.exp?(l.d===null?'Ngày không hợp lệ: '+esc(l.exp):fmtDate(l.exp)+' · '+hkDays(l)):'Chưa có thông tin hạn sử dụng')+'</div></div>'
+       +'<div style="font-size:12px;color:var(--mut);margin-top:3px">Kho '+esc(l.br||'–')+' · SL kiểm kê '+(l.qty==null?'–':fmt(l.qty))+' '+esc(l.unit)+(l.lot?' · Lô '+esc(l.lot):'')+(l.lb?' · '+esc(l.lb):'')+'</div>'
+       +'<div style="font-size:12px;color:var(--mut)">Biên bản: '+esc(l.pn)+' · lập '+hkDt(l.at)+' · '+(l.lk?'đã khóa':'đang kiểm')+' <button class="chip" style="margin-left:6px;padding:3px 10px" onclick="A.openPeriod(\''+l.pid+'\')">Mở biên bản</button></div></div>';}).join('')+(rows.length>80?'<div style="font-size:12px;color:var(--mut)">Hiện 80/'+rows.length+' dòng; dùng bộ lọc để thu hẹp.</div>':'');});
+  var T=db.hsdTrack||{},G=Object.keys(T).map(function(k){return T[k];}).filter(function(t){return t.gone&&hkMatch(t);}).sort(function(a,b){return b.gone-a.gone;});
+  h+='<details style="margin:18px 0"><summary class="sec" style="cursor:pointer">Lịch sử thay đổi ('+G.length+' dòng không còn trong biên bản)</summary>'+(G.length?G.slice(0,60).map(function(t){return '<div style="font-size:12.5px;padding:6px 0;border-bottom:1px solid var(--line)"><b>'+esc(t.name)+'</b> · '+esc(t.code)+' · HSD '+fmtDate(t.exp)+' · SL '+(t.qty==null?'–':fmt(t.qty))+'<br><span style="color:var(--mut)">Biên bản '+esc(t.pn)+' · ghi nhận '+hkDt(t.first)+' · '+esc(t.why||'')+' ('+hkDt(t.gone)+')</span></div>';}).join(''):'<div style="font-size:12px;color:var(--mut)">Chưa có thay đổi nào.</div>')+'</details>';
+  return h+'<div style="font-size:12px;color:var(--mut);margin:10px 0 20px;line-height:1.6">Dữ liệu lấy hoàn toàn từ biên bản kiểm kê (các mã đã kiểm có ghi lô/hạn), không dùng nguồn khác. Mỗi lô/hạn được theo dõi riêng; trùng lô trong cùng biên bản được gộp số lượng. Mốc nhóm: dưới 30 / 90 / 180 ngày. Biên bản chưa có trường số chứng từ và nhóm hàng nên hiển thị tên biên bản, không có bộ lọc nhóm hàng. Cảnh báo chỉ để theo dõi, không tự điều chỉnh tồn kho, xuất hàng hay đánh dấu đã xử lý.</div>';}
+function renderHsdKk(){var L=hkSync(),brs={},np={},n=0;Object.keys(L).forEach(function(k){brs[L[k].br]=1;np[L[k].pid]=1;n++;});
+  var bl=Object.keys(brs).sort(function(a,b){return a.localeCompare(b,'vi');});
+  document.getElementById('app').innerHTML='<div class="topbar"><div class="trow wrap"><button class="back" onclick="A.go(\'home\')">‹</button><div class="ttl">Theo dõi hạn sử dụng</div><button class="pill" onclick="A.hkCsv()">Xuất CSV</button></div><div style="height:10px"></div></div><div class="wrap" style="padding-top:16px;padding-bottom:40px">'
+   +'<div style="font-size:12px;color:var(--mut);margin-bottom:10px">Tự lấy từ biên bản kiểm kê · đồng bộ lần gần nhất '+new Date(HK.at).toLocaleString('vi-VN')+' · '+n+' dòng từ '+Object.keys(np).length+' biên bản · trạng thái: đã đồng bộ</div>'
+   +'<div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px"><select class="inp" style="width:auto" onchange="A.hkSet(\'br\',this.value)"><option value="">Tất cả kho</option>'+bl.map(function(b){return '<option value="'+esc(b)+'"'+(HK.br===b?' selected':'')+'>'+esc(b||'(không rõ)')+'</option>';}).join('')+'</select>'
+   +'<input class="inp" style="flex:1;min-width:180px" placeholder="Tìm mã, tên, lô hoặc biên bản" value="'+esc(HK.q)+'" oninput="A.hkSet(\'q\',this.value)">'
+   +'<label style="font-size:12px;color:var(--mut);display:flex;align-items:center;gap:4px">Lập từ <input class="inp" type="date" style="width:auto" value="'+HK.from+'" onchange="A.hkSet(\'from\',this.value)"></label><label style="font-size:12px;color:var(--mut);display:flex;align-items:center;gap:4px">đến <input class="inp" type="date" style="width:auto" value="'+HK.to+'" onchange="A.hkSet(\'to\',this.value)"></label>'
+   +'<label style="font-size:13px;display:flex;align-items:center;gap:6px"><input type="checkbox" '+(HK.lk?'checked ':'')+'onchange="A.hkSet(\'lk\',this.checked?1:0)"> Chỉ biên bản đã khóa</label></div><div id="hkBody">'+hkBody()+'</div></div>';}
 function renderHsd(){
   var entries=hsdEntries();
   var h='<div class="topbar"><div class="trow wrap"><button class="back" onclick="A.go(\'home\')">‹</button><div class="ttl">Cảnh báo hạn sử dụng</div><button class="pill" onclick="A.hsdPrint()">In</button><button class="pill" onclick="showHsdEmailPicker()">✉ Gửi cảnh báo</button></div><div style="height:10px"></div></div>';
@@ -5337,13 +5380,14 @@ function navGroups(){
   var kho=[
     {label:'Tồn kho theo Biên bản kiểm kê',act:'A.navStock()',on:v==='stock'},
     {label:'Cảnh báo hạn sử dụng',cnt:nc.ex||undefined,hot:1,act:C("A.go('hsd')"),on:v==='hsd'},
+    {label:'Theo dõi hạn sử dụng',title:'Lô và hạn lấy từ biên bản kiểm kê',act:C("A.go('hsdkk')"),on:v==='hsdkk'},
     {label:'Cảnh báo hàng tồn kho',title:'Tồn ≥3/6 tháng, gợi ý điều chuyển giữa chi nhánh',act:C("A.go('mgmt')"),on:v==='mgmt'}
   ];
   return [
     {quick:[{label:'Tạo kỳ',icon:'plus',pri:1,act:C("A.go('upload')"),on:v==='upload'},{label:'Quét QR',icon:'scan',act:C('v2Scan()'),on:false}]},
     {k:'ov',icon:'home',label:'Tổng quan',act:"A.navGo('home')",on:v==='home'},
     {k:'kk',icon:'list',label:'Kiểm kê',bd:nc.o||undefined,subs:kk,on:['lists','transfer','upload','folder','period','assets','asset','baocao','reporthub','explain','explainEdit'].indexOf(v)>=0},
-    {k:'kho',icon:'box',label:'Kho',bd:nc.ex||undefined,subs:kho,on:['stock','hsd','mgmt'].indexOf(v)>=0},
+    {k:'kho',icon:'box',label:'Kho',bd:nc.ex||undefined,subs:kho,on:['stock','hsd','hsdkk','mgmt'].indexOf(v)>=0},
     {k:'rc',icon:'swap',label:'Đối chiếu',on:['recon','err','ana'].indexOf(v)>=0,subs:[
       {label:'Đối chiếu doanh thu – xuất kho',desc:'So doanh thu với giá trị xuất kho theo tháng',act:C("A.go('recon')"),on:v==='recon'},
       {label:'Phân tích mua hàng – tiêu hao',desc:'So mua hàng với tiêu hao vật tư theo cơ sở, từ sổ chi tiết MISA',act:C("A.go('ana')"),on:v==='ana'},
@@ -6926,6 +6970,7 @@ function render(){
   else if(route.view==="baocao")renderBaoCao();
   else if(route.view==="stock")renderStock();
   else if(route.view==="hsd")renderHsd();
+  else if(route.view==="hsdkk")renderHsdKk();
   else if(route.view==="handover")renderHandoverList();
   else if(route.view==="handoverEdit")renderHandoverEdit();
   else if(route.view==="explain")renderExplainList();
@@ -7018,6 +7063,11 @@ var A={
   mvTab:function(t){MV.tab=t;renderMgmt();},
   mvSet:function(k,v){if(k==='mo')v=+v;if(k==='f'&&MV.f===v)v='';MV[k]=v;if(k==='br'||k==='mo')MV.it='';var e=document.getElementById('mvBody');if(e)e.innerHTML=mvBody();},
   mvPick:function(i){var x=MV.rows[i];if(!x)return;MV.it=x.k;var e=document.getElementById('mvBody');if(e)e.innerHTML=mvBody();var c=document.getElementById('mvChart');if(c)c.scrollIntoView({behavior:'smooth',block:'start'});},
+  hkSet:function(k,v){if(k==='b'&&HK.b===v)v='';HK[k]=v;var e=document.getElementById('hkBody');if(e)e.innerHTML=hkBody();},
+  hkCsv:function(){var R=hkRows(),q=function(x){return '"'+String(x==null?'':x).replace(/"/g,'""')+'"';},B={};HK_B.forEach(function(b){B[b.k]=b.l;});
+    var c=[['Tên hàng','Mã hàng','Kho','Số lượng kiểm kê','ĐVT','Lô','Hạn sử dụng','Số ngày còn lại (âm là quá hạn)','Nhóm','Biên bản','Ngày lập biên bản','Trạng thái biên bản'].map(q).join(',')];
+    R.forEach(function(l){c.push([l.name,l.code,l.br,l.qty==null?'':l.qty,l.unit,l.lot,l.exp?fmtDate(l.exp):'Chưa có thông tin hạn sử dụng',l.d===null?'':l.d,B[l.s],l.pn,hkDt(l.at),l.lk?'Đã khóa':'Đang kiểm'].map(q).join(','));});
+    dlAnchor(new Blob(['\ufeff'+c.join('\r\n')],{type:'text/csv;charset=utf-8'}),'theo-doi-han-su-dung.csv');},
   stkUp:function(input){var f=input.files&&input.files[0];if(!f)return;if(!kkNeed(["xlsx"],function(){A.stkUp(input);}))return;var fr=new FileReader();
     fr.onload=function(e){try{var P=stkParse(XLSX.read(new Uint8Array(e.target.result),{type:'array'}));if(P.err){toast(P.err);return;}
       db.stkUp=db.stkUp||{};db.stkUpLog=db.stkUpLog||[];var khos=Object.keys(P.G),ex=khos.filter(function(k){return db.stkUp[norm(k)+'|'+P.y+'-'+P.m];});
@@ -8059,7 +8109,7 @@ function renderHome(){
 }
 /* ===== Điều hướng theo đường dẫn (#/...): nút Back/Forward, F5 và liên kết trực tiếp giữ đúng màn hình =====
    Chỉ bọc quanh route hiện có: không đổi dữ liệu, không đổi cách mở màn hình. Màn cần ngữ cảnh (chi tiết kỳ, chi nhánh, soạn biên bản...) khi mở lại từ liên kết sẽ về màn danh sách cha. */
-var HR_SLUG={sign:'ky-so-pdf',home:'tong-quan',lists:'ky-kiem-ke',upload:'tao-ky',assets:'ccdc-tscd',hsd:'han-su-dung',baocao:'bao-cao-kiem-ke',reporthub:'trung-tam-bao-cao',handover:'ban-giao',explain:'giai-trinh',settings:'cai-dat',recon:'doi-chieu',pay:'thanh-toan-ncc',err:'bao-loi',ana:'phan-tich-mua-tieu-hao',mgmt:'dieu-chuyen',dchub:'kiem-soat-du-lieu',stock:'ton-kho',transfer:'chuyen-vat-tu',period:'ky-kiem-ke/chi-tiet',folder:'chi-nhanh',asset:'ccdc-tscd/chi-tiet',handoverEdit:'ban-giao/soan',explainEdit:'giai-trinh/soan'};
+var HR_SLUG={sign:'ky-so-pdf',home:'tong-quan',lists:'ky-kiem-ke',upload:'tao-ky',assets:'ccdc-tscd',hsd:'han-su-dung',hsdkk:'theo-doi-han-su-dung',baocao:'bao-cao-kiem-ke',reporthub:'trung-tam-bao-cao',handover:'ban-giao',explain:'giai-trinh',settings:'cai-dat',recon:'doi-chieu',pay:'thanh-toan-ncc',err:'bao-loi',ana:'phan-tich-mua-tieu-hao',mgmt:'dieu-chuyen',dchub:'kiem-soat-du-lieu',stock:'ton-kho',transfer:'chuyen-vat-tu',period:'ky-kiem-ke/chi-tiet',folder:'chi-nhanh',asset:'ccdc-tscd/chi-tiet',handoverEdit:'ban-giao/soan',explainEdit:'giai-trinh/soan'};
 var HR_FALL={stock:'lists',transfer:'lists',period:'lists',folder:'lists',asset:'assets',handoverEdit:'handover',explainEdit:'explain'};
 var HR_REV={},HR_REPL=false;
 Object.keys(HR_SLUG).forEach(function(k){HR_REV[HR_SLUG[k]]=k;});
