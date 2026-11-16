@@ -6905,7 +6905,7 @@ var A={
   },
   upSrcClear:function(){UP.src=null;renderUpload();},
   staSet:function(k,v){STA[k]=(k==='s1'||k==='s2')?!!v:v;renderMgmt();},
-  stkUp:function(input){var f=input.files&&input.files[0];if(!f)return;var fr=new FileReader();
+  stkUp:function(input){var f=input.files&&input.files[0];if(!f)return;if(!kkNeed(["xlsx"],function(){A.stkUp(input);}))return;var fr=new FileReader();
     fr.onload=function(e){try{var P=stkParse(XLSX.read(new Uint8Array(e.target.result),{type:'array'}));if(P.err){toast(P.err);return;}
       db.stkUp=db.stkUp||{};db.stkUpLog=db.stkUpLog||[];var khos=Object.keys(P.G),ex=khos.filter(function(k){return db.stkUp[norm(k)+'|'+P.y+'-'+P.m];});
       if(ex.length&&!confirm('Đã có dữ liệu tháng '+P.m+'/'+P.y+' của '+ex.length+' kho. Thay thế bằng file mới? Các tháng khác không bị ảnh hưởng.')){input.value='';return;}
