@@ -2037,8 +2037,10 @@ function buildBienBan(p){
     var b64=wc.toDataURL('image/png').split(',')[1];
     wmId=wb.addImage({base64:b64,extension:'png'});
   }catch(e){wmId=null;}
-  var d=new Date(p.createdAt);
-  var thang=d.getMonth()+1,nam=d.getFullYear();
+  var pmy=stPMY(p),thang=pmy.m,nam=pmy.y;
+  function bbD(iso,fb){var m=/^(\d{4})-(\d{2})-(\d{2})/.exec(iso||'');return m?m[3]+'/'+m[2]+'/'+m[1]:fb;}
+  var tuNgay=bbD(p.from,'01/'+('0'+thang).slice(-2)+'/'+nam),
+      denNgay=bbD(p.to,('0'+new Date(nam,thang,0).getDate()).slice(-2)+'/'+('0'+thang).slice(-2)+'/'+nam);
   var thin={style:"thin"};
   var bAll={top:thin,left:thin,bottom:thin,right:thin};
   var branches=[];
@@ -2050,11 +2052,11 @@ function buildBienBan(p){
     var base=sname,k=2;
     while(used[sname.toLowerCase()]){sname=base.substring(0,28)+" "+k;k++;}
     used[sname.toLowerCase()]=1;
-    var ws=wb.addWorksheet(sname,{views:[{state:"frozen",ySplit:4}]});xlPrint(ws,null,true);
+    var ws=wb.addWorksheet(sname,{views:[{state:"frozen",ySplit:6}]});xlPrint(ws,null,true);
     if(wmId!==null)try{ws.addBackgroundImage(wmId);}catch(e){klog("ws.addBackgroundImage(wmId);",e)}
     var cwArr=[4.43,14.57,52,12.29,14.57,14.57,14.57,14.57,11.43,11.43,49.29,13];
     cwArr.forEach(function(w,i){ws.getColumn(i+1).width=w;});
-    var last=4+items.length;
+    var last=6+items.length;
     ws.mergeCells(1,1,1,11);
     var c=ws.getCell(1,1);
     c.value="BIÊN BẢN KIỂM KÊ";
@@ -2063,29 +2065,37 @@ function buildBienBan(p){
     ws.getRow(1).height=20.1;
     ws.mergeCells(2,1,2,11);
     c=ws.getCell(2,1);
-    c.value="Kho: "+br+", Tháng "+thang+" năm "+nam;
+    c.value="Kho: "+br;
     c.font={name:"Arial",size:11,bold:true,italic:true};
     c.alignment={horizontal:"center",vertical:"middle",wrapText:true};
     ws.getRow(2).height=14.1;
+    [[3,"Kỳ kiểm kê: T"+thang+"/"+nam],[4,"Số liệu "+tuNgay+" đến "+denNgay]].forEach(function(z){
+      ws.mergeCells(z[0],1,z[0],11);
+      var hc=ws.getCell(z[0],1);
+      hc.value=z[1];
+      hc.font={name:"Arial",size:11,bold:true,italic:true};
+      hc.alignment={horizontal:"center",vertical:"middle",wrapText:true};
+      ws.getRow(z[0]).height=14.1;
+    });
     ["E","F","G","H","I","J"].forEach(function(col){
-      var cc=ws.getCell(col+"3");
-      cc.value={formula:"SUM("+col+"5:"+col+last+")"};
+      var cc=ws.getCell(col+"5");
+      cc.value={formula:"SUM("+col+"7:"+col+last+")"};
       cc.font={name:"Arial",size:16,bold:true};
       cc.alignment={vertical:"middle"};
       cc.numFmt="#,##0";
     });
-    ws.getRow(3).height=20.25;
+    ws.getRow(5).height=20.25;
     ["STT","Mã hàng","Tên hàng","ĐVT","Đầu kỳ","Nhập kho","Xuất kho","Cuối kỳ","Kiểm kê","Chênh","Ghi chú","Ảnh"].forEach(function(t,i){
-      var cc=ws.getCell(4,i+1);
+      var cc=ws.getCell(6,i+1);
       cc.value=t;
       cc.font={name:"Arial",size:10,bold:true};
       cc.fill={type:"pattern",pattern:"solid",fgColor:{argb:"FFD8D8D8"}};
       cc.border=bAll;
       cc.alignment={horizontal:"center",vertical:"middle",wrapText:true};
     });
-    ws.getRow(4).height=25.5;
+    ws.getRow(6).height=25.5;
     items.forEach(function(it,i){
-      var r=5+i,ci,cc;
+      var r=7+i,ci,cc;
       for(ci=1;ci<=11;ci++){
         cc=ws.getCell(r,ci);
         cc.font={name:"Times New Roman",size:11};
@@ -2280,10 +2290,11 @@ function readKiemKeXlsx(file,cb){
         var rows=XLSX.utils.sheet_to_json(ws,{header:1,defval:''});
         var branchName=sheetName;
         var row2=rows[1]?String(rows[1][0]||''):'';
-        var mN=row2.match(/Kho:\s*(.+?),/);
+        var mN=row2.match(/Kho:\s*(.+?)(?:,|$)/);
         if(mN)branchName=mN[1].trim();
-        var totalClose=0,totalKiem=0,hhtmItems=[];
-        for(var r=4;r<rows.length;r++){
+        var totalClose=0,totalKiem=0,hhtmItems=[],r0=4,hr;
+        for(hr=0;hr<Math.min(rows.length,12);hr++){var hrw=rows[hr]||[];if(norm(hrw[1])==='ma hang'&&norm(hrw[2])==='ten hang'){r0=hr+1;break;}}   /* dòng tiêu đề bảng: định dạng cũ = dòng 4, mới = dòng 6 */
+        for(var r=r0;r<rows.length;r++){
           var row=rows[r]||[];
           var code=String(row[1]||'').trim();
           var name=String(row[2]||'').trim();
