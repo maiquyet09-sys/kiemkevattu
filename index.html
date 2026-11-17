@@ -5216,7 +5216,8 @@ var HK={br:'',q:'',b:'',from:'',to:'',lk:0,L:null,at:0},HK_B=[
 {k:'ex',l:'Đã hết hạn',c:'var(--red)',t:function(d){return d<0;}},{k:'m1',l:'Còn dưới 1 tháng',c:'var(--orange)',t:function(d){return d>=0&&d<30;}},
 {k:'m3',l:'Còn dưới 3 tháng',c:'var(--amber)',t:function(d){return d>=30&&d<90;}},{k:'m6',l:'Còn dưới 6 tháng',c:'var(--sky)',t:function(d){return d>=90&&d<180;}},
 {k:'m6p',l:'Còn trên 6 tháng',c:'var(--green)',t:function(d){return d>=180;}},{k:'bad',l:'Cần kiểm tra ngày',c:'var(--red)'},{k:'none',l:'Chưa có thông tin hạn sử dụng',c:'var(--mut)'}];
-function hkLines(){var L={};(db.periods||[]).forEach(function(p){(p.items||[]).forEach(function(it){if(!it.counted)return;var n=0;
+function hkOn(it){return !!(db.hsdOn&&db.hsdOn[normKey(it.branch,it.code,it.name)]);}
+function hkLines(){var L={};(db.periods||[]).forEach(function(p){(p.items||[]).forEach(function(it){if(!it.counted||!hkOn(it))return;var n=0;
   function add(exp,qty,lot,lb){var k=[p.id,it.branch||'',it.code||it.name,exp,lot].join('|'),o=L[k];if(o){if(qty!=null)o.qty=(o.qty||0)+qty;return;}
     L[k]={k:k,pid:p.id,pn:p.name||'',lk:!!p.locked,at:p.createdAt||0,br:it.branch||'',code:it.code||'',name:it.name||'',unit:it.unit||'',qty:qty,exp:exp,lot:lot,lb:lb||'',d:exp?daysTo(exp):null};}
   (it.batches||[]).forEach(function(b){if(b.exp){add(b.exp,b.qty==null?null:+b.qty,'');n++;}});
@@ -5227,7 +5228,7 @@ function hkSync(){var L=hkLines(),T=db.hsdTrack=db.hsdTrack||{},now=Date.now(),c
   Object.keys(L).forEach(function(k){var l=L[k],t=T[k];if(!l.exp)return;
     if(!t){T[k]={pid:l.pid,pn:l.pn,br:l.br,code:l.code,name:l.name,unit:l.unit,qty:l.qty,exp:l.exp,lot:l.lot,first:now,last:now,gone:0};ch=1;}
     else if(t.gone||t.qty!==l.qty||t.pn!==l.pn){t.gone=0;t.qty=l.qty;t.pn=l.pn;t.last=now;ch=1;}});
-  Object.keys(T).forEach(function(k){var t=T[k];if(!L[k]&&!t.gone){t.gone=now;t.why=per(t.pid)?'Lô hoặc hạn không còn trong biên bản (đã sửa hoặc bỏ)':'Biên bản không còn (đã hủy hoặc xóa)';ch=1;}});
+  Object.keys(T).forEach(function(k){var t=T[k];if(!L[k]&&!t.gone){t.gone=now;t.why=per(t.pid)?'Lô/hạn không còn trong biên bản hoặc mặt hàng đã bỏ theo dõi':'Biên bản không còn (đã hủy hoặc xóa)';ch=1;}});
   HK.L=L;HK.at=now;if(ch)saveSoon();return L;}
 function hkDt(t){if(!t)return '';var d=new Date(t);return ('0'+d.getDate()).slice(-2)+'/'+('0'+(d.getMonth()+1)).slice(-2)+'/'+d.getFullYear();}
 function hkDays(l){return l.d===null?'':l.d<0?'Quá hạn '+(-l.d)+' ngày':l.d===0?'Hết hạn hôm nay':'Còn '+l.d+' ngày';}
@@ -5237,7 +5238,7 @@ function hkRows(){var f=HK.from?new Date(HK.from+'T00:00:00').getTime():0,t=HK.t
    .sort(function(a,b){return (a.d===null?1e9:a.d)-(b.d===null?1e9:b.d);});}
 function hkBody(){var R=hkRows(),cnt={},h='';R.forEach(function(l){cnt[l.s]=(cnt[l.s]||0)+1;});
   h+='<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px;margin-bottom:14px">'+HK_B.map(function(b){return '<button class="card" style="text-align:left;cursor:pointer;padding:10px 12px;border-left:4px solid '+b.c+(HK.b===b.k?';outline:2px solid '+b.c:'')+'" onclick="A.hkSet(\'b\',\''+b.k+'\')"><div style="font-size:12px;color:var(--mut);font-weight:600">'+b.l+'</div><div class="tnum" style="font-size:22px;font-weight:800;color:'+b.c+'">'+(cnt[b.k]||0)+'</div></button>';}).join('')+'</div>';
-  if(!R.length)h+='<div class="card" style="color:var(--mut)">Chưa có dòng nào khớp. Hạn sử dụng được lấy từ mục "Lô hàng / hạn dùng" khi kiểm kê từng mã; chỉ tính các mã đã kiểm.</div>';
+  if(!R.length)h+='<div class="card" style="color:var(--mut)">Chưa có dòng nào khớp. Chỉ theo dõi các mặt hàng đã tick "Theo dõi hạn sử dụng" trong mục "Lô hàng / hạn dùng" khi kiểm kê (mã đã kiểm).</div>';
   HK_B.forEach(function(b){if(HK.b&&HK.b!==b.k)return;var rows=R.filter(function(l){return l.s===b.k;});if(!rows.length)return;
     h+='<div style="font-size:14px;font-weight:700;color:'+b.c+';margin:14px 0 6px">'+b.l+' · '+rows.length+'</div>'+rows.slice(0,80).map(function(l){
       return '<div class="card" style="margin-bottom:6px;padding:10px 12px"><div style="display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap"><div style="font-weight:700">'+esc(l.name)+' <span style="font-weight:400;color:var(--mut)">· '+esc(l.code)+'</span></div><div style="font-weight:700;color:'+b.c+'">'+(l.exp?(l.d===null?'Ngày không hợp lệ: '+esc(l.exp):fmtDate(l.exp)+' · '+hkDays(l)):'Chưa có thông tin hạn sử dụng')+'</div></div>'
@@ -5245,7 +5246,7 @@ function hkBody(){var R=hkRows(),cnt={},h='';R.forEach(function(l){cnt[l.s]=(cnt
        +'<div style="font-size:12px;color:var(--mut)">Biên bản: '+esc(l.pn)+' · lập '+hkDt(l.at)+' · '+(l.lk?'đã khóa':'đang kiểm')+' <button class="chip" style="margin-left:6px;padding:3px 10px" onclick="A.openPeriod(\''+l.pid+'\')">Mở biên bản</button></div></div>';}).join('')+(rows.length>80?'<div style="font-size:12px;color:var(--mut)">Hiện 80/'+rows.length+' dòng; dùng bộ lọc để thu hẹp.</div>':'');});
   var T=db.hsdTrack||{},G=Object.keys(T).map(function(k){return T[k];}).filter(function(t){return t.gone&&hkMatch(t);}).sort(function(a,b){return b.gone-a.gone;});
   h+='<details style="margin:18px 0"><summary class="sec" style="cursor:pointer">Lịch sử thay đổi ('+G.length+' dòng không còn trong biên bản)</summary>'+(G.length?G.slice(0,60).map(function(t){return '<div style="font-size:12.5px;padding:6px 0;border-bottom:1px solid var(--line)"><b>'+esc(t.name)+'</b> · '+esc(t.code)+' · HSD '+fmtDate(t.exp)+' · SL '+(t.qty==null?'–':fmt(t.qty))+'<br><span style="color:var(--mut)">Biên bản '+esc(t.pn)+' · ghi nhận '+hkDt(t.first)+' · '+esc(t.why||'')+' ('+hkDt(t.gone)+')</span></div>';}).join(''):'<div style="font-size:12px;color:var(--mut)">Chưa có thay đổi nào.</div>')+'</details>';
-  return h+'<div style="font-size:12px;color:var(--mut);margin:10px 0 20px;line-height:1.6">Dữ liệu lấy hoàn toàn từ biên bản kiểm kê (các mã đã kiểm có ghi lô/hạn), không dùng nguồn khác. Mỗi lô/hạn được theo dõi riêng; trùng lô trong cùng biên bản được gộp số lượng. Mốc nhóm: dưới 30 / 90 / 180 ngày. Biên bản chưa có trường số chứng từ và nhóm hàng nên hiển thị tên biên bản, không có bộ lọc nhóm hàng. Cảnh báo chỉ để theo dõi, không tự điều chỉnh tồn kho, xuất hàng hay đánh dấu đã xử lý.</div>';}
+  return h+'<div style="font-size:12px;color:var(--mut);margin:10px 0 20px;line-height:1.6">Dữ liệu lấy hoàn toàn từ biên bản kiểm kê , chỉ gồm mặt hàng được tick "Theo dõi hạn sử dụng" khi kiểm kê; không dùng nguồn khác. Mỗi lô/hạn được theo dõi riêng; trùng lô trong cùng biên bản được gộp số lượng. Mốc nhóm: dưới 30 / 90 / 180 ngày. Biên bản chưa có trường số chứng từ và nhóm hàng nên hiển thị tên biên bản, không có bộ lọc nhóm hàng. Cảnh báo chỉ để theo dõi, không tự điều chỉnh tồn kho, xuất hàng hay đánh dấu đã xử lý.</div>';}
 function renderHsdKk(){var L=hkSync(),brs={},np={},n=0;Object.keys(L).forEach(function(k){brs[L[k].br]=1;np[L[k].pid]=1;n++;});
   var bl=Object.keys(brs).sort(function(a,b){return a.localeCompare(b,'vi');});
   document.getElementById('app').innerHTML='<div class="topbar"><div class="trow wrap"><button class="back" onclick="A.go(\'home\')">‹</button><div class="ttl">Theo dõi hạn sử dụng</div><button class="pill" onclick="A.hkCsv()">Xuất CSV</button></div><div style="height:10px"></div></div><div class="wrap" style="padding-top:16px;padding-bottom:40px">'
@@ -7063,6 +7064,7 @@ var A={
   mvTab:function(t){MV.tab=t;renderMgmt();},
   mvSet:function(k,v){if(k==='mo')v=+v;if(k==='f'&&MV.f===v)v='';MV[k]=v;if(k==='br'||k==='mo')MV.it='';var e=document.getElementById('mvBody');if(e)e.innerHTML=mvBody();},
   mvPick:function(i){var x=MV.rows[i];if(!x)return;MV.it=x.k;var e=document.getElementById('mvBody');if(e)e.innerHTML=mvBody();var c=document.getElementById('mvChart');if(c)c.scrollIntoView({behavior:'smooth',block:'start'});},
+  hkTog:function(on){db.hsdOn=db.hsdOn||{};if(on)db.hsdOn[HK.cur]=1;else delete db.hsdOn[HK.cur];saveSoon();toast(on?'Đã bật theo dõi hạn sử dụng cho mặt hàng này':'Đã tắt theo dõi hạn sử dụng cho mặt hàng này');},
   hkSet:function(k,v){if(k==='b'&&HK.b===v)v='';HK[k]=v;var e=document.getElementById('hkBody');if(e)e.innerHTML=hkBody();},
   hkCsv:function(){var R=hkRows(),q=function(x){return '"'+String(x==null?'':x).replace(/"/g,'""')+'"';},B={};HK_B.forEach(function(b){B[b.k]=b.l;});
     var c=[['Tên hàng','Mã hàng','Kho','Số lượng kiểm kê','ĐVT','Lô','Hạn sử dụng','Số ngày còn lại (âm là quá hạn)','Nhóm','Biên bản','Ngày lập biên bản','Trạng thái biên bản'].map(q).join(',')];
@@ -8209,7 +8211,7 @@ function openSheet(itemId,seq){
     +'<div id="v2keys" style="display:block"><div class="keypad">'+keypadHtml()+'</div></div>'
     +'<button class="matchbtn" onclick="A.key(\'match\')">✓ Bằng tồn cuối · '+fmt(it.close)+' '+u+'</button>'
     +'<div id="sban"></div>'
-    +'<details class="v2dt" id="sdtbat"'+((it.batches&&it.batches.length)?' open':'')+'><summary>Lô hàng / hạn dùng <span class="tg" id="sbattg"></span></summary><div class="dtb"><button class="addbat" onclick="A.batAdd()">+ Thêm lô</button>'
+    +'<details class="v2dt" id="sdtbat"'+((it.batches&&it.batches.length)?' open':'')+'><summary>Lô hàng / hạn dùng <span class="tg" id="sbattg"></span></summary><div class="dtb"><label style="display:flex;gap:8px;align-items:center;font-size:13px;margin-bottom:8px"><input type="checkbox" '+(HK.cur=normKey(it.branch,it.code,it.name),hkOn(it)?'checked ':'')+'onchange="A.hkTog(this.checked)"> Theo dõi hạn sử dụng mặt hàng này</label><button class="addbat" onclick="A.batAdd()">+ Thêm lô</button>'
     +'<div id="sbat"></div><div class="v2mt" style="margin-top:0">Hạn sử dụng được lưu và tự kế thừa sang kỳ sau.</div><div id="sbox"></div></div></details>'
     +'<details class="v2dt" id="sdtnote"'+(it.note?' open':'')+'><summary><span id="snotelbl">Ghi chú</span><span class="tg" id="snotetg"></span></summary><div class="dtb"><div class="qchips">'+quickNoteChipsHtml()+'</div>'
     +'<textarea class="sinp" id="snote" rows="3" maxlength="200" placeholder="Nhập ghi chú (nếu có)..." oninput="A.calc()">'+esc(it.note||"")+'</textarea>'
