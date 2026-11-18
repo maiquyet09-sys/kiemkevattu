@@ -2,8 +2,8 @@
 <html lang="vi">
 <head>
 <meta charset="UTF-8">
-<meta name="app-notes" content="Ký số PDF nâng cấp: ký nhiều người (tuần tự / đồng thời), danh sách nhân sự (nhập tay hoặc tải file mẫu), xem văn bản và kéo chữ ký đến đúng chỗ trước khi ký, thông báo Văn bản cần ký ở Trang chủ, biên bản Excel dùng chung thư viện chữ ký. Mở: Quản trị &amp; tiện ích › Ký số PDF">
-<meta name="app-version" content="2026111701">
+<meta name="app-notes" content="Ký số PDF nâng cấp: ký nhiều người (tuần tự / đồng thời), danh sách nhân sự (nhập tay hoặc tải file mẫu), xem văn bản và kéo chữ ký đến đúng chỗ trước khi ký, thông báo Văn bản cần ký ở Trang chủ, biên bản Excel dùng chung thư viện chữ ký., hiện “đang chờ tại ai” và tiến độ 2 số lẻ, thông báo Trang chủ mở thẳng văn bản cần ký. Mở: Quản trị &amp; tiện ích › Ký số PDF">
+<meta name="app-version" content="2026111804">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="format-detection" content="telephone=no">
 <meta name="color-scheme" content="light">
@@ -4682,7 +4682,7 @@ function renderHomeOld(){
   function nxRow(cls,ico,label,n,act){nxr+='<div class="nx-r '+cls+'" onclick="'+act+'"><span class="nx-i">'+ico+'</span><div class="nx-t">'+label+'</div><span class="nx-n tnum">'+n+'</span><span class="nx-c">'+icon('chev',16)+'</span></div>';}
   var nxs=null;try{nxs=window.MSP&&MSP();}catch(e){}
   var nsg=nxs?(nxs.me?nxs.mine:nxs.all):0;
-  if(nsg)nxRow(nxs.me?'red':'amb',icon('edit',18),'Văn bản cần ký<span style="display:block;font-size:12px;font-weight:500;color:#6b7389;margin-top:1px">'+(nxs.me?nxs.mine+' chờ bạn ký'+(nxs.all>nxs.mine?' · '+(nxs.all-nxs.mine)+' chờ người khác':''):'Đang chờ: '+esc(nxs.names.join(', ')))+'</span>',nsg,"A.go('sign')");
+  if(nsg)nxRow(nxs.me?'red':'amb',icon('edit',18),'Văn bản cần ký<span style="display:block;font-size:12px;font-weight:500;color:#6b7389;margin-top:1px">'+(nxs.me?nxs.mine+' chờ bạn ký'+(nxs.all>nxs.mine?' · '+(nxs.all-nxs.mine)+' chờ người khác':''):'Đang chờ: '+esc(nxs.names.join(', ')))+'</span>',nsg,"MSX.goSign()");
   if(nxc.expired)nxRow('red',KIC.expired,'Đã hết hạn',nxc.expired,"NX.go('expired')");
   if(nxc.m1)nxRow('org',KCAL,'Còn ≤ 1 tháng',nxc.m1,"NX.go('m1')");
   if(nxo)nxRow('blu',icon('clock',18),'Kỳ đang kiểm dở',nxo,"NX.go('open')");
@@ -12633,8 +12633,8 @@ function msRender(){
     +(l.slice(0,80).map(function(p){var on=M.rows.some(function(r){return r.sid===p.id;});return '<label style="display:flex;gap:10px;align-items:flex-start;padding:7px 0;border-top:1px solid var(--line);cursor:pointer"><input type="checkbox" style="margin-top:3px" '+(on?'checked ':'')+'onchange="MSX.tick(\''+p.id+'\',this.checked)"><span style="font-size:13.5px"><b>'+esc(p.name)+'</b><br><span style="font-size:12px;color:var(--mut)">'+(stTxt(p)||'—')+'</span></span></label>';}).join('')||'<div style="font-size:13px;color:var(--mut);padding:8px 0">Không có ai khớp.</div>')+'</div>'
     +'<div style="font-size:12px;color:var(--mut);margin:6px 0">Đã chọn '+M.rows.length+' người</div><button class="sgbt" onclick="MSX.staff()">Quản lý danh sách nhân sự</button></div>';
   }else h+='<div class="sgc" style="margin-top:10px;font-size:13px">Chưa có danh sách nhân sự. <button class="sgbt" style="margin-top:6px" onclick="MSX.staff()">Thêm / tải danh sách</button><div style="color:var(--mut);margin-top:6px;font-size:12px">Hoặc nhập tay từng người ở dưới.</div></div>';
-  M.rows.forEach(function(r,i){h+='<div class="sgc" style="margin-top:10px"><div style="display:flex;align-items:center;gap:6px"><b style="flex:1">Người ký '+(i+1)+(r.unit?' · '+esc(r.unit):'')+'</b>'+(i>0?'<button class="sgbt" onclick="MSX.mv('+i+',-1)">↑</button>':'')+(i<M.rows.length-1?'<button class="sgbt" onclick="MSX.mv('+i+',1)">↓</button>':'')+'</div><input class="inp" placeholder="Họ tên" value="'+esc(r.name)+'" onchange="MSX.r('+i+',\'name\',this.value)" style="margin-top:6px"><input class="inp" placeholder="Chức danh (vd: Người lập)" value="'+esc(r.title)+'" onchange="MSX.r('+i+',\'title\',this.value)" style="margin-top:6px">'+(r.sid&&!S().sigs.some(function(g){return g.owner===r.sid;})?'<div style="font-size:12px;color:var(--amber);margin-top:6px">Người này chưa đăng ký chữ ký — cần tự đăng ký trước khi đến lượt ký.</div>':'')+'<label class="lbl">Vị trí ô ký</label>'+sel(MSPOS.map(function(p,k){return [k,p[0]];}),r.pos,'MSX.r('+i+',\'pos\',this.value)')+'<button class="sgbt rd" style="margin-top:8px" onclick="MSX.del('+i+')">Bỏ người này</button></div>';});
-  h+='<div style="display:flex;gap:8px;margin-top:12px"><button class="sgbt" style="flex:1" onclick="MSX.add()">+ Nhập tay</button><button class="sgbt pr" style="flex:1" onclick="MSX.start()">Bắt đầu ký</button></div><button class="btn btn-outline" style="margin-top:10px;padding:11px" onclick="MSX.close()">Đóng</button>';
+  M.rows.forEach(function(r,i){h+='<div class="sgc" style="margin-top:10px"><div style="display:flex;align-items:center;gap:6px"><b style="flex:1">Người ký '+(i+1)+(r.unit?' · '+esc(r.unit):'')+'</b>'+(i>0?'<button class="sgbt" onclick="MSX.mv('+i+',-1)">↑</button>':'')+(i<M.rows.length-1?'<button class="sgbt" onclick="MSX.mv('+i+',1)">↓</button>':'')+'</div><input class="inp" placeholder="Họ tên" value="'+esc(r.name)+'" onchange="MSX.r('+i+',\'name\',this.value)" style="margin-top:6px"><input class="inp" list="esroles" placeholder="Vai trò (chọn hoặc gõ)" value="'+esc(r.title)+'" onchange="MSX.r('+i+',\'title\',this.value)" style="margin-top:6px">'+(r.sid&&!S().sigs.some(function(g){return g.owner===r.sid;})?'<div style="font-size:12px;color:var(--amber);margin-top:6px">Người này chưa đăng ký chữ ký — cần tự đăng ký trước khi đến lượt ký.</div>':'')+'<label class="lbl">Vị trí ô ký</label>'+sel(MSPOS.map(function(p,k){return [k,p[0]];}),r.pos,'MSX.r('+i+',\'pos\',this.value)')+'<button class="sgbt rd" style="margin-top:8px" onclick="MSX.del('+i+')">Bỏ người này</button></div>';});
+  h+=esRoles();h+='<div style="display:flex;gap:8px;margin-top:12px"><button class="sgbt" style="flex:1" onclick="MSX.add()">+ Nhập tay</button><button class="sgbt pr" style="flex:1" onclick="MSX.start()">Bắt đầu ký</button></div><button class="btn btn-outline" style="margin-top:10px;padding:11px" onclick="MSX.close()">Đóng</button>';
   msOv(h);var c=$('msov').firstChild;c.scrollTop=sc;var l2=$('mslist');if(l2)l2.scrollTop=sl;
 }
 
@@ -12644,7 +12644,7 @@ async function msStart(){
   var buf=await IDBM.get('sgsrc:'+M.id),h=await sha(buf);
   d.flow={mode:M.mode,st:'run',hash:h,log:[],people:M.rows.map(function(r){var p=MSPOS[+r.pos];return {id:uid(),name:r.name.trim(),title:r.title.trim(),unit:r.unit||'',dept:r.dept||'',sid:r.sid||'',sigId:r.sigId,p:+M.pg,x:p[1],y:p[2],w:.28,s:'wait'};})};
   msLog(d.flow,'Người tạo','Khởi tạo quy trình '+(M.mode==='seq'?'tuần tự':'đồng thời')+', '+M.rows.length+' người ký',{inH:h});
-  store.save();msClose();SG.tab='todo';renderSign();toast('Đã khởi tạo quy trình ký');
+  d.flow.by=(msMe()||{}).id||'';d.flow.people.forEach(function(p){esN(p.sid,d,'Biên bản chờ bạn ký: '+d.name);});store.save();msClose();SG.tab='todo';renderSign();toast('Đã khởi tạo quy trình ký');
 }
 async function msSign(id,pid,pos,sigId){
   var d=D(id),f=d&&d.flow,p=f&&f.people.filter(function(x){return x.id===pid;})[0];
@@ -12666,7 +12666,7 @@ async function msSign(id,pid,pos,sigId){
       if(!(await IDBM.set('sgout:'+id,ob))){toast('Không lưu được PDF — bộ nhớ đầy');return;}
       p.s='ok';p.at=Date.now();f.hash=oh;msLog(f,p.name,'Đã ký ('+(p.title||'—')+')',{inH:inH,outH:oh,auth:auth,sigId:g.id,sigAt:g.at});
       if(f.people.every(function(x){return x.s==='ok';})){f.st='done';d.status='signed';d.signedAt=Date.now();d.signer=f.people.map(function(x){return x.name;}).join(', ');d.outHash=oh;d.srcHash=d.srcHash||'';d.outSize=ob.byteLength;d.folder=0;msLog(f,'Hệ thống','Hoàn tất: mọi người đã ký',{outH:oh});SG.tab='done';SG.fo=0;}
-      store.save();renderSign();toast(f.st==='done'?'Hoàn tất — mọi người đã ký':'Đã ký: '+p.name);
+      esN(f.by,d,p.name+(f.st==='done'?' đã ký — hoàn tất: ':' đã ký: ')+d.name);store.save();renderSign();toast(f.st==='done'?'Hoàn tất — mọi người đã ký':'Đã ký: '+p.name);
     }catch(e){klog('msSign',e);toast('Lỗi khi ký: '+((e&&e.message)||''));}
     finally{delete MSB[id];}
   });
@@ -12723,17 +12723,19 @@ async function msViewPage(){
   }catch(e){if(e&&e.name==='RenderingCancelledException')return;klog('msViewPage',e);toast('Lỗi hiển thị trang PDF');}
 }
 function msCard(d){
-  var f=d.flow,n=f.people.filter(function(x){return x.s==='ok';}).length,pc=(n/f.people.length*100).toFixed(1).replace('.',','),
-  stt={run:'Đang ký',done:'Hoàn tất',stop:'Đã dừng (có người từ chối)',cancel:'Đã hủy'}[f.st],
+  var f=d.flow,n=f.people.filter(function(x){return x.s==='ok';}).length,pc=(n/f.people.length*100).toFixed(2).replace('.',','),
+  stt=esSt(d)[1],
   b=function(t,fn,c){return '<button class="sgbt '+(c||'')+'" onclick="'+fn+'">'+t+'</button>';};
-  var h='<div class="sgc"><div style="font-weight:700;word-break:break-word">'+esc(d.name)+'</div><div style="font-size:12.5px;color:var(--mut);margin:2px 0 8px">'+(f.mode==='seq'?'Ký tuần tự':'Ký đồng thời')+' · '+stt+' · tiến độ '+n+'/'+f.people.length+' – '+pc+'%</div>'+(f.st==='run'&&!msMe()?'<div style="font-size:12px;color:var(--amber);margin-bottom:6px">Hãy vào Danh sách nhân sự › “Đặt là tôi” để xác định bạn là ai. Mỗi người chỉ ký phần của mình bằng chữ ký của mình.</div>':'');
+  var wt=f.people.filter(function(p){return msTurn(f,p);}),ev=f.log.filter(function(l){return /^(Đã ký|Khởi tạo)/.test(l.act);}),sn=f.mode==='seq'?ev[ev.length-1]:ev[0],hr=sn?Math.floor((Date.now()-sn.t)/36e5):0,
+  late=(f.st==='run'&&wt.length&&sn)?'<div style="font-size:12.5px;margin:-2px 0 8px;padding:6px 9px;border-radius:9px;background:#fff7e6">Đang chờ tại: <b>'+wt.map(function(p){return esc(p.name);}).join(', ')+'</b> — từ '+dt(sn.t)+' ('+(hr>=24?Math.floor(hr/24)+' ngày':hr+' giờ')+')</div>':'';
+  var h='<div class="sgc"><div style="font-weight:700;word-break:break-word">'+esc(d.name)+'</div><div style="font-size:12.5px;color:var(--mut);margin:2px 0 8px">'+(f.mode==='seq'?'Ký tuần tự':'Ký đồng thời')+' · '+stt+' · tiến độ '+n+'/'+f.people.length+' – '+pc+'%</div>'+late+(f.st==='run'&&!msMe()?'<div style="font-size:12px;color:var(--amber);margin-bottom:6px">Hãy vào Danh sách nhân sự › “Đặt là tôi” để xác định bạn là ai. Mỗi người chỉ ký phần của mình bằng chữ ký của mình.</div>':'');
   f.people.forEach(function(p,i){
     var lb=p.s==='ok'?'Đã ký '+dt(p.at):p.s==='rej'?'Từ chối':msTurn(f,p)?'Đang chờ ký':f.st==='run'?'Chưa đến lượt':'Không còn hiệu lực';
     h+='<div style="display:flex;align-items:center;gap:8px;padding:7px 0;border-top:1px solid var(--line)"><div style="flex:1;min-width:0;font-size:13.5px"><b>'+(i+1)+'. '+esc(p.name)+'</b>'+(p.title?' · '+esc(p.title):'')+(p.unit?' · '+esc(p.unit):'')+'<br><span style="color:'+(p.s==='ok'?'var(--green)':p.s==='rej'?'var(--red)':'var(--mut)')+';font-size:12px">'+lb+' · trang '+p.p+'</span></div>'+(msTurn(f,p)&&msIsMe(p)?b('Xem & ký','MSX.view(\''+d.id+'\',\''+p.id+'\')','pr')+b('Từ chối','MSX.rej(\''+d.id+'\',\''+p.id+'\')','rd'):'')+'</div>';});
   h+='<div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px">'+b('Lịch sử','MSX.log(\''+d.id+'\')')+b('Xem văn bản','MSX.view(\''+d.id+'\')');
   if(f.st==='done')h+=b('Tải về','SGX.dl(\''+d.id+'\')','pr')+b('Kiểm tra','MSX.chk(\''+d.id+'\')');
-  if(f.st==='run')h+=b('Hủy quy trình','MSX.cancel(\''+d.id+'\')','rd');
-  if(f.st==='stop'||f.st==='cancel')h+=b('Tạo quy trình mới','MSX.again(\''+d.id+'\')','pr');
+  if(f.st==='run')h+=b('Thu hồi','MSX.revoke(\''+d.id+'\')','rd')+b('Hủy quy trình','MSX.cancel(\''+d.id+'\')','rd');
+  if(f.st==='stop'||f.st==='cancel'||f.st==='revoked')h+=b('Tạo quy trình mới','MSX.again(\''+d.id+'\')','pr');
   return h+'</div></div>';
 }
 function msMe(){var q=S(),m=q.me?stFind(q.me):null;if(!m){var n=nz(db.profile&&db.profile.ten);m=n?(q.staff.filter(function(x){return nz(x.name)===n;})[0]||null):null;}
@@ -12744,11 +12746,11 @@ window.MSP=function(){
   var r={all:0,mine:0,me:null,names:[]};if(!db.sg||!Array.isArray(db.sg.docs))return r;
   var me=msMe();r.me=me;
   S().docs.forEach(function(d){var f=d.flow;if(!f||f.st!=='run')return;r.all++;var w=f.people.filter(function(p){return msTurn(f,p);});
-    if(me&&w.some(function(p){return p.sid===me.id||nz(p.name)===nz(me.name);}))r.mine++;
+    var mp=me?w.filter(function(p){return p.sid===me.id||nz(p.name)===nz(me.name);})[0]:null;if(mp){r.mine++;r.last={id:d.id,pid:mp.id};}
     w.slice(0,3).forEach(function(p){if(r.names.indexOf(p.name)<0)r.names.push(p.name);});});
   return r;};
 window.SGLIB={list:function(){return ownSigs().slice();},add:function(g){var q=S(),m=msMe();if(!g||!g.img||q.sigs.length>=SIG_MAX||q.sigs.some(function(x){return x.img===g.img;}))return false;q.sigs.push({id:uid(),name:String(g.name||'Chữ ký').slice(0,40),img:g.img,w:g.w,h:g.h,kind:'draw',at:Date.now(),owner:m?m.id:''});store.save();return true;}};
-window.MSX={close:msClose,vsig:async function(id){var V=MV,g=sigById(id);if(!V||!g||!ownSigs().some(function(x){return x.id===id;}))return;V.sigId=id;V.st=await stamp({sig:g,name:V.nm,when:'(ghi lúc ký)',auth:'Face ID / vân tay',txt:true});msViewPage();},vw:function(v){var V=MV;if(!V||!V.pos)return;V.pos.w=v/100;msBoxPos();},view:msView,pg:function(k){var V=MV;if(!V)return;var q=Math.min(V.pdf.numPages,Math.max(1,V.pg+k));if(q!==V.pg){V.pg=q;msViewPage();}},signv:function(){var V=MV;if(!V)return;var a=V.id,b=V.pid,sg=V.sigId,ps=V.pos?{p:V.pos.p,x:V.pos.x,y:V.pos.y,w:V.pos.w}:null;msClose();msSign(a,b,ps,sg);},sign:msSign,log:msLogView,setup:msSetup,start:msStart,
+window.MSX={close:msClose,goSign:function(){var r=MSP();A.go('sign');if(r.me&&r.mine===1&&r.last)setTimeout(function(){msView(r.last.id,r.last.pid);},0);},vsig:async function(id){var V=MV,g=sigById(id);if(!V||!g||!ownSigs().some(function(x){return x.id===id;}))return;V.sigId=id;V.st=await stamp({sig:g,name:V.nm,when:'(ghi lúc ký)',auth:'Face ID / vân tay',txt:true});msViewPage();},vw:function(v){var V=MV;if(!V||!V.pos)return;V.pos.w=v/100;msBoxPos();},view:msView,pg:function(k){var V=MV;if(!V)return;var q=Math.min(V.pdf.numPages,Math.max(1,V.pg+k));if(q!==V.pg){V.pg=q;msViewPage();}},signv:function(){var V=MV;if(!V)return;var a=V.id,b=V.pid,sg=V.sigId,ps=V.pos?{p:V.pos.p,x:V.pos.x,y:V.pos.y,w:V.pos.w}:null;msClose();msSign(a,b,ps,sg);},sign:msSign,log:msLogView,setup:msSetup,start:msStart,
   f:function(k,v){MSD[k]=k==='pg'?Math.min(MSD.n,Math.max(1,+v||1)):v;msRender();},
   r:function(i,k,v){MSD.rows[i][k]=v;},
   add:function(){if(MSD.rows.length>=9){toast('Tối đa 9 người ký');return;}MSD.rows.push({name:'',title:'',unit:'',dept:'',sid:'',sigId:'',pos:msFree(MSD.rows)});msRender();},
@@ -12763,12 +12765,35 @@ window.MSX={close:msClose,vsig:async function(id){var V=MV,g=sigById(id);if(!V||
   stCol:function(){var n=(prompt('Tên cột thông tin thêm (vd: Mã NV, Email, SĐT):')||'').trim().slice(0,40),q=S();if(!n)return;if(['họ tên','chức danh','bộ phận'].indexOf(n.toLowerCase())>=0||q.cols.indexOf(n)>=0){toast('Cột này đã có');return;}q.cols.push(n);store.save();stRender();toast('Đã thêm cột “'+n+'”');},
   stDel:function(id){var p=stFind(id);if(!p||!confirm('Xóa “'+p.name+'” khỏi danh sách nhân sự? (Quy trình ký đã tạo không bị ảnh hưởng)'))return;var q=S();q.staff=q.staff.filter(function(x){return x.id!==id;});store.save();stRender();},
   del:function(i){MSD.rows.splice(i,1);msRender();},
-  rej:function(id,pid){var d=D(id),f=d&&d.flow,p=f&&f.people.filter(function(x){return x.id===pid;})[0],r=prompt('Lý do từ chối ký (bắt buộc):');if(!p||!msTurn(f,p)||!msIsMe(p)||!r||!r.trim())return;p.s='rej';f.st='stop';msLog(f,p.name,'Từ chối ký',{reason:r.trim()});store.save();renderSign();},
+  rej:function(id,pid){var d=D(id),f=d&&d.flow,p=f&&f.people.filter(function(x){return x.id===pid;})[0],r=prompt('Lý do từ chối ký (bắt buộc):');if(!p||!msTurn(f,p)||!msIsMe(p)||!r||!r.trim())return;p.s='rej';f.st='stop';msLog(f,p.name,'Từ chối ký',{reason:r.trim()});esN(f.by,d,p.name+' từ chối ký: '+d.name);store.save();renderSign();},
   cancel:function(id){var d=D(id),r=prompt('Lý do hủy quy trình (bắt buộc):');if(!d||!r||!r.trim())return;d.flow.st='cancel';d.flow.people.forEach(function(p){if(p.s==='wait')p.s='rev';});msLog(d.flow,'Người tạo','Hủy quy trình',{reason:r.trim()});store.save();renderSign();},
   again:async function(id){var d=D(id);if(!d)return;var b=await IDBM.get('sgsrc:'+id);d.flow.st='replaced';msLog(d.flow,'Người tạo','Thay thế bằng quy trình mới');await idbDel('sgout:'+id);d.status='todo';delete d.flow.people;var old=d.flowOld=(d.flowOld||[]);old.push({log:d.flow.log});delete d.flow;store.save();msSetup(id);},
   chk:async function(id){var d=D(id),b=await IDBM.get('sgout:'+id);if(!d||!b){toast('Không còn file đã ký trên máy này');return;}toast((await sha(b))===d.flow.hash?'Toàn vẹn: khớp mã SHA-256 sau lần ký cuối':'CẢNH BÁO: file KHÔNG khớp mã SHA-256 lần ký cuối');}
 };
 
+/* ===== Quản lý biên bản điện tử dùng chung: 8 trạng thái · 4 khu vực · thu hồi · thông báo lưu bền · vai trò ===== */
+var ES={q:''},ES_ROLES=['Người lập biên bản','Người kiểm kê','Người bàn giao','Người nhận bàn giao','Người giải trình','Người xác nhận','Người kiểm tra','Người phê duyệt'];
+function esSt(d){var f=d.flow;if(!f)return d.status==='signed'?['done','Hoàn tất ký']:['draft','Bản nháp'];var ok=f.people.filter(function(x){return x.s==='ok';}).length;
+  if(f.st==='done')return['done','Hoàn tất ký'];if(f.st==='stop')return['rej','Từ chối ký'];if(f.st==='revoked')return['rev','Đã thu hồi'];if(f.st==='cancel')return['can','Đã hủy'];if(f.st==='replaced')return['can','Đã thay bằng bản mới'];
+  if(MSB[d.id])return['sg','Đang ký'];return ok?['part','Đã ký một phần']:['wait','Chờ ký'];}
+function esN(sid,d,txt){if(!sid)return;var s=S();s.notifs=s.notifs||[];s.notifs.push({id:uid(),to:sid,doc:d.id,txt:txt,t:Date.now(),read:0});if(s.notifs.length>300)s.notifs=s.notifs.slice(-300);}
+function esRoles(){var r=ES_ROLES.concat((S().roles||[]).filter(function(x){return ES_ROLES.indexOf(x)<0;}));return '<datalist id="esroles">'+r.map(function(x){return '<option value="'+esc(x)+'">';}).join('')+'</datalist>';}
+function esSel(t){var m=msMe(),q=nz(ES.q);if(!m)return [];return S().docs.filter(function(d){var f=d.flow;if(!f||!f.people)return false;
+  if(t==='e1')return f.st==='run'&&f.people.some(function(p){return msTurn(f,p)&&msIsMe(p);});
+  if(t==='e2')return f.people.some(function(p){return p.s==='ok'&&msIsMe(p);});
+  if(t==='e3'&&!(f.by===m.id||!f.by))return false;if(t==='e4'&&f.st!=='done')return false;
+  return !q||nz(d.name+' '+f.people.map(function(p){return p.name+' '+(p.unit||'')+' '+(p.title||'');}).join(' ')).indexOf(q)>=0;});}
+function esChips(){var T=[['e1','Chờ tôi ký'],['e2','Tôi đã ký'],['e3','Do tôi lập'],['e4','Kho lưu trữ']];return '<div class="sgchips">'+T.map(function(x){return '<button class="sgchip'+(SG.tab===x[0]?' on':'')+'" onclick="SGX.tab(\''+x[0]+'\')">'+x[1]+' ('+esSel(x[0]).length+')</button>';}).join('')+'</div>';}
+function esList(t){var m=msMe();if(!m)return '<div class="sgc" style="font-size:13px">Chưa xác định bạn là ai. Vào Danh sách nhân sự › “Đặt là tôi”.</div>';
+  var h='',nt=(S().notifs||[]).filter(function(n){return n.to===m.id;}).slice(-8).reverse();
+  if(t==='e1'&&nt.length)h+='<div class="sgc"><div style="font-weight:700;font-size:13.5px;margin-bottom:4px">Thông báo</div>'+nt.map(function(n){return '<div style="font-size:12.5px;padding:5px 0;border-top:1px solid var(--line);'+(n.read?'color:var(--mut)':'font-weight:600')+'" onclick="MSX.nread(\''+n.id+'\')">'+esc(n.txt)+'<br><span style="font-size:11.5px;color:var(--mut)">'+dt(n.t)+'</span></div>';}).join('')+'</div>';
+  if(t==='e3'||t==='e4')h+='<input class="inp" placeholder="Tìm theo tên biên bản, người ký, cơ sở…" value="'+esc(ES.q)+'" onchange="MSX.eq(this.value)" style="margin-bottom:10px">';
+  var l=esSel(t);return h+(l.length?l.map(msCard).join(''):'<div class="sgc" style="text-align:center;color:var(--mut);font-size:13px">Chưa có biên bản nào.</div>');}
+MSX.eq=function(v){ES.q=v;renderSign();};
+MSX.nread=function(id){(S().notifs||[]).forEach(function(n){if(n.id===id){n.read=1;}});store.save();renderSign();};
+MSX.revoke=function(id){var d=D(id),f=d&&d.flow,m=msMe(),r;if(!f||f.st!=='run')return;if(f.by&&(!m||f.by!==m.id)){toast('Chỉ người lập mới được thu hồi');return;}
+  r=prompt('Lý do thu hồi yêu cầu ký (bắt buộc). Chữ ký đã có vẫn được giữ nguyên:');if(!r||!r.trim())return;f.st='revoked';f.people.forEach(function(p){if(p.s==='wait')p.s='rev';});
+  msLog(f,'Người tạo','Thu hồi yêu cầu ký',{reason:r.trim()});f.people.forEach(function(p){esN(p.sid,d,'Yêu cầu ký đã bị thu hồi: '+d.name);});store.save();renderSign();};
 /* ---- màn hình Ký số PDF ---- */
 function card(d){
   if(d.flow)return msCard(d);
@@ -12784,7 +12809,7 @@ window.renderSign=function(){
   h+='<label class="btn btn-primary" style="margin-bottom:12px;cursor:pointer">'+icon('upload',18)+'Chọn file PDF cần ký<input type="file" accept="application/pdf,.pdf" multiple hidden onchange="SGX.add(this)"></label>';
   h+='<button class="btn btn-outline" style="margin-bottom:12px;padding:11px" onclick="MSX.staff()">Danh sách nhân sự ('+s.staff.length+')</button>';
   h+='<div class="sgtabs"><button class="sgtab'+(SG.tab==='todo'?' on':'')+'" onclick="SGX.tab(\'todo\')">Cần ký ('+todo.length+')</button><button class="sgtab'+(SG.tab==='done'?' on':'')+'" onclick="SGX.tab(\'done\')">Đã ký ('+done.length+')</button></div>';
-  if(SG.tab==='todo')h+=todo.length?todo.map(card).join(''):'<div class="sgc" style="text-align:center;color:var(--mut);font-size:13px">Chưa có file nào chờ ký. Bấm “Chọn file PDF cần ký” ở trên.</div>';
+  h+=esChips();if(/^e\d$/.test(SG.tab))h+=esList(SG.tab);else if(SG.tab==='todo')h+=todo.length?todo.map(card).join(''):'<div class="sgc" style="text-align:center;color:var(--mut);font-size:13px">Chưa có file nào chờ ký. Bấm “Chọn file PDF cần ký” ở trên.</div>';
   else{
     h+='<div class="sgchips"><button class="sgchip'+(SG.fo<0?' on':'')+'" onclick="SGX.fo(-1)">Tất cả ('+done.length+')</button>'+s.folders.map(function(f,i){return '<button class="sgchip'+(SG.fo===i?' on':'')+'" onclick="SGX.fo('+i+')">'+esc(f)+' ('+done.filter(function(d){return d.folder===i;}).length+')</button>';}).join('')+'<button class="sgchip" onclick="SGX.newFo()">+ Thư mục</button></div>';
     var l=done.filter(function(d){return SG.fo<0||d.folder===SG.fo;});
