@@ -1463,6 +1463,107 @@ html body #gsidebar .gnav-item.on:not(.gnav-sub)::before,html body #gdrawer .gna
 html body #gsidebar .gnav-item.gnav-sub.on,html body #gdrawer .gnav-item.gnav-sub.on{border-radius:10px;box-shadow:none!important;background:linear-gradient(90deg,rgba(244,220,156,.16),rgba(212,175,95,0) 100%)!important}
 html body .gnav-item.gnav-sub.on::before{content:"";position:absolute;left:-8px;top:10px;bottom:10px;width:3px;border-radius:999px;background:linear-gradient(180deg,#c9a24f 0%,#f7e3a8 50%,#c9a24f 100%)}
 </style>
+<style id="ds-unified">
+/* ===== MEDDENTAL PRIME · DESIGN SYSTEM v2 · Executive Minimal =====
+   Lớp chuẩn hóa cuối cùng: chỉ CSS, không đổi HTML/JS/dữ liệu. Đặt cuối <head> để thống nhất các lớp style cũ. */
+:root{
+  --brand:#1f55d6;--brand-d:#163f9f;--brand-bg:rgba(31,85,214,.08);--brand-ln:rgba(31,85,214,.26);
+  --navy:#0f2347;--gold:#c9a24f;
+  --bg:#f4f6fa;--card:#fff;--card2:#f4f6fa;--ink:#0f1b33;--mut:rgba(15,27,51,.62);--mut2:rgba(15,27,51,.42);--line:rgba(15,27,51,.1);
+  --teal:var(--brand);--teal-d:var(--brand-d);--teal-bg:var(--brand-bg);--teal-ln:var(--brand-ln);
+  --ok:#12805c;--ok-bg:rgba(18,128,92,.1);--warn:#a8630a;--warn-bg:rgba(180,83,9,.1);--err:#c62828;--err-bg:rgba(198,40,40,.09);
+  --r-sm:8px;--r-md:12px;--r-lg:16px;--ctl-h:44px;--tap:var(--ctl-h);
+  --sh1:0 1px 2px rgba(15,27,51,.06);--sh2:0 10px 28px -10px rgba(15,27,51,.22);
+  --fs-xs:12px;--fs-sm:13px;--fs-md:14px;--fs-lg:16px;--fs-h2:18px;--fs-h1:22px;
+}
+@media(min-width:1024px) and (pointer:fine){:root{--ctl-h:40px}}
+/* Nền & chữ: một font, một thang cỡ chữ */
+html body{background:var(--bg);font-family:'Inter',system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;letter-spacing:0}
+button,input,select,textarea{font-family:inherit}
+html body .h1{font-size:var(--fs-h1);font-weight:700;letter-spacing:-.01em;line-height:1.3}
+html body .sec{font-size:var(--fs-md);font-weight:600;letter-spacing:0;text-transform:none;color:var(--ink)}
+html body .eyebrow{font-size:var(--fs-xs);letter-spacing:0;text-transform:none}
+html body #gcrumb{font-size:var(--fs-sm);font-weight:500;color:var(--mut)}
+/* Icon: cùng một kiểu nét */
+svg[fill="none"][stroke="currentColor"]{stroke-width:1.75;stroke-linecap:round;stroke-linejoin:round}
+/* Header: phẳng, một đường kẻ */
+html body #gheader{background:#fff;-webkit-backdrop-filter:none;backdrop-filter:none;box-shadow:none;border-bottom:1px solid var(--line)}
+html body #gheader::after{display:none}
+html body #ghmenu{background:var(--card2);box-shadow:none;border-radius:var(--r-md)}
+html body #gbrand .dot,html body #guser .av{background:var(--navy);box-shadow:none}
+/* Điều hướng navy: sidebar, drawer, thanh dưới */
+html body #gsidebar,html body #gdrawer{background:var(--navy)!important;box-shadow:none}
+html body #gsidebar .gnav-item,html body #gdrawer .gnav-item{border-radius:var(--r-sm);font-weight:500}
+html body #gsidebar .gnav-item.on,html body #gdrawer .gnav-item.on,html body #gsidebar .gnav-item.gnav-sub.on,html body #gdrawer .gnav-item.gnav-sub.on{background:rgba(255,255,255,.1)!important;color:#fff!important;box-shadow:none!important;font-weight:600}
+html body #gsidebar .gnav-item.on:not(.gnav-sub)::before,html body #gdrawer .gnav-item.on:not(.gnav-sub)::before,html body .gnav-item.gnav-sub.on::before{background:var(--gold)}
+html body .gnav-quick .gq{border-radius:var(--r-md);font-weight:600}
+html body .gnav-quick .gq.pri{background:var(--brand);border-color:var(--brand);color:#fff}
+html body #bnav{background:#fff;-webkit-backdrop-filter:none;backdrop-filter:none;border-top:1px solid var(--line);box-shadow:none}
+html body #bnav button.on:not(.fab)::before{background:var(--gold)}
+html body #bnav .fab i{background:var(--brand);box-shadow:0 0 0 4px #fff,var(--sh2)}
+/* Card: một kiểu duy nhất — nền trắng, viền mảnh, bo 16px; dòng danh sách bo 12px */
+html body .card,html body .stkwrap,html body .nx,html body .brc,html body #mcard{background:#fff;border:1px solid var(--line);border-radius:var(--r-lg);box-shadow:var(--sh1)}
+html body #mcard{border-radius:var(--r-lg)}
+html body .hsdcard{background:#fff!important;border:1px solid var(--line)!important;border-radius:var(--r-lg)!important;box-shadow:var(--sh1)!important}
+html body .item,html body .hsditem{background:#fff;border:1px solid var(--line);border-radius:var(--r-md);box-shadow:var(--sh1)}
+html body .item:hover,html body .hsdcard:hover{transform:none;box-shadow:var(--sh1);border-color:var(--brand-ln)}
+html body .hero{box-shadow:var(--sh2)}
+html body .brc{background:#fff}
+html body .brc .bt{border-radius:var(--r-md);background:var(--card2);box-shadow:none}
+html body .brc .bpt i,.fill,.ring .rf{background:var(--brand)}
+html body .nx-r{border-top-color:var(--line)}
+/* Nút: cao 44px (40px trên máy tính), bo 12px, phẳng */
+html body .btn{min-height:var(--ctl-h);padding:0 16px;border-radius:var(--r-md);font-size:var(--fs-md);font-weight:600;letter-spacing:0;box-shadow:none}
+html body .btn-primary{background:var(--brand);color:#fff}
+html body .btn-primary:hover:not([disabled]){background:var(--brand-d)}
+html body .btn-outline{background:#fff;color:var(--brand);border:1px solid var(--brand-ln);box-shadow:none}
+html body .btn-dk,html body .btn-nxt{border-radius:var(--r-md);font-weight:600;letter-spacing:0}
+/* Ô nhập, bộ lọc, danh sách chọn */
+html body .inp,html body .sinp,html body select.inp,html body textarea.inp{min-height:var(--ctl-h);border:1px solid var(--line);border-radius:var(--r-md);background:#fff;color:var(--ink);font-size:var(--fs-md);font-weight:500;box-shadow:none}
+html body .inp:focus,html body .sinp:focus{border-color:var(--brand);box-shadow:0 0 0 3px var(--brand-bg)}
+html body .chip,html body .pill,html body .chip-on{min-height:36px;border-radius:var(--r-md);padding:0 14px;font-size:var(--fs-sm);font-weight:600;box-shadow:none}
+html body .chip{background:#fff;border:1px solid var(--line);color:var(--ink)}
+html body .pill{background:#fff;border:1px solid var(--brand-ln);color:var(--brand)}
+html body .chip-on{background:var(--brand);border-color:var(--brand);color:#fff}
+/* Bảng dữ liệu: tiêu đề, dòng, viền thống nhất */
+html body #app .stktable th,html body #app .rct th,html body #app .bctbl th,html body .stktable th,html body table.rct th{background:#f1f4f9;color:var(--mut);font-size:var(--fs-xs);font-weight:600;letter-spacing:0;text-transform:none;padding:10px 12px;border-bottom:1px solid var(--line)}
+html body #app .stktable td,html body #app .rct td,html body #app .bctbl td{padding:12px;border-bottom:1px solid var(--line)}
+html body #app .stktable tbody tr:hover td,html body #app .rct tbody tr:hover td{background:var(--brand-bg)}
+html body #app .stkwrap,html body #app .tblwrap,html body div:has(>table.rct){border:1px solid var(--line);border-radius:var(--r-md);background:#fff}
+/* Popup, hộp thoại, thông báo */
+html body .ovl,html body #sigovl,html body #nmovl,html body .v2o{background:rgba(15,27,51,.55);-webkit-backdrop-filter:none;backdrop-filter:none}
+html body .v2s,html body .sigcard{border-radius:var(--r-lg);box-shadow:var(--sh2)}
+html body .sheet{border-radius:var(--r-lg) var(--r-lg) 0 0}
+html body .v2hd{background:var(--navy)}
+html body .v2sv{background:var(--brand)}
+html body #toast .in{border-radius:var(--r-md);box-shadow:var(--sh2);font-size:var(--fs-md);font-weight:600}
+/* Trạng thái: thành công / cảnh báo / lỗi · quá hạn */
+html body .stbadge{padding:3px 10px;border-radius:999px;font-size:var(--fs-xs);font-weight:600;background:var(--warn-bg);color:var(--warn)}
+html body .stbadge.ok{background:var(--ok-bg);color:var(--ok)}
+html body .stbadge.err,html body .stbadge.over{background:var(--err-bg);color:var(--err)}
+html body .pxe{background:#fff;border:1px dashed var(--line);border-radius:var(--r-lg)}
+/* ===== Thẻ Tỷ lệ kiểm kê: thống nhất nền sáng, chữ đậm, biểu đồ đủ tương phản ===== */
+html body #mcard,html body .fc-row #mcard{--hm-fg:var(--ink);--hm-mut:var(--mut);--hm-track:#e6ebf3;--hm-a1:var(--brand);--hm-a2:var(--brand-d);--hm-d1:var(--brand);--hm-d2:#9db4e8;--hm-d3:#c4ccdb;background:#fff;color:var(--ink)}
+html body #mcard::before{display:none}
+html body #mcard .mn button{background:#fff;border:1px solid var(--line);color:var(--ink)}
+html body #mcard .hseg i.on{background:var(--brand)}
+html body #mcard .hchip{background:var(--card2);color:var(--mut)}
+html body #mcard .hchip.ok{background:var(--ok-bg);color:var(--ok)}
+html body #mcard .hchip.lo{background:var(--err-bg);color:var(--err)}
+html body #mcard .hchip.hi{background:var(--warn-bg);color:var(--warn)}
+html body #mcard .sub{color:var(--mut);border-top-color:var(--line)}
+html body #mcard .htr text{fill:var(--mut);fill-opacity:1;font-weight:600}
+html body #mcard .htr text[font-weight="700"],html body #mcard .htr text[font-weight="800"]{fill:var(--ink);font-weight:700}
+html body #mcard .htr text[fill="#f5c04a"]{fill:var(--warn)}
+html body #mcard .htr line[stroke="#f5c04a"]{stroke:var(--warn)}
+html body #mcard .htr [stroke="#7ef0c9"]{stroke:var(--ok)}
+html body #mcard .htr [fill="#7ef0c9"]{fill:var(--ok)}
+html body #mcard .htr [stroke="#ff9aa8"]{stroke:var(--err)}
+html body #mcard .htr [fill="#ff9aa8"]{fill:var(--err)}
+html body #mcard .htr [stroke="#ffd88a"]{stroke:var(--warn)}
+html body #mcard .htr [fill="#ffd88a"]{fill:var(--warn)}
+html body #mcard .htr circle[fill="#1e3a6b"]{fill:#fff}
+</style>
 </head>
 <body>
 <header id="gheader">
