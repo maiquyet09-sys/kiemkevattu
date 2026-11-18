@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="app-notes" content="Ký số PDF nâng cấp: ký nhiều người (tuần tự / đồng thời), danh sách nhân sự (nhập tay hoặc tải file mẫu), xem văn bản và kéo chữ ký đến đúng chỗ trước khi ký, thông báo Văn bản cần ký ở Trang chủ, biên bản Excel dùng chung thư viện chữ ký., hiện “đang chờ tại ai” và tiến độ 2 số lẻ, thông báo Trang chủ mở thẳng văn bản cần ký. Mở: Quản trị &amp; tiện ích › Ký số PDF">
-<meta name="app-version" content="2026111804">
+<meta name="app-version" content="2026111806">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="format-detection" content="telephone=no">
 <meta name="color-scheme" content="light">
@@ -2764,14 +2764,15 @@ function sigBoxHtml(kind,key){
   var S=sigStore(kind);S.sig=S.sig||{};
   var s=S.sig[key],label=SIG_TITLES[kind+'.'+key];
   var h='<div style="flex:1 1 140px;min-width:0;border:1px solid var(--line);border-radius:14px;padding:10px;background:var(--card)">';
-  h+='<div style="font-weight:700;font-size:13px;margin-bottom:8px">'+label+'</div>';
+    h+='<div style="font-weight:700;font-size:13px;margin-bottom:'+(asgOf(kind,key)?'2':'8')+'px">'+label+'</div>'+asgLine(kind,key);
   if(s){
     h+='<div style="height:84px;display:flex;align-items:center;justify-content:center;background:var(--card2);border-radius:10px"><img src="'+s.img+'" style="max-width:100%;max-height:76px"></div>';
     h+='<div style="font-size:13px;font-weight:600;margin-top:6px">'+esc(s.ten)+'</div><div style="font-size:11px;color:var(--mut)">'+esc(s.time)+'</div>'+(s.auth?'<div style="font-size:11px;color:var(--green)">🔒 '+esc(s.auth)+'</div>':'');
-    h+='<div style="display:flex;gap:14px;margin-top:6px"><button class="addbat" style="color:var(--teal)" onclick="A.sigOpen(\''+kind+'\',\''+key+'\')">Ký lại</button><button class="addbat" style="color:var(--red)" onclick="A.sigClear(\''+kind+'\',\''+key+'\')">Xoá</button></div>';
+    if(asgCanSign(kind,key))h+='<div style="display:flex;gap:14px;margin-top:6px"><button class="addbat" style="color:var(--teal)" onclick="A.sigOpen(\''+kind+'\',\''+key+'\')">Ký lại</button><button class="addbat" style="color:var(--red)" onclick="A.sigClear(\''+kind+'\',\''+key+'\')">Xoá</button></div>';
   }else{
     h+='<div style="height:84px;display:flex;align-items:center;justify-content:center;border:1.5px dashed var(--line);border-radius:10px;color:var(--mut2);font-size:12px">Chưa ký</div>';
-    h+='<button class="btn btn-outline" style="margin-top:8px;padding:10px;font-size:13px" onclick="A.sigOpen(\''+kind+'\',\''+key+'\')">'+icon('edit',15)+'Ký tại đây</button>';
+    h+=asgCanSign(kind,key)?'<button class="btn btn-outline" style="margin-top:8px;padding:10px;font-size:13px" onclick="A.sigOpen(\''+kind+'\',\''+key+'\')">'+icon('edit',15)+'Ký tại đây</button>':'<div style="margin-top:8px;font-size:12.5px;color:var(--amber)">Chờ '+esc(asgOf(kind,key).name)+' ký — ô này đã giao riêng cho người đó</div>';
+    if(!s)h+='<button class="addbat" style="color:var(--teal);margin-top:6px" onclick="A.asgOpen(\''+kind+'\',\''+key+'\')">'+(asgOf(kind,key)?'Đổi người ký':'Phân công người ký')+'</button>';
   }
   return h+'</div>';
 }
@@ -2915,7 +2916,7 @@ function sigConfirm(){
     if(auth)sig.auth=auth;
     var kind=SIGP.kind,key=SIGP.key;
     sigPadClose();
-    var S=sigStore(kind);S.sig=S.sig||{};S.sig[key]=sig;
+    var S=sigStore(kind);S.sig=S.sig||{};S.sig[key]=sig;if(S.asg&&S.asg[key]){S.asg[key].at=Date.now();ESX.notify(S.asg[key].by,ten+' đã ký ô «'+(S.asg[key].role||key)+'» — '+ESX.kn(kind),null);}
     if(kind==='as')asLog(S,'Ký điện tử: '+(SIG_TITLES['as.'+key]||key),null,ten+(auth?' · '+auth:''));
     sigPersist(kind);
     sigRerender(kind);
@@ -5386,36 +5387,59 @@ function navCounts(){var C=window.__nbc;if(C&&Date.now()-C.t<4000)return C.v;var
 function navGroups(){
   var nc=navCounts(),v=route.view,cur=navCurFolder(),inFolder=(cur!==null&&(v==='folder'||v==='period'));
   function C(act){return 'A.drawerClose();'+act;}
-  /* 6 phân hệ: Tổng quan · Kiểm kê · Kho · Đối chiếu · Thanh toán NCC · Quản trị & tiện ích. Thao tác nhanh (Tạo kỳ, Quét QR) nằm đầu menu. Chỉ đổi cách xếp menu, không đổi màn hình/dữ liệu. */
+  /* Cấu trúc mới (V3): Biên bản · Kiểm kê · Đối chiếu · Quản lý kho · Ký số · Giá vốn và mua hàng · Các danh mục khác. Chỉ đổi cách xếp menu, giữ nguyên route, màn hình và dữ liệu. */
+  var sg=(window.SGTAB?window.SGTAB():'todo');
+  function KS(t){return C("A.go('sign');setTimeout(function(){SGX.tab('"+t+"')},0)");}
+  var bb=[
+    {label:'Biên bản kiểm kê',title:'Biên bản kiểm kê vật tư theo từng kỳ',act:C('v2List()'),on:false},
+    {label:'Biên bản kiểm kê CCDC &amp; TSCĐ',title:'Biên bản kiểm kê công cụ dụng cụ, tài sản cố định',act:C("A.go('assets')"),on:false},
+    {label:'Biên bản giải trình',title:'Giải trình các mã chênh lệch sau kiểm kê',act:C("A.go('explain')"),on:v==='explain'||v==='explainEdit'},
+    {label:'Biên bản bàn giao',title:'Bàn giao vật tư, tài sản giữa các bên',act:C("A.go('handover')"),on:v==='handover'||v==='handoverEdit'}
+  ];
   var kk=[
-    {label:'Danh sách kỳ kiểm kê',title:'Gồm các kỳ đang kiểm dở',cnt:nc.o||undefined,act:C('v2List()'),on:v==='lists'||v==='transfer'||v==='folder'||(v==='asset'&&LS.back)||v==='period'},
-    {label:'Kiểm kê CCDC &amp; TSCĐ',act:C("A.go('assets')"),on:v==='assets'||(v==='asset'&&!LS.back)},
-    {label:'Giải trình chênh lệch',title:'Giải trình các mã chênh lệch sau kiểm kê',act:C("A.go('explain')"),on:v==='explain'||v==='explainEdit'},
+    {label:'Kiểm kê vật tư',title:'Các kỳ kiểm kê vật tư, kể cả kỳ đang kiểm dở',cnt:nc.o||undefined,act:C('v2List()'),on:v==='lists'||v==='transfer'||v==='folder'||(v==='asset'&&LS.back)||v==='period'},
+    {label:'Kiểm kê tài sản, công cụ dụng cụ',act:C("A.go('assets')"),on:v==='assets'||(v==='asset'&&!LS.back)},
     {label:'Báo cáo kiểm kê',title:'Tổng hợp kết quả kiểm kê',act:C("A.go('baocao')"),on:v==='baocao'||v==='reporthub'},
     {label:'Tạo kỳ kiểm kê',act:C("A.go('upload')"),on:v==='upload',hide:true}
   ];
+  var dc=[
+    {label:'Đối chiếu dịch vụ và xuất kho',desc:'So doanh thu với giá trị xuất kho theo tháng',act:C("A.go('recon')"),on:v==='recon'},
+    {label:'Đối chiếu thanh toán NCC',desc:'Nạp mua hàng và hóa đơn MISA, rà lỗi, lập đề nghị thanh toán',cnt:nc.nl||undefined,hot:1,act:C("A.go('pay')"),on:v==='pay'},
+    {label:'Đối chiếu nhập liệu',desc:'Báo lỗi nhập liệu (phiếu nhập kho MISA) và lỗi labo',act:C("A.go('err')"),on:v==='err'}
+  ];
   var kho=[
-    {label:'Tồn kho theo Biên bản kiểm kê',act:'A.navStock()',on:v==='stock'},
+    {label:'Tồn kho theo biên bản kiểm kê',act:'A.navStock()',on:v==='stock'},
     {label:'Cảnh báo hạn sử dụng',cnt:nc.ex||undefined,hot:1,act:C("A.go('hsd')"),on:v==='hsd'},
     {label:'Theo dõi hạn sử dụng',title:'Lô và hạn lấy từ biên bản kiểm kê',act:C("A.go('hsdkk')"),on:v==='hsdkk'},
     {label:'Cảnh báo hàng tồn kho',title:'Tồn ≥3/6 tháng, gợi ý điều chuyển giữa chi nhánh',act:C("A.go('mgmt')"),on:v==='mgmt'}
   ];
+  var ks=[
+    {label:'Quy trình ký tài liệu PDF',desc:'Chọn file PDF, chọn vị trí ký, ký nhiều người',act:KS('todo'),on:v==='sign'&&(sg==='todo'||sg==='done')},
+    {label:'Chờ tôi ký',act:KS('e1'),on:v==='sign'&&sg==='e1'},
+    {label:'Tôi đã ký',act:KS('e2'),on:v==='sign'&&sg==='e2'},
+    {label:'Do tôi lập',act:KS('e3'),on:v==='sign'&&sg==='e3'},
+    {label:'Kho lưu trữ',act:KS('e4'),on:v==='sign'&&sg==='e4'},
+    {label:'Đăng ký &amp; quản lý chữ ký',desc:'Vẽ hoặc tải ảnh chữ ký, mật khẩu ký, Face ID',act:C("A.go('sign');setTimeout(function(){SGX.pw()},0)"),on:false},
+    {label:'Phân công người ký',desc:'Danh sách nhân sự dùng để phân công ký',act:C("A.go('sign');setTimeout(function(){MSX.staff()},0)"),on:false}
+  ];
+  var gv=[
+    {label:'Giá vốn và mua hàng',desc:'Tên cũ: Trung tâm kiểm soát dữ liệu — giữ nguyên các công cụ bên trong',act:C("A.go('dchub')"),on:v==='dchub'},
+    {label:'Phân tích mua hàng – tiêu hao',desc:'So mua hàng với tiêu hao vật tư theo cơ sở, từ sổ chi tiết MISA',act:C("A.go('ana')"),on:v==='ana'}
+  ];
+  var kh=[
+    {label:'Sao lưu &amp; khôi phục',desc:'Sao lưu toàn bộ, tự động, kiểm tra toàn vẹn, khôi phục',act:C("A.go('backup')"),on:v==='backup'},
+    {label:'Cài đặt hệ thống',desc:'Hồ sơ, in ấn, người ký, sao lưu và khôi phục',act:C("A.go('settings')"),on:v==='settings'}
+  ];
   return [
     {quick:[{label:'Tạo kỳ',icon:'plus',pri:1,act:C("A.go('upload')"),on:v==='upload'},{label:'Quét QR',icon:'scan',act:C('v2Scan()'),on:false}]},
     {k:'ov',icon:'home',label:'Tổng quan',act:"A.navGo('home')",on:v==='home'},
-    {k:'kk',icon:'list',label:'Kiểm kê',bd:nc.o||undefined,subs:kk,on:['lists','transfer','upload','folder','period','assets','asset','baocao','reporthub','explain','explainEdit'].indexOf(v)>=0},
-    {k:'kho',icon:'box',label:'Kho',bd:nc.ex||undefined,subs:kho,on:['stock','hsd','hsdkk','mgmt'].indexOf(v)>=0},
-    {k:'rc',icon:'swap',label:'Đối chiếu',on:['recon','err','ana'].indexOf(v)>=0,subs:[
-      {label:'Đối chiếu doanh thu – xuất kho',desc:'So doanh thu với giá trị xuất kho theo tháng',act:C("A.go('recon')"),on:v==='recon'},
-      {label:'Phân tích mua hàng – tiêu hao',desc:'So mua hàng với tiêu hao vật tư theo cơ sở, từ sổ chi tiết MISA',act:C("A.go('ana')"),on:v==='ana'},
-      {label:'Báo lỗi nhập liệu và labo',act:C("A.go('err')"),on:v==='err'}]},
-    {k:'pay',icon:'doc',label:'Thanh toán NCC',bd:nc.nl||undefined,act:"A.navGo('pay')",on:v==='pay'},
-    {k:'qt',icon:'file',label:'Quản trị &amp; tiện ích',on:['handover','handoverEdit','dchub','settings','sign','backup'].indexOf(v)>=0,subs:[
-      {label:'Biên bản bàn giao',desc:'Bàn giao vật tư, tài sản giữa các bên',act:C("A.go('handover')"),on:v==='handover'||v==='handoverEdit'},
-      {label:'Trung tâm kiểm soát dữ liệu',desc:'Tổng hợp các công cụ đối chiếu, kiểm soát',act:C("A.go('dchub')"),on:v==='dchub'},
-      {label:'Ký số PDF',desc:'Ký PDF, chọn vị trí ký, xác nhận mật khẩu / Face ID',act:C("A.go('sign')"),on:v==='sign'},
-      {label:'Sao lưu & khôi phục',desc:'Sao lưu toàn bộ, tự động, kiểm tra toàn vẹn, khôi phục',act:C("A.go('backup')"),on:v==='backup'},
-      {label:'Cài đặt hệ thống',desc:'Hồ sơ, in ấn, người ký, sao lưu và khôi phục',act:C("A.go('settings')"),on:v==='settings'}]}
+    {k:'bb',icon:'file',label:'Biên bản',subs:bb,on:['explain','explainEdit','handover','handoverEdit'].indexOf(v)>=0},
+    {k:'kk',icon:'list',label:'Kiểm kê',bd:nc.o||undefined,subs:kk,on:['lists','transfer','upload','folder','period','assets','asset','baocao','reporthub'].indexOf(v)>=0},
+    {k:'rc',icon:'swap',label:'Đối chiếu',bd:nc.nl||undefined,subs:dc,on:['recon','pay','err'].indexOf(v)>=0},
+    {k:'kho',icon:'box',label:'Quản lý kho',bd:nc.ex||undefined,subs:kho,on:['stock','hsd','hsdkk','mgmt'].indexOf(v)>=0},
+    {k:'ks',icon:'edit',label:'Ký số',subs:ks,on:v==='sign'},
+    {k:'gv',icon:'doc',label:'Giá vốn và mua hàng',subs:gv,on:['dchub','ana'].indexOf(v)>=0},
+    {k:'qt',icon:'gear',label:'Các danh mục khác',subs:kh,on:['backup','settings'].indexOf(v)>=0}
   ];
 }
 function navActive(gs){
@@ -5662,7 +5686,7 @@ function renderMgmtOld(){
 }
 function renderDcHub(){
   var n=0;try{if(db.pay&&db.pay.mua&&db.pay.mua.length)payCompute().forEach(function(g){if(g.bad)n++;});}catch(e){klog("if(db.pay&&db.pay.mua&&db.pay.mua.length)payComp",e)}
-  hubCards('Đối chiếu & thanh toán','home',[
+  hubCards('Giá vốn và mua hàng','home',[
     {icon:'swap',title:'Đối chiếu doanh thu – xuất kho',desc:'Đối chiếu doanh thu với phiếu xuất kho, xuất Excel kèm sheet map, bôi đỏ phần lệch.',route:'recon'},
     {icon:'swap',title:'Phân tích mua hàng – tiêu hao',desc:'Tải sổ chi tiết vật tư MISA, so mua hàng với tiêu hao 2 tháng theo cơ sở, cảnh báo tồn kho, xuất Excel.',route:'ana'},
     {icon:'monitor',title:'Quản trị liên chi nhánh',desc:'Dashboard chi nhánh, tồn ≥3/6 tháng, gợi ý điều chuyển, đối chiếu doanh thu – xuất kho – kiểm kê.',route:'mgmt'},
@@ -7283,6 +7307,7 @@ var A={
   },
   /* ---- Chữ ký điện tử ---- */
   sigOpen:function(kind,key){
+    if(!asgCanSign(kind,key)){toast('Ô ký này đã giao cho '+asgOf(kind,key).name+' — chỉ người này mới ký được');return;}
     var def='';
     if(kind==='hv'&&HV[key])def=HV[key].ten||'';
     if(kind==='ex'&&key==='nguoiGiaiTrinh')def=EX.nguoiGiaiTrinh.ten||'';
@@ -7293,6 +7318,7 @@ var A={
     sigPadOpen(kind,key,SIG_TITLES[kind+'.'+key]||'',def);
   },
   sigClear:function(kind,key){
+    if(!asgCanSign(kind,key)){toast('Chỉ người được giao mới xoá được chữ ký này');return;}
     if(!confirm('Xoá chữ ký này?'))return;
     var S=sigStore(kind);S.sig=S.sig||{};delete S.sig[key];
     sigPersist(kind);sigRerender(kind);
@@ -8153,8 +8179,8 @@ function renderNav(){
   var v=route.view,on={
     home:['home','upload','folder'].indexOf(v)>=0,
     list:['lists','period','stock','transfer'].indexOf(v)>=0||(v==='asset'&&LS.back),
-    dc:['dchub','recon','pay','mgmt','err','ana'].indexOf(v)>=0,
-    more:['sign','backup','settings','hsd','assets','reporthub','baocao','handover','handoverEdit','explain','explainEdit'].indexOf(v)>=0||(v==='asset'&&!LS.back)
+    dc:['recon','pay','err'].indexOf(v)>=0,
+    more:['dchub','ana','mgmt','sign','backup','settings','hsd','assets','reporthub','baocao','handover','handoverEdit','explain','explainEdit'].indexOf(v)>=0||(v==='asset'&&!LS.back)
   };
   Array.prototype.forEach.call(document.querySelectorAll('#bnav [data-k]'),function(b){b.classList.toggle('on',!!on[b.getAttribute('data-k')]);});
   document.getElementById('app').classList.toggle('v2p',v==='period');
@@ -8558,7 +8584,7 @@ document.getElementById('bnav').innerHTML=
  '<button data-k="home" onclick="A.go(\'home\')">'+fcGly('home',24)+'Trang chủ</button>'
  +'<button data-k="list" onclick="v2List()">'+fcGly('list',24)+'Kiểm kê</button>'
  +'<button class="fab" onclick="v2Scan()" aria-label="Quét QR"><i>'+icon('qr',30)+'</i>Quét QR</button>'
- +'<button data-k="dc" onclick="A.go(\'dchub\')">'+fcGly('rec',24)+'Đối chiếu</button>'
+ +'<button data-k="dc" onclick="A.go(\'recon\')">'+fcGly('rec',24)+'Đối chiếu</button>'
  +'<button data-k="more" onclick="A.drawerToggle()">'+fcGly('more',24)+'Khác</button>';
 
 store.boot(function(){
@@ -12506,7 +12532,7 @@ async function doSign(auth){
   }catch(e){klog('sgSign',e);toast('Lỗi khi ký PDF: '+((e&&e.message)||''));}
   finally{P.busy=false;}
 }
-async function fileOut(id,kind,dl){
+async function fileOut(id,kind,dl){var d0=D(id);if(d0&&!esVis(d0)){toast('Bạn không có quyền xem văn bản này');return;}
   var d=D(id),buf=await IDBM.get((kind==='out'?'sgout:':'sgsrc:')+id);if(!d||!buf){toast('Không còn file này trên máy (có thể đang mở ở máy khác)');return;}
   var u=URL.createObjectURL(new Blob([buf],{type:'application/pdf'})),a=document.createElement('a');a.href=u;
   if(dl)a.download=d.name.replace(/\.pdf$/i,'')+(kind==='out'?'_da-ky':'')+'.pdf';else a.target='_blank';
@@ -12644,7 +12670,7 @@ async function msStart(){
   var buf=await IDBM.get('sgsrc:'+M.id),h=await sha(buf);
   d.flow={mode:M.mode,st:'run',hash:h,log:[],people:M.rows.map(function(r){var p=MSPOS[+r.pos];return {id:uid(),name:r.name.trim(),title:r.title.trim(),unit:r.unit||'',dept:r.dept||'',sid:r.sid||'',sigId:r.sigId,p:+M.pg,x:p[1],y:p[2],w:.28,s:'wait'};})};
   msLog(d.flow,'Người tạo','Khởi tạo quy trình '+(M.mode==='seq'?'tuần tự':'đồng thời')+', '+M.rows.length+' người ký',{inH:h});
-  d.flow.by=(msMe()||{}).id||'';d.flow.people.forEach(function(p){esN(p.sid,d,'Biên bản chờ bạn ký: '+d.name);});store.save();msClose();SG.tab='todo';renderSign();toast('Đã khởi tạo quy trình ký');
+  d.flow.by=(msMe()||{}).id||'';d.flow.byDev=devId();d.flow.people.forEach(function(p){esN(p.sid,d,'Biên bản chờ bạn ký: '+d.name);});store.save();msClose();SG.tab='todo';renderSign();toast('Đã khởi tạo quy trình ký');
 }
 async function msSign(id,pid,pos,sigId){
   var d=D(id),f=d&&d.flow,p=f&&f.people.filter(function(x){return x.id===pid;})[0];
@@ -12671,10 +12697,10 @@ async function msSign(id,pid,pos,sigId){
     finally{delete MSB[id];}
   });
 }
-function msLogView(id){var d=D(id);if(!d||!d.flow)return;msOv('<div style="font-weight:800;font-size:16px;margin-bottom:8px">Lịch sử: '+esc(d.name)+'</div>'+d.flow.log.map(function(l){return '<div class="sgc" style="font-size:12.5px"><b>'+esc(l.act)+'</b><br>'+esc(l.who)+' · '+dt(l.t)+' · máy '+esc(l.dev)+(l.outH?'<br><span style="color:var(--mut);word-break:break-all">SHA-256 ra: '+l.outH.slice(0,24)+'…</span>':'')+(l.reason?'<br>Lý do: '+esc(l.reason):'')+'</div>';}).join('')+'<button class="btn btn-primary" style="padding:12px" onclick="MSX.close()">Đóng</button>');}
+function msLogView(id){var d=D(id);if(!d||!d.flow||!esVis(d))return;msOv('<div style="font-weight:800;font-size:16px;margin-bottom:8px">Lịch sử: '+esc(d.name)+'</div>'+d.flow.log.map(function(l){return '<div class="sgc" style="font-size:12.5px"><b>'+esc(l.act)+'</b><br>'+esc(l.who)+' · '+dt(l.t)+' · máy '+esc(l.dev)+(l.outH?'<br><span style="color:var(--mut);word-break:break-all">SHA-256 ra: '+l.outH.slice(0,24)+'…</span>':'')+(l.reason?'<br>Lý do: '+esc(l.reason):'')+'</div>';}).join('')+'<button class="btn btn-primary" style="padding:12px" onclick="MSX.close()">Đóng</button>');}
 /* ---- Hiển thị văn bản cần ký: xem từng trang PDF (bản mới nhất), tô sáng ô ký, xác nhận trước khi ký ---- */
 async function msView(id,pid){
-  var d=D(id);if(!d)return;toast('Đang mở văn bản…');
+  var d=D(id);if(!d)return;if(!esVis(d)){toast('Bạn không có quyền xem văn bản này');return;}toast('Đang mở văn bản…');
   try{
     await libs();var buf=(await IDBM.get('sgout:'+id))||(await IDBM.get('sgsrc:'+id));if(!buf)throw new Error('nofile');
     var pdf=await pdfjsLib.getDocument({data:new Uint8Array(buf.slice(0))}).promise,f=d.flow,p=(pid&&f)?f.people.filter(function(x){return x.id===pid;})[0]:null;
@@ -12745,7 +12771,7 @@ function msIsMe(p){var m=msMe();return !!m&&(p.sid?p.sid===m.id:nz(p.name)===nz(
 window.MSP=function(){
   var r={all:0,mine:0,me:null,names:[]};if(!db.sg||!Array.isArray(db.sg.docs))return r;
   var me=msMe();r.me=me;
-  S().docs.forEach(function(d){var f=d.flow;if(!f||f.st!=='run')return;r.all++;var w=f.people.filter(function(p){return msTurn(f,p);});
+  S().docs.forEach(function(d){var f=d.flow;if(!f||f.st!=='run'||!esVis(d))return;r.all++;var w=f.people.filter(function(p){return msTurn(f,p);});
     var mp=me?w.filter(function(p){return p.sid===me.id||nz(p.name)===nz(me.name);})[0]:null;if(mp){r.mine++;r.last={id:d.id,pid:mp.id};}
     w.slice(0,3).forEach(function(p){if(r.names.indexOf(p.name)<0)r.names.push(p.name);});});
   return r;};
@@ -12776,9 +12802,10 @@ var ES={q:''},ES_ROLES=['Người lập biên bản','Người kiểm kê','Ngư
 function esSt(d){var f=d.flow;if(!f)return d.status==='signed'?['done','Hoàn tất ký']:['draft','Bản nháp'];var ok=f.people.filter(function(x){return x.s==='ok';}).length;
   if(f.st==='done')return['done','Hoàn tất ký'];if(f.st==='stop')return['rej','Từ chối ký'];if(f.st==='revoked')return['rev','Đã thu hồi'];if(f.st==='cancel')return['can','Đã hủy'];if(f.st==='replaced')return['can','Đã thay bằng bản mới'];
   if(MSB[d.id])return['sg','Đang ký'];return ok?['part','Đã ký một phần']:['wait','Chờ ký'];}
+function esVis(d){var f=d&&d.flow;if(!f||!f.people)return true;if(f.people.some(msIsMe))return true;var m=msMe();if(f.by)return !!m&&f.by===m.id;if(f.byDev)return f.byDev===devId();return true;}
 function esN(sid,d,txt){if(!sid)return;var s=S();s.notifs=s.notifs||[];s.notifs.push({id:uid(),to:sid,doc:d.id,txt:txt,t:Date.now(),read:0});if(s.notifs.length>300)s.notifs=s.notifs.slice(-300);}
 function esRoles(){var r=ES_ROLES.concat((S().roles||[]).filter(function(x){return ES_ROLES.indexOf(x)<0;}));return '<datalist id="esroles">'+r.map(function(x){return '<option value="'+esc(x)+'">';}).join('')+'</datalist>';}
-function esSel(t){var m=msMe(),q=nz(ES.q);if(!m)return [];return S().docs.filter(function(d){var f=d.flow;if(!f||!f.people)return false;
+function esSel(t){var m=msMe(),q=nz(ES.q);if(!m)return [];return S().docs.filter(function(d){var f=d.flow;if(!f||!f.people||!esVis(d))return false;
   if(t==='e1')return f.st==='run'&&f.people.some(function(p){return msTurn(f,p)&&msIsMe(p);});
   if(t==='e2')return f.people.some(function(p){return p.s==='ok'&&msIsMe(p);});
   if(t==='e3'&&!(f.by===m.id||!f.by))return false;if(t==='e4'&&f.st!=='done')return false;
@@ -12789,11 +12816,34 @@ function esList(t){var m=msMe();if(!m)return '<div class="sgc" style="font-size:
   if(t==='e1'&&nt.length)h+='<div class="sgc"><div style="font-weight:700;font-size:13.5px;margin-bottom:4px">Thông báo</div>'+nt.map(function(n){return '<div style="font-size:12.5px;padding:5px 0;border-top:1px solid var(--line);'+(n.read?'color:var(--mut)':'font-weight:600')+'" onclick="MSX.nread(\''+n.id+'\')">'+esc(n.txt)+'<br><span style="font-size:11.5px;color:var(--mut)">'+dt(n.t)+'</span></div>';}).join('')+'</div>';
   if(t==='e3'||t==='e4')h+='<input class="inp" placeholder="Tìm theo tên biên bản, người ký, cơ sở…" value="'+esc(ES.q)+'" onchange="MSX.eq(this.value)" style="margin-bottom:10px">';
   var l=esSel(t);return h+(l.length?l.map(msCard).join(''):'<div class="sgc" style="text-align:center;color:var(--mut);font-size:13px">Chưa có biên bản nào.</div>');}
+window.SGTAB=function(){return SG.tab;};
 MSX.eq=function(v){ES.q=v;renderSign();};
-MSX.nread=function(id){(S().notifs||[]).forEach(function(n){if(n.id===id){n.read=1;}});store.save();renderSign();};
+MSX.nread=function(id){var r=null;(S().notifs||[]).forEach(function(n){if(n.id===id){n.read=1;r=n.ref;}});store.save();if(r&&r.k==='pe'&&r.pid&&per(r.pid)){A.openPeriod(r.pid);P.sigOpen=true;renderPeriod();return;}if(r)toast('Mở '+ESX.kn(r.k)+' để ký ô được giao');renderSign();};
 MSX.revoke=function(id){var d=D(id),f=d&&d.flow,m=msMe(),r;if(!f||f.st!=='run')return;if(f.by&&(!m||f.by!==m.id)){toast('Chỉ người lập mới được thu hồi');return;}
   r=prompt('Lý do thu hồi yêu cầu ký (bắt buộc). Chữ ký đã có vẫn được giữ nguyên:');if(!r||!r.trim())return;f.st='revoked';f.people.forEach(function(p){if(p.s==='wait')p.s='rev';});
   msLog(f,'Người tạo','Thu hồi yêu cầu ký',{reason:r.trim()});f.people.forEach(function(p){esN(p.sid,d,'Yêu cầu ký đã bị thu hồi: '+d.name);});store.save();renderSign();};
+var KN={pe:'Biên bản kiểm kê vật tư',as:'Biên bản kiểm kê CCDC & TSCĐ',hv:'Biên bản bàn giao',ex:'Phiếu giải trình',bc:'Báo cáo kiểm kê'},AG={k:'',key:'',q:'',role:''};
+function asgOf0(kind,key){var S0=sigStore(kind);return (S0&&S0.asg&&S0.asg[key])||null;}
+window.asgOf=asgOf0;
+window.asgCanSign=function(kind,key){var a=asgOf0(kind,key);if(!a)return true;var m=msMe();return !!m&&m.id===a.sid;};
+window.asgLine=function(kind,key){var a=asgOf0(kind,key);return a?'<div style="font-size:12px;color:var(--teal);margin-bottom:6px">Giao: <b>'+esc(a.name)+'</b>'+(a.role?' · '+esc(a.role):'')+'</div>':'';};
+function agOv(){var a=asgOf0(AG.k,AG.key),q=nz(AG.q),st=S().staff,l=st.filter(function(p){return stMatch(p,q);}).slice(0,60),lb=SIG_TITLES[AG.k+'.'+AG.key]||'';
+  msOv('<div style="font-weight:800;font-size:16px;margin-bottom:4px">Phân công ký: '+esc(lb)+'</div><div style="font-size:12px;color:var(--mut);margin-bottom:8px">'+esc(KN[AG.k]||'')+' · chọn 1 người. Chỉ người này ký được ô này; họ nhận thông báo ký.</div>'
+  +'<label class="lbl">Vai trò</label><input class="inp" list="esroles" id="agrole" value="'+esc(AG.role||lb)+'" onchange="ESX.agRole(this.value)">'+esRoles()
+  +'<input class="inp" placeholder="Tìm theo họ tên, mã NV, phòng ban, cơ sở…" value="'+esc(AG.q)+'" onchange="ESX.agQ(this.value)" style="margin:8px 0">'
+  +(st.length?'':'<div class="sgc" style="font-size:13px">Chưa có danh sách nhân sự — vào Ký số PDF › Danh sách nhân sự để thêm hoặc tải file.</div>')
+  +l.map(function(p){return '<button class="sgbt" style="display:block;width:100%;text-align:left;margin-bottom:6px;'+(a&&a.sid===p.id?'border-color:var(--teal)':'')+'" onclick="ESX.agPick(\''+p.id+'\')"><b>'+esc(p.name)+'</b><br><span style="font-size:12px;color:var(--mut)">'+(stTxt(p)||'—')+'</span></button>';}).join('')
+  +(a?'<button class="sgbt rd" onclick="ESX.agDel()">Bỏ phân công</button> ':'')+'<button class="btn btn-outline" style="margin-top:8px;padding:11px" onclick="MSX.close()">Đóng</button>');}
+function esNx(to,txt,ref){if(!to)return;var s=S();s.notifs=s.notifs||[];s.notifs.push({id:uid(),to:to,txt:txt,ref:ref||null,t:Date.now(),read:0});if(s.notifs.length>300)s.notifs=s.notifs.slice(-300);}
+window.ESX={kn:function(k){return KN[k]||'biên bản';},notify:function(to,txt,ref){esNx(to,txt,ref);},
+  agRole:function(v){AG.role=v;},agQ:function(v){AG.q=v;agOv();},
+  agPick:function(id){var p=stFind(id),S0=sigStore(AG.k),m=msMe(),lb=SIG_TITLES[AG.k+'.'+AG.key]||'',r=((($('agrole')||{}).value)||AG.role||lb).trim()||lb;if(!p)return;
+    S0.asg=S0.asg||{};S0.asg[AG.key]={sid:p.id,name:p.name,role:r,by:m?m.id:'',t:Date.now(),at:0};
+    var q=S();if(r!==lb&&ES_ROLES.indexOf(r)<0){q.roles=q.roles||[];if(q.roles.indexOf(r)<0)q.roles.push(r);}
+    esNx(p.id,'Bạn được giao ký ô «'+r+'» — '+KN[AG.k],{k:AG.k,key:AG.key,pid:AG.k==='pe'?P.id:''});
+    store.save();sigPersist(AG.k);msClose();sigRerender(AG.k);toast('Đã giao '+p.name+' ký ô này và gửi thông báo');},
+  agDel:function(){var S0=sigStore(AG.k);if(S0.asg)delete S0.asg[AG.key];store.save();sigPersist(AG.k);msClose();sigRerender(AG.k);}};
+A.asgOpen=function(kind,key){AG={k:kind,key:key,q:'',role:''};agOv();};
 /* ---- màn hình Ký số PDF ---- */
 function card(d){
   if(d.flow)return msCard(d);
@@ -12804,7 +12854,7 @@ function card(d){
   return h+'</div>';
 }
 window.renderSign=function(){
-  var s=S(),todo=s.docs.filter(function(d){return d.status!=='signed';}),done=s.docs.filter(function(d){return d.status==='signed';}),
+  var s=S(),todo=s.docs.filter(function(d){return d.status!=='signed'&&esVis(d);}),done=s.docs.filter(function(d){return d.status==='signed'&&esVis(d);}),
     h='<div class="topbar"><div class="trow wrap"><button class="back" onclick="A.go(\'home\')">‹</button><div class="ttl">Ký số PDF</div><button class="pill" onclick="SGX.pw()">Chữ ký &amp; bảo mật</button></div><div style="height:10px"></div></div><div class="wrap" style="padding-top:14px;padding-bottom:40px">';
   h+='<label class="btn btn-primary" style="margin-bottom:12px;cursor:pointer">'+icon('upload',18)+'Chọn file PDF cần ký<input type="file" accept="application/pdf,.pdf" multiple hidden onchange="SGX.add(this)"></label>';
   h+='<button class="btn btn-outline" style="margin-bottom:12px;padding:11px" onclick="MSX.staff()">Danh sách nhân sự ('+s.staff.length+')</button>';
@@ -13915,5 +13965,10 @@ window.BKX=window.BKX||{open:false};
 })();
 
 </script>
+<style id="nav-v3">
+/* Sidebar V3 – tối giản: tên thư mục in hoa nhỏ, mục con gọn; giữ nguyên hệ màu MedDental */
+#gsidebar .gnav-grp .lb,#gdrawer .gnav-grp .lb{text-transform:uppercase;letter-spacing:.05em;font-size:12.5px;font-weight:800}
+#gsidebar .gnav-sub,#gdrawer .gnav-sub{font-size:13.5px;line-height:1.3}
+</style>
 </body>
 </html>
