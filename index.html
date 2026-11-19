@@ -2,8 +2,8 @@
 <html lang="vi">
 <head>
 <meta charset="UTF-8">
-<meta name="app-notes" content="Danh bạ nhân sự: chọn người là tự điền biên bản bàn giao, giải trình, ô ký; nhập Excel/CSV theo file mẫu. Giao diện đồng bộ 4 màu. Ký số PDF nâng cấp: ký nhiều người (tuần tự / đồng thời), danh sách nhân sự (nhập tay hoặc tải file mẫu), xem văn bản và kéo chữ ký đến đúng chỗ trước khi ký, thông báo Văn bản cần ký ở Trang chủ, biên bản Excel dùng chung thư viện chữ ký., hiện “đang chờ tại ai” và tiến độ 2 số lẻ, thông báo Trang chủ mở thẳng văn bản cần ký. Mở: Quản trị &amp; tiện ích › Ký số PDF. Sửa lỗi nhập / thêm nhân sự vào Danh bạ (lỗi uid).">
-<meta name="app-version" content="2026111912">
+<meta name="app-notes" content="Danh bạ nhân sự: chọn người là tự điền biên bản bàn giao, giải trình, ô ký; nhập Excel/CSV theo file mẫu. Giao diện đồng bộ 4 màu. Ký số PDF nâng cấp: ký nhiều người (tuần tự / đồng thời), danh sách nhân sự (nhập tay hoặc tải file mẫu), xem văn bản và kéo chữ ký đến đúng chỗ trước khi ký, thông báo Văn bản cần ký ở Trang chủ, biên bản Excel dùng chung thư viện chữ ký., hiện “đang chờ tại ai” và tiến độ 2 số lẻ, thông báo Trang chủ mở thẳng văn bản cần ký. Mở: Quản trị &amp; tiện ích › Ký số PDF. Sửa lỗi nhập / thêm nhân sự vào Danh bạ (lỗi uid). Ô chọn nhân sự trong biên bản: gõ để tìm theo tên, mã NV, số điện thoại, chức vụ.">
+<meta name="app-version" content="2026111913">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="format-detection" content="telephone=no">
 <meta name="color-scheme" content="light">
@@ -7107,6 +7107,7 @@ function addUnmSheet(wb,p){
   var ROLE={giamDoc:'Giám đốc cơ sở',thuKho:'Thủ kho cơ sở',hanhChinh:'Hành chính'};
   var COLS=['Họ tên','Chức vụ','Bộ phận','Chi nhánh','Vai trò ký','Điện thoại','Mã NV','Trạng thái'];
   var ST={q:'',ed:null,seen:null,wrapped:false};
+  document.addEventListener('click',function(e){var t=e.target;Array.prototype.forEach.call(document.querySelectorAll('.sfx-l'),function(l){if(!l.hidden&&!(t&&t.closest&&t.closest('.sfx')))l.hidden=true;});});
   var _uidN=0;function uid(){return 'st'+Date.now().toString(36)+(++_uidN).toString(36)+Math.random().toString(36).slice(2,6);}
   var AL=[['name','ten'],['title','chucVu'],['dept','boPhan'],['unit','chiNhanh']];
   function alias(r){if(!r||r._al)return r;if(!r.ex)r.ex={};AL.forEach(function(p){Object.defineProperty(r,p[0],{get:function(){return r[p[1]]||'';},set:function(v){r[p[1]]=v;},enumerable:false,configurable:true});});Object.defineProperty(r,'_al',{value:1,enumerable:false});return r;}
@@ -7130,7 +7131,7 @@ function addUnmSheet(wb,p){
   function syncAll(){var ch=false;(db.handovers||[]).forEach(function(d){if(syncDoc(d,['benGiao','benNhan']))ch=true;});(db.explains||[]).forEach(function(d){if(syncDoc(d,['nguoiGiaiTrinh']))ch=true;});if(ch)try{store.save();}catch(e){}}
   function fin(m){syncAll();try{store.save();}catch(e){}toast(m);if(route.view==='staff')render();}
   function rowHtml(s){var sub=[s.chucVu,s.boPhan,s.chiNhanh].filter(Boolean).join(' · ');return '<div class="stf-r" onclick="STAFF.edit(\''+s.id+'\')"><div class="stf-top"><div class="stf-n">'+esc(s.ten)+(s.vaiTro?'<em>'+ROLE[s.vaiTro]+'</em>':'')+(s.active===false?'<em class="off">Ngừng</em>':'')+'</div><span class="stf-e">Sửa</span></div>'+(sub?'<div class="stf-s">'+esc(sub)+'</div>':'')+'</div>';}
-  function listHtml(){var q=norm(ST.q||''),a=L().slice().sort(function(x,y){return (x.active===false)-(y.active===false)||String(x.ten).localeCompare(String(y.ten),'vi');}).filter(function(s){return !q||norm([s.ten,s.chucVu,s.boPhan,s.chiNhanh,s.maNV,s.dienThoai].join(' ')).indexOf(q)>=0;});
+  function listHtml(){var q=norm(ST.q||''),a=L().slice().sort(function(x,y){return (x.active===false)-(y.active===false)||String(x.ten).localeCompare(String(y.ten),'vi');}).filter(function(s){return !q||norm([s.ten,s.chucVu,s.boPhan,s.chiNhanh,s.maNV,s.dienThoai].concat(Object.keys(s.ex||{}).map(function(k){return s.ex[k];})).join(' ')).indexOf(q)>=0;});
     return a.length?a.map(rowHtml).join(''):'<div class="stf-s" style="padding:16px;text-align:center">'+(L().length?'Không có kết quả':'Chưa có nhân sự — thêm tay hoặc nhập từ file mẫu')+'</div>';}
   function field(id,lb,v,ph){return '<label class="lbl">'+lb+'</label><input class="inp" id="'+id+'" value="'+esc(v||'')+'" placeholder="'+(ph||'')+'">';}
   function xcols(){return (db.sg&&Array.isArray(db.sg.cols))?db.sg.cols:[];}
@@ -7158,9 +7159,25 @@ function addUnmSheet(wb,p){
   window.STAFF={
     bind:bind,
     sel:function(kind,role){var d=kind==='hv'?HV:EX,p=d&&d[role];if(!p)return '';syncDoc(d,[role]);
-      var o='<option value="">'+(act().length?'Chọn từ danh bạ nhân sự…':'Danh bạ trống — thêm tại Danh bạ nhân sự')+'</option>';
-      act().forEach(function(s){o+='<option value="'+s.id+'"'+(p.staffId===s.id?' selected':'')+'>'+esc(s.ten)+(s.chucVu?' · '+esc(s.chucVu):'')+'</option>';});
-      return '<select class="inp" style="margin-bottom:6px" onchange="STAFF.pick(\''+kind+'\',\''+role+'\',this.value)">'+o+'</select>';},
+      var cur=p.staffId?byId(p.staffId):null,lab=cur?cur.ten+(cur.chucVu?' · '+cur.chucVu:''):'',
+        ph=act().length?'Chọn / tìm nhân sự: tên, mã NV, số điện thoại, chức vụ…':'Danh bạ trống — thêm tại Danh bạ nhân sự';
+      return '<div class="sfx" data-k="'+kind+'" data-r="'+role+'"><input class="inp sfx-i" type="search" autocomplete="off" value="'+esc(lab)+'" placeholder="'+ph+'" onfocus="STAFF.sfOpen(this,1)" oninput="STAFF.sfOpen(this)" onkeydown="STAFF.sfKey(event,this)"><div class="sfx-l" hidden></div></div>';},
+    sfHay:function(s){return norm([s.ten,s.chucVu,s.boPhan,s.chiNhanh,s.maNV,s.dienThoai,s.vaiTro?ROLE[s.vaiTro]:''].concat(Object.keys(s.ex||{}).map(function(k){return s.ex[k];})).join(' '));},
+    sfOpen:function(inp,first){
+      var w=inp.parentNode,l=w.querySelector('.sfx-l'),k=w.getAttribute('data-k'),r=w.getAttribute('data-r'),d=k==='hv'?HV:EX,p=d&&d[r];
+      if(first){try{inp.select();}catch(e){}setTimeout(function(){try{inp.scrollIntoView({block:'center',behavior:'smooth'});}catch(e){}},60);}
+      var terms=first?[]:norm(inp.value).split(' ').filter(Boolean),
+        m=act().filter(function(s){if(!terms.length)return true;var h=STAFF.sfHay(s),dg=String(s.dienThoai||'').replace(/\D/g,'');return terms.every(function(t){return h.indexOf(t)>=0||(/^\d{3,}$/.test(t)&&dg.indexOf(t)>=0);});}),h='';
+      if(p&&p.staffId)h+='<div class="sfx-o" onclick="STAFF.pick(\''+k+'\',\''+r+'\',\'\')"><span>✕ Bỏ chọn, nhập tay bên dưới</span></div>';
+      m.slice(0,50).forEach(function(s){h+='<div class="sfx-o" onclick="STAFF.pick(\''+k+'\',\''+r+'\',\''+s.id+'\')"><b>'+esc(s.ten)+'</b><span>'+esc([s.chucVu,s.boPhan,s.chiNhanh].filter(Boolean).join(' · '))+'</span>'+((s.maNV||s.dienThoai)?'<em>'+esc([s.maNV,s.dienThoai].filter(Boolean).join(' · '))+'</em>':'')+'</div>';});
+      if(!m.length)h+='<div class="sfx-n">Không tìm thấy — thử tên, mã NV, số điện thoại hoặc chức vụ khác</div>';
+      else if(m.length>50)h+='<div class="sfx-n">Còn '+(m.length-50)+' người nữa — gõ thêm để lọc</div>';
+      l.innerHTML=h;l.hidden=false;},
+    sfKey:function(e,inp){var l=inp.parentNode.querySelector('.sfx-l'),o=l?Array.prototype.slice.call(l.querySelectorAll('.sfx-o')).filter(function(x){return x.querySelector('b');}):[],i=-1;
+      o.forEach(function(x,j){if(x.classList.contains('on'))i=j;});
+      if(e.key==='Escape'){if(l)l.hidden=true;return;}
+      if(e.key==='ArrowDown'||e.key==='ArrowUp'){e.preventDefault();if(!o.length)return;if(i>=0)o[i].classList.remove('on');i=e.key==='ArrowDown'?(i+1)%o.length:(i<=0?o.length-1:i-1);o[i].classList.add('on');o[i].scrollIntoView({block:'nearest'});return;}
+      if(e.key==='Enter'){e.preventDefault();var t=o[i>=0?i:0];if(t)t.click();}},
     pick:function(kind,role,id){var d=kind==='hv'?HV:EX,p=d[role],s=byId(id);if(!p)return;if(s)apply(p,s);else delete p.staffId;try{store.save();}catch(e){}(kind==='hv'?renderHandoverEdit:renderExplainEdit)();},
     add:function(){ST.ed='new';ST.draft=null;render();window.scrollTo(0,0);},
     edit:function(id){ST.ed=id;ST.draft=null;render();window.scrollTo(0,0);},
@@ -12800,7 +12817,7 @@ var MST={q:'',ed:''};
 function nz(t){return String(t==null?'':t).normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/đ/g,'d').replace(/Đ/g,'D').toLowerCase().replace(/[^a-z0-9]+/g,' ').trim();}
 function stTxt(p){return [p.title,p.dept,p.unit].filter(Boolean).map(esc).join(' · ');}
 function stExtra(p){var a=S().cols.filter(function(c){return p.ex&&p.ex[c];}).map(function(c){return esc(c)+': '+esc(p.ex[c]);});return a.length?'<div style="font-size:12px;color:var(--mut)">'+a.join(' · ')+'</div>':'';}
-function stMatch(p,q){if(!q)return true;return nz([p.name,p.title,p.dept,p.unit].concat(Object.keys(p.ex||{}).map(function(k){return p.ex[k];})).join(' ')).indexOf(q)>=0;}
+function stMatch(p,q){if(!q)return true;if(/^\d{3,}$/.test(q)&&String(p.dienThoai||'').replace(/\D/g,'').indexOf(q)>=0)return true;return nz([p.name,p.title,p.dept,p.unit,p.maNV,p.dienThoai].concat(Object.keys(p.ex||{}).map(function(k){return p.ex[k];})).join(' ')).indexOf(q)>=0;}
 function stFind(id){return S().staff.filter(function(x){return x.id===id;})[0];}
 function stRender(){
   var s=S(),q=nz(MST.q),l=s.staff.filter(function(p){return stMatch(p,q);}),
@@ -12865,7 +12882,7 @@ function msRender(){
   h+='<label class="lbl">Trang chứa ô ký (1–'+M.n+')</label><input class="inp" type="number" min="1" max="'+M.n+'" value="'+M.pg+'" onchange="MSX.f(\'pg\',this.value)">';
   if(s.staff.length){
     var l=s.staff.filter(function(p){return stMatch(p,q);});
-    h+='<div class="sgc" style="margin-top:10px"><div style="font-weight:700;font-size:13.5px;margin-bottom:6px">Chọn người ký từ danh sách nhân sự</div><input class="inp" placeholder="Tìm theo tên, chức danh, phòng ban…" value="'+esc(M.q)+'" onchange="MSX.q(this.value)"><div id="mslist" style="max-height:210px;overflow:auto;margin-top:6px">'
+    h+='<div class="sgc" style="margin-top:10px"><div style="font-weight:700;font-size:13.5px;margin-bottom:6px">Chọn người ký từ danh sách nhân sự</div><input class="inp" placeholder="Tìm theo tên, mã NV, số điện thoại, chức danh, phòng ban…" value="'+esc(M.q)+'" onchange="MSX.q(this.value)"><div id="mslist" style="max-height:210px;overflow:auto;margin-top:6px">'
     +(l.slice(0,80).map(function(p){var on=M.rows.some(function(r){return r.sid===p.id;});return '<label style="display:flex;gap:10px;align-items:flex-start;padding:7px 0;border-top:1px solid var(--line);cursor:pointer"><input type="checkbox" style="margin-top:3px" '+(on?'checked ':'')+'onchange="MSX.tick(\''+p.id+'\',this.checked)"><span style="font-size:13.5px"><b>'+esc(p.name)+'</b><br><span style="font-size:12px;color:var(--mut)">'+(stTxt(p)||'—')+'</span></span></label>';}).join('')||'<div style="font-size:13px;color:var(--mut);padding:8px 0">Không có ai khớp.</div>')+'</div>'
     +'<div style="font-size:12px;color:var(--mut);margin:6px 0">Đã chọn '+M.rows.length+' người</div><button class="sgbt" onclick="MSX.staff()">Quản lý danh sách nhân sự</button></div>';
   }else h+='<div class="sgc" style="margin-top:10px;font-size:13px">Chưa có danh sách nhân sự. <button class="sgbt" style="margin-top:6px" onclick="MSX.staff()">Thêm / tải danh sách</button><div style="color:var(--mut);margin-top:6px;font-size:12px">Hoặc nhập tay từng người ở dưới.</div></div>';
@@ -14347,6 +14364,14 @@ html body #mcard dd[style*="#ffd88a"]{color:var(--warn)!important}
 html body #mcard dd[style*="#7ef0c9"]{color:var(--ok)!important}
 </style>
 <style id="staff-css">
+.sfx{position:relative;margin-bottom:6px}
+.sfx-l{position:absolute;left:0;right:0;top:calc(100% + 4px);z-index:60;max-height:300px;overflow:auto;background:#fff;border:1px solid var(--line);border-radius:14px;box-shadow:0 18px 40px -14px rgba(11,23,48,.35);padding:4px;-webkit-overflow-scrolling:touch;overscroll-behavior:contain}
+.sfx-o{padding:9px 11px;border-radius:10px;cursor:pointer;display:grid;gap:1px}
+.sfx-o:hover,.sfx-o.on{background:var(--brand-bg,rgba(31,85,214,.08))}
+.sfx-o b{font-size:14px;font-weight:700;color:var(--ink)}
+.sfx-o span{font-size:12px;color:var(--mut)}
+.sfx-o em{font-style:normal;font-size:12px;font-weight:600;color:var(--brand,#1f55d6)}
+.sfx-n{padding:10px 12px;font-size:13px;color:var(--mut)}
 .stf-r{display:flex;flex-direction:column;gap:2px;padding:12px 14px;border-top:1px solid var(--line);cursor:pointer}
 .stf-r:first-child{border-top:0}.stf-r:active{background:var(--card2)}
 .stf-n{display:flex;align-items:center;flex-wrap:wrap;gap:8px;font-size:var(--fs-md);font-weight:600;color:var(--ink)}
