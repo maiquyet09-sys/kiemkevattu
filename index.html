@@ -13418,6 +13418,16 @@ async function collectErrors(){
   try{var all=await dumpStore(h,'i');Object.keys(all).sort().forEach(function(id){var v=all[id]||{};img[id]={url:v.url,t:v.t};});}finally{h.close();}
   o.img=img;return o;
 }
+var LS_SKIP=['kk_db_v1','kk_db_at','kk_db_prev','kk_errlog','kk_kpi_snap','kk_ver_seen','kk_sg_did','kk_bk_hist','kk_bk_cfg','kk_bk_last','kk_err_bk'];
+var IDB_KNOWN=['kk_main','kk_photos','kk_err_img','kk_backups'];
+/* Rà mọi khoá localStorage / IndexedDB do app tạo (tiền tố kk_) mà trung tâm sao lưu chưa biết: tính năng mới thêm sau này mà quên đưa vào sao lưu sẽ bị báo ngay */
+async function unknownSources(){
+  var unk=[],known=Object.keys(ER_KEY).map(function(n){return ER_KEY[n];}).concat(SET_KEYS,LS_SKIP);
+  try{for(var i=0;i<localStorage.length;i++){var k=localStorage.key(i);if(k&&k.indexOf('kk_')===0&&known.indexOf(k)<0&&k.indexOf('kk_db_corrupt_')!==0)unk.push('localStorage:'+k);}}catch(e){}
+  try{if(indexedDB.databases){var ds=await indexedDB.databases();ds.forEach(function(d){if(d.name&&d.name.indexOf('kk_')===0&&IDB_KNOWN.indexOf(d.name)<0)unk.push('IndexedDB:'+d.name);});}}catch(e){}
+  try{if(IDBM&&IDBM.db){var st=Array.from(IDBM.db.objectStoreNames);st.forEach(function(n){if(n!=='kv')unk.push('IndexedDB kk_main › kho '+n);});var kv=await kvKeys();kv.forEach(function(k){if(k!=='db'&&!isPdfKey(k))unk.push('IndexedDB kk_main › kv:'+k);});}}catch(e){}
+  return unk.length?[chk('unk','Có nguồn dữ liệu CHƯA nằm trong danh mục sao lưu','warn',unk.slice(0,8).join('; ')+(unk.length>8?' … (+'+(unk.length-8)+')':'')+' — hãy báo để bổ sung vào sao lưu.')]:[];
+}
 function collectSettings(){var o={};SET_KEYS.forEach(function(k){var v=lsGet(k);if(v!=null)o[k]=v;});return o;}
 function countOf(k,d){
   if(k==='main')return sumT(tables(d));
@@ -13570,12 +13580,12 @@ BK.build=async function(o){
   await tick();
   var before,mp,extra=[];
   try{
-    ps('scan','run');store.flush();await flushWait();before=await census();mp=mainParts();
+    ps('scan','run');store.flush();await flushWait();before=await census();mp=mainParts();try{extra=await unknownSources();}catch(e){}
     ps('scan','ok','Dữ liệu chính '+sumT(before.main)+' bản ghi · '+before.photos+' ảnh · '+before.pdf+' PDF · '+before.errors+' mục Báo lỗi');
   }catch(e){ps('scan','fail',e.message);failures.push({group:'scan',error:e.message});}
   async function grp(k,fn){
     ps(k,'run');await tick();
-    try{var d=await fn();if(d===undefined)return;var r=await describe(k,d);G[k]=r.s;M[k]=r.m;S[k]=d;ps(k,'ok',M[k].count+' '+(GU[k]||'')+' · '+kb(r.s.length));}
+    try{var d=await fn();if(d===undefined)return;var r=await describe(k,d);G[k]=r.s;M[k]=r.m;d=null;ps(k,'ok',M[k].count+' '+(GU[k]||'')+' · '+kb(r.s.length));}
     catch(e){console.error(e);failures.push({group:k,error:e.message||String(e)});ps(k,'fail',e.message||String(e));}
   }
   if(mp)await grp('main',function(){return mp.main;});else{ps('main','fail','Không quét được');failures.push({group:'main',error:'Không quét được nguồn dữ liệu'});}
@@ -13594,11 +13604,12 @@ BK.build=async function(o){
   var rootParts=Object.keys(M).map(function(k){return k+'='+M[k].hash;});
   var hdr={format:FORMAT,app:'MedDental-KiemKe',id:id,createdAt:at,kind:kind,by:(db.profile&&db.profile.ten)||'',appVersion:(typeof APP_VERSION!=='undefined'?APP_VERSION:''),schema:BK_SCHEMA,algo:algo,groups:M,rootHash:await sha256Str(rootParts.sort().join('\n')),census:before||null};
   function assemble(h){return '{"__kkbk":'+JSON.stringify(h)+',"groups":{'+Object.keys(G).map(function(k){return JSON.stringify(k)+':'+G[k];}).join(',')+'}}';}
-  var text=assemble(hdr),checks=[],norm=null;
-  /* đọc lại + kiểm tra toàn vẹn */
+  var text='',checks=[],norm=null;
+  /* đọc lại từng nhóm từ đúng chuỗi sẽ ghi ra file (không dựng thêm 1 bản chép nguyên file) + kiểm tra toàn vẹn */
   ps('verify','run');await tick();
   try{
-    var parsed=JSON.parse(text);norm=normalize(parsed);
+    var pg2={};Object.keys(G).forEach(function(k){pg2[k]=JSON.parse(G[k]);});
+    norm=normalize({__kkbk:hdr,groups:pg2});pg2=null;
     checks=checks.concat(await verifyIntegrity(norm));
     if(before){
       var cmp=[];
@@ -13622,12 +13633,13 @@ BK.build=async function(o){
     if(norm){var dr=await dryRestore(norm,encOK?o.pass:'');checks=checks.concat(dr);var df=dr.filter(function(c){return c.state==='fail';}).length,dw=dr.filter(function(c){return c.state==='warn';}).length;ps('dry',df?'fail':dw?'warn':'ok',df?df+' mục lỗi':dw?dw+' cảnh báo':'Khôi phục thử thành công');}
     else ps('dry','skip','Bỏ qua do không đọc lại được file');
   }catch(e){console.error(e);checks.push(chk('dry','Kiểm thử khôi phục','fail',e.message));ps('dry','fail',e.message);}
+  norm=null;
   var status=statusOf(checks,failures);
   var excluded=EXCLUDED.map(function(x){return {t:x.t,r:x.r,a:x.a};});
   if(mp&&mp.secrets&&!encOK)excluded.unshift({t:'Chữ ký đã lưu & mật khẩu ký',r:'Là thông tin xác thực, không được ghi dạng không mã hoá vào file sao lưu thường.',a:'Đặt “mật khẩu sao lưu” rồi sao lưu lại để kèm phần này (mã hoá AES-256), hoặc tạo lại chữ ký trên máy mới.'});
   var rep={status:status,id:id,at:at,kind:kind,ms:Date.now()-t0,checks:checks,failures:failures,groups:Object.keys(M).map(function(k){return {key:k,label:GL[k],count:M[k].count,unit:GU[k],len:M[k].len,hash:M[k].hash,tables:M[k].tables||null,bytes:M[k].bytes||0};}),excluded:excluded,census:before||null};
   hdr.report=rep;hdr.status=status;
-  text=assemble(hdr);
+  text=assemble(hdr);G=null;
   var res={ok:status!=='fail',status:status,id:id,at:at,kind:kind,rep:rep,hdr:hdr,len:text.length,text:text,name:'SaoLuu_ToanBo_'+fstamp(at)+'.json',internal:false,internalErr:''};
   /* lưu bản trong app */
   ps('save','run');await tick();
@@ -13665,7 +13677,27 @@ BK.run=async function(o){
 BK.manual=function(){
   var pass=BK.passOn?BK.pass:'';
   if(BK.passOn&&(!pass||pass.length<6)){toast('Mật khẩu sao lưu cần ít nhất 6 ký tự');return;}
+  var hasSec=false;try{hasSec=!!mainParts().secrets;}catch(e){}
+  if(!pass&&hasSec&&window.crypto&&crypto.subtle){BK.askSecrets();return;}
   return BK.run({kind:'manual',internal:getCfg().keepInternal,pass:pass});
+};
+BK.askSecrets=function(){
+  ovl('<div class="bk-h">Kèm chữ ký đã lưu &amp; mật khẩu ký?</div><div class="bk-sub">Máy này đang lưu chữ ký tay và mật khẩu ký. Đây là thông tin xác thực nên chỉ được đưa vào file khi <b>mã hoá AES-256</b> bằng mật khẩu sao lưu riêng. Muốn chuyển sang máy khác mà không phải ký lại thì nên kèm.</div>'
+    +'<label class="lbl" style="margin-top:10px">Mật khẩu sao lưu (≥ 6 ký tự)</label><input class="inp" type="password" id="bk_sp1" autocomplete="new-password" style="margin-bottom:8px">'
+    +'<label class="lbl">Nhập lại mật khẩu</label><input class="inp" type="password" id="bk_sp2" autocomplete="new-password" style="margin-bottom:8px">'
+    +'<div class="note-warn" style="margin-bottom:12px">Mật khẩu này KHÔNG được lưu lại. Quên mật khẩu thì phần chữ ký trong file không giải mã được (các dữ liệu khác vẫn khôi phục bình thường).</div>'
+    +'<div style="display:flex;flex-direction:column;gap:8px"><button class="btn btn-primary" onclick="BK.secGo(true)">Sao lưu toàn bộ, kèm chữ ký (mã hoá)</button><button class="btn btn-outline" onclick="BK.secGo(false)">Sao lưu không kèm chữ ký &amp; mật khẩu ký</button><button class="btn btn-outline" onclick="BK.close()">Huỷ</button></div>',false);
+};
+BK.secGo=function(withSec){
+  var pass='';
+  if(withSec){
+    var a=($('bk_sp1')||{}).value||'',b=($('bk_sp2')||{}).value||'';
+    if(a.length<6){toast('Mật khẩu sao lưu cần ít nhất 6 ký tự');return;}
+    if(a!==b){toast('Hai lần nhập mật khẩu chưa khớp');return;}
+    pass=a;
+  }
+  ovlClose();
+  BK.run({kind:'manual',internal:getCfg().keepInternal,pass:pass});
 };
 function badge(st){var t={ok:'Thành công',warn:'Có cảnh báo',fail:'Thất bại'}[st]||st;return '<span class="bk-b '+st+'">'+t+'</span>';}
 function chkRows(cs){return cs.map(function(c){return stRow({st:c.state,t:c.label,d:c.detail});}).join('');}
@@ -13686,10 +13718,26 @@ function showResult(res){
   ovl(h,false);
   toast(res.status==='ok'?'Sao lưu thành công và đã kiểm tra toàn vẹn':res.status==='warn'?'Sao lưu xong nhưng có cảnh báo — xem báo cáo':'Sao lưu KHÔNG đạt kiểm tra — chưa coi là đã sao lưu');
 }
+/* như shareOrDownload nhưng trả về true/false: huỷ bảng chia sẻ thì KHÔNG tính là đã sao lưu */
+function saveBlob(blob,fname){
+  return new Promise(function(res){
+    var file=null;try{file=new File([blob],fname,{type:blob.type});}catch(e){file=null;}
+    if(file&&navigator.share&&navigator.canShare&&navigator.canShare({files:[file]})){
+      navigator.share({files:[file],title:fname}).then(function(){toast('Đã xuất — chọn nơi lưu/gửi trong bảng chia sẻ');res(true);}).catch(function(err){
+        if(err&&err.name==='AbortError'){toast('Đã huỷ — CHƯA có file sao lưu nào được lưu về máy');res(false);return;}
+        try{dlAnchor(blob,fname);res(true);}catch(e){toast('Không tải được file: '+e.message);res(false);}
+      });
+      return;
+    }
+    try{dlAnchor(blob,fname);res(true);}catch(e){toast('Không tải được file: '+e.message);res(false);}
+  });
+}
 BK.dlLast=function(){
   var r=BK.last;if(!r||!r.text){toast('Không còn dữ liệu để tải, hãy tải từ Lịch sử sao lưu');return;}
-  shareOrDownload(new Blob([r.text],{type:'application/json'}),r.name);
-  updHist(r.id,{dl:true});db.lastBackup=Date.now();db.backupSnooze=0;saveSoon();
+  saveBlob(new Blob([r.text],{type:'application/json'}),r.name).then(function(ok){
+    if(!ok)return;
+    updHist(r.id,{dl:true});db.lastBackup=Date.now();db.backupSnooze=0;saveSoon();
+  });
 };
 function reportText(rep,name){
   var L=[];L.push('BÁO CÁO KIỂM TRA TOÀN VẸN BẢN SAO LƯU — Kiểm kê kho MedDental');L.push('Mã bản sao lưu: '+rep.id);L.push('Thời điểm: '+fdt(rep.at));L.push('Loại: '+({manual:'Thủ công',auto:'Tự động','pre-restore':'Dự phòng trước khi khôi phục'}[rep.kind]||rep.kind));L.push('Kết quả: '+({ok:'THÀNH CÔNG',warn:'CÓ CẢNH BÁO',fail:'THẤT BẠI'}[rep.status]));L.push('');
@@ -13932,7 +13980,7 @@ BK.doRestore=async function(){
 };
 
 /* ---------------- lịch sử: tải, khôi phục, xoá ---------------- */
-BK.dlHist=async function(id){try{var t=await loadInternal(id);if(!t){toast('Không còn bản trong app');return;}var e=getHist().filter(function(x){return x.id===id;})[0]||{};shareOrDownload(new Blob([t],{type:'application/json'}),e.name||('SaoLuu_'+id+'.json'));updHist(id,{dl:true});}catch(e){toast('Không tải được: '+e.message);}};
+BK.dlHist=async function(id){try{var t=await loadInternal(id);if(!t){toast('Không còn bản trong app');return;}var e=getHist().filter(function(x){return x.id===id;})[0]||{};saveBlob(new Blob([t],{type:'application/json'}),e.name||('SaoLuu_'+id+'.json')).then(function(ok){if(!ok)return;updHist(id,{dl:true});db.lastBackup=Date.now();db.backupSnooze=0;saveSoon();});}catch(e){toast('Không tải được: '+e.message);}};
 BK.delHist=async function(id){
   var e=getHist().filter(function(x){return x.id===id;})[0];if(!e)return;
   if(!confirm('Xoá '+(e.internal?'bản sao lưu trong app và ':'')+'dòng lịch sử này? Không hoàn tác được.'))return;
@@ -13949,7 +13997,7 @@ BK.fillInv=async function(){
       ['errors',c.errors,'localStorage kk_err_* + IndexedDB kk_err_img','Lỗi nhập liệu, lỗi labo, dữ liệu MISA, ánh xạ, ảnh bằng chứng'],
       ['settings',c.settings,'localStorage kk_ana_*, kk_err_hint, kk_ui_sb','Tên kho & tuỳ chọn phân tích, tuỳ chọn giao diện']
     ];
-    el.innerHTML='<div style="overflow:auto"><table class="bk-t2"><tr><th>Nhóm</th><th>Hiện có</th><th>Lưu ở</th></tr>'+rows.map(function(r){return '<tr><td><b>'+esc(GL[r[0]])+'</b><div class="bk-d">'+esc(r[3])+'</div></td><td>'+r[1]+' '+GU[r[0]]+'</td><td class="bk-d" style="font-size:12px">'+esc(r[2])+'</td></tr>';}).join('')+'<tr><td><b>'+esc(GL.secrets)+'</b><div class="bk-d">Chỉ vào file khi đặt mật khẩu sao lưu (mã hoá)</div></td><td>'+(c.hasSecrets?'Có':'Không có')+'</td><td class="bk-d" style="font-size:12px">db.sg</td></tr></table></div>';
+    el.innerHTML='<div style="overflow:auto"><table class="bk-t2"><tr><th>Nhóm</th><th>Hiện có</th><th>Lưu ở</th></tr>'+rows.map(function(r){return '<tr><td><b>'+esc(GL[r[0]])+'</b><div class="bk-d">'+esc(r[3])+'</div></td><td>'+r[1]+' '+GU[r[0]]+'</td><td class="bk-d" style="font-size:12px">'+esc(r[2])+'</td></tr>';}).join('')+'<tr><td><b>'+esc(GL.secrets)+'</b><div class="bk-d">Vào file khi đặt mật khẩu sao lưu (mã hoá AES-256); app sẽ hỏi mỗi lần sao lưu thủ công</div></td><td>'+(c.hasSecrets?'Có':'Không có')+'</td><td class="bk-d" style="font-size:12px">db.sg</td></tr></table></div>';
   }catch(e){el.innerHTML='<div class="bk-d">Không quét được: '+esc(e.message)+'</div>';}
 };
 
