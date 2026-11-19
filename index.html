@@ -3208,13 +3208,13 @@ function renderHandoverEdit(){
   h+='<label class="lbl" style="margin-top:10px">5. Căn cứ (đề xuất / phiếu xuất kho / quyết định số)</label><input class="inp" value="'+esc(v.canCu)+'" oninput="A.hvField(\'canCu\',this.value)">';
 
   h+='<div class="bcsec" style="margin-top:16px">Bên giao (A)</div>';
-  h+='<input class="inp" placeholder="Họ tên" value="'+esc(v.benGiao.ten)+'" oninput="A.hvPerson(\'benGiao\',\'ten\',this.value)" style="margin-bottom:6px">';
+  h+=STAFF.sel('hv','benGiao');h+='<input class="inp" placeholder="Họ tên" value="'+esc(v.benGiao.ten)+'" oninput="A.hvPerson(\'benGiao\',\'ten\',this.value)" style="margin-bottom:6px">';
   h+='<input class="inp" placeholder="Chức vụ" value="'+esc(v.benGiao.chucVu)+'" oninput="A.hvPerson(\'benGiao\',\'chucVu\',this.value)" style="margin-bottom:6px">';
   h+='<input class="inp" placeholder="Bộ phận / Chi nhánh" value="'+esc(v.benGiao.boPhan)+'" oninput="A.hvPerson(\'benGiao\',\'boPhan\',this.value)" style="margin-bottom:6px">';
   h+='<input class="inp" placeholder="Điện thoại / Mã NV" value="'+esc(v.benGiao.dienThoai)+'" oninput="A.hvPerson(\'benGiao\',\'dienThoai\',this.value)">';
 
   h+='<div class="bcsec" style="margin-top:16px">Bên nhận (B)</div>';
-  h+='<input class="inp" placeholder="Họ tên" value="'+esc(v.benNhan.ten)+'" oninput="A.hvPerson(\'benNhan\',\'ten\',this.value)" style="margin-bottom:6px">';
+  h+=STAFF.sel('hv','benNhan');h+='<input class="inp" placeholder="Họ tên" value="'+esc(v.benNhan.ten)+'" oninput="A.hvPerson(\'benNhan\',\'ten\',this.value)" style="margin-bottom:6px">';
   h+='<input class="inp" placeholder="Chức vụ" value="'+esc(v.benNhan.chucVu)+'" oninput="A.hvPerson(\'benNhan\',\'chucVu\',this.value)" style="margin-bottom:6px">';
   h+='<input class="inp" placeholder="Bộ phận / Chi nhánh" value="'+esc(v.benNhan.boPhan)+'" oninput="A.hvPerson(\'benNhan\',\'boPhan\',this.value)" style="margin-bottom:6px">';
   h+='<input class="inp" placeholder="Điện thoại / Mã NV" value="'+esc(v.benNhan.dienThoai)+'" oninput="A.hvPerson(\'benNhan\',\'dienThoai\',this.value)">';
@@ -3380,7 +3380,7 @@ function renderExplainEdit(){
   h+='<div style="flex:1"><label class="lbl">Bộ phận / Chi nhánh</label><input class="inp" value="'+esc(v.boPhan)+'" oninput="A.exField(\'boPhan\',this.value)"></div></div>';
 
   h+='<div class="bcsec" style="margin-top:16px">I. Người giải trình</div>';
-  h+='<input class="inp" placeholder="Họ tên" value="'+esc(v.nguoiGiaiTrinh.ten)+'" oninput="A.exPerson(\'ten\',this.value)" style="margin-bottom:6px">';
+  h+=STAFF.sel('ex','nguoiGiaiTrinh');h+='<input class="inp" placeholder="Họ tên" value="'+esc(v.nguoiGiaiTrinh.ten)+'" oninput="A.exPerson(\'ten\',this.value)" style="margin-bottom:6px">';
   h+='<input class="inp" placeholder="Chức vụ" value="'+esc(v.nguoiGiaiTrinh.chucVu)+'" oninput="A.exPerson(\'chucVu\',this.value)" style="margin-bottom:6px">';
   h+='<input class="inp" placeholder="Bộ phận / Chi nhánh" value="'+esc(v.nguoiGiaiTrinh.boPhan)+'" oninput="A.exPerson(\'boPhan\',this.value)" style="margin-bottom:6px">';
   h+='<input class="inp" placeholder="Thời gian phụ trách (từ – đến)" value="'+esc(v.nguoiGiaiTrinh.thoiGian)+'" oninput="A.exPerson(\'thoiGian\',this.value)">';
@@ -4807,7 +4807,7 @@ function renderHomeOld(){
     +'<div class="sec fc-cap" style="margin-top:22px">Đối chiếu & thanh toán</div><div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">'
     +tile('swap','Đối chiếu DT – xuất kho',"A.go('recon')",'')+tile('file','Đề nghị thanh toán NCC',"A.go('pay')",'')+tile('warn','Báo lỗi nhập liệu & labo',"A.go('err')",'')+tile('monitor','Quản trị liên chi nhánh',"A.go('mgmt')",'')+'</div>'
     +'<div class="sec fc-cap" style="margin-top:22px">Kho & biểu mẫu</div><div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px">'
-    +tile('box','Tồn kho','A.navStock()','')+tile('edit','Biểu mẫu',"A.go('reporthub')",'')+tile('gear','Cài đặt',"A.go('settings')",'')+'</div>'
+    +tile('box','Tồn kho','A.navStock()','')+tile('edit','Biểu mẫu',"A.go('reporthub')",'')+tile('users','Danh bạ nhân sự',"A.go('staff')",'')+tile('gear','Cài đặt',"A.go('settings')",'')+'</div>'
     +'<div style="height:24px"></div></div>';
   document.getElementById("app").innerHTML=h;
 }
@@ -5529,6 +5529,7 @@ function navGroups(){
   ];
   var kh=[
     {label:'Sao lưu &amp; khôi phục',desc:'Sao lưu toàn bộ, tự động, kiểm tra toàn vẹn, khôi phục',act:C("A.go('backup')"),on:v==='backup'},
+    {label:'Danh bạ nhân sự',desc:'Cán bộ nhân viên, tự điền vào biên bản và ô ký',act:C("A.go('staff')"),on:v==='staff'},
     {label:'Cài đặt hệ thống',desc:'Hồ sơ, in ấn, người ký, sao lưu và khôi phục',act:C("A.go('settings')"),on:v==='settings'}
   ];
   return [
@@ -5540,7 +5541,7 @@ function navGroups(){
     {k:'kho',icon:'box',label:'Quản lý kho',bd:nc.ex||undefined,subs:kho,on:['stock','hsd','hsdkk','mgmt'].indexOf(v)>=0},
     {k:'ks',icon:'edit',label:'Ký số',subs:ks,on:v==='sign'},
     {k:'gv',icon:'doc',label:'Giá vốn và mua hàng',subs:gv,on:['dchub','ana'].indexOf(v)>=0},
-    {k:'qt',icon:'gear',label:'Các danh mục khác',subs:kh,on:['backup','settings'].indexOf(v)>=0}
+    {k:'qt',icon:'gear',label:'Các danh mục khác',subs:kh,on:['backup','settings','staff'].indexOf(v)>=0}
   ];
 }
 function navActive(gs){
@@ -7100,6 +7101,92 @@ function addUnmSheet(wb,p){
   });
   ws.views=[{state:'frozen',ySplit:1}];
 }
+
+/* ===== DANH BẠ NHÂN SỰ: một nguồn thông tin cho biên bản bàn giao, giải trình, kiểm kê ===== */
+(function(){
+  var ROLE={giamDoc:'Giám đốc cơ sở',thuKho:'Thủ kho cơ sở',hanhChinh:'Hành chính'};
+  var COLS=['Họ tên','Chức vụ','Bộ phận','Chi nhánh','Vai trò ký','Điện thoại','Mã NV','Trạng thái'];
+  var ST={q:'',ed:null,seen:null,wrapped:false};
+  function L(){if(!Array.isArray(db.staff))db.staff=[];return db.staff;}
+  function byId(id){var a=L();for(var i=0;i<a.length;i++)if(a[i].id===id)return a[i];return null;}
+  function act(){return L().filter(function(s){return s.active!==false;}).sort(function(a,b){return String(a.ten).localeCompare(String(b.ten),'vi');});}
+  function roleKey(t){t=norm(t||'');return /giam doc/.test(t)?'giamDoc':/thu kho/.test(t)?'thuKho':/hanh chinh/.test(t)?'hanhChinh':'';}
+  function apply(p,s){p.staffId=s.id;p.ten=s.ten||'';p.chucVu=s.chucVu||'';p.boPhan=[s.boPhan,s.chiNhanh].filter(Boolean).join(' – ');if('dienThoai' in p)p.dienThoai=[s.dienThoai,s.maNV].filter(Boolean).join(' / ');}
+  function snap(p){return [p.ten,p.chucVu,p.boPhan,p.dienThoai].join('|');}
+  /* Cập nhật tự động: biên bản chưa ký thì theo danh bạ; ô đã ký giữ nguyên bản đã ký */
+  function syncDoc(d,roles){var ch=false;roles.forEach(function(r){var p=d&&d[r];if(!p||!p.staffId||(d.sig&&d.sig[r]))return;var s=byId(p.staffId);if(!s)return;var b=snap(p);apply(p,s);if(snap(p)!==b)ch=true;});return ch;}
+  function syncAll(){var ch=false;(db.handovers||[]).forEach(function(d){if(syncDoc(d,['benGiao','benNhan']))ch=true;});(db.explains||[]).forEach(function(d){if(syncDoc(d,['nguoiGiaiTrinh']))ch=true;});if(ch)try{store.save();}catch(e){}}
+  function fin(m){syncAll();try{store.save();}catch(e){}toast(m);if(route.view==='staff')render();}
+  function rowHtml(s){var sub=[s.chucVu,s.boPhan,s.chiNhanh].filter(Boolean).join(' · ');return '<div class="stf-r" onclick="STAFF.edit(\''+s.id+'\')"><div class="stf-n">'+esc(s.ten)+(s.vaiTro?'<em>'+ROLE[s.vaiTro]+'</em>':'')+(s.active===false?'<em class="off">Ngừng</em>':'')+'</div>'+(sub?'<div class="stf-s">'+esc(sub)+'</div>':'')+'</div>';}
+  function listHtml(){var q=norm(ST.q||''),a=L().slice().sort(function(x,y){return (x.active===false)-(y.active===false)||String(x.ten).localeCompare(String(y.ten),'vi');}).filter(function(s){return !q||norm([s.ten,s.chucVu,s.boPhan,s.chiNhanh,s.maNV,s.dienThoai].join(' ')).indexOf(q)>=0;});
+    return a.length?a.map(rowHtml).join(''):'<div class="stf-s" style="padding:16px;text-align:center">'+(L().length?'Không có kết quả':'Chưa có nhân sự — thêm tay hoặc nhập từ file mẫu')+'</div>';}
+  function field(id,lb,v,ph){return '<label class="lbl">'+lb+'</label><input class="inp" id="'+id+'" value="'+esc(v||'')+'" placeholder="'+(ph||'')+'">';}
+  function formHtml(){var s=ST.ed==='new'?{active:true}:byId(ST.ed)||{};
+    var ro='<option value="">Không</option>'+Object.keys(ROLE).map(function(k){return '<option value="'+k+'"'+(s.vaiTro===k?' selected':'')+'>'+ROLE[k]+'</option>';}).join('');
+    return '<div class="card" style="margin-bottom:12px"><div style="font-weight:700;margin-bottom:10px">'+(ST.ed==='new'?'Thêm nhân sự':'Sửa nhân sự')+'</div><div class="stf-f">'
+      +field('stf_ten','Họ tên',s.ten)+field('stf_cv','Chức vụ',s.chucVu)+field('stf_bp','Bộ phận',s.boPhan)
+      +field('stf_cn','Chi nhánh',s.chiNhanh,'Trùng tên thư mục chi nhánh để tự điền ô ký')
+      +'<label class="lbl">Vai trò ký tại chi nhánh</label><select class="inp" id="stf_vt">'+ro+'</select>'
+      +field('stf_dt','Điện thoại',s.dienThoai)+field('stf_ma','Mã NV',s.maNV)
+      +'<label class="lbl">Trạng thái</label><select class="inp" id="stf_ac"><option value="1">Đang làm</option><option value="0"'+(s.active===false?' selected':'')+'>Ngừng hoạt động</option></select></div>'
+      +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px"><button class="btn" onclick="STAFF.cancel()">Hủy</button><button class="btn btn-primary" onclick="STAFF.save()">Lưu</button></div>'
+      +(ST.ed!=='new'?'<button class="stklink" style="margin-top:10px;color:var(--err)" onclick="STAFF.del()">Xóa khỏi danh bạ</button>':'')+'</div>';}
+  function page(){var h='<div class="topbar"><div class="trow wrap"><button class="back" onclick="A.go(\'home\')">‹</button><div class="ttl">Danh bạ nhân sự</div></div><div style="height:10px"></div></div><div class="wrap" style="padding-top:16px;padding-bottom:100px">'
+    +'<div class="stf-note">Chọn người ở biên bản bàn giao, giải trình, kiểm kê là thông tin tự điền. Sửa tại đây, các biên bản chưa ký tự cập nhật theo; ô đã ký giữ nguyên.</div>';
+    if(ST.ed)h+=formHtml();
+    h+='<div class="stf-bar"><button class="btn btn-primary" onclick="STAFF.add()">+ Thêm nhân sự</button><button class="btn" onclick="document.getElementById(\'stfFile\').click()">Nhập từ file</button><button class="btn" onclick="STAFF.tpl()">Tải file mẫu</button><button class="btn" onclick="STAFF.exp()">Xuất danh sách</button></div>'
+      +'<input type="file" id="stfFile" accept=".xlsx,.xls,.csv" hidden onchange="STAFF.imp(this.files[0]);this.value=\'\'">'
+      +'<input class="inp" placeholder="Tìm theo tên, chức vụ, chi nhánh, mã NV…" value="'+esc(ST.q)+'" oninput="STAFF.find(this.value)" style="margin-bottom:12px">'
+      +'<div class="stf-sec">'+L().length+' nhân sự</div><div class="nx" id="stfList">'+listHtml()+'</div></div>';
+    document.getElementById('app').innerHTML=h;}
+  function sheet(rows){var ws=XLSX.utils.aoa_to_sheet([COLS].concat(rows));ws['!cols']=COLS.map(function(){return {wch:20};});var wb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(wb,ws,'DanhBa');return wb;}
+  function col(h,keys){for(var i=0;i<h.length;i++){var n=norm(String(h[i]));if(keys.some(function(k){return n.indexOf(k)>=0;}))return i;}return -1;}
+  window.STAFF={
+    sel:function(kind,role){var d=kind==='hv'?HV:EX,p=d&&d[role];if(!p)return '';syncDoc(d,[role]);
+      var o='<option value="">'+(act().length?'Chọn từ danh bạ nhân sự…':'Danh bạ trống — thêm tại Danh bạ nhân sự')+'</option>';
+      act().forEach(function(s){o+='<option value="'+s.id+'"'+(p.staffId===s.id?' selected':'')+'>'+esc(s.ten)+(s.chucVu?' · '+esc(s.chucVu):'')+'</option>';});
+      return '<select class="inp" style="margin-bottom:6px" onchange="STAFF.pick(\''+kind+'\',\''+role+'\',this.value)">'+o+'</select>';},
+    pick:function(kind,role,id){var d=kind==='hv'?HV:EX,p=d[role],s=byId(id);if(!p)return;if(s)apply(p,s);else delete p.staffId;try{store.save();}catch(e){}(kind==='hv'?renderHandoverEdit:renderExplainEdit)();},
+    add:function(){ST.ed='new';render();window.scrollTo(0,0);},
+    edit:function(id){ST.ed=id;render();window.scrollTo(0,0);},
+    cancel:function(){ST.ed=null;render();},
+    find:function(v){ST.q=v;var e=document.getElementById('stfList');if(e)e.innerHTML=listHtml();},
+    save:function(){var t=val('stf_ten');if(!t){toast('Chưa nhập họ tên');return;}
+      var s=ST.ed==='new'?null:byId(ST.ed);if(!s){s={id:uid()};L().push(s);}
+      s.ten=t;s.chucVu=val('stf_cv');s.boPhan=val('stf_bp');s.chiNhanh=val('stf_cn');s.vaiTro=val('stf_vt');s.dienThoai=val('stf_dt');s.maNV=val('stf_ma');s.active=val('stf_ac')!=='0';
+      ST.ed=null;fin('Đã lưu · biên bản chưa ký đã cập nhật');},
+    del:function(){if(!confirm('Xóa người này khỏi danh bạ? Biên bản cũ vẫn giữ tên đã điền.'))return;db.staff=L().filter(function(s){return s.id!==ST.ed;});ST.ed=null;fin('Đã xóa');},
+    tpl:function(){if(!kkNeed(['xlsx'],STAFF.tpl))return;XLSX.writeFile(sheet([['Nguyễn Văn A','Thủ kho','Kho vật tư','Cát Linh','Thủ kho','0900000000','NV001','Đang làm']]),'Mau_DanhBaNhanSu.xlsx');},
+    exp:function(){if(!kkNeed(['xlsx'],STAFF.exp))return;if(!L().length){toast('Chưa có nhân sự để xuất');return;}XLSX.writeFile(sheet(L().map(function(s){return [s.ten,s.chucVu||'',s.boPhan||'',s.chiNhanh||'',s.vaiTro?ROLE[s.vaiTro]:'',s.dienThoai||'',s.maNV||'',s.active===false?'Ngừng':'Đang làm'];})),'DanhBaNhanSu.xlsx');},
+    imp:function(f){if(!f)return;if(!kkNeed(['xlsx'],function(){STAFF.imp(f);}))return;
+      var r=new FileReader();r.onload=function(e){try{
+        var wb=XLSX.read(new Uint8Array(e.target.result),{type:'array'}),rows=XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]],{header:1,defval:''}),h=rows[0]||[];
+        var c={ten:col(h,['ho ten','ho va ten']),chucVu:col(h,['chuc vu']),boPhan:col(h,['bo phan']),chiNhanh:col(h,['chi nhanh']),vaiTro:col(h,['vai tro']),dienThoai:col(h,['dien thoai','sdt']),maNV:col(h,['ma nv','ma nhan']),tt:col(h,['trang thai'])};
+        if(c.ten<0){toast('File không đúng mẫu — cột "Họ tên" bị thiếu. Tải file mẫu để dùng đúng.');return;}
+        var add=0,upd=0;
+        rows.slice(1).forEach(function(r){var t=String(r[c.ten]||'').trim();if(!t)return;
+          var g=function(k){return c[k]>=0?String(r[c[k]]==null?'':r[c[k]]).trim():'';},ma=g('maNV'),cn=g('chiNhanh'),s=null;
+          L().forEach(function(x){if(s)return;if(ma&&x.maNV&&norm(x.maNV)===norm(ma))s=x;else if(!ma&&norm(x.ten)===norm(t)&&norm(x.chiNhanh||'')===norm(cn))s=x;});
+          if(s)upd++;else{s={id:uid()};L().push(s);add++;}
+          s.ten=t;['chucVu','boPhan','chiNhanh','dienThoai','maNV'].forEach(function(k){var v=g(k);if(v||!s[k])s[k]=v;});
+          var vt=roleKey(g('vaiTro'));if(vt||!s.vaiTro)s.vaiTro=vt;
+          if(c.tt>=0&&g('tt'))s.active=!/nghi|ngung|khong|^0$/.test(norm(g('tt')));else if(s.active==null)s.active=true;});
+        fin('Đã nhập: thêm '+add+' · cập nhật '+upd);
+      }catch(err){klog('staffImport',err);toast('Không đọc được file — kiểm tra đúng định dạng mẫu');}};r.readAsArrayBuffer(f);}
+  };
+  /* Ô ký theo chi nhánh (Giám đốc / Thủ kho / Hành chính) lấy từ danh bạ, ưu tiên hơn nhập tay cũ */
+  var _sg=sgOf;sgOf=function(b){var o=_sg(b);try{var br=norm(String(b||'').trim()||(db.profile&&db.profile.chiNhanh)||'');
+    if(br)act().forEach(function(s){if(!s.vaiTro||!s.chiNhanh)return;var n=norm(s.chiNhanh);if(n&&(br.indexOf(n)>=0||n.indexOf(br)>=0))o[s.vaiTro]=s.ten;});}catch(e){}return o;};
+  /* Trang riêng + đồng bộ khi dữ liệu vừa tải */
+  var _r=render;render=function(){
+    if(!ST.wrapped&&typeof A==='object'&&A){ST.wrapped=true;
+      var h1=A.hvPerson,h2=A.exPerson; /* gõ tay vào ô → tách khỏi danh bạ, không bị ghi đè */
+      A.hvPerson=function(s,k,v){h1(s,k,v);if(HV&&HV[s])delete HV[s].staffId;};
+      A.exPerson=function(k,v){h2(k,v);if(EX&&EX.nguoiGiaiTrinh)delete EX.nguoiGiaiTrinh.staffId;};}
+    if(ST.seen!==db){ST.seen=db;try{syncAll();}catch(e){}}
+    if(route.view==='staff'){document.getElementById('modal').innerHTML='';SB=null;page();return;}
+    _r();};
+})();
 
 function render(){
   document.getElementById("modal").innerHTML="";
@@ -14236,6 +14323,16 @@ html body #bnav .fab i{width:56px;height:56px;margin-top:-28px}
 html body #mcard dd[style*="#ff9aa8"]{color:var(--err)!important}
 html body #mcard dd[style*="#ffd88a"]{color:var(--warn)!important}
 html body #mcard dd[style*="#7ef0c9"]{color:var(--ok)!important}
+</style>
+<style id="staff-css">
+.stf-r{display:flex;flex-direction:column;gap:2px;padding:12px 14px;border-top:1px solid var(--line);cursor:pointer}
+.stf-r:first-child{border-top:0}.stf-r:active{background:var(--card2)}
+.stf-n{display:flex;align-items:center;flex-wrap:wrap;gap:8px;font-size:var(--fs-md);font-weight:600;color:var(--ink)}
+.stf-n em{font-style:normal;font-size:var(--fs-xs);font-weight:600;padding:2px 10px;border-radius:999px;background:var(--brand-bg);color:var(--brand)}
+.stf-n em.off{background:var(--card2);color:var(--mut)}
+.stf-s{font-size:var(--fs-sm);color:var(--mut)}.stf-note{font-size:var(--fs-sm);color:var(--mut);margin-bottom:12px}
+.stf-sec{font-size:var(--fs-sm);font-weight:600;color:var(--mut);margin:0 4px 8px}
+.stf-bar{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px}.stf-f{display:grid;gap:6px}
 </style>
 </body>
 </html>
