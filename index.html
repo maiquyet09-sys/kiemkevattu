@@ -1676,7 +1676,7 @@ var ICONS={
   refresh:'<path d="M21 12a9 9 0 1 1-3-6.7"/><path d="M21 3v6h-6"/>'
 };
 /* ===== FastCons icons v2: nhỏ, nhẹ, duotone ===== */
-var FCC={"vt": ["#eef1f8", "#1e3a6b", "#d4af5f"], "as": ["#eef1f8", "#1e3a6b", "#d4af5f"], "open": ["#eef1f8", "#1e3a6b", "#d4af5f"], "qr": ["#eef1f8", "#1e3a6b", "#d4af5f"], "list": ["#eef1f8", "#1e3a6b", "#d4af5f"], "home": ["#eef1f8", "#1e3a6b", "#d4af5f"], "bld0": ["#eef1f8", "#1e3a6b", "#d4af5f"], "bld1": ["#eef1f8", "#1e3a6b", "#d4af5f"], "bld2": ["#eef1f8", "#1e3a6b", "#d4af5f"], "bld3": ["#eef1f8", "#1e3a6b", "#d4af5f"], "bld4": ["#eef1f8", "#1e3a6b", "#d4af5f"], "rec": ["#eef1f8", "#1e3a6b", "#d4af5f"], "pay": ["#eef1f8", "#1e3a6b", "#d4af5f"], "err": ["#fdecea", "#dc4a4a", "#d4af5f"], "mgmt": ["#eef1f8", "#1e3a6b", "#d4af5f"], "handover": ["#eef1f8", "#1e3a6b", "#d4af5f"], "stock": ["#eef1f8", "#1e3a6b", "#d4af5f"], "form": ["#eef1f8", "#1e3a6b", "#d4af5f"], "report": ["#eef1f8", "#1e3a6b", "#d4af5f"], "explain": ["#eef1f8", "#1e3a6b", "#d4af5f"], "gear": ["#eef1f8", "#1e3a6b", "#d4af5f"], "more": ["#eef1f8", "#1e3a6b", "#d4af5f"]};
+var FCC={"vt": ["#eef2fb", "#1e3a6b", "currentColor"], "as": ["#eef2fb", "#1e3a6b", "currentColor"], "open": ["#eef2fb", "#1e3a6b", "currentColor"], "qr": ["#eef2fb", "#1e3a6b", "currentColor"], "list": ["#eef2fb", "#1e3a6b", "currentColor"], "home": ["#eef2fb", "#1e3a6b", "currentColor"], "bld0": ["#eef2fb", "#1e3a6b", "currentColor"], "bld1": ["#eef2fb", "#1e3a6b", "currentColor"], "bld2": ["#eef2fb", "#1e3a6b", "currentColor"], "bld3": ["#eef2fb", "#1e3a6b", "currentColor"], "bld4": ["#eef2fb", "#1e3a6b", "currentColor"], "rec": ["#eef2fb", "#1e3a6b", "currentColor"], "pay": ["#eef2fb", "#1e3a6b", "currentColor"], "err": ["#eef2fb", "#1e3a6b", "currentColor"], "mgmt": ["#eef2fb", "#1e3a6b", "currentColor"], "handover": ["#eef2fb", "#1e3a6b", "currentColor"], "stock": ["#eef2fb", "#1e3a6b", "currentColor"], "form": ["#eef2fb", "#1e3a6b", "currentColor"], "report": ["#eef2fb", "#1e3a6b", "currentColor"], "explain": ["#eef2fb", "#1e3a6b", "currentColor"], "gear": ["#eef2fb", "#1e3a6b", "currentColor"], "more": ["#eef2fb", "#1e3a6b", "currentColor"]};
 var FCP={
 vt:`<path d="M24 10.5 37 17.8v14.4L24 39.5 11 32.2V17.8Z" fill="{D}" fill-opacity=".14" stroke="{D}" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/><path d="M11 17.8 24 25l13-7.2M24 25v14.5" stroke="{D}" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" fill="none"/><circle cx="35" cy="34" r="7" fill="{A}"/><path d="m31.7 34 2.4 2.5 4.2-4.8" stroke="#fff" stroke-width="2.4" fill="none" stroke-linecap="round" stroke-linejoin="round"/>`,
 as:`<rect x="9" y="11" width="30" height="21" rx="3.5" fill="{D}" fill-opacity=".14" stroke="{D}" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/><path d="M19 38h10M24 32v6" stroke="{D}" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" fill="none"/><path d="m14.5 27 5-6 4 3 6-7 4.5 4.5" stroke="{A}" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" fill="none"/>`,
@@ -14178,6 +14178,64 @@ html body .v2s{background:var(--bg)}
 html body #netbar{font-size:var(--fs-xs);font-weight:600;box-shadow:none}
 html body :is(#toast .in){font-size:var(--fs-md);font-weight:600}
 @media(prefers-reduced-motion:reduce){*{animation-duration:.01ms!important;transition-duration:.01ms!important}}
+/* 10. Khối "Cần xử lý": tối đa 4 màu của hệ thống — navy (mặc định), đỏ (khẩn/quá hạn), hổ phách (cảnh báo), xanh lá (ổn).
+   Biểu tượng luôn trung tính; màu chỉ nằm ở con số để mỗi dòng chỉ có một tín hiệu màu. */
+html body .nx{border-color:var(--line);box-shadow:var(--sh1);border-radius:var(--r-lg)}
+html body .nx-r{border-top-color:var(--line);min-height:52px}
+html body .nx-r:active{background:var(--card2)}
+html body .nx-r .nx-i,html body .nx-r:is(.red,.org,.amb,.grn,.blu) .nx-i{background:var(--brand-bg);color:var(--navy);border-radius:var(--r-md)}
+html body .nx-t{font-size:var(--fs-md);font-weight:600;color:var(--ink)}
+html body .nx-n{background:var(--brand-bg);color:var(--navy);font-size:var(--fs-md);font-weight:700}
+html body .nx-r.red .nx-n{background:var(--err);color:#fff}
+html body .nx-r:is(.org,.amb) .nx-n{background:var(--warn-bg);color:var(--warn)}
+html body .nx-r.grn .nx-n{background:var(--ok-bg);color:var(--ok)}
+html body .nx-tot{background:var(--err);color:#fff;font-size:var(--fs-sm);font-weight:700}
+html body .nx-c{color:var(--mut2)}
+/* 11. Màn hình chính — một ngôn ngữ: nền xám nhạt, thẻ trắng viền mảnh, icon một màu navy, màu chỉ để báo trạng thái.
+   Bộ màu chuẩn của ứng dụng: navy (chữ, điều hướng) · xanh MedDental (hành động, số liệu) · đỏ (khẩn) · hổ phách (cảnh báo). Vàng chỉ còn nhãn Prime. */
+html body #gmain{background:var(--bg)!important;border-radius:0!important;margin-top:0!important}
+html body #gheader{height:auto;min-height:var(--header-h);padding-top:10px;padding-bottom:10px;background:#fff!important;color:var(--ink);box-shadow:none;border-bottom:1px solid var(--line)}
+html body #gheader::after{display:none!important}
+html body :is(#gbrand .h5c,#gbrand .h2k,.h5nm .h5c){display:none!important}
+html body #gbrand .bt{gap:2px}
+html body #gbrand .h5row{gap:8px}
+html body #gbrand small{font-size:var(--fs-xs);font-weight:500;letter-spacing:0;text-transform:none;color:var(--mut);opacity:1}
+html body .fc-hero{padding:16px var(--page-pad) 4px;gap:12px}
+html body .fc-av{width:40px;height:40px;background:var(--navy)!important;box-shadow:none!important}
+html body .fc-av svg{width:20px;height:20px}
+html body .fc-hi small{font-size:var(--fs-sm);color:var(--mut)}
+html body .fc-hi b{font-size:var(--fs-h2);font-weight:700;letter-spacing:-.01em}
+html body .fc-dt{font-size:var(--fs-sm);color:var(--mut)}
+html body :is(.sec.fc-cap,span.sec){font-size:var(--fs-sm);font-weight:600;color:var(--mut);letter-spacing:0}
+html body .sec.fc-cap{margin:20px 4px 8px}
+html body .fci rect:first-child{fill:var(--brand-bg)}
+html body .fci rect:nth-child(2){stroke-opacity:0}
+/* lối tắt: danh sách trong một thẻ, cùng kiểu với khối "Cần xử lý" */
+html body #app div:has(>.tile){display:block!important;background:#fff;border:1px solid var(--line);border-radius:var(--r-lg);overflow:hidden;box-shadow:var(--sh1)}
+html body #app .tile{display:flex!important;flex-direction:row!important;align-items:center;justify-content:flex-start!important;gap:12px!important;width:100%;min-height:52px;padding:8px 14px!important;border:0!important;border-top:1px solid var(--line)!important;border-radius:0!important;box-shadow:none!important;background:#fff!important;text-align:left;font-size:var(--fs-md)!important;font-weight:600!important;line-height:1.3!important;color:var(--ink)!important}
+html body #app .tile:first-child{border-top:0!important}
+html body #app .tile:active{background:var(--card2)!important}
+html body #app .tile .tic{flex:none;display:grid;place-items:center;width:auto;height:auto}
+html body #app .tile .tic svg{width:34px;height:34px;border-radius:var(--r-md)}
+html body #app .tile::after{content:"";margin-left:auto;flex:none;width:16px;height:16px;background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23a3a9bb' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m9 6 6 6-6 6'/%3E%3C/svg%3E") center/contain no-repeat}
+/* thẻ tỷ lệ kiểm kê: một xanh duy nhất, đường mốc xám, vùng đạt là dải xanh rất nhạt */
+html body #mcard{border:1px solid var(--line);border-radius:var(--r-lg);box-shadow:var(--sh1)}
+html body #mcard .mt{font-size:var(--fs-lg);font-weight:700;color:var(--ink)}
+html body #mcard .htr rect{fill:var(--brand);fill-opacity:.07}
+html body #mcard .htr line[stroke="#f5c04a"]{stroke:var(--mut2);stroke-opacity:1}
+html body #mcard .htr text[fill="#f5c04a"]{fill:var(--mut)}
+html body #mcard .htr [stroke="#7ef0c9"]{stroke:var(--brand)}
+html body #mcard .htr [fill="#7ef0c9"]{fill:var(--brand)}
+/* thanh dưới: bỏ đổ bóng nặng, bỏ chấm vàng */
+html body #bnav{border-radius:0;box-shadow:none;border-top:1px solid var(--line)}
+html body #bnav button{font-size:var(--fs-xs);font-weight:600;color:var(--mut2)}
+html body #bnav button.on,html body #bnav .fab{color:var(--brand)}
+html body #bnav svg :is([fill="#d4af5f"],[fill="#c9a24f"]){fill:currentColor}
+html body #bnav svg :is([stroke="#d4af5f"],[stroke="#c9a24f"]){stroke:currentColor}
+html body #bnav .fab i{width:56px;height:56px;margin-top:-28px}
+html body #mcard dd[style*="#ff9aa8"]{color:var(--err)!important}
+html body #mcard dd[style*="#ffd88a"]{color:var(--warn)!important}
+html body #mcard dd[style*="#7ef0c9"]{color:var(--ok)!important}
 </style>
 </body>
 </html>
