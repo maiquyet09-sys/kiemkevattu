@@ -2,8 +2,8 @@
 <html lang="vi">
 <head>
 <meta charset="UTF-8">
-<meta name="app-notes" content="Danh bạ nhân sự: chọn người là tự điền biên bản bàn giao, giải trình, ô ký; nhập Excel/CSV theo file mẫu. Giao diện đồng bộ 4 màu. Ký số PDF nâng cấp: ký nhiều người (tuần tự / đồng thời), danh sách nhân sự (nhập tay hoặc tải file mẫu), xem văn bản và kéo chữ ký đến đúng chỗ trước khi ký, thông báo Văn bản cần ký ở Trang chủ, biên bản Excel dùng chung thư viện chữ ký., hiện “đang chờ tại ai” và tiến độ 2 số lẻ, thông báo Trang chủ mở thẳng văn bản cần ký. Mở: Quản trị &amp; tiện ích › Ký số PDF. Giao diện mới: kính mờ Glassmorphism, nền gradient tím nhạt – xanh khói, thanh điều hướng nổi.">
-<meta name="app-version" content="2026111909">
+<meta name="app-notes" content="Danh bạ nhân sự: chọn người là tự điền biên bản bàn giao, giải trình, ô ký; nhập Excel/CSV theo file mẫu. Giao diện đồng bộ 4 màu. Ký số PDF nâng cấp: ký nhiều người (tuần tự / đồng thời), danh sách nhân sự (nhập tay hoặc tải file mẫu), xem văn bản và kéo chữ ký đến đúng chỗ trước khi ký, thông báo Văn bản cần ký ở Trang chủ, biên bản Excel dùng chung thư viện chữ ký., hiện “đang chờ tại ai” và tiến độ 2 số lẻ, thông báo Trang chủ mở thẳng văn bản cần ký. Mở: Quản trị &amp; tiện ích › Ký số PDF">
+<meta name="app-version" content="2026111911">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="format-detection" content="telephone=no">
 <meta name="color-scheme" content="light">
@@ -14355,111 +14355,6 @@ html body #mcard dd[style*="#7ef0c9"]{color:var(--ok)!important}
 .stf-s{font-size:var(--fs-sm);color:var(--mut)}.stf-note{font-size:var(--fs-sm);color:var(--mut);margin-bottom:12px}
 .stf-sec{font-size:var(--fs-sm);font-weight:600;color:var(--mut);margin:0 4px 8px}
 .stf-bar{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px}.stf-f{display:grid;gap:6px}
-</style>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&display=swap">
-<style id="glass-skin">
-/* ===== GLASS SKIN · Glassmorphism / Modern Soft Gradient (chỉ CSS, không đổi HTML, JS, dữ liệu) =====
-   Đặt cuối tài liệu để thắng các lớp cũ. Muốn quay lại giao diện cũ: xóa khối <style id="glass-skin"> này. */
-:root{
-  --g1:#D8D8FE;--g2:#B8C5FD;--navy:#1F2942;--navy2:#161E33;--gmut:#94A3B8;
-  --glass:rgba(255,255,255,.65);--glass-ln:rgba(255,255,255,.8);
-  --ink:#1E1B4B;--mut:rgba(30,27,75,.64);--mut2:rgba(30,27,75,.44);--line:rgba(30,27,75,.1);
-  --teal:#1F2942;--teal-d:#161E33;--teal-bg:rgba(31,41,66,.08);--teal-ln:rgba(31,41,66,.24);
-  --brand:#1F2942;--brand-bg:rgba(31,41,66,.08);
-  --gold:#8b8fc7;--gold-l:#c9ccf5;--gold-ln:rgba(255,255,255,.8);
-  --card2:rgba(255,255,255,.55);
-  --sh1:0 8px 24px -14px rgba(31,41,66,.28);--sh2:0 16px 36px -16px rgba(31,41,66,.38);
-  --r-lg:20px;--r-md:16px;
-}
-html body{background:linear-gradient(160deg,var(--g1) 0%,var(--g2) 100%) fixed;color:var(--ink);font-family:'Be Vietnam Pro','Plus Jakarta Sans','Inter',system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;font-variant-numeric:tabular-nums}
-html body :is(button,input,select,textarea){font-family:inherit}
-html body :is(#gshell,#gmain,#app){background:transparent}
-
-/* Header, thanh bên, ngăn kéo: kính mờ (phần tử cố định nên giữ backdrop-filter) */
-html body #gheader{background:rgba(255,255,255,.55);border-bottom:1px solid var(--glass-ln);box-shadow:none}
-html body #gheader::after{display:none}
-html body :is(#gsidebar,#gdrawer){background:rgba(255,255,255,.55);border-right:1px solid var(--glass-ln);box-shadow:none}
-@supports((backdrop-filter:blur(1px)) or (-webkit-backdrop-filter:blur(1px))){
-  html body :is(#gheader,#gsidebar,#gdrawer){-webkit-backdrop-filter:blur(16px);backdrop-filter:blur(16px)}
-}
-html body #ghmenu{background:rgba(255,255,255,.7);border:1px solid var(--glass-ln);box-shadow:none}
-html body :is(#gbrand .dot,#guser .av){background:var(--navy);color:#fff;box-shadow:0 0 0 2px rgba(255,255,255,.8)}
-html body .gnav-item.on{background:var(--navy);color:#fff}
-html body .gnav-item.on .cnt{color:#cbd5e1}
-
-/* Thẻ kính mờ (không blur trên danh sách dài để giữ 60fps) */
-html body :is(.card,.item,.hsditem,.stkwrap,.tile,.pxc,.rck,.rcg,.rcx,.sigcard){background:var(--glass)!important;border:1px solid var(--glass-ln)!important;border-radius:20px;box-shadow:var(--sh1)!important;color:var(--ink)}
-html body .hsdcard{background:var(--glass)!important;border:1px solid var(--glass-ln)!important;border-radius:20px!important;box-shadow:var(--sh1)!important;color:var(--ink)!important}
-html body .tile{border-radius:20px}
-html body :is(.hsdcard .t,.tile){color:var(--ink)!important}
-
-/* Thẻ chính nền navy + ô chỉ số tối */
-html body #mcard,html body .hero{background:linear-gradient(160deg,#25304C,#1F2942);border:0;border-radius:24px;color:#fff;box-shadow:0 18px 36px -16px rgba(31,41,66,.7),inset 0 1px 0 rgba(255,255,255,.12)}
-html body #mcard::before{display:none}
-html body #mcard :is(.hk dt,.hc small,.hcl,.sub){color:#94A3B8}
-html body #mcard dl.hk>div{background:#161E33;border:1px solid rgba(255,255,255,.06);border-radius:16px;padding:9px 12px}
-html body #mcard .hchip{border-radius:12px}
-html body .hero span{color:var(--gmut)}
-
-/* Nút, chip dạng viên thuốc, ô nhập */
-html body .btn{border-radius:12px}
-html body .btn-primary{background:var(--navy);box-shadow:0 10px 22px -10px rgba(31,41,66,.65)}
-html body .btn-outline{background:rgba(255,255,255,.7);border-color:var(--teal-ln)}
-html body :is(.pill,.chip){background:rgba(255,255,255,.65);border:1px solid var(--glass-ln);border-radius:999px;color:var(--ink);box-shadow:none}
-html body .chip-on{background:var(--navy);border-color:var(--navy);color:#fff;position:relative;box-shadow:0 8px 18px -8px rgba(31,41,66,.6)}
-html body .chip-on:not(select)::after{content:"";position:absolute;left:50%;bottom:4px;width:4px;height:4px;margin-left:-2px;border-radius:50%;background:#fff}
-html body :is(.inp,.sinp){background:rgba(255,255,255,.78);border:1px solid rgba(30,27,75,.14);border-radius:12px;color:var(--ink)}
-html body :is(.inp,.sinp):focus{border-color:var(--navy);box-shadow:0 0 0 4px rgba(31,41,66,.12)}
-html body .fill,html body .ring .rf{background:var(--navy)}
-html body .stbadge,html body .pxch{border-radius:12px}
-html body :is(.stktable th,table.rct th,#app .bk-head){background:rgba(255,255,255,.7);color:var(--mut)}
-html body .v2hd{background:var(--navy)}
-html body .v2bd{background:transparent}
-
-/* Thanh điều hướng dưới: kính mờ nổi, nút tròn giữa không đè nội dung */
-@media(max-width:899px){
-  html body #bnav{left:12px;right:12px;bottom:calc(10px + env(safe-area-inset-bottom,0px));height:var(--nav-h,64px);padding:0 6px;border-radius:28px;background:rgba(255,255,255,.62);border:1px solid var(--glass-ln);box-shadow:0 16px 36px -14px rgba(31,41,66,.4)}
-  @supports((backdrop-filter:blur(1px)) or (-webkit-backdrop-filter:blur(1px))){html body #bnav{-webkit-backdrop-filter:blur(16px);backdrop-filter:blur(16px)}}
-  html body #bnav button.on:not(.fab)::before{background:var(--navy);width:18px;border-radius:0 0 4px 4px}
-  html body #bnav .fab i{background:var(--navy);box-shadow:0 0 0 5px rgba(255,255,255,.75),0 14px 26px -8px rgba(31,41,66,.6)}
-  html body #app{padding-bottom:calc(var(--nav-h,64px) + 44px + env(safe-area-inset-bottom,0px))}
-}
-html body :is(#bnav button.on,#bnav .fab){color:var(--navy)}
-html body #bnav .fab i{color:#fff}
-/* ===== Thư mục (nhóm menu) và ô tắt: khối nổi tone xanh–tím, icon tròn trắng, chữ trắng ===== */
-html body :is(#gsidebar,#gdrawer){background:linear-gradient(170deg,#D9D3FA 0%,#C4C8FA 45%,#B3C3FA 100%)!important;border-right:1px solid var(--glass-ln)!important;padding:14px 12px}
-html body :is(#gsidebar,#gdrawer) :is(.gnav-wrap,.gq,.gnav-item:not(.gnav-sub):not(.gnav-grp)){--t1:#4A5AA8;--t2:#33418D;--ic:#33418D;background:linear-gradient(155deg,var(--t1),var(--t2));border:1px solid rgba(255,255,255,.28);border-radius:22px;box-shadow:0 14px 24px -12px rgba(36,38,120,.6),inset 0 1px 0 rgba(255,255,255,.38);margin-bottom:10px}
-html body :is(#gsidebar,#gdrawer) .gnav-wrap{padding:4px}
-html body :is(#gsidebar,#gdrawer) .gnav-wrap[data-g=bb]{--t1:#7C5CD6;--t2:#5A41B4;--ic:#5A41B4}
-html body :is(#gsidebar,#gdrawer) .gnav-wrap[data-g=kk]{--t1:#4560CC;--t2:#2F45A8;--ic:#2F45A8}
-html body :is(#gsidebar,#gdrawer) .gnav-wrap[data-g=rc]{--t1:#9A62CE;--t2:#7842B2;--ic:#7842B2}
-html body :is(#gsidebar,#gdrawer) .gnav-wrap[data-g=kho]{--t1:#6577DC;--t2:#4452BC;--ic:#4452BC}
-html body :is(#gsidebar,#gdrawer) .gnav-wrap[data-g=ks]{--t1:#A468C4;--t2:#83479F;--ic:#83479F}
-html body :is(#gsidebar,#gdrawer) .gnav-wrap[data-g=gv]{--t1:#4A7FCB;--t2:#305EA6;--ic:#305EA6}
-html body :is(#gsidebar,#gdrawer) .gnav-wrap[data-g=qt]{--t1:#646C98;--t2:#464E7C;--ic:#464E7C}
-html body :is(#gsidebar,#gdrawer) .gnav-item,html body :is(#gsidebar,#gdrawer) .gnav-item .lb{color:#fff}
-html body :is(#gsidebar,#gdrawer) .gnav-grp .lb,html body :is(#gsidebar,#gdrawer) .gnav-item .lb{font-weight:700}
-html body :is(#gsidebar,#gdrawer) :is(.gnav-grp,.gnav-item:not(.gnav-sub)) > :first-child:not(.lb){flex:none;width:36px;height:36px;box-sizing:border-box;padding:7px;border-radius:50%;display:grid;place-items:center;background:#fff;color:var(--ic);box-shadow:0 6px 12px -6px rgba(20,20,80,.5)}
-html body :is(#gsidebar,#gdrawer) .gnav-sub{border-radius:14px;margin:3px 4px;background:rgba(255,255,255,.14)}
-html body :is(#gsidebar,#gdrawer) .gnav-sub .cnt{color:rgba(255,255,255,.82)}
-html body :is(#gsidebar,#gdrawer) .gnav-add{color:#fff}
-html body :is(#gsidebar,#gdrawer) .gnav-item.on:is(:not(.gnav-sub),.gnav-sub),html body :is(#gsidebar,#gdrawer) .gnav-item.gnav-sub.on{background:rgba(255,255,255,.22)!important;color:#fff!important;box-shadow:inset 0 0 0 1px rgba(255,255,255,.4)!important}
-html body :is(#gsidebar,#gdrawer) .gnav-item.gnav-sub.on{background:#fff!important;color:var(--navy)!important}
-html body :is(#gsidebar,#gdrawer) .gnav-item.on .lb{color:#fff}
-html body :is(#gsidebar,#gdrawer) .gnav-sub.on .cnt{color:var(--navy)}
-html body :is(#gsidebar,#gdrawer) .gnav-item.on::before{display:none!important}
-html body :is(#gsidebar,#gdrawer) .gq{color:#fff}
-html body :is(#gsidebar,#gdrawer) .gq.pri{background:#fff!important;color:var(--navy)!important}
-html body :is(#gsidebar,#gdrawer) .gbd{background:#fff;color:var(--ic);border-radius:999px}
-html body .tile.tile{background:linear-gradient(155deg,#4A5AA8,#33418D)!important;border:1px solid rgba(255,255,255,.28)!important;border-radius:22px!important;color:#fff!important;box-shadow:0 14px 24px -12px rgba(36,38,120,.6),inset 0 1px 0 rgba(255,255,255,.38)!important}
-/* ===== Ép nền gradient tím khói thắng lớp chuẩn hóa cũ (ds-final dùng !important) ===== */
-html{background:#C4C8FA}
-html body{background:linear-gradient(170deg,#D9D3FA 0%,#C4C8FA 36%,#B3C3FA 68%,#C6B8F4 100%) fixed!important;color:var(--ink)}
-html body :is(#gmain,#gshell,.v2s){background:transparent!important}
-html body #gheader{background:rgba(255,255,255,.55)!important;border-bottom:1px solid var(--glass-ln)!important;color:var(--ink)!important}
-html body .topbar{background:rgba(255,255,255,.55);border-bottom:1px solid var(--glass-ln)}
-html body .hsdcard{-webkit-backdrop-filter:blur(16px);backdrop-filter:blur(16px)}
-@media print{html body{background:#fff}}
 </style>
 </body>
 </html>
