@@ -5405,6 +5405,40 @@ function tsLabel(ts){
   var d=new Date(ts),p=function(n){return String(n).padStart(2,'0');};
   return p(d.getHours())+':'+p(d.getMinutes())+' ngày '+p(d.getDate())+'/'+p(d.getMonth()+1)+'/'+d.getFullYear();
 }
+/* Gộp các phần dữ liệu KHÔNG có mã kỳ/biên bản riêng: chỉ thêm cái chưa có, không bao giờ ghi đè dữ liệu trên máy.
+   Dùng chung cho "Gộp" khi khôi phục và "Nhập & hợp nhất từ máy khác". */
+function staffKey(s){return norm(s&&s.ten||'')+'|'+norm(s&&s.chiNhanh||'');}
+function staffFind(list,s){var cur=null;(list||[]).forEach(function(y){if(!cur&&y&&(y.id===s.id||staffKey(y)===staffKey(s)))cur=y;});return cur;}
+function mergeExtraDb(d,touched){
+  var n={staff:0,fill:0,keys:0,mua:0,hd:0,ncc:0};
+  if(!d||typeof d!=='object')return n;
+  if(Array.isArray(d.staff)){
+    if(!Array.isArray(db.staff))db.staff=[];
+    d.staff.forEach(function(s){
+      if(!s||typeof s!=='object'||!s.ten)return;
+      var cur=staffFind(db.staff,s);
+      if(!cur){var c=JSON.parse(JSON.stringify(s));if(!c.id)c.id='st'+Date.now().toString(36)+Math.random().toString(36).slice(2,6);db.staff.push(c);n.staff++;if(touched)touched['staff:'+c.id]=1;return;}
+      Object.keys(s).forEach(function(k){if(k==='id'||k==='ex')return;var v=s[k];if(v===''||v==null)return;if(cur[k]===undefined||cur[k]===null||cur[k]===''){cur[k]=v;n.fill++;}});
+      if(s.ex&&typeof s.ex==='object'){if(!cur.ex||typeof cur.ex!=='object')cur.ex={};Object.keys(s.ex).forEach(function(k){if(!cur.ex[k]&&s.ex[k]){cur.ex[k]=s.ex[k];n.fill++;}});}
+    });
+  }
+  ['hsdOn','hsdTrack','stkUp'].forEach(function(k){
+    var src=d[k];if(!src||typeof src!=='object'||Array.isArray(src))return;
+    if(!db[k]||typeof db[k]!=='object'||Array.isArray(db[k]))db[k]={};
+    Object.keys(src).forEach(function(q){if(db[k][q]===undefined){db[k][q]=JSON.parse(JSON.stringify(src[q]));n.keys++;}});
+  });
+  if(Array.isArray(d.stkUpLog)){
+    if(!Array.isArray(db.stkUpLog))db.stkUpLog=[];
+    var have={};db.stkUpLog.forEach(function(x){have[JSON.stringify(x)]=1;});
+    d.stkUpLog.forEach(function(x){var j=JSON.stringify(x);if(!have[j]){db.stkUpLog.push(x);have[j]=1;n.keys++;}});
+  }
+  if(d.pay&&typeof d.pay==='object'&&typeof payMerge==='function'){
+    try{var o={mua:Array.isArray(d.pay.mua)?d.pay.mua:[],hd:Array.isArray(d.pay.hd)?d.pay.hd:[],ncc:Array.isArray(d.pay.ncc)?d.pay.ncc:[]};
+      if(o.mua.length||o.hd.length||o.ncc.length){var r=payMerge(JSON.parse(JSON.stringify(o)),'từ file sao lưu');n.mua=r.mua.add;n.hd=r.hd.add;n.ncc=r.ncc.add;}
+    }catch(e){console.error(e);}
+  }
+  return n;
+}
 function mergeDb(d){
   var st={p:0,h:0,e:0,a:0,u:0,c:0};
   function add(dst,src,k){
@@ -5434,6 +5468,7 @@ function mergeDb(d){
   Object.keys(d.counters||{}).forEach(function(k){db.counters[k]=Math.max(db.counters[k]||0,d.counters[k]||0);});
   st.rc=0;try{if(d.recon&&typeof rcMergeRecon==="function")st.rc=rcMergeRecon(d.recon);}catch(e){console.error(e);}
   if(d.print&&!db.print)db.print=d.print;
+  try{var xe=mergeExtraDb(d);st.sf=xe.staff;st.sx=xe.keys+xe.mua+xe.hd+xe.ncc;}catch(e){console.error(e);}
   if(d.profile&&d.profile.ten&&!(db.profile&&db.profile.ten))db.profile=d.profile;
   if(!db.signers)db.signers={};
   Object.keys(d.signers||{}).forEach(function(k){if(!db.signers[k])db.signers[k]=d.signers[k];});
@@ -13991,7 +14026,7 @@ BK.fillInv=async function(){
   var el=$('bk-inv');if(!el)return;
   try{
     var c=await census(),rows=[
-      ['main',sumT(c.main),'IndexedDB kk_main › db (+ bản sao localStorage kk_db_v1)','Kỳ vật tư, CCDC/TSCĐ, biên bản, phiếu giải trình, danh mục, mã vạch, HSD, người ký, in ấn, đối chiếu DT–xuất kho, đề nghị thanh toán, nhật ký'],
+      ['main',sumT(c.main),'IndexedDB kk_main › db (+ bản sao localStorage kk_db_v1)','Kỳ vật tư, CCDC/TSCĐ, biên bản, phiếu giải trình, danh bạ nhân sự, danh mục, mã vạch, HSD, người ký, in ấn, đối chiếu DT–xuất kho, đề nghị thanh toán, nhật ký'],
       ['photos',c.photos,'IndexedDB kk_photos','Ảnh tài sản, CCDC, tem quét không khớp'],
       ['pdf',c.pdf,'IndexedDB kk_main › kv (sgsrc:/sgout:)','PDF gốc và PDF đã ký, giữ cả nội dung tệp'],
       ['errors',c.errors,'localStorage kk_err_* + IndexedDB kk_err_img','Lỗi nhập liệu, lỗi labo, dữ liệu MISA, ánh xạ, ảnh bằng chứng'],
@@ -14073,6 +14108,15 @@ function impAnalyze(norm,plan){
     });
     plan.tab[k]=r;
   });
+  var sl=Array.isArray(M.staff)?M.staff.filter(function(x){return x&&x.ten;}):[];
+  if(sl.length){var rs={l:'Danh bạ nhân sự',tot:sl.length,nw:0,same:0,conf:0,items:0};sl.forEach(function(x){if(staffFind(db.staff,x))rs.same++;else rs.nw++;});plan.tab.staff=rs;}
+  if(M.pay&&typeof M.pay==='object'&&((M.pay.mua||[]).length||(M.pay.hd||[]).length)){
+    var rp={l:'Thanh toán NCC (phiếu mua + HĐ MISA)',tot:0,nw:0,same:0,conf:0,items:0};
+    try{var P0=payDb(),hm={},hh={};P0.mua.forEach(function(r){hm[payNKey(r)]=1;});P0.hd.forEach(function(h){hh[payHKey(h)]=1;});
+      (M.pay.mua||[]).forEach(function(r){rp.tot++;if(hm[payNKey(r)])rp.same++;else rp.nw++;});
+      (M.pay.hd||[]).forEach(function(h){rp.tot++;if(hh[payHKey(h)])rp.same++;else rp.nw++;});}catch(e){}
+    plan.tab.pay=rp;
+  }
 }
 async function impAtt(G,plan){
   var A=plan.att;
@@ -14114,6 +14158,7 @@ function impApplyMain(norm,o){
   try{migrateFolders();}catch(e){}
   try{if(M.recon&&typeof rcMergeRecon==='function')rcMergeRecon(M.recon);}catch(e){console.error(e);}
   if(M.print&&!db.print)db.print=M.print;
+  try{var xe=mergeExtraDb(M,o.touched);o.extra=xe;}catch(e){console.error(e);}
   if(norm.groups.pdf&&M.sg&&Array.isArray(M.sg.docs)){
     var S=db.sg=db.sg&&typeof db.sg==='object'?db.sg:{};if(!Array.isArray(S.docs))S.docs=[];if(!Array.isArray(S.folders)||!S.folders.length)S.folders=['Chưa phân loại'];
     M.sg.docs.forEach(function(x){if(!x||!x.id||S.docs.some(function(y){return y.id===x.id;}))return;var fn=(M.sg.folders||[])[x.folder]||'Chưa phân loại',ix=S.folders.indexOf(fn);if(ix<0){S.folders.push(fn);ix=S.folders.length-1;}x.folder=ix;S.docs.push(x);});
@@ -14153,7 +14198,7 @@ BK.impBegin=async function(text,label){
   if(!norm.groups.main){fail('File không có nhóm dữ liệu chính để nhập.');return;}
   try{impAnalyze(norm,plan);await impAtt(norm.groups,plan);}catch(e){console.error(e);fail('Không đối chiếu được: '+(e.message||e));return;}
   BK.imp={norm:norm,label:label,plan:plan,text:text};
-  var H=norm.header,rows=IMP_T.map(function(t){return plan.tab[t[0]];}).concat(['photos','pdf','eimg','eitems'].map(function(k){return plan.att[k];}).filter(Boolean)),T={tot:0,nw:0,same:0,conf:0};
+  var H=norm.header,rows=IMP_T.map(function(t){return plan.tab[t[0]];}).concat([plan.tab.staff,plan.tab.pay].filter(Boolean),['photos','pdf','eimg','eitems'].map(function(k){return plan.att[k];}).filter(Boolean)),T={tot:0,nw:0,same:0,conf:0};
   rows.forEach(function(r){T.tot+=r.tot;T.nw+=r.nw;T.same+=r.same;T.conf+=r.conf;});
   var h='<div class="bk-h">Nhập dữ liệu từ máy khác</div><div class="bk-sub">Nguồn: '+esc(label)+(H.createdAt?' · tạo lúc '+fdt(H.createdAt):'')+(H.by?' · bởi '+esc(H.by):'')+(H.appVersion?' · bản app '+esc(H.appVersion):'')+(norm.legacy?'<br><b>File định dạng cũ</b>':'')+'</div>';
   h+='<div class="bk-h2">Kiểm tra bản sao lưu '+badge(st)+'</div>'+chkRows(checks.filter(function(c){return c.state!=='ok';}))+'<div class="bk-d">Đạt '+checks.filter(function(c){return c.state==='ok';}).length+'/'+checks.length+' mục kiểm tra.</div>';
@@ -14222,6 +14267,7 @@ BK.impGo=async function(){
   var tl=[],tab=P.plan.tab,tc={keep:0,backup:0,new:0,skip:0};Object.keys(dec).forEach(function(k){tc[dec[k]]++;});
   tl.push('BÁO CÁO NHẬP DỮ LIỆU TỪ MÁY KHÁC','Chế độ: '+mode+' · Nguồn: '+P.label+' · Người thực hiện: '+by+' · '+fdt(res.at),'Kết quả: '+vs+(res.error?' — '+res.error:''),'');
   IMP_T.forEach(function(t){var r=tab[t[0]];tl.push(r.l+': trong file '+r.tot+', mới '+r.nw+', trùng khớp '+r.same+', xung đột '+r.conf);});
+  ['staff','pay'].forEach(function(k){var r=tab[k];if(r)tl.push(r.l+': trong file '+r.tot+', mới '+r.nw+', trùng khớp '+r.same+' (chỉ thêm, không ghi đè)');});
   if(mode==='merge')tl.push('Xử lý xung đột: giữ hiện tại '+tc.keep+', dùng bản sao lưu '+tc.backup+', tạo mới '+tc.new+', bỏ qua '+tc.skip);
   tl.push('Bản ghi thêm/cập nhật thực tế: '+Object.keys(o.touched).length,'','Không nhập được / không ghi đè:');P.plan.unimp.forEach(function(m){tl.push('- '+m);});tl.push('','Kiểm tra:');res.checks.forEach(function(c){tl.push('- ['+c.state+'] '+c.label+(c.detail?': '+c.detail:''));});
   var repTxt=tl.join('\n');BK.impRepTxt=repTxt;
