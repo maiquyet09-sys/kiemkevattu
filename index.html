@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="app-notes" content="Danh bạ nhân sự: chọn người là tự điền biên bản bàn giao, giải trình, ô ký; nhập Excel/CSV theo file mẫu. Giao diện đồng bộ 4 màu. Ký số PDF nâng cấp: ký nhiều người (tuần tự / đồng thời), danh sách nhân sự (nhập tay hoặc tải file mẫu), xem văn bản và kéo chữ ký đến đúng chỗ trước khi ký, thông báo Văn bản cần ký ở Trang chủ, biên bản Excel dùng chung thư viện chữ ký., hiện “đang chờ tại ai” và tiến độ 2 số lẻ, thông báo Trang chủ mở thẳng văn bản cần ký. Mở: Quản trị &amp; tiện ích › Ký số PDF. Sửa lỗi nhập / thêm nhân sự vào Danh bạ (lỗi uid). Ô chọn nhân sự trong biên bản: gõ để tìm theo tên, mã NV, số điện thoại, chức vụ.">
-<meta name="app-version" content="2026111913">
+<meta name="app-version" content="2026111914">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="format-detection" content="telephone=no">
 <meta name="color-scheme" content="light">
@@ -1597,6 +1597,74 @@ html body .mdl-x-float{position:absolute;top:calc(env(safe-area-inset-top,0px) +
 .mdl-std{background:#fff;color:var(--ink,#101828);width:100%;max-width:520px;border-radius:16px;box-shadow:0 12px 40px rgba(0,0,0,.25);--mdl-pt:16px;--mdl-pr:16px;--mdl-pb:calc(16px + env(safe-area-inset-bottom,0px));--mdl-pl:16px}
 .mdl-std.mdl-wide{max-width:720px}
 @media (max-width:600px){.mdl-std-ov{align-items:flex-end;padding:0}.mdl-std{border-radius:16px 16px 0 0}}
+</style>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style id="blk-ui">
+/* ===== Giao diện khối v1.0 (blk-ui) — chỉ áp dụng khi body có class "blk"; tắt = về giao diện cũ ===== */
+body.blk .bk,body.blk #bnav{font-family:'Be Vietnam Pro',system-ui,-apple-system,'Segoe UI',Roboto,sans-serif}
+body.blk .bk{max-width:1100px;margin:0 auto;padding:14px 16px 120px;color:#14203a;font-variant-numeric:tabular-nums}
+body.blk .bk *{box-sizing:border-box}
+body.blk .bk-top{display:flex;align-items:center;justify-content:space-between;gap:12px}
+body.blk .bk-hi{font-size:14px;font-weight:500;color:#5b6479}
+body.blk .bk-hi b{color:#14203a;font-weight:700}
+body.blk .bk-bell{position:relative;width:44px;height:44px;border-radius:50%;border:0;background:#fff;color:#1e3a6b;display:grid;place-items:center;cursor:pointer;box-shadow:0 1px 3px rgba(20,30,60,.08)}
+body.blk .bk-bell b{position:absolute;top:-3px;right:-3px;min-width:20px;height:20px;padding:0 5px;border-radius:99px;background:#dc4a4a;color:#fff;font-size:11px;font-weight:700;display:grid;place-items:center}
+body.blk .bk h1{margin:10px 0 16px;font-size:28px;line-height:1.2;font-weight:800;letter-spacing:-.01em;color:#101b34}
+body.blk .bk-grid{display:grid;gap:14px;grid-template-columns:1fr}
+body.blk .bk-pair{display:grid;gap:14px;grid-template-columns:1fr 1fr}
+body.blk .bk-card{border-radius:24px;padding:18px;box-shadow:0 1px 2px rgba(20,30,60,.04);position:relative}
+body.blk .bk-ic{width:40px;height:40px;border-radius:50%;display:grid;place-items:center;background:rgba(255,255,255,.75);color:#1e3a6b;flex:none}
+body.blk .bk-lb{font-size:13px;font-weight:600;color:#5b6479;margin-top:12px}
+body.blk .bk-num{display:flex;align-items:baseline;gap:6px;margin-top:2px;font-size:38px;line-height:1.1;font-weight:800;color:#101b34}
+body.blk .bk-num small{font-size:13px;font-weight:600;color:#5b6479}
+body.blk .bk-pill{display:inline-flex;align-items:center;gap:6px;margin-top:10px;padding:5px 11px;border-radius:99px;font-size:12px;font-weight:700;background:#e3f5ec;color:#1f6b4a}
+body.blk .bk-pill i{width:7px;height:7px;border-radius:50%;background:currentColor}
+body.blk .bk-pill.w{background:#ffefdc;color:#b8651a}
+body.blk .bk-pill.r{background:#fdecea;color:#c23a3a}
+body.blk .bk-btn{min-height:44px;padding:0 18px;border-radius:99px;border:0;font:inherit;font-size:13px;font-weight:700;cursor:pointer}
+body.blk button.bk-card{width:100%;text-align:left;border:0;font:inherit;color:inherit;cursor:pointer;min-height:44px}
+body.blk .bk-s1{background:#e6edfb}body.blk .bk-s2{background:#e3f5ec}body.blk .bk-long{background:#fbf1d9;display:flex;align-items:center;gap:14px}
+body.blk .bk-long .t{flex:1;min-width:0;font-size:15px;font-weight:700}
+body.blk .bk-long .t span{display:block;font-size:12.5px;font-weight:500;color:#6b6140;margin-top:2px}
+/* Khối lớn "Cần xử lý": nền đậm, nổi bật */
+body.blk .bk-need{background:#1e3a6b;color:#fff;padding:20px}
+body.blk .bk-need .hd{display:flex;align-items:center;gap:12px}
+body.blk .bk-need .bk-ic{background:rgba(255,255,255,.16);color:#fff}
+body.blk .bk-need .bk-lb{margin:0;color:#c9d5ee;font-size:14px}
+body.blk .bk-need .bk-num{margin:0;color:#fff;font-size:44px}
+body.blk .bk-need .bk-num small{color:#c9d5ee}
+body.blk .bk-need .bk-pill{margin:0 0 0 auto;background:#ffefdc;color:#9a4f10}
+body.blk .bk-need .bk-pill.g{background:#d6f3e3;color:#17603f}
+body.blk .bk-rows{margin-top:14px;display:grid;gap:8px}
+body.blk .bk-need .nx-r{display:flex;align-items:center;gap:12px;min-height:52px;padding:8px 12px;border:0;border-radius:16px;background:rgba(255,255,255,.1);cursor:pointer}
+body.blk .bk-need .nx-r:active{background:rgba(255,255,255,.2)}
+body.blk .bk-need .nx-i{width:34px;height:34px;border-radius:50%;background:rgba(255,255,255,.9)}
+body.blk .bk-need .nx-t{flex:1;min-width:0;font-size:14px;font-weight:600;color:#fff}
+body.blk .bk-need .nx-t span{color:#c9d5ee!important}
+body.blk .bk-need .nx-n,body.blk .bk-need .nx-r.red .nx-n,body.blk .bk-need .nx-r.org .nx-n,body.blk .bk-need .nx-r.amb .nx-n,body.blk .bk-need .nx-r.grn .nx-n{background:#fff;color:#14203a;font-weight:800}
+body.blk .bk-need .nx-c{color:#c9d5ee}
+html body.blk .bk-need .nx-r .nx-i{background:#fff!important}
+html body.blk .bk-need .nx-r.red .nx-i{color:#dc4a4a!important}html body.blk .bk-need .nx-r.grn .nx-i{color:#1f8a5b!important}html body.blk .bk-need .nx-r.org .nx-i{color:#d9822b!important}html body.blk .bk-need .nx-r.amb .nx-i{color:#9a7416!important}
+body.blk .bk-more{display:none}body.blk .bk-need.open .bk-more{display:flex}
+body.blk .bk-need .bk-btn{margin-top:14px;background:#fff;color:#1e3a6b}
+body.blk .bk-note{margin:0 0 14px}
+body.blk .bk-ft{margin-top:22px;text-align:center;font-size:12px;color:#8a92a6}
+body.blk .bk-ft button{border:0;background:none;color:#1e3a6b;font:inherit;font-weight:700;text-decoration:underline;min-height:44px;padding:0 8px;cursor:pointer}
+@media(min-width:900px){
+ body.blk .bk{padding:24px 28px 40px}
+ body.blk .bk-grid{grid-template-columns:repeat(3,1fr)}
+ body.blk .bk-need{grid-column:1/3;grid-row:1/3}
+ body.blk .bk-pair{grid-column:3;grid-row:1/3;grid-template-columns:1fr}
+ body.blk .bk-long{grid-column:1/4}
+}
+/* Thanh điều hướng dưới: 4 mục, mục đang chọn là nút tròn nền tối */
+@media(max-width:899px){
+ html body.blk #bnav{display:flex!important;justify-content:space-around;align-items:center;left:12px!important;right:12px!important;bottom:calc(10px + env(safe-area-inset-bottom))!important;height:68px!important;padding:0 8px!important;border:0!important;border-radius:34px!important;background:#fff!important;box-shadow:0 8px 24px -8px rgba(20,40,75,.28)!important}
+}
+body.blk #bnav button{flex:1;min-height:44px;border:0;background:none;display:flex;flex-direction:column;align-items:center;gap:2px;font:inherit;font-size:11px;font-weight:600;color:#6b7389;cursor:pointer}
+body.blk #bnav button i{width:44px;height:36px;border-radius:99px;display:grid;place-items:center;font-style:normal}
+body.blk #bnav button.on{color:#14203a}
+body.blk #bnav button.on i{background:#14203a;color:#fff}
 </style>
 </head>
 <body>
@@ -14700,6 +14768,51 @@ try{A.backupNow=function(){BK.manual();};A.syncExport=function(){BK.manual();};}
 window.BKX=window.BKX||{open:false};
 })();
 
+
+/* ===== Giao diện khối v1.0 — lớp bọc ngoài, không đổi dữ liệu/chức năng. Tắt: BLK.set(false) hoặc thêm ?ui=old vào địa chỉ ===== */
+var BLK=(function(){
+  var K='kk_ui',nav=document.getElementById('bnav'),OLDNAV=nav.innerHTML,oldHome=renderHome;
+  function pref(){try{var q=/[?&]ui=(old|new)/.exec(location.search);if(q)localStorage.setItem(K,q[1]);return localStorage.getItem(K)!=='old';}catch(e){return true;}}
+  var BELL='<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9a6 6 0 0 1 12 0c0 6 2 7 2 7H4s2-1 2-7"/><path d="M10 20a2 2 0 0 0 4 0"/></svg>';
+  function setNav(on){
+    nav.innerHTML=on?
+      '<button data-k="home" onclick="A.go(\'home\')"><i>'+fcGly('home',22)+'</i>Trang chủ</button>'
+      +'<button data-k="list" onclick="v2List()"><i>'+fcGly('list',22)+'</i>Kiểm kê</button>'
+      +'<button data-k="dc" onclick="A.go(\'recon\')"><i>'+fcGly('rec',22)+'</i>Đối chiếu</button>'
+      +'<button data-k="more" onclick="A.drawerToggle()"><i>'+fcGly('more',22)+'</i>Khác</button>':OLDNAV;
+  }
+  function uncounted(){var n=0;try{db.periods.forEach(function(p){n+=p.items.filter(needsCount).length;});}catch(e){}return n;}
+  function payBad(){var n=0;try{if(db.pay&&db.pay.mua&&db.pay.mua.length)payCompute().forEach(function(g){if(g.bad)n++;});}catch(e){}return n;}
+  function home(){
+    oldHome();                                   /* dựng trang cũ để lấy đúng các dòng "Cần xử lý" và thao tác nhảy thẳng tới hồ sơ */
+    var app=document.getElementById('app'),rows=[].slice.call(app.querySelectorAll('.nx .nx-r')),
+      tot=app.querySelector('.nx-tot'),total=tot?parseInt(tot.textContent,10)||0:0,
+      nm=esc((db.profile&&db.profile.ten)||'bạn'),nb=0,nq=uncounted(),np=payBad(),notes='';
+    try{notes=homeNoticesHtml()||'';}catch(e){}
+    if(!store.ok)notes='<div class="note-warn">Trình duyệt đang chặn bộ nhớ lưu trữ — dữ liệu chỉ tồn tại trong phiên này. Kiểm xong nhớ Xuất Excel ngay.</div>'+notes;
+    var d=document.createElement('div');d.className='wrap bk';
+    d.innerHTML='<div class="bk-top"><div class="bk-hi">Xin chào, <b>'+nm+'</b></div><button class="bk-bell" aria-label="Thông báo" onclick="document.getElementById(\'bk-need\').scrollIntoView({behavior:\'smooth\',block:\'start\'})">'+BELL+(total?'<b>'+total+'</b>':'')+'</button></div>'
+      +'<h1>Việc hôm nay</h1>'+(notes?'<div class="bk-note">'+notes+'</div>':'')
+      +'<div class="bk-grid"><section class="bk-card bk-need" id="bk-need"><div class="hd"><span class="bk-ic">'+icon('warn',20)+'</span><div><div class="bk-lb">Cần xử lý</div><div class="bk-num">'+total+' <small>việc</small></div></div>'
+      +'<span class="bk-pill '+(total?'':'g')+'"><i></i>'+(total?'Cần xử lý':'Bình thường')+'</span></div><div class="bk-rows"></div><button class="bk-btn" id="bk-all" onclick="this.parentNode.classList.toggle(\'open\');this.textContent=this.parentNode.classList.contains(\'open\')?\'Thu gọn\':\'Xem tất cả\'">Xem tất cả</button></section>'
+      +'<div class="bk-pair"><button class="bk-card bk-s1" onclick="v2Scan()"><span class="bk-ic">'+icon('qr',20)+'</span><div class="bk-lb">Quét QR vật tư</div><div class="bk-num">'+nq+' <small>mã chưa kiểm</small></div><span class="bk-pill '+(nq?'w':'')+'"><i></i>'+(nq?'Cần kiểm':'Bình thường')+'</span></button>'
+      +'<button class="bk-card bk-s2" onclick="A.go(\'pay\')"><span class="bk-ic">'+icon('doc',20)+'</span><div class="bk-lb">Thanh toán NCC</div><div class="bk-num">'+np+' <small>có lỗi</small></div><span class="bk-pill '+(np?'r':'')+'"><i></i>'+(np?'Cần xử lý':'Bình thường')+'</span></button></div>'
+      +'<button class="bk-card bk-long" onclick="A.drawerToggle()"><span class="bk-ic">'+icon('list',20)+'</span><div class="t">Tất cả chức năng<span>Kiểm kê CCDC, đối chiếu, tồn kho, biểu mẫu, báo lỗi, cài đặt…</span></div>'+icon('chev',18)+'</button></div>'
+      +'<div class="bk-ft">Giao diện khối 1.0 · bản '+esc(APP_VERSION)+'<br><button onclick="BLK.set(false)">Quay về giao diện cũ</button></div>';
+    var box=d.querySelector('.bk-rows');
+    rows.forEach(function(r,i){if(i>=3)r.classList.add('bk-more');box.appendChild(r);});   /* chuyển nguyên dòng cũ sang khối mới, giữ nguyên thao tác bấm */
+    if(rows.length<=3)d.querySelector('#bk-all').style.display='none';
+    app.innerHTML='';app.appendChild(d);
+  }
+  function apply(){var o=pref();document.body.classList.toggle('blk',o);setNav(o);}
+  window.renderHome=function(){
+    if(!document.body.classList.contains('blk')){oldHome();
+      document.getElementById('app').insertAdjacentHTML('beforeend','<div class="wrap" style="text-align:center;padding:8px 0 110px"><button class="btn btn-outline" onclick="BLK.set(true)">Dùng giao diện khối mới</button></div>');return;}
+    home();
+  };
+  apply();
+  return {set:function(o){try{localStorage.setItem(K,o?'new':'old');}catch(e){}apply();try{render();}catch(e){location.reload();}}};
+})();
 </script>
 <style id="nav-v3">
 /* Sidebar V3 – tối giản: tên thư mục in hoa nhỏ, mục con gọn; giữ nguyên hệ màu MedDental */
