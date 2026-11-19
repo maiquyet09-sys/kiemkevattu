@@ -2,8 +2,8 @@
 <html lang="vi">
 <head>
 <meta charset="UTF-8">
-<meta name="app-notes" content="Danh bạ nhân sự: chọn người là tự điền biên bản bàn giao, giải trình, ô ký; nhập Excel/CSV theo file mẫu. Giao diện đồng bộ 4 màu. Ký số PDF nâng cấp: ký nhiều người (tuần tự / đồng thời), danh sách nhân sự (nhập tay hoặc tải file mẫu), xem văn bản và kéo chữ ký đến đúng chỗ trước khi ký, thông báo Văn bản cần ký ở Trang chủ, biên bản Excel dùng chung thư viện chữ ký., hiện “đang chờ tại ai” và tiến độ 2 số lẻ, thông báo Trang chủ mở thẳng văn bản cần ký. Mở: Quản trị &amp; tiện ích › Ký số PDF">
-<meta name="app-version" content="2026111911">
+<meta name="app-notes" content="Danh bạ nhân sự: chọn người là tự điền biên bản bàn giao, giải trình, ô ký; nhập Excel/CSV theo file mẫu. Giao diện đồng bộ 4 màu. Ký số PDF nâng cấp: ký nhiều người (tuần tự / đồng thời), danh sách nhân sự (nhập tay hoặc tải file mẫu), xem văn bản và kéo chữ ký đến đúng chỗ trước khi ký, thông báo Văn bản cần ký ở Trang chủ, biên bản Excel dùng chung thư viện chữ ký., hiện “đang chờ tại ai” và tiến độ 2 số lẻ, thông báo Trang chủ mở thẳng văn bản cần ký. Mở: Quản trị &amp; tiện ích › Ký số PDF. Sửa lỗi nhập / thêm nhân sự vào Danh bạ (lỗi uid).">
+<meta name="app-version" content="2026111912">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="format-detection" content="telephone=no">
 <meta name="color-scheme" content="light">
@@ -7107,6 +7107,7 @@ function addUnmSheet(wb,p){
   var ROLE={giamDoc:'Giám đốc cơ sở',thuKho:'Thủ kho cơ sở',hanhChinh:'Hành chính'};
   var COLS=['Họ tên','Chức vụ','Bộ phận','Chi nhánh','Vai trò ký','Điện thoại','Mã NV','Trạng thái'];
   var ST={q:'',ed:null,seen:null,wrapped:false};
+  var _uidN=0;function uid(){return 'st'+Date.now().toString(36)+(++_uidN).toString(36)+Math.random().toString(36).slice(2,6);}
   var AL=[['name','ten'],['title','chucVu'],['dept','boPhan'],['unit','chiNhanh']];
   function alias(r){if(!r||r._al)return r;if(!r.ex)r.ex={};AL.forEach(function(p){Object.defineProperty(r,p[0],{get:function(){return r[p[1]]||'';},set:function(v){r[p[1]]=v;},enumerable:false,configurable:true});});Object.defineProperty(r,'_al',{value:1,enumerable:false});return r;}
   function L(){if(!Array.isArray(db.staff))db.staff=[];db.staff.forEach(alias);return db.staff;}
