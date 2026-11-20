@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="app-notes" content="Danh bạ nhân sự: chọn người là tự điền biên bản bàn giao, giải trình, ô ký; nhập Excel/CSV theo file mẫu. Giao diện đồng bộ 4 màu. Ký số PDF nâng cấp: ký nhiều người (tuần tự / đồng thời), danh sách nhân sự (nhập tay hoặc tải file mẫu), xem văn bản và kéo chữ ký đến đúng chỗ trước khi ký, thông báo Văn bản cần ký ở Trang chủ, biên bản Excel dùng chung thư viện chữ ký., hiện “đang chờ tại ai” và tiến độ 2 số lẻ, thông báo Trang chủ mở thẳng văn bản cần ký. Mở: Quản trị &amp; tiện ích › Ký số PDF. Sửa lỗi nhập / thêm nhân sự vào Danh bạ (lỗi uid). Ô chọn nhân sự trong biên bản: gõ để tìm theo tên, mã NV, số điện thoại, chức vụ.">
 <meta name="app-version" content="2026111925">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="format-detection" content="telephone=no">
 <meta name="color-scheme" content="light">
 <meta name="theme-color" content="#ffffff">
@@ -15185,6 +15185,73 @@ html body.blk.bp :is(#gsidebar,#gdrawer) a.gq.pri{background:#BF5535;color:#fff}
 html body.blk.bp :is(#gsidebar,#gdrawer) a.gnav-item.gnav-sub.on{background:#ECE9FB!important;color:#4B3F9E!important}
 html body.blk.bp :is(.topbar .back,button.back,.topbar>button.btn.ghost){color:#4B3F9E!important}
 </style>
+<style id="premium-ui">
+/* ===== Premium UI v1 — lớp phủ chỉ-CSS: header, hero cam đất, thẻ vuốt ngang, toast, thanh điều hướng. Không đổi logic/dữ liệu. Gỡ: xoá khối này + khối script#pu-js ===== */
+html body.bp{--sh2:0 1px 2px rgba(20,32,58,.04),0 10px 24px -16px rgba(20,32,58,.18);--pu-line:rgba(20,32,58,.08);--nav-h:58px;-webkit-font-smoothing:antialiased;overflow-x:clip}
+html body.bp :is(#gmain,#app,.wrap){min-width:0;max-width:100%}
+html body.bp :focus-visible{outline:2px solid #4B3F9E;outline-offset:2px}
+/* Header */
+html body.bp #gbrand{min-width:0;flex:0 1 auto}
+html body.bp #gbrand b.h5t{font-size:21px;font-weight:800;letter-spacing:-.02em;line-height:1}
+html body.bp .h5p{font-size:10.5px;font-weight:700;padding:2px 8px;border-radius:99px;line-height:1.5}
+html body.bp #gbrand small{font-size:10.5px;line-height:1.2;margin-top:3px;opacity:.8}
+html body.bp #gheader :is(#ghmenu,#guser .gearb){width:40px;height:40px;flex:none;border-radius:12px;background:#fff;border:1px solid var(--pu-line);box-shadow:0 1px 2px rgba(20,32,58,.04)}
+html body.bp #guser{flex:none;margin-left:auto}
+@media(max-width:899px){
+ html body.bp{--header-h:60px}
+ html body.bp #gheader{height:calc(60px + env(safe-area-inset-top,0px));padding:env(safe-area-inset-top,0px) max(14px,env(safe-area-inset-right,0px)) 0 max(14px,env(safe-area-inset-left,0px));gap:10px}
+}
+/* Hero cam đất: gradient nhẹ hơn, 4 chỉ số thành ô riêng */
+html body.bp .bp-band{background:linear-gradient(135deg,#E58F6B 0%,#D5734E 60%,#C8613F 100%);padding:14px 16px 16px;box-shadow:0 16px 30px -20px rgba(191,85,53,.6)}
+html body.bp .bp-tri{opacity:.6}
+html body.bp .bp-tri::after{background:rgba(75,63,158,.12)}
+html body.bp .bp-bh{margin-bottom:12px}
+html body.bp .bp-sts{gap:10px}
+html body.bp .bp-st{min-width:0;padding:10px 12px;border-radius:16px;background:rgba(255,255,255,.14)}
+html body.bp .bp-st b{font-size:28px;letter-spacing:-.01em}
+html body.bp .bp-st span{display:block;margin-top:3px;font-size:12.5px;font-weight:600;line-height:1.25;opacity:.94}
+@media(min-width:700px){html body.bp .bp-st+.bp-st{border-left:0;padding-left:12px}}
+@media(min-width:900px){html body.bp .bp-st b{font-size:36px}html body.bp .bp-band{padding:24px 28px 28px}}
+/* Thẻ chức năng: vuốt ngang có chủ đích, lộ thẻ kế tiếp, không tràn trang */
+html body.bp .bp-body{grid-template-columns:minmax(0,1fr)}
+@media(min-width:900px){html body.bp .bp-body{grid-template-columns:minmax(0,1fr) 360px}}
+html body.bp .bp-cards{gap:12px;margin:0 -16px;padding:4px 16px 12px;scroll-padding:0 16px;scroll-snap-type:x proximity;overscroll-behavior-x:contain;-webkit-overflow-scrolling:touch;scrollbar-width:none}
+html body.bp .bp-cards::-webkit-scrollbar{display:none}
+html body.bp .bp-cards>.bk-card{flex:0 0 clamp(210px,72%,264px);min-width:0;min-height:0;padding:16px;border-radius:20px;overflow-wrap:anywhere}
+html body.bp .bk-num{font-size:34px}
+html body.bp .bk-lb{font-size:13px}
+@media(min-width:600px){html body.bp .bp-cards>.bk-card{flex-basis:clamp(230px,34%,280px)}}
+@media(min-width:900px){html body.bp .bp-cards{margin:0;padding:4px 0 6px}html body.bp .bp-cards>.bk-card{min-height:170px}}
+/* Trạng thái: Hoàn thành (xanh) · Cần kiểm (hổ phách) · Cần xử lý (đỏ dịu) */
+html body.bp .bk-pill{min-height:26px;padding:4px 10px;font-size:12px;border:1px solid #C5E6D4;background:#E8F6EE;color:#1F6B4A}
+html body.bp .bk-pill.w{background:#FFF1E0;color:#A85A14;border-color:#F6D9B6}
+html body.bp .bk-pill.r{background:#FDEDEA;color:#B3372F;border-color:#F3C6C0}
+/* Sửa khai báo font lỗi ở lớp cũ (font:… inherit không hợp lệ) */
+html body.bp .bp-t{font-size:13px;font-weight:600;line-height:1.2;overflow-wrap:anywhere}
+html body.bp .bp-main{font-size:16px;font-weight:700}
+html body.bp .card,html body.bp .bp-side,html body.bp .bk-need{border-radius:20px}
+/* Thông báo (toast) gọn, xếp chồng, đặt dưới header — không che thanh điều hướng/nút thao tác */
+html body #toast{position:fixed;left:0;right:0;top:calc(env(safe-area-inset-top,0px) + 68px);bottom:auto;z-index:70;display:flex;flex-direction:column;align-items:center;gap:6px;padding:0 14px;pointer-events:none}
+html body #toast #toastin{display:none!important}
+#toast .tt{pointer-events:auto;max-width:min(92vw,420px);display:flex;align-items:center;gap:8px;padding:7px 12px;border-radius:14px;border:1px solid;font-size:13px;font-weight:600;line-height:1.35;font-family:inherit;box-shadow:0 8px 22px -12px rgba(20,32,58,.3);opacity:0;transform:translateY(-6px);transition:opacity .2s,transform .2s;overflow-wrap:anywhere}
+#toast .tt.show{opacity:1;transform:none}
+#toast .tt::before{content:"";flex:none;width:7px;height:7px;border-radius:50%;background:currentColor}
+#toast .tt.ok{background:#EEF8F2;color:#1F6B4A;border-color:#CBE8D8}
+#toast .tt.err{background:#FDF0ED;color:#B3372F;border-color:#F5CFC8}
+@media(min-width:900px){html body #toast{top:76px;left:auto;right:20px;align-items:flex-end}}
+/* Thanh điều hướng dưới: thấp hơn ~15% (68→58px), chọn mục nhẹ, đúng safe-area */
+@media(max-width:899px){
+ html body.blk.bp #bnav{height:58px!important;left:max(12px,env(safe-area-inset-left,0px))!important;right:max(12px,env(safe-area-inset-right,0px))!important;bottom:calc(8px + env(safe-area-inset-bottom,0px))!important;border-radius:29px!important;padding:0 6px!important;background:rgba(255,255,255,.92)!important;-webkit-backdrop-filter:saturate(1.5) blur(16px);backdrop-filter:saturate(1.5) blur(16px);border:1px solid var(--pu-line)!important;box-shadow:0 6px 20px -10px rgba(20,32,58,.28)!important}
+ html body.blk.bp #bnav button{gap:1px;font-size:10.5px;font-weight:600;color:#7a8196}
+ html body.blk.bp #bnav button i{width:40px;height:28px;transition:background-color .18s}
+ html body.blk.bp #bnav button i svg{width:20px;height:20px}
+ html body.blk.bp #bnav button.on{color:#BF5535;font-weight:700}
+ html body.blk.bp #bnav button.on i{background:rgba(191,85,53,.14);color:#BF5535}
+ html body.blk.bp .botbar{bottom:calc(74px + env(safe-area-inset-bottom,0px))!important}
+ html body.bp .wrap.bk{padding-bottom:calc(100px + env(safe-area-inset-bottom,0px))}
+}
+@media(prefers-reduced-motion:reduce){#toast .tt,html body.blk.bp #bnav button i{transition:none}}
+</style>
 <script id="bp-js">
 /* Dựng lại trang chủ theo bố cục Bold & Playful từ đúng các khối/dòng đang có (giữ nguyên thao tác bấm, dữ liệu). */
 var BP=(function(){
@@ -15232,6 +15299,19 @@ var BP=(function(){
   apply();
   return {mode:setMode,set:function(v){setMode(v?'bp':'blk');}};
 })();
+</script>
+<script id="pu-js">
+/* Toast xếp chồng (tối đa 3, tự ẩn, bấm để đóng; trùng nội dung chỉ gia hạn). Giữ nguyên chữ ký toast(m). */
+(function(){var MAX=3,ERR=/lỗi|thất bại|không thể|không hợp lệ|chưa (có|chọn|nhập)|sai /i;
+function kill(e){if(!e.parentNode)return;e.classList.remove('show');setTimeout(function(){if(e.parentNode)e.parentNode.removeChild(e);},200);}
+window.toast=function(m){var b=document.getElementById('toast');m=String(m==null?'':m);if(!b||!m)return;
+var d=Math.max(2600,Math.min(6000,m.length*60)),all=[].slice.call(b.querySelectorAll('.tt'));
+function arm(e){clearTimeout(e._t);e._t=setTimeout(function(){kill(e);},d);}
+for(var i=0;i<all.length;i++){if(all[i].getAttribute('data-m')===m){arm(all[i]);return;}}
+var e=document.createElement('div'),s=document.createElement('span');e.className='tt '+(ERR.test(m)?'err':'ok');e.setAttribute('data-m',m);s.textContent=m;e.appendChild(s);
+e.onclick=function(){clearTimeout(e._t);kill(e);};b.appendChild(e);
+all=b.querySelectorAll('.tt');for(var j=0;j<all.length-MAX;j++){clearTimeout(all[j]._t);kill(all[j]);}
+requestAnimationFrame(function(){e.classList.add('show');});arm(e);};})();
 </script>
 
 </body>
