@@ -15116,12 +15116,12 @@ html body #mcard dd[style*="#7ef0c9"]{color:var(--ok)!important}
 .stf-sec{font-size:var(--fs-sm);font-weight:600;color:var(--mut);margin:0 4px 8px}
 .stf-bar{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px}.stf-f{display:grid;gap:6px}
 </style>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&family=Nunito:wght@500;600;700;800&display=swap&subset=vietnamese" rel="stylesheet" media="print" onload="this.media='all'">
 <style id="bp-skin">
 /* ===== Bold & Playful · lớp phủ giao diện (chỉ CSS + dựng lại trang chủ). Tắt: Cài đặt → Bold & Playful, hoặc BP.set(false) ===== */
 html body.bp{--brand:#4B3F9E;--brand-d:#25224D;--brand-bg:#ECE9FB;--brand-ln:rgba(75,63,158,.25);--bg:#F4F5F9;--ink:#1F2942;--mut:#5B6075;--r-md:18px;--r-lg:24px;--sh2:0 12px 30px -12px rgba(75,63,158,.28);--bp-c:#E8896A;--bp-cd:#BF5535;background:#F4F5F9}
 html body.bp #gmain{background:#F4F5F9}
-html body.bp #gheader{background:#25224D!important}
-html body.bp :is(#gsidebar,#gdrawer){background:#25224D!important}
 html body.blk.bp :is(#gsidebar,#gdrawer) a.gnav-item.on:not(.gnav-sub){background:#BF5535!important}
 html body.blk.bp #bnav button.on i{background:#BF5535}
 html body.bp .card{border-radius:20px;box-shadow:var(--sh2)}
@@ -15140,11 +15140,7 @@ html body.bp .card{border-radius:20px;box-shadow:var(--sh2)}
 @media(min-width:900px){.bp-body{grid-template-columns:minmax(0,1fr) 340px}}
 .bp-col{min-width:0;display:grid;gap:14px}
 .bp-cards{display:flex;gap:14px;overflow-x:auto;padding:4px 2px 10px;scroll-snap-type:x mandatory}
-.bp-cards>.bk-card{flex:0 0 min(78%,260px);min-height:150px;scroll-snap-align:start;border:0;border-radius:22px;box-shadow:0 14px 28px -14px rgba(37,34,77,.55)}
-html body.bp .bp-cards .bk-card :is(.bk-lb,.bk-num,.bk-num small,.t,.t span){color:inherit!important}
-.bp-cards .bk-s1{background:#4B3F9E;color:#fff;--a:#7468CE;--b:#fff}
-.bp-cards .bk-s2{background:#25224D;color:#fff;--a:#4B3F9E;--b:#E8896A}
-.bp-cards .bk-long{background:linear-gradient(135deg,#8FC9E8,#C9E4F5);color:#25224D;--a:#4B3F9E;--b:#E8896A}
+.bp-cards>.bk-card{flex:0 0 min(78%,260px);min-height:150px;scroll-snap-align:start;border:0;border-radius:22px;box-shadow:var(--sh2)}
 html body.bp .bk-need{border-radius:22px;box-shadow:var(--sh2)}
 .bp-side{background:#fff;border-radius:22px;padding:16px;box-shadow:var(--sh2);align-self:start}
 .bp-sh b{display:block;font-size:18px;font-weight:700;color:#1F2942}
@@ -15153,6 +15149,41 @@ html body.bp .bk-need{border-radius:22px;box-shadow:var(--sh2)}
 .bp-t{border:0;background:#F4F5F9;border-radius:16px;min-height:88px;padding:10px 4px;display:grid;place-items:center;align-content:center;gap:6px;font:600 13px/1.2 inherit;color:#1F2942;cursor:pointer}
 .bp-t i{width:40px;height:40px;border-radius:12px;display:grid;place-items:center;background:color-mix(in srgb,var(--c) 16%,#fff);color:var(--c)}
 .bp-main{width:100%;margin-top:14px;min-height:48px;border:0;border-radius:12px;background:#BF5535;color:#fff;font:700 16px inherit;cursor:pointer}
+/* sửa v2: logo/chữ trên header tím đậm; chữ chào trên dải cam; màu thẻ thắng quy tắc cũ */
+html body.bp .bp-band :is(.bk-hi,.bk-hi b){color:#fff!important}
+/* font trẻ trung: Nunito (chữ thường, tròn, dễ đọc) + Baloo 2 (số liệu và tiêu đề) */
+html body.bp,html body.bp :is(input,button,select,textarea){font-family:'Nunito','Be Vietnam Pro',system-ui,-apple-system,'Segoe UI',Roboto,sans-serif}
+html body.bp :is(.bp-st b,.bp-sh b,.bk-num,.bk-need .bk-lb,.topbar .ttl,#gbrand b.h5t){font-family:'Baloo 2','Nunito',system-ui,sans-serif}
+html body.bp .bk-hi{font-weight:600}
+/* sửa v3: menu trái/ngăn kéo giữ nền sáng (chữ tối đọc được); chữ trên header tím */
+/* ===== Desktop ===== */
+@media(min-width:900px){
+ html body.bp #app .wrap.bk{max-width:1240px;margin:0 auto}
+ .bp-band{padding:26px 32px 30px;border-radius:28px}
+ .bp-band .bk-hi{font-size:18px}
+ .bp-st b{font-size:40px}
+ .bp-st span{font-size:14px}
+ .bp-tri{width:320px;height:150px}
+ .bp-tri::before{width:130px;height:116px;right:40px;top:-20px}
+ .bp-tri::after{width:84px;height:76px;right:150px;top:30px}
+ .bp-body{grid-template-columns:minmax(0,1fr) 360px;gap:20px}
+ .bp-cards{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));overflow:visible;padding:4px 0 6px}
+ .bp-cards>.bk-card{min-height:176px;min-width:0}
+ .bp-side{position:sticky;top:84px;padding:20px}
+ .bp-t{min-height:96px}
+}
+@media(min-width:900px) and (pointer:fine){
+ .bp-cards>.bk-card,.bp-t,.bp-main{transition:transform .15s ease,background-color .15s ease}
+ .bp-cards>.bk-card:hover{transform:translateY(-3px)}
+ .bp-t:hover{background:#ECE9FB}
+ .bp-main:hover{background:#A94A2C}
+}
+/* sửa v4: header trắng (logo tối như cũ), bỏ tím than; nút/mục xanh cũ đổi sang cam–tím cho đồng bộ */
+html body.bp #gheader{background:#fff!important;border-bottom:1px solid rgba(20,32,58,.08)!important}
+html body.blk.bp :is(#gsidebar,#gdrawer) a.gq{background:#ECE9FB;color:#4B3F9E}
+html body.blk.bp :is(#gsidebar,#gdrawer) a.gq.pri{background:#BF5535;color:#fff}
+html body.blk.bp :is(#gsidebar,#gdrawer) a.gnav-item.gnav-sub.on{background:#ECE9FB!important;color:#4B3F9E!important}
+html body.blk.bp :is(.topbar .back,button.back,.topbar>button.btn.ghost){color:#4B3F9E!important}
 </style>
 <script id="bp-js">
 /* Dựng lại trang chủ theo bố cục Bold & Playful từ đúng các khối/dòng đang có (giữ nguyên thao tác bấm, dữ liệu). */
@@ -15184,6 +15215,7 @@ var BP=(function(){
       +tl('#2E9E6B','pay','Thanh toán',"A.go('pay')")+tl('#8A6A0E','gear','Cài đặt',"A.go('settings')")+tl('#25224D','more','Tất cả','A.drawerToggle()')
       +'</div><button class="bp-main" onclick="v2Scan()">Quét QR vật tư</button>';
     grid.className='bp-body';grid.appendChild(col);grid.appendChild(side);
+    if(window.matchMedia('(min-width:900px)').matches){needEl.classList.add('open');var hd=needEl.querySelector('.hd');if(hd)hd.setAttribute('aria-expanded','true');}
     w.insertBefore(band,w.firstChild);
   };
   var prevSet=window.renderSettings;
