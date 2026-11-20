@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="app-notes" content="Giao diện điện thoại riêng (Trang chủ: việc cần xử lý, quét QR, lưới chức năng) và nút chuyển Điện thoại / Máy tính trên thanh đầu trang + Cài đặt. Đồng nhất giao diện toàn app theo Trang chủ (v12): chip lọc, thanh tiến độ, bảng, ô nhập, biểu tượng, biểu đồ, nút trong màn quét đổi sang tông đào – nâu espresso. Trang chủ tổng hợp 5 cơ sở: thêm bảng xếp hạng cơ sở (quá hạn, sắp đến hạn, cần chú ý, đang xử lý, trễ lâu nhất, người phụ trách, tự kiểm khớp số), mỗi dòng việc hiện cơ sở / số ngày trễ / người phụ trách, việc quá hạn xếp theo mức trễ, bộ lọc hiện Tất cả cơ sở. Danh bạ nhân sự: chọn người là tự điền biên bản bàn giao, giải trình, ô ký; nhập Excel/CSV theo file mẫu. Giao diện đồng bộ 4 màu. Ký số PDF nâng cấp: ký nhiều người (tuần tự / đồng thời), danh sách nhân sự (nhập tay hoặc tải file mẫu), xem văn bản và kéo chữ ký đến đúng chỗ trước khi ký, thông báo Văn bản cần ký ở Trang chủ, biên bản Excel dùng chung thư viện chữ ký., hiện “đang chờ tại ai” và tiến độ 2 số lẻ, thông báo Trang chủ mở thẳng văn bản cần ký. Mở: Quản trị &amp; tiện ích › Ký số PDF. Sửa lỗi nhập / thêm nhân sự vào Danh bạ (lỗi uid). Ô chọn nhân sự trong biên bản: gõ để tìm theo tên, mã NV, số điện thoại, chức vụ. v14: tinh chỉnh giao diện điện thoại (thanh dưới dán đáy + safe-area, lưới Thao tác nhanh 2 cột (Quét QR là 1 ô), nút Gán dạng viên thuốc, menu bên, chữ phụ đậm hơn).">
-<meta name="app-version" content="2026112010">
+<meta name="app-version" content="2026112011">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="format-detection" content="telephone=no">
 <meta name="color-scheme" content="light">
@@ -16147,6 +16147,28 @@ html body.bp.bp .bp-feat .fg .bp-main{position:static;inset:auto;z-index:auto;or
 html body.bp.bp .bp-feat .fg .bp-main:active{background:#FFDCCB}
 html body.bp.bp .bp-feat .fg .bp-main::before{flex:none;width:36px;height:36px;border-radius:12px;background-color:#FFD9C7;background-size:20px 20px;background-position:center;background-repeat:no-repeat}
 html body.bp.bp .bp-feat .fg .bp-main .pu-k{display:none}
+/* Thẻ "Cảnh báo nghiệp vụ": nhãn nhỏ lại, nhãn trạng thái không xuống dòng */
+html body.bp.bp .bk-need .bk-lb{font-size:16px;line-height:1.25}
+html body.bp .bk-need :is(.bk-pill,.bk-chev){flex:none;white-space:nowrap}
+/* Bảng "Tổng hợp 5 cơ sở": mỗi cơ sở thành 1 thẻ, đủ 6 chỉ số trong lưới 3×2, không phải cuộn ngang */
+html body.bp .v11-tb .v11-sc{overflow:visible}
+html body.bp .v11-tb table{display:block;min-width:0;width:100%}
+html body.bp .v11-tb thead{display:none}
+html body.bp .v11-tb :is(tbody,tfoot){display:block}
+html body.bp .v11-tb tr{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px 8px;padding:12px 0;border-bottom:1px solid #F0E6DE}
+html body.bp .v11-tb tbody tr:last-child{border-bottom:0}
+html body.bp .v11-tb tfoot tr{border-top:1.5px solid #E8DDD5;border-bottom:0}
+html body.bp .v11-tb td{display:block;padding:0;border:0;text-align:left;font-size:16px;line-height:1.2}
+html body.bp .v11-tb td:first-child{grid-column:1/-1;position:static;min-width:0;background:none;box-shadow:none;font-size:14px;line-height:1.35}
+html body.bp .v11-tb td:empty{display:none}
+html body.bp .v11-tb td:not(:first-child)::before{display:block;margin-bottom:3px;font-size:11.5px;font-weight:600;line-height:1.25;color:#6F6055}
+html body.bp .v11-tb td:nth-child(2)::before{content:"Quá hạn / lỗi"}
+html body.bp .v11-tb td:nth-child(3)::before{content:"Sắp đến hạn"}
+html body.bp .v11-tb td:nth-child(4)::before{content:"Cần chú ý"}
+html body.bp .v11-tb td:nth-child(5)::before{content:"Đang xử lý"}
+html body.bp .v11-tb td:nth-child(6)::before{content:"Tổng"}
+html body.bp .v11-tb td:nth-child(7)::before{content:"Trễ lâu nhất"}
+html body.bp .v11-tb td.z{font-size:14px}
 }
 </style>
 <script id="bp-v14-js">
