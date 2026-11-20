@@ -15552,6 +15552,88 @@ html body.bp .bp-t i{background:#F5F0EC!important;color:#4A3B34!important}
 html body.bp .bp-main:focus-visible{outline-color:#2A1F1A}
 html body.blk.bp :is(#gsidebar,#gdrawer) a.gq:not(.pri){background:#F5F0EC;color:#4A3B34}
 .pu-x{border-color:#EDE6E1;color:#2A1F1A}.pu-x:focus-visible{outline-color:#2A1F1A}
+
+/* ===== v9 — Peach × Espresso × Ivory + bố cục theo mockup: hero chào, hàng KPI, Cảnh báo nghiệp vụ, Thao tác nhanh + Chức năng chính ===== */
+html body.bp{--pu:#D9552E;--pu-d:#B8431F;--pu-bg:#FFEDE5;--brand:#D9552E;--brand-d:#B8431F;--brand-bg:#FFEDE5;--brand-ln:rgba(217,85,46,.26);--ink:#33271F;--mut:#6E5F55;--bg:#FCF8F4;--pu-bd:#F0E6DE;--pu-tx:#5A4A40;--pu-line:#F0E6DE;--sh2:0 1px 2px rgba(51,39,31,.05),0 12px 28px -18px rgba(51,39,31,.25);background:#FCF8F4}
+/* Hero */
+html body.bp .bp-band{background:radial-gradient(120% 140% at 100% 0%,#FFF1E9 0%,rgba(255,241,233,0) 55%),linear-gradient(120deg,#FFE3D6 0%,#FFC9B2 60%,#FFB69B 100%);color:#33271F;border-radius:22px;padding:22px 24px;margin-bottom:16px;box-shadow:0 14px 28px -22px rgba(217,85,46,.5)}
+html body.bp .bp-band .bp-bh{margin-bottom:6px}
+html body.bp .bp-band :is(.bk-hi,.bk-hi b){color:#33271F!important}
+html body.bp .bp-band .bk-hi{background:transparent;padding:0;font-size:24px;font-weight:800;letter-spacing:-.02em}
+html body.bp .bp-band .bk-hi::after{content:" 👋"}
+html body.bp .bp-band .bk-bell{background:rgba(255,255,255,.75);color:#33271F}
+.bp-sub{margin:0 0 12px;font-size:14px;color:#6A4A3A}
+.bp-date{display:inline-block;padding:6px 12px;border-radius:99px;background:rgba(255,255,255,.75);font-size:13px;font-weight:600;color:#33271F}
+@media(min-width:900px){html body.bp .bp-band{padding:30px 36px}html body.bp .bp-band .bk-hi{font-size:30px}.bp-sub{font-size:15px}}
+/* Hàng KPI: 4 thẻ trắng, icon trong vòng đào */
+html body.bp .bp-sts.bp-kpis{grid-template-columns:repeat(2,1fr);gap:12px;margin-bottom:16px}
+@media(min-width:900px){html body.bp .bp-sts.bp-kpis{grid-template-columns:repeat(4,1fr);gap:14px}}
+html body.bp .bp-st,html body.bp .bp-st+.bp-st{background:#fff;border:1px solid #F0E6DE;border-radius:18px;padding:14px 38px 14px 14px;display:flex;align-items:center;gap:12px;text-align:left;box-shadow:var(--sh2)}
+html body.bp .bp-st:first-child{box-shadow:var(--sh2),inset 0 0 0 1.5px rgba(217,85,46,.4)}
+html body.bp .bp-st .kic{flex:none;width:44px;height:44px;border-radius:50%;display:grid;place-items:center;background:#FFEDE5;color:#D9552E}
+html body.bp .bp-st:first-child .kic{background:#FFD9C7}
+html body.bp .bp-st .kt{min-width:0}
+html body.bp .bp-st .kt span{display:block;font-size:13px;font-weight:600;color:#6E5F55;line-height:1.3}
+html body.bp .bp-st .kr{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-top:2px}
+html body.bp .bp-st b,html body.bp .bp-st:first-child b{font-size:30px;line-height:1.1;color:#33271F}
+html body.bp .bp-st:first-child b{color:#D9552E}
+@media(min-width:900px){html body.bp .bp-st b,html body.bp .bp-st:first-child b{font-size:32px}}
+html body.bp .bp-st em{font-style:normal;padding:2px 9px;border-radius:99px;font-size:12px;font-weight:700;background:#FDECEE;color:#B42333}
+html body.bp .bp-st::after{right:14px;top:50%;transform:translateY(-50%);color:#B9A599}
+@media(hover:hover){html body.bp .bp-st:hover{background:#FFFBF8;box-shadow:var(--sh2),inset 0 0 0 1px rgba(217,85,46,.4)}html body.bp .bp-st:first-child:hover{background:#FFFBF8;box-shadow:var(--sh2),inset 0 0 0 1.5px #D9552E}}
+html body.bp .bp-st:focus-visible{outline-color:#D9552E}
+/* Cảnh báo nghiệp vụ: icon, badge, chip, nút */
+html body.bp :is(.bk-need,.bp-side,.bp-feat),html body.bp .bk-need .nx-r,html body.bp .bp-t{border-color:#F0E6DE}
+html body.bp .bk-need .bk-ic{background:#FFEDE5;color:#D9552E}
+html body.bp .bk-need .bk-num{color:#33271F}
+html body.blk.bp .bk-need .nx-r:not(.zz):not(.zz) .nx-i{background:#FFEDE5!important;color:#D9552E!important}
+html body.blk.bp .bk-need .nx-r.red:not(.zz):not(.zz) .nx-i{background:#FDECEE!important;color:#C62839!important}
+html body.blk.bp .bk-need .nx-r.red:not(.zz) .nx-n{background:#D6303F;color:#fff}
+html body.blk.bp .bk-need .nx-r:is(.org,.amb):not(.zz) .nx-n{background:#FFEDE5;color:#B8431F}
+html body.blk.bp .bk-need .nx-r:is(.blu,.grn):not(.zz) .nx-n{background:#F5EDE7;color:#6E5F55}
+html body.bp .pu-gh:is(.org,.amb){color:#B8431F}html body.bp .pu-gh:is(.blu,.watch){color:#6E5F55}
+html body.bp .pu-c.on{background:#FFEDE5;color:#B8431F;border-color:#FFC9B2}
+html body.bp .nx-r .nx-act{background:#fff;border-color:#EADFD6;color:#5A4A40}
+html body.bp .nx-r.red .nx-act{background:#FFE3D6;border-color:#FFC4AB;color:#A8381A}
+@media(hover:hover){html body.bp .nx-r .nx-act:hover{background:#FBF4EF}html body.bp .nx-r.red .nx-act:hover{background:#FFD3BF}}
+html body.bp .nx-act:focus-visible{outline-color:#A8381A}
+/* Nút: primary espresso · secondary viền · destructive đỏ */
+html body.bp .btn-primary{background:#33271F;border-color:#33271F;color:#fff}
+@media(hover:hover){html body.bp .btn-primary:hover{background:#4A382E}}
+html body.bp .btn-outline{color:#33271F;border-color:#E8DDD5}
+/* Cột phải: Thao tác nhanh + Chức năng chính */
+.bp-right{display:grid;gap:16px;align-self:start;min-width:0}
+@media(min-width:900px){.bp-right{position:sticky;top:84px}}
+html body.bp .bp-side{position:static}
+html body.bp .bp-t:last-child{grid-column:auto}
+html body.bp .bp-t i{background:#FFEDE5!important;color:#D9552E!important}
+@media(hover:hover){html body.bp .bp-t:hover{background:#FFFBF8;border-color:rgba(217,85,46,.45)}}
+html body.bp .bp-main{background:linear-gradient(135deg,#FFB59E,#FF8A66);color:#33271F;box-shadow:0 14px 26px -14px rgba(255,138,102,.8),inset 0 0 0 1px rgba(255,255,255,.4)}
+@media(hover:hover){html body.bp .bp-main:hover{background:linear-gradient(135deg,#FFC0AC,#FF9674)}}
+html body.bp .bp-main:focus-visible{outline-color:#33271F}
+.bp-feat{background:#fff;border:1px solid #F0E6DE;border-radius:18px;box-shadow:var(--sh2);padding:18px 20px}
+.bp-feat .fh{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+.bp-feat .fh b{display:flex;align-items:center;gap:8px;font-size:16px;font-weight:700;color:#33271F}
+.bp-feat .fh b::before{content:"";width:4px;height:16px;border-radius:2px;background:#FF9F85}
+.bp-feat .fh button{border:0;background:none;color:#B8431F;font:600 13px inherit;cursor:pointer;padding:4px 2px}
+.bp-feat .fg{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.bp-feat .fi{display:flex;align-items:center;gap:10px;text-align:left;min-height:58px;padding:10px;border:1px solid #F0E6DE;border-radius:14px;background:#FFFBF8;color:#33271F;font-family:inherit;cursor:pointer;transition:background-color .15s,border-color .15s}
+.bp-feat .fi i{flex:none;width:36px;height:36px;border-radius:12px;display:grid;place-items:center;background:#FFEDE5;color:#D9552E}
+.bp-feat .fi span{min-width:0}
+.bp-feat .fi b{display:block;font-size:13px;font-weight:700;line-height:1.25}
+.bp-feat .fi small{display:block;margin-top:2px;font-size:12px;line-height:1.3;color:#6E5F55}
+@media(hover:hover){.bp-feat .fi:hover{background:#fff;border-color:rgba(217,85,46,.45)}}
+.bp-feat :is(.fi,.fh button):focus-visible{outline:2px solid #33271F;outline-offset:2px}
+/* Sidebar + điều hướng */
+html body.blk.bp :is(#gsidebar,#gdrawer) a.gq.pri{background:#33271F;color:#fff}
+html body.blk.bp :is(#gsidebar,#gdrawer) a.gq:not(.pri){background:#FFEDE5;color:#A8381A}
+html body.blk.bp #bnav button.on i{background:#D9552E}
+html body.bp #gbrand .dot{background:#D9552E}
+html body.bp .gbd{background:#D6303F}
+@media(min-width:900px){html body.bp #gsidebar{display:flex;flex-direction:column}
+html body.bp #gsidebar::after{content:"MedDental Prime\A Hiệu quả hơn mỗi ngày";white-space:pre;margin-top:auto;padding:14px 16px;border-radius:16px;font:700 13px/1.5 inherit;color:#33271F;background:radial-gradient(90% 120% at 100% 100%,#FFC9B2 0%,rgba(255,201,178,0) 70%),#FFF3EC}
+html body.sb-min #gsidebar::after{display:none}}
+.pu-x{border-color:#F0E6DE;color:#33271F}.pu-x:focus-visible{outline-color:#33271F}
 </style>
 <script id="bp-js">
 /* Dựng lại trang chủ theo bố cục Bold & Playful từ đúng các khối/dòng đang có (giữ nguyên thao tác bấm, dữ liệu). */
@@ -15668,6 +15750,32 @@ var o=c.closest('.ovl')||c;while(o.parentNode&&o.parentNode!==document.body&&o.p
 c.insertBefore(b,c.firstChild);}
 function scan(){[].forEach.call(document.querySelectorAll('.sigcard,.sheet,.v2s'),add);}
 try{new MutationObserver(scan).observe(document.body,{childList:true,subtree:true});scan();}catch(e){}})();
+</script>
+<script id="bp-v9">
+/* v9: dựng bố cục theo mockup từ đúng các khối đang có (giữ nguyên dữ liệu và thao tác bấm) */
+(function(){var prev=window.renderHome,DAY=['Chủ nhật','Thứ Hai','Thứ Ba','Thứ Tư','Thứ Năm','Thứ Sáu','Thứ Bảy'];
+function g(k,n){try{return fcGly(k,n);}catch(e){return '';}}
+function ic(k,n){try{return icon(k,n);}catch(e){return '';}}
+function fi(t,s,k,a){return '<button type="button" class="fi" onclick="'+a+'"><i>'+k+'</i><span><b>'+t+'</b><small>'+s+'</small></span></button>';}
+function v9(){var w=document.querySelector('#app .wrap.bk');if(!w||!document.body.classList.contains('bp')||w.getAttribute('data-v9'))return;
+var band=w.querySelector('.bp-band'),body=w.querySelector('.bp-body'),sts=band&&band.querySelector('.bp-sts'),bh=band&&band.querySelector('.bp-bh');if(!band||!body||!sts||!bh)return;w.setAttribute('data-v9','1');
+var d=new Date(),p=function(n){return (n<10?'0':'')+n;};
+var sub=document.createElement('p');sub.className='bp-sub';sub.textContent='Chúc bạn một ngày làm việc hiệu quả!';
+var dt=document.createElement('span');dt.className='bp-date';dt.textContent=DAY[d.getDay()]+', '+p(d.getDate())+'/'+p(d.getMonth()+1)+'/'+d.getFullYear();
+bh.parentNode.insertBefore(sub,bh.nextSibling);sub.parentNode.insertBefore(dt,sub.nextSibling);
+var red=0;[].forEach.call(w.querySelectorAll('.bk-need .nx-r.red .nx-n'),function(n){red+=parseInt(n.textContent,10)||0;});
+var K=[['Công việc cần xử lý',ic('warn',22)],['Mã chưa kiểm',g('open',22)],['Thanh toán lỗi',g('pay',22)],['Kỳ kiểm kê',g('list',22)]];
+[].forEach.call(sts.querySelectorAll('.bp-st'),function(s,i){var k=K[i],b=s.querySelector('b');if(!k||!b)return;var n=b.textContent,v=parseInt(n,10)||0,
+ pill=i===0?(red?red+' quá hạn / lỗi':''):(i===1&&v?'Cần kiểm':(i===2&&v?'Cần sửa':''));
+ s.innerHTML='<i class="kic">'+k[1]+'</i><div class="kt"><span>'+k[0]+'</span><div class="kr"><b>'+n+'</b>'+(pill?'<em>'+pill+'</em>':'')+'</div></div>';});
+sts.classList.add('bp-kpis');w.insertBefore(sts,body);
+var side=body.querySelector('.bp-side');if(side&&!side.parentNode.classList.contains('bp-right')){var R=document.createElement('div');R.className='bp-right';side.parentNode.insertBefore(R,side);R.appendChild(side);
+ var f=document.createElement('section');f.className='bp-feat';
+ f.innerHTML='<div class="fh"><b>Chức năng chính</b><button type="button" onclick="A.drawerToggle()">Tất cả chức năng</button></div><div class="fg">'+fi('Kiểm kê vật tư','Số lượng, tồn kho',g('list',20),"A.go('upload')")+fi('Kiểm kê CCDC &amp; TSCĐ','Tài sản, công cụ',g('form',20),"A.go('assets')")+fi('Kỳ kiểm kê','Theo dõi tiến độ',ic('clock',20),'v2List()')+fi('Quét QR','Tra cứu nhanh',g('open',20),'v2Scan()')+'</div>';
+ R.appendChild(f);}
+var lb=w.querySelector('.bk-need .bk-lb');if(lb)lb.textContent='Cảnh báo nghiệp vụ';}
+window.renderHome=function(){var r=prev.apply(this,arguments);try{v9();}catch(e){}return r;};
+try{v9();}catch(e){}})();
 </script>
 </body>
 </html>
