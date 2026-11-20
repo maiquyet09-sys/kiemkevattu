@@ -15116,5 +15116,91 @@ html body #mcard dd[style*="#7ef0c9"]{color:var(--ok)!important}
 .stf-sec{font-size:var(--fs-sm);font-weight:600;color:var(--mut);margin:0 4px 8px}
 .stf-bar{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px}.stf-f{display:grid;gap:6px}
 </style>
+<style id="bp-skin">
+/* ===== Bold & Playful · lớp phủ giao diện (chỉ CSS + dựng lại trang chủ). Tắt: Cài đặt → Bold & Playful, hoặc BP.set(false) ===== */
+html body.bp{--brand:#4B3F9E;--brand-d:#25224D;--brand-bg:#ECE9FB;--brand-ln:rgba(75,63,158,.25);--bg:#F4F5F9;--ink:#1F2942;--mut:#5B6075;--r-md:18px;--r-lg:24px;--sh2:0 12px 30px -12px rgba(75,63,158,.28);--bp-c:#E8896A;--bp-cd:#BF5535;background:#F4F5F9}
+html body.bp #gmain{background:#F4F5F9}
+html body.bp #gheader{background:#25224D!important}
+html body.bp :is(#gsidebar,#gdrawer){background:#25224D!important}
+html body.blk.bp :is(#gsidebar,#gdrawer) a.gnav-item.on:not(.gnav-sub){background:#BF5535!important}
+html body.blk.bp #bnav button.on i{background:#BF5535}
+html body.bp .card{border-radius:20px;box-shadow:var(--sh2)}
+.bp-band{position:relative;overflow:hidden;background:linear-gradient(135deg,#DE7650,#BF5535);color:#fff;border-radius:24px;padding:16px 18px 20px;margin-bottom:16px}
+.bp-tri{position:absolute;right:0;top:0;width:200px;height:110px;pointer-events:none}
+.bp-tri::before,.bp-tri::after{content:"";position:absolute;background:rgba(255,255,255,.16);clip-path:polygon(50% 0,100% 100%,0 100%)}
+.bp-tri::before{width:90px;height:80px;right:20px;top:-14px}
+.bp-tri::after{width:60px;height:54px;right:96px;top:18px;background:rgba(75,63,158,.22)}
+.bp-bh{position:relative;z-index:1;display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:14px}
+.bp-band .bk-hi{color:#fff;font-size:15px}
+.bp-sts{position:relative;z-index:1;display:grid;grid-template-columns:repeat(2,1fr);gap:14px 10px}
+.bp-st b{display:block;font-size:30px;font-weight:800;line-height:1.1;font-variant-numeric:tabular-nums}
+.bp-st span{font-size:13px;font-weight:600}
+@media(min-width:700px){.bp-sts{grid-template-columns:repeat(4,1fr)}.bp-st+.bp-st{border-left:1px solid rgba(255,255,255,.35);padding-left:14px}}
+.bp-body{display:grid;gap:16px}
+@media(min-width:900px){.bp-body{grid-template-columns:minmax(0,1fr) 340px}}
+.bp-col{min-width:0;display:grid;gap:14px}
+.bp-cards{display:flex;gap:14px;overflow-x:auto;padding:4px 2px 10px;scroll-snap-type:x mandatory}
+.bp-cards>.bk-card{flex:0 0 min(78%,260px);min-height:150px;scroll-snap-align:start;border:0;border-radius:22px;box-shadow:0 14px 28px -14px rgba(37,34,77,.55)}
+html body.bp .bp-cards .bk-card :is(.bk-lb,.bk-num,.bk-num small,.t,.t span){color:inherit!important}
+.bp-cards .bk-s1{background:#4B3F9E;color:#fff;--a:#7468CE;--b:#fff}
+.bp-cards .bk-s2{background:#25224D;color:#fff;--a:#4B3F9E;--b:#E8896A}
+.bp-cards .bk-long{background:linear-gradient(135deg,#8FC9E8,#C9E4F5);color:#25224D;--a:#4B3F9E;--b:#E8896A}
+html body.bp .bk-need{border-radius:22px;box-shadow:var(--sh2)}
+.bp-side{background:#fff;border-radius:22px;padding:16px;box-shadow:var(--sh2);align-self:start}
+.bp-sh b{display:block;font-size:18px;font-weight:700;color:#1F2942}
+.bp-sh span{font-size:13px;color:#5B6075}
+.bp-tiles{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:12px}
+.bp-t{border:0;background:#F4F5F9;border-radius:16px;min-height:88px;padding:10px 4px;display:grid;place-items:center;align-content:center;gap:6px;font:600 13px/1.2 inherit;color:#1F2942;cursor:pointer}
+.bp-t i{width:40px;height:40px;border-radius:12px;display:grid;place-items:center;background:color-mix(in srgb,var(--c) 16%,#fff);color:var(--c)}
+.bp-main{width:100%;margin-top:14px;min-height:48px;border:0;border-radius:12px;background:#BF5535;color:#fff;font:700 16px inherit;cursor:pointer}
+</style>
+<script id="bp-js">
+/* Dựng lại trang chủ theo bố cục Bold & Playful từ đúng các khối/dòng đang có (giữ nguyên thao tác bấm, dữ liệu). */
+var BP=(function(){
+  var K='kk_bp',prev=window.renderHome;
+  function on(){try{return localStorage.getItem(K)!=='off';}catch(e){return true;}}
+  function apply(){document.body.classList.toggle('bp',document.body.classList.contains('blk')&&on());}
+  function num(s){var e=document.querySelector(s+' .bk-num');return e?parseInt(e.textContent,10)||0:0;}
+  function st(n,l){return '<div class="bp-st"><b>'+n+'</b><span>'+l+'</span></div>';}
+  function tl(c,ic,t,act){return '<button class="bp-t" style="--c:'+c+'" onclick="'+act+'"><i>'+fcGly(ic,22)+'</i><span>'+t+'</span></button>';}
+  window.renderHome=function(){
+    prev();apply();
+    if(!document.body.classList.contains('bp'))return;
+    var w=document.querySelector('#app .wrap.bk');if(!w||w.querySelector('.bp-band'))return;
+    var grid=w.querySelector('.bk-grid'),needEl=grid&&grid.querySelector('.bk-need');if(!needEl)return;
+    var per=0;try{per=db.periods.length;}catch(e){}
+    var band=document.createElement('div');band.className='bp-band';
+    band.innerHTML='<div class="bp-tri"></div><div class="bp-bh"></div><div class="bp-sts">'+st(num('.bk-need'),'Cần xử lý')+st(num('.bk-s1'),'Mã chưa kiểm')+st(num('.bk-s2'),'Thanh toán lỗi')+st(per,'Kỳ kiểm kê')+'</div>';
+    var bh=band.querySelector('.bp-bh'),hi=w.querySelector('.bk-hi'),bell=w.querySelector('.bk-bell');
+    if(hi)bh.appendChild(hi);if(bell)bh.appendChild(bell);
+    var top=w.querySelector('.bk-top'),h1=w.querySelector('h1');if(top)top.remove();if(h1)h1.remove();
+    var cards=document.createElement('div');cards.className='bp-cards';
+    ['.bk-s1','.bk-s2','.bk-long'].forEach(function(s){var e=grid.querySelector(s);if(e)cards.appendChild(e);});
+    var pair=grid.querySelector('.bk-pair');if(pair)pair.remove();
+    var col=document.createElement('div');col.className='bp-col';col.appendChild(cards);col.appendChild(needEl);
+    var side=document.createElement('aside');side.className='bp-side';
+    side.innerHTML='<div class="bp-sh"><b>Thao tác nhanh</b><span>Việc hay làm nhất</span></div><div class="bp-tiles">'
+      +tl('#4B3F9E','open','Quét QR','v2Scan()')+tl('#BF5535','list','Kiểm kê','v2List()')+tl('#2E8FB8','rec','Đối chiếu',"A.go('recon')")
+      +tl('#2E9E6B','pay','Thanh toán',"A.go('pay')")+tl('#8A6A0E','gear','Cài đặt',"A.go('settings')")+tl('#25224D','more','Tất cả','A.drawerToggle()')
+      +'</div><button class="bp-main" onclick="v2Scan()">Quét QR vật tư</button>';
+    grid.className='bp-body';grid.appendChild(col);grid.appendChild(side);
+    w.insertBefore(band,w.firstChild);
+  };
+  var prevSet=window.renderSettings;
+  function mode(){var c=document.body.classList;return !c.contains('blk')?'old':(c.contains('bp')?'bp':'blk');}
+  function setMode(k){try{localStorage.setItem(K,k==='bp'?'on':'off');}catch(e){}BLK.set(k!=='old');}
+  window.renderSettings=function(){
+    prevSet();
+    var sw=document.querySelector('#app .bk-sw');if(!sw)return;
+    var m=mode();
+    function opt(k,t,d){var a=(m===k);return '<button class="bk-opt'+(a?' on':'')+'" onclick="BP.mode(\''+k+'\')"><i></i><span><b>'+t+'</b><small>'+d+'</small></span>'+(a?'<em>Đang dùng</em>':'')+'</button>';}
+    sw.innerHTML=opt('bp','Bold &amp; Playful','Màu cam–tím, thẻ màu lớn, Trang chủ bố cục mới')+opt('blk','Giao diện khối','Các khối màu nhạt, thanh điều hướng tròn, gọn và dễ nhìn')+opt('old','Giao diện cũ','Kiểu hiển thị trước đây của app');
+  };
+  var oldBlk=BLK.set;BLK.set=function(v){oldBlk(v);apply();try{render();}catch(e){}};
+  apply();
+  return {mode:setMode,set:function(v){setMode(v?'bp':'blk');}};
+})();
+</script>
+
 </body>
 </html>
