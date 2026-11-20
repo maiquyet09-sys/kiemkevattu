@@ -5330,7 +5330,8 @@ function renderHomeOld(){
   var nxs=null;try{nxs=window.MSP&&MSP();}catch(e){}
   var nsg=nxs?(nxs.me?nxs.mine:nxs.all):0;
   if(nsg)nxRow(nxs.me?'red':'amb',icon('edit',18),'Văn bản cần ký<span style="display:block;font-size:12px;font-weight:500;color:#6b7389;margin-top:1px">'+(nxs.me?nxs.mine+' chờ bạn ký'+(nxs.all>nxs.mine?' · '+(nxs.all-nxs.mine)+' chờ người khác':''):'Đang chờ: '+esc(nxs.names.join(', ')))+'</span>',nsg,"MSX.goSign()");
-  if(nxc.expired)nxRow('red',KIC.expired,'Đã hết hạn',nxc.expired,"NX.go('expired')");
+  if(nxc.expired){var nxlate=0;try{entries.forEach(function(e){if(e.days<0&&-e.days>nxlate)nxlate=-e.days;});}catch(e){}
+    nxRow('red',KIC.expired,'Đã hết hạn'+(nxlate?'<span style="display:block;font-size:12px;font-weight:500;color:#6b7389;margin-top:1px">Trễ lâu nhất '+nxlate+' ngày</span>':''),nxc.expired,"NX.go('expired')");}
   if(nxc.m1)nxRow('org',KCAL,'Còn ≤ 1 tháng',nxc.m1,"NX.go('m1')");
   if(nxo)nxRow('blu',icon('clock',18),'Kỳ đang kiểm dở',nxo,"NX.go('open')");
   if(nxl)nxRow('amb',icon('doc',18),'Thanh toán NCC có lỗi',nxl,"NX.go('pay')");
@@ -15382,6 +15383,31 @@ html body.blk.bp :is(#gsidebar,#gdrawer) a.gnav-item.on:not(.gnav-sub) :is(.cnt,
 html body.bp .bp-main,html body.blk.bp :is(#gsidebar,#gdrawer) a.gq.pri{background:linear-gradient(135deg,#FFBBA0,#FFA382);color:#5A1E0A;box-shadow:0 10px 20px -14px rgba(219,86,50,.55)}
 @media(hover:hover){html body.bp .bp-main:hover{background:linear-gradient(135deg,#FFBBA0,#FFA382);filter:brightness(.97);box-shadow:0 12px 22px -14px rgba(219,86,50,.65)}}
 html body.bp .bp-main .pu-k{background:rgba(255,255,255,.55);color:#5A1E0A}
+
+/* ===== v5 — bỏ trùng lặp, banner bấm được, 3 mức khẩn cấp, nút hành động, chữ dễ đọc ===== */
+:root{--sidebar-w:252px}
+html body.bp{--fs-cap:13px}
+html body.bp .bp-cards{display:none}
+html body.bp .bp-t:last-child{grid-column:span 2}
+html body.bp .bp-st{position:relative;cursor:pointer;border-radius:14px;transition:background-color .15s,box-shadow .15s}
+html body.bp .bp-st::after{content:"›";position:absolute;right:12px;top:8px;font-size:20px;line-height:1;color:#A8381A;opacity:.75}
+html body.bp .bp-st.z b{opacity:.5}
+@media(hover:hover){html body.bp .bp-st:hover{background:#fff;box-shadow:inset 0 0 0 1px rgba(219,86,50,.4)}}
+html body.bp .bp-st:focus-visible,.nx-act:focus-visible{outline:2px solid #A8381A;outline-offset:2px}
+html body.blk.bp .bk-need .nx-t span{font-size:13px!important;color:#3F4A5A!important}
+/* 3 mức: đỏ = quá hạn/lỗi · cam = sắp đến hạn, cần chú ý · xám = thông tin */
+html body.blk.bp .bk-need .nx-r.amb .nx-n{background:#FFF1E0;color:#9A4F0C}
+html body.blk.bp .bk-need .nx-r.amb .nx-i{color:#B45A10!important}
+html body.blk.bp .bk-need .nx-r.blu .nx-n,html body.blk.bp .bk-need .nx-r.grn .nx-n{background:#EEF2F6;color:#475569}
+html body.blk.bp .bk-need .nx-r.blu .nx-i,html body.blk.bp .bk-need .nx-r.grn:has(.nx-n) .nx-i{background:#EEF2F6!important;color:#475569!important}
+html body.bp .pu-gh.amb{color:#9A4F0C}
+html body.bp .pu-gh.blu,html body.bp .pu-gh.watch{color:#475569}
+.nx-act{flex:none;min-height:32px;padding:0 12px;border-radius:99px;border:1px solid #CBD5E1;background:#fff;color:#334155;font:700 12.5px/1 inherit;cursor:pointer;white-space:nowrap}
+.nx-r.red .nx-act{background:#FDECEA;border-color:#F3B7B7;color:#B42323}
+.nx-r.org .nx-act,.nx-r.amb .nx-act{background:#FFF1E0;border-color:#F6D9B6;color:#9A4F0C}
+@media(max-width:560px){.nx-act{display:none}}
+html body #gsidebar .gnav-item{line-height:1.3}
+html body #gsidebar .gnav-grp{white-space:nowrap}
 </style>
 <script id="bp-js">
 /* Dựng lại trang chủ theo bố cục Bold & Playful từ đúng các khối/dòng đang có (giữ nguyên thao tác bấm, dữ liệu). */
@@ -15452,7 +15478,7 @@ function key(r){var a=r.getAttribute('onclick')||'';if(/NX\.go\('m[36]'\)/.test(
 function num(r){var n=r.querySelector('.nx-n');return n?parseInt(n.textContent,10)||0:0;}
 function el(t,c,x){var e=document.createElement(t);if(c)e.className=c;if(x!=null)e.textContent=x;return e;}
 function build(){var nd=document.getElementById('bk-need'),box=nd&&nd.querySelector('.bk-rows');if(!box||box.getAttribute('data-pu'))return;
-var rows=[].slice.call(box.querySelectorAll('.nx-r')).filter(function(r){return r.querySelector('.nx-n');});if(!rows.length)return;box.setAttribute('data-pu','1');
+var rows=[].slice.call(box.querySelectorAll('.nx-r')).filter(function(r){return r.querySelector('.nx-n');});if(!rows.length)return;box.setAttribute('data-pu','1');rows.sort(function(x,y){return num(y)-num(x);});
 var by={},cnt={},tot=0,st={f:'all',x:false};rows.forEach(function(r){var k=key(r);r._g=k;(by[k]=by[k]||[]).push(r);});
 var gs=O.filter(function(k){return by[k];}).map(function(k){cnt[k]=by[k].reduce(function(s,r){return s+num(r);},0);if(k!=='watch')tot+=cnt[k];return{k:k,rows:by[k],h:el('div','pu-gh '+k,G[k])};});
 gs.forEach(function(g){g.h.appendChild(el('span','', g.k==='watch'?'· không tính vào tổng':'· '+cnt[g.k]+' mục'));});
@@ -15471,6 +15497,23 @@ document.addEventListener('keydown',function(e){if(e.defaultPrevented||e.ctrlKey
 if(!document.body.classList.contains('bp')||!window.matchMedia('(min-width:900px)').matches)return;var md=document.getElementById('modal');if(md&&md.children.length)return;
 var k=(e.key||'').toLowerCase();if(k==='q'&&typeof v2Scan==='function'){e.preventDefault();v2Scan();}else if(k==='b'){var c=document.getElementById('fcbr');if(c){e.preventDefault();c.click();}}});
 try{build();hint();}catch(e){}})();
+</script>
+<script id="bp-v5">
+/* v5: Banner 4 chỉ số bấm được; bỏ nút/thẻ lặp; thêm nút hành động trên mỗi dòng việc */
+(function(){var prev=window.renderHome;
+var ACT=["document.getElementById('bk-need').scrollIntoView({behavior:'smooth',block:'start'})","v2Scan()","A.go('pay')","v2List()"],
+CTA=[[/cần ký/i,'Ký ngay'],[/hết hạn/i,'Xem lô hết hạn'],[/Còn ≤/,'Xem lô'],[/kiểm dở/i,'Kiểm tiếp'],[/Thanh toán/i,'Sửa lỗi'],[/Lỗi báo/i,'Xử lý ngay']];
+function v5(){var w=document.querySelector('#app .wrap.bk');if(!w||!document.body.classList.contains('bp')||w.getAttribute('data-v5'))return;w.setAttribute('data-v5','1');
+[].forEach.call(w.querySelectorAll('.bp-cards'),function(e){e.remove();});
+[].forEach.call(w.querySelectorAll('.bp-t'),function(t){if(/v2Scan/.test(t.getAttribute('onclick')||''))t.remove();});
+[].forEach.call(w.querySelectorAll('.bp-st'),function(s,i){s.setAttribute('role','button');s.tabIndex=0;s.setAttribute('onclick',ACT[i]||'');
+ s.onkeydown=function(e){if(e.key==='Enter'||e.key===' '){e.preventDefault();s.click();}};
+ var b=s.querySelector('b');if(b&&!(parseInt(b.textContent,10)>0))s.classList.add('z');});
+[].forEach.call(w.querySelectorAll('.bk-need .nx-r'),function(r){var t=r.querySelector('.nx-t');if(!t||!r.querySelector('.nx-n')||r.querySelector('.nx-act'))return;
+ var tx=t.textContent,lb='';for(var i=0;i<CTA.length;i++){if(CTA[i][0].test(tx)){lb=CTA[i][1];break;}}if(!lb)return;
+ var b=document.createElement('button');b.type='button';b.className='nx-act';b.textContent=lb;r.insertBefore(b,r.querySelector('.nx-n'));});}
+window.renderHome=function(){var r=prev.apply(this,arguments);try{v5();}catch(e){}return r;};
+try{v5();}catch(e){}})();
 </script>
 </body>
 </html>
