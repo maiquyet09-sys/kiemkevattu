@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="app-notes" content="Danh bạ nhân sự: chọn người là tự điền biên bản bàn giao, giải trình, ô ký; nhập Excel/CSV theo file mẫu. Giao diện đồng bộ 4 màu. Ký số PDF nâng cấp: ký nhiều người (tuần tự / đồng thời), danh sách nhân sự (nhập tay hoặc tải file mẫu), xem văn bản và kéo chữ ký đến đúng chỗ trước khi ký, thông báo Văn bản cần ký ở Trang chủ, biên bản Excel dùng chung thư viện chữ ký., hiện “đang chờ tại ai” và tiến độ 2 số lẻ, thông báo Trang chủ mở thẳng văn bản cần ký. Mở: Quản trị &amp; tiện ích › Ký số PDF. Sửa lỗi nhập / thêm nhân sự vào Danh bạ (lỗi uid). Ô chọn nhân sự trong biên bản: gõ để tìm theo tên, mã NV, số điện thoại, chức vụ.">
-<meta name="app-version" content="2026111914">
+<meta name="app-version" content="2026111920">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="format-detection" content="telephone=no">
 <meta name="color-scheme" content="light">
@@ -1665,6 +1665,61 @@ body.blk #bnav button{flex:1;min-height:44px;border:0;background:none;display:fl
 body.blk #bnav button i{width:44px;height:36px;border-radius:99px;display:grid;place-items:center;font-style:normal}
 body.blk #bnav button.on{color:#14203a}
 body.blk #bnav button.on i{background:#14203a;color:#fff}
+
+/* ===== v1.1: thanh tiêu đề, thanh tác vụ dưới, nút viên thuốc ===== */
+body.blk .topbar{background:transparent!important;border:0!important;box-shadow:none!important}
+body.blk .topbar .trow{align-items:center;gap:12px;padding-top:8px}
+body.blk .topbar .back{width:44px;height:44px;min-height:44px;border-radius:50%;border:0;background:#fff;color:#1e3a6b;font-size:22px;font-weight:700;display:grid;place-items:center;box-shadow:0 1px 3px rgba(20,30,60,.08);cursor:pointer}
+body.blk .topbar .ttl{font-family:'Be Vietnam Pro',system-ui,sans-serif;font-size:22px;line-height:1.2;font-weight:800;letter-spacing:-.01em;color:#101b34}
+body.blk #app .card{border-radius:24px;border:0;box-shadow:0 1px 2px rgba(20,30,60,.04)}
+body.blk .btn,body.blk .bcbtn{border-radius:99px;font-family:'Be Vietnam Pro',system-ui,sans-serif;font-weight:700}
+body.blk .bcbtn{min-height:48px}
+html body.blk .botbar{background:linear-gradient(to top,var(--bg) 60%,transparent)!important;border:0!important;-webkit-backdrop-filter:none;backdrop-filter:none}
+body.blk .botbar .botin{padding-top:10px;padding-bottom:10px}
+@media(max-width:899px){html body.blk .botbar{bottom:calc(86px + env(safe-area-inset-bottom,0px))!important}}
+@media(min-width:900px){body.blk .bk-bell{display:none}}
+
+/* ===== v1.2: "Cần xử lý" gọn, bấm mới mở; bảng màu nhạt (đổi màu ở 4 biến đầu) ===== */
+body.blk .bk{--c-need:#ffe6d6;--c-s1:#e1eaf9;--c-s2:#dff3e8;--c-long:#ebe6f8}
+html body.blk .bk-need{background:var(--c-need);color:#101b34;padding:12px 16px}
+html body.blk .bk-s1{background:var(--c-s1)}html body.blk .bk-s2{background:var(--c-s2)}html body.blk .bk-long{background:var(--c-long)}
+body.blk .bk-long .t span{color:#5f5a78}
+html body.blk .bk-need .hd{cursor:pointer;min-height:56px;-webkit-tap-highlight-color:transparent}
+html body.blk .bk-need .bk-ic{background:#fff;color:#c4631f}
+html body.blk .bk-need .bk-lb{color:#7a5a46;font-size:13px}
+html body.blk .bk-need .bk-num{color:#101b34;font-size:34px}
+html body.blk .bk-need .bk-num small{color:#7a5a46}
+html body.blk .bk-need .bk-pill{background:#fff;color:#b8651a}
+html body.blk .bk-need .bk-pill.g{background:#fff;color:#1f6b4a}
+body.blk .bk-chev{flex:none;width:28px;height:28px;display:grid;place-items:center;color:#7a5a46;transform:rotate(90deg);transition:transform .2s}
+body.blk .bk-need.open .bk-chev{transform:rotate(-90deg)}
+html body.blk .bk-need:not(.open) .bk-rows{display:none}
+html body.blk .bk-need .bk-rows{margin-top:6px;padding-bottom:4px}
+html body.blk .bk-need .nx-r{background:rgba(255,255,255,.8)!important;min-height:46px;padding:6px 10px;border-radius:14px}
+html body.blk .bk-need .nx-r:active{background:#fff!important}
+html body.blk .bk-need .nx-i{width:30px;height:30px}
+html body.blk .bk-need .nx-t{color:#14203a;font-size:13.5px}
+html body.blk .bk-need .nx-t span{color:#6b7389!important}
+html body.blk .bk-need .nx-n,html body.blk .bk-need .nx-r.red .nx-n,html body.blk .bk-need .nx-r.org .nx-n,html body.blk .bk-need .nx-r.amb .nx-n,html body.blk .bk-need .nx-r.grn .nx-n{background:#1e3a6b;color:#fff}
+html body.blk .bk-need .nx-c{color:#8a7a6e}
+
+/* ===== v1.3: chọn giao diện trong Cài đặt ===== */
+.bk-sw{display:grid;gap:10px}
+.bk-opt{display:flex;align-items:center;gap:12px;min-height:60px;padding:10px 14px;border-radius:16px;border:2px solid #e3e6ee;background:#fff;text-align:left;font:inherit;color:#14203a;cursor:pointer;width:100%}
+.bk-opt.on{border-color:#1e3a6b;background:#eef3fc}
+.bk-opt i{flex:none;width:20px;height:20px;border-radius:50%;border:2px solid #b9c0d0;background:#fff}
+.bk-opt.on i{border:6px solid #1e3a6b}
+.bk-opt span{flex:1;min-width:0}.bk-opt b{display:block;font-size:14.5px}.bk-opt small{display:block;font-size:12px;color:#6b7389;margin-top:2px}
+.bk-opt em{font-style:normal;font-size:11.5px;font-weight:700;color:#1e3a6b;background:#fff;border-radius:99px;padding:3px 9px;flex:none}
+
+/* ===== v1.4: hình minh họa trong khối ===== */
+body.blk .bk-card{overflow:hidden}
+body.blk .bk-art{position:absolute;top:10px;right:10px;width:58px;height:58px;pointer-events:none}
+body.blk .bk-s1{--a:#c9d9f6;--b:#8fb0ea}body.blk .bk-s2{--a:#bfe6d0;--b:#6fc49a}body.blk .bk-long{--a:#d9d0f2;--b:#a897e0}
+html body.blk .bk-long .bk-art{position:static;width:54px;height:54px;flex:none}
+
+/* ===== v1.6: hình minh họa thay cho biểu tượng tròn ở hai khối nhỏ ===== */
+html body.blk .bk-s1 .bk-art,html body.blk .bk-s2 .bk-art{position:static;display:block;width:56px;height:56px}
 </style>
 </head>
 <body>
@@ -14773,6 +14828,9 @@ window.BKX=window.BKX||{open:false};
 var BLK=(function(){
   var K='kk_ui',nav=document.getElementById('bnav'),OLDNAV=nav.innerHTML,oldHome=renderHome;
   function pref(){try{var q=/[?&]ui=(old|new)/.exec(location.search);if(q)localStorage.setItem(K,q[1]);return localStorage.getItem(K)!=='old';}catch(e){return true;}}
+  var ART_QR='<svg class="bk-art" viewBox="0 0 80 80" aria-hidden="true"><rect x="8" y="8" width="64" height="64" rx="16" fill="var(--a)"/><path d="M24 36v-8a4 4 0 0 1 4-4h8M44 24h8a4 4 0 0 1 4 4v8M56 44v8a4 4 0 0 1-4 4h-8M36 56h-8a4 4 0 0 1-4-4v-8" fill="none" stroke="var(--b)" stroke-width="4" stroke-linecap="round"/><rect x="32" y="32" width="6" height="6" rx="1.5" fill="var(--b)"/><rect x="42" y="32" width="6" height="6" rx="1.5" fill="var(--b)"/><rect x="32" y="42" width="6" height="6" rx="1.5" fill="var(--b)"/><rect x="17" y="39" width="46" height="3" rx="1.5" fill="#fff" opacity=".9"/></svg>',
+    ART_PAY='<svg class="bk-art" viewBox="0 0 80 80" aria-hidden="true"><rect x="14" y="6" width="46" height="62" rx="10" fill="var(--a)"/><rect x="23" y="19" width="28" height="4" rx="2" fill="var(--b)"/><rect x="23" y="29" width="20" height="4" rx="2" fill="var(--b)" opacity=".7"/><rect x="23" y="39" width="25" height="4" rx="2" fill="var(--b)" opacity=".7"/><circle cx="58" cy="58" r="15" fill="var(--b)"/><path d="M51 58l5 5 9-10" fill="none" stroke="#fff" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+    ART_GRID='<svg class="bk-art" viewBox="0 0 80 80" aria-hidden="true"><rect x="6" y="6" width="30" height="30" rx="9" fill="var(--b)"/><rect x="44" y="6" width="30" height="30" rx="9" fill="var(--a)"/><rect x="6" y="44" width="30" height="30" rx="9" fill="var(--a)"/><rect x="44" y="44" width="30" height="30" rx="9" fill="var(--b)" opacity=".65"/></svg>';
   var BELL='<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9a6 6 0 0 1 12 0c0 6 2 7 2 7H4s2-1 2-7"/><path d="M10 20a2 2 0 0 0 4 0"/></svg>';
   function setNav(on){
     nav.innerHTML=on?
@@ -14793,22 +14851,33 @@ var BLK=(function(){
     var d=document.createElement('div');d.className='wrap bk';
     d.innerHTML='<div class="bk-top"><div class="bk-hi">Xin chào, <b>'+nm+'</b></div><button class="bk-bell" aria-label="Thông báo" onclick="document.getElementById(\'bk-need\').scrollIntoView({behavior:\'smooth\',block:\'start\'})">'+BELL+(total?'<b>'+total+'</b>':'')+'</button></div>'
       +'<h1>Việc hôm nay</h1>'+(notes?'<div class="bk-note">'+notes+'</div>':'')
-      +'<div class="bk-grid"><section class="bk-card bk-need" id="bk-need"><div class="hd"><span class="bk-ic">'+icon('warn',20)+'</span><div><div class="bk-lb">Cần xử lý</div><div class="bk-num">'+total+' <small>việc</small></div></div>'
-      +'<span class="bk-pill '+(total?'':'g')+'"><i></i>'+(total?'Cần xử lý':'Bình thường')+'</span></div><div class="bk-rows"></div><button class="bk-btn" id="bk-all" onclick="this.parentNode.classList.toggle(\'open\');this.textContent=this.parentNode.classList.contains(\'open\')?\'Thu gọn\':\'Xem tất cả\'">Xem tất cả</button></section>'
-      +'<div class="bk-pair"><button class="bk-card bk-s1" onclick="v2Scan()"><span class="bk-ic">'+icon('qr',20)+'</span><div class="bk-lb">Quét QR vật tư</div><div class="bk-num">'+nq+' <small>mã chưa kiểm</small></div><span class="bk-pill '+(nq?'w':'')+'"><i></i>'+(nq?'Cần kiểm':'Bình thường')+'</span></button>'
-      +'<button class="bk-card bk-s2" onclick="A.go(\'pay\')"><span class="bk-ic">'+icon('doc',20)+'</span><div class="bk-lb">Thanh toán NCC</div><div class="bk-num">'+np+' <small>có lỗi</small></div><span class="bk-pill '+(np?'r':'')+'"><i></i>'+(np?'Cần xử lý':'Bình thường')+'</span></button></div>'
-      +'<button class="bk-card bk-long" onclick="A.drawerToggle()"><span class="bk-ic">'+icon('list',20)+'</span><div class="t">Tất cả chức năng<span>Kiểm kê CCDC, đối chiếu, tồn kho, biểu mẫu, báo lỗi, cài đặt…</span></div>'+icon('chev',18)+'</button></div>'
-      +'<div class="bk-ft">Giao diện khối 1.0 · bản '+esc(APP_VERSION)+'<br><button onclick="BLK.set(false)">Quay về giao diện cũ</button></div>';
+      +'<div class="bk-grid"><section class="bk-card bk-need" id="bk-need"><div class="hd" role="button" tabindex="0" aria-expanded="false" onclick="var c=document.getElementById(\'bk-need\');c.classList.toggle(\'open\');this.setAttribute(\'aria-expanded\',c.classList.contains(\'open\'))"><span class="bk-ic">'+icon('warn',20)+'</span><div><div class="bk-lb">Cần xử lý</div><div class="bk-num">'+total+' <small>việc</small></div></div>'
+      +'<span class="bk-pill '+(total?'':'g')+'"><i></i>'+(total?'Cần xử lý':'Bình thường')+'</span><span class="bk-chev">'+icon('chev',18)+'</span></div><div class="bk-rows"></div></section>'
+      +'<div class="bk-pair"><button class="bk-card bk-s1" onclick="v2Scan()">'+ART_QR+'<div class="bk-lb">Quét QR vật tư</div><div class="bk-num">'+nq+' <small>mã chưa kiểm</small></div><span class="bk-pill '+(nq?'w':'')+'"><i></i>'+(nq?'Cần kiểm':'Bình thường')+'</span></button>'
+      +'<button class="bk-card bk-s2" onclick="A.go(\'pay\')">'+ART_PAY+'<div class="bk-lb">Thanh toán NCC</div><div class="bk-num">'+np+' <small>có lỗi</small></div><span class="bk-pill '+(np?'r':'')+'"><i></i>'+(np?'Cần xử lý':'Bình thường')+'</span></button></div>'
+      +'<button class="bk-card bk-long" onclick="A.drawerToggle()">'+ART_GRID+'<div class="t">Tất cả chức năng<span>Kiểm kê CCDC, đối chiếu, tồn kho, biểu mẫu, báo lỗi, cài đặt…</span></div>'+icon('chev',18)+'</button></div>'
+      ;
     var box=d.querySelector('.bk-rows');
-    rows.forEach(function(r,i){if(i>=3)r.classList.add('bk-more');box.appendChild(r);});   /* chuyển nguyên dòng cũ sang khối mới, giữ nguyên thao tác bấm */
-    if(rows.length<=3)d.querySelector('#bk-all').style.display='none';
+    rows.forEach(function(r){box.appendChild(r);});   /* chuyển nguyên dòng cũ sang khối mới, giữ nguyên thao tác bấm */
+    
     app.innerHTML='';app.appendChild(d);
   }
   function apply(){var o=pref();document.body.classList.toggle('blk',o);setNav(o);}
   window.renderHome=function(){
     if(!document.body.classList.contains('blk')){oldHome();
-      document.getElementById('app').insertAdjacentHTML('beforeend','<div class="wrap" style="text-align:center;padding:8px 0 110px"><button class="btn btn-outline" onclick="BLK.set(true)">Dùng giao diện khối mới</button></div>');return;}
+      return;}
     home();
+  };
+  var oldSet=renderSettings;
+  window.renderSettings=function(){
+    oldSet();
+    var w=document.querySelector('#app .topbar + .wrap');if(!w)return;
+    var on=document.body.classList.contains('blk');
+    function opt(v,t,d){var a=(on===v);return '<button class="bk-opt'+(a?' on':'')+'" onclick="BLK.set('+v+')"><i></i><span><b>'+t+'</b><small>'+d+'</small></span>'+(a?'<em>Đang dùng</em>':'')+'</button>';}
+    w.insertAdjacentHTML('afterbegin','<div class="card" style="margin-bottom:12px"><div style="font-weight:700;margin-bottom:2px">Thay đổi giao diện</div>'
+      +'<div style="font-size:12px;color:var(--mut);margin-bottom:12px">Chọn kiểu hiển thị bạn thích, đổi qua lại bất cứ lúc nào. Dữ liệu không bị ảnh hưởng.</div>'
+      +'<div class="bk-sw">'+opt(true,'Giao diện khối','Các khối màu nhạt, thanh điều hướng tròn, gọn và dễ nhìn')+opt(false,'Giao diện cũ','Kiểu hiển thị trước đây của app')+'</div>'
+      +'<div style="font-size:11.5px;color:var(--mut);margin-top:10px">Giao diện khối 1.6 · bản '+esc(APP_VERSION)+'</div></div>');
   };
   apply();
   return {set:function(o){try{localStorage.setItem(K,o?'new':'old');}catch(e){}apply();try{render();}catch(e){location.reload();}}};
