@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="app-notes" content="Danh bạ nhân sự: chọn người là tự điền biên bản bàn giao, giải trình, ô ký; nhập Excel/CSV theo file mẫu. Giao diện đồng bộ 4 màu. Ký số PDF nâng cấp: ký nhiều người (tuần tự / đồng thời), danh sách nhân sự (nhập tay hoặc tải file mẫu), xem văn bản và kéo chữ ký đến đúng chỗ trước khi ký, thông báo Văn bản cần ký ở Trang chủ, biên bản Excel dùng chung thư viện chữ ký., hiện “đang chờ tại ai” và tiến độ 2 số lẻ, thông báo Trang chủ mở thẳng văn bản cần ký. Mở: Quản trị &amp; tiện ích › Ký số PDF. Sửa lỗi nhập / thêm nhân sự vào Danh bạ (lỗi uid). Ô chọn nhân sự trong biên bản: gõ để tìm theo tên, mã NV, số điện thoại, chức vụ.">
-<meta name="app-version" content="2026111922">
+<meta name="app-version" content="2026111925">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="format-detection" content="telephone=no">
 <meta name="color-scheme" content="light">
@@ -1742,6 +1742,27 @@ html body.blk :is(#gsidebar,#gdrawer) svg.fcg:has(>.fci-spin){transform:scale(.6
  html body.blk .bk-long{grid-column:auto}
  html body.blk .bk-need .bk-rows{grid-template-columns:repeat(2,1fr)}
 }
+
+/* ===== v1.9: bảng màu và phông thống nhất toàn app (đổi biến ở đây là đổi cả app) ===== */
+body.blk{--brand:#1e3a6b;--brand-d:#14203a;--brand-bg:#e1eaf9;--brand-ln:rgba(30,58,107,.22);
+ --ink:#14203a;--mut:#5b6479;--mut2:#8a92a6;--line:rgba(20,32,58,.1);
+ --ok:#1f8a5b;--ok-bg:#dff3e8;--warn:#b8651a;--warn-bg:#ffe6d6;--err:#c23a3a;--err-bg:#fdecea;
+ --teal:var(--brand);--teal-d:var(--brand-d);--teal-bg:var(--brand-bg);--teal-ln:var(--brand-ln);
+ --sky:var(--brand);--sky-bg:var(--brand-bg);--sky-ln:var(--brand-ln);--info:var(--brand);--info-bg:var(--brand-bg);
+ --red:var(--err);--red-bg:var(--err-bg);--amber:var(--warn);--amber-bg:var(--warn-bg);--orange:var(--warn);--orange-bg:var(--warn-bg);
+ --green:var(--ok);--green-bg:var(--ok-bg);--r-sm:12px;--r-md:16px;--r-lg:24px;--sh2:0 10px 28px -14px rgba(20,32,58,.18);
+ font-family:'Be Vietnam Pro',system-ui,-apple-system,'Segoe UI',Roboto,sans-serif}
+body.blk :is(input,button,select,textarea){font-family:inherit}
+
+/* ===== v2.0: rà soát đồng nhất toàn app ===== */
+html body.blk #bnav button.on i{background:#1e3a6b}
+html body.blk :is(#gsidebar,#gdrawer) a.gnav-item.on:not(.gnav-sub){background:#1e3a6b!important}
+html body.blk .topbar .back,html body.blk button.back{width:44px!important;height:44px!important;min-width:44px;padding:0!important;border-radius:50%!important;border:0!important;background:#fff!important;color:#1e3a6b!important;display:grid;place-items:center;flex:none;font-size:22px;box-shadow:0 1px 3px rgba(20,30,60,.08)}
+html body.blk .topbar .trow{flex-wrap:wrap;row-gap:8px;align-items:center}
+html body.blk .topbar .ttl{flex:1 1 140px;min-width:0;white-space:normal!important;overflow:visible!important;text-overflow:clip!important;font-size:20px}
+html body.blk .topbar:has(>button.btn.ghost){display:flex;align-items:center;gap:12px;padding:8px 16px}
+html body.blk .topbar>button.btn.ghost{width:44px;height:44px;min-width:44px;padding:0;border-radius:50%;border:0;background:#fff;color:#1e3a6b;font-size:22px;display:grid;place-items:center;flex:none;box-shadow:0 1px 3px rgba(20,30,60,.08)}
+html body.blk .topbar:has(>button.btn.ghost)>div{font-size:20px!important;font-weight:800!important;color:#101b34}
 </style>
 </head>
 <body>
@@ -14899,7 +14920,7 @@ var BLK=(function(){
     w.insertAdjacentHTML('afterbegin','<div class="card" style="margin-bottom:12px"><div style="font-weight:700;margin-bottom:2px">Thay đổi giao diện</div>'
       +'<div style="font-size:12px;color:var(--mut);margin-bottom:12px">Chọn kiểu hiển thị bạn thích, đổi qua lại bất cứ lúc nào. Dữ liệu không bị ảnh hưởng.</div>'
       +'<div class="bk-sw">'+opt(true,'Giao diện khối','Các khối màu nhạt, thanh điều hướng tròn, gọn và dễ nhìn')+opt(false,'Giao diện cũ','Kiểu hiển thị trước đây của app')+'</div>'
-      +'<div style="font-size:11.5px;color:var(--mut);margin-top:10px">Giao diện khối 1.8 · bản '+esc(APP_VERSION)+'</div></div>');
+      +'<div style="font-size:11.5px;color:var(--mut);margin-top:10px">Giao diện khối 2.0 · bản '+esc(APP_VERSION)+'</div></div>');
   };
   apply();
   return {set:function(o){try{localStorage.setItem(K,o?'new':'old');}catch(e){}apply();try{render();}catch(e){location.reload();}}};
