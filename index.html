@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="app-notes" content="Danh bạ nhân sự: chọn người là tự điền biên bản bàn giao, giải trình, ô ký; nhập Excel/CSV theo file mẫu. Giao diện đồng bộ 4 màu. Ký số PDF nâng cấp: ký nhiều người (tuần tự / đồng thời), danh sách nhân sự (nhập tay hoặc tải file mẫu), xem văn bản và kéo chữ ký đến đúng chỗ trước khi ký, thông báo Văn bản cần ký ở Trang chủ, biên bản Excel dùng chung thư viện chữ ký., hiện “đang chờ tại ai” và tiến độ 2 số lẻ, thông báo Trang chủ mở thẳng văn bản cần ký. Mở: Quản trị &amp; tiện ích › Ký số PDF. Sửa lỗi nhập / thêm nhân sự vào Danh bạ (lỗi uid). Ô chọn nhân sự trong biên bản: gõ để tìm theo tên, mã NV, số điện thoại, chức vụ.">
-<meta name="app-version" content="2026111920">
+<meta name="app-version" content="2026111922">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="format-detection" content="telephone=no">
 <meta name="color-scheme" content="light">
@@ -1720,6 +1720,28 @@ html body.blk .bk-long .bk-art{position:static;width:54px;height:54px;flex:none}
 
 /* ===== v1.6: hình minh họa thay cho biểu tượng tròn ở hai khối nhỏ ===== */
 html body.blk .bk-s1 .bk-art,html body.blk .bk-s2 .bk-art{position:static;display:block;width:56px;height:56px}
+
+/* ===== v1.7: thanh bên / ngăn kéo menu đồng bộ tông sáng với giao diện ngoài ===== */
+html body.blk :is(#gsidebar,#gdrawer){background:#fffdf9!important;border:0!important;box-shadow:12px 0 36px -22px rgba(20,30,60,.35)!important}
+html body.blk :is(#gsidebar,#gdrawer) a.gq{min-height:48px;border-radius:99px;font-weight:700;background:#e1eaf9;color:#1e3a6b;border:0;box-shadow:none}
+html body.blk :is(#gsidebar,#gdrawer) a.gq.pri{background:#1e3a6b;color:#fff}
+html body.blk :is(#gsidebar,#gdrawer) a.gnav-item{color:#3b4660;font-weight:600;border-radius:16px;min-height:46px}
+html body.blk :is(#gsidebar,#gdrawer) a.gnav-item:hover{background:#f4f1e8}
+html body.blk :is(#gsidebar,#gdrawer) a.gnav-item>svg:first-child{width:22px;height:22px;flex:none}
+html body.blk :is(#gsidebar,#gdrawer) a.gnav-item.on:not(.gnav-sub){background:#14203a!important;color:#fff!important;box-shadow:none!important}
+html body.blk :is(#gsidebar,#gdrawer) a.gnav-item.on::before{display:none!important}
+html body.blk :is(#gsidebar,#gdrawer) a.gnav-item.gnav-sub{color:#5b6479;font-weight:500}
+html body.blk :is(#gsidebar,#gdrawer) a.gnav-item.gnav-sub.on{background:#e1eaf9!important;color:#1e3a6b!important;font-weight:700;box-shadow:none!important}
+html body.blk :is(#gsidebar,#gdrawer) .gnav-grp .lb{color:inherit!important;font-weight:600}
+html body.blk :is(#gsidebar,#gdrawer) .gnav-cap,html body.blk :is(#gsidebar,#gdrawer) .chv,html body.blk :is(#gsidebar,#gdrawer) .gnav-sub .cnt{color:#8a92a6}
+html body.blk :is(#gsidebar,#gdrawer) a.gnav-item.on:not(.gnav-sub) .cnt,html body.blk :is(#gsidebar,#gdrawer) a.gnav-item.on:not(.gnav-sub) .chv{color:rgba(255,255,255,.75)}
+html body.blk :is(#gsidebar,#gdrawer) svg.fcg:has(>.fci-spin){transform:scale(.62);transform-origin:center}
+@media(min-width:900px){
+ html body.blk .bk-need{grid-column:1/4;grid-row:auto}
+ html body.blk .bk-pair{display:contents}
+ html body.blk .bk-long{grid-column:auto}
+ html body.blk .bk-need .bk-rows{grid-template-columns:repeat(2,1fr)}
+}
 </style>
 </head>
 <body>
@@ -14877,7 +14899,7 @@ var BLK=(function(){
     w.insertAdjacentHTML('afterbegin','<div class="card" style="margin-bottom:12px"><div style="font-weight:700;margin-bottom:2px">Thay đổi giao diện</div>'
       +'<div style="font-size:12px;color:var(--mut);margin-bottom:12px">Chọn kiểu hiển thị bạn thích, đổi qua lại bất cứ lúc nào. Dữ liệu không bị ảnh hưởng.</div>'
       +'<div class="bk-sw">'+opt(true,'Giao diện khối','Các khối màu nhạt, thanh điều hướng tròn, gọn và dễ nhìn')+opt(false,'Giao diện cũ','Kiểu hiển thị trước đây của app')+'</div>'
-      +'<div style="font-size:11.5px;color:var(--mut);margin-top:10px">Giao diện khối 1.6 · bản '+esc(APP_VERSION)+'</div></div>');
+      +'<div style="font-size:11.5px;color:var(--mut);margin-top:10px">Giao diện khối 1.8 · bản '+esc(APP_VERSION)+'</div></div>');
   };
   apply();
   return {set:function(o){try{localStorage.setItem(K,o?'new':'old');}catch(e){}apply();try{render();}catch(e){location.reload();}}};
