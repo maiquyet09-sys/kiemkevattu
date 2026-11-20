@@ -2,8 +2,8 @@
 <html lang="vi">
 <head>
 <meta charset="UTF-8">
-<meta name="app-notes" content="Trang chủ tổng hợp 5 cơ sở: thêm bảng xếp hạng cơ sở (quá hạn, sắp đến hạn, cần chú ý, đang xử lý, trễ lâu nhất, người phụ trách, tự kiểm khớp số), mỗi dòng việc hiện cơ sở / số ngày trễ / người phụ trách, việc quá hạn xếp theo mức trễ, bộ lọc hiện Tất cả cơ sở. Danh bạ nhân sự: chọn người là tự điền biên bản bàn giao, giải trình, ô ký; nhập Excel/CSV theo file mẫu. Giao diện đồng bộ 4 màu. Ký số PDF nâng cấp: ký nhiều người (tuần tự / đồng thời), danh sách nhân sự (nhập tay hoặc tải file mẫu), xem văn bản và kéo chữ ký đến đúng chỗ trước khi ký, thông báo Văn bản cần ký ở Trang chủ, biên bản Excel dùng chung thư viện chữ ký., hiện “đang chờ tại ai” và tiến độ 2 số lẻ, thông báo Trang chủ mở thẳng văn bản cần ký. Mở: Quản trị &amp; tiện ích › Ký số PDF. Sửa lỗi nhập / thêm nhân sự vào Danh bạ (lỗi uid). Ô chọn nhân sự trong biên bản: gõ để tìm theo tên, mã NV, số điện thoại, chức vụ.">
-<meta name="app-version" content="2026112003">
+<meta name="app-notes" content="Giao diện điện thoại riêng (Trang chủ: việc cần xử lý, quét QR, lưới chức năng) và nút chuyển Điện thoại / Máy tính trên thanh đầu trang + Cài đặt. Đồng nhất giao diện toàn app theo Trang chủ (v12): chip lọc, thanh tiến độ, bảng, ô nhập, biểu tượng, biểu đồ, nút trong màn quét đổi sang tông đào – nâu espresso. Trang chủ tổng hợp 5 cơ sở: thêm bảng xếp hạng cơ sở (quá hạn, sắp đến hạn, cần chú ý, đang xử lý, trễ lâu nhất, người phụ trách, tự kiểm khớp số), mỗi dòng việc hiện cơ sở / số ngày trễ / người phụ trách, việc quá hạn xếp theo mức trễ, bộ lọc hiện Tất cả cơ sở. Danh bạ nhân sự: chọn người là tự điền biên bản bàn giao, giải trình, ô ký; nhập Excel/CSV theo file mẫu. Giao diện đồng bộ 4 màu. Ký số PDF nâng cấp: ký nhiều người (tuần tự / đồng thời), danh sách nhân sự (nhập tay hoặc tải file mẫu), xem văn bản và kéo chữ ký đến đúng chỗ trước khi ký, thông báo Văn bản cần ký ở Trang chủ, biên bản Excel dùng chung thư viện chữ ký., hiện “đang chờ tại ai” và tiến độ 2 số lẻ, thông báo Trang chủ mở thẳng văn bản cần ký. Mở: Quản trị &amp; tiện ích › Ký số PDF. Sửa lỗi nhập / thêm nhân sự vào Danh bạ (lỗi uid). Ô chọn nhân sự trong biên bản: gõ để tìm theo tên, mã NV, số điện thoại, chức vụ.">
+<meta name="app-version" content="2026112007">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="format-detection" content="telephone=no">
 <meta name="color-scheme" content="light">
@@ -15893,6 +15893,54 @@ html body.bp .bp-feat .fi small,html body.bp .pu-cap{color:#5A4A40}
 .v11-warn{margin-top:8px;font-size:12.5px;font-weight:600;color:#B42333}
 html body.bp #fcbr::before{content:"Phạm vi"}
 </style>
+<style id="bp-v12">
+/* v12 — Đồng nhất toàn app theo Trang chủ (Peach × Espresso × Ivory). Chỉ CSS, chỉ khi đang dùng Bold & Playful; không đổi dữ liệu/chức năng. */
+html body.bp{--line:#F0E6DE;--card2:#FBF3EC;--mut2:#9C8B80;--navy:#33271F;--sh1:0 1px 2px rgba(51,39,31,.05);--ok:#0F766E;--ok-bg:#CCFBF1;--warn:#92400E;--warn-bg:#FEF3C7;--err:#C62839;--err-bg:#FDECEE}
+/* Chữ & tiêu đề */
+html body.bp :is(.h1,.topbar .ttl,.nx-t,.hsdcard .n,.brc .bn,.fc-ph){color:var(--ink)}
+html body.bp :is(.eyebrow,.addbat){color:#B8431F}
+/* Chip lọc, nhãn, nút chọn: cùng kiểu viên thuốc như Trang chủ */
+html body.bp :is(.chip,.pill,.chip-on){border-radius:99px}
+html body.bp .chip{border-color:#E8DDD5}
+html body.bp .pill{background:#FFEDE5;border-color:#FFC9B2;color:#B8431F}
+html body.bp :is(.chip.on,.chip-on){background:#33271F!important;border-color:#33271F!important;color:#fff!important}
+html body.bp .msb.on{background:#33271F;color:#fff}
+/* Thanh tiến độ */
+html body.bp :is(.fill,.ring .rf,.brc .bpt i){background:linear-gradient(90deg,#FF9A7B,#D9552E)}
+html body.bp .brc .bp{background:#FBF3EC;border-color:#F0E6DE;color:#5A4A40}
+html body.bp :is(.brc .bp b,.brc .bpg span){color:#B8431F}
+html body.bp .brc .bp.warn .dt{background:#F59E0B}
+/* Biểu tượng tròn / vuông và số đếm trong dòng */
+html body.bp :is(.nx-i,.hsdcard .kic,.fc-ti,.brc .bc){background:#FFEDE5;color:#D9552E}
+html body.bp :is(.nx-n,.fc-tn){background:#F5EDE7;color:#6E5F55}
+html body.bp svg.fci>rect:first-child{fill:#FFEDE5}
+html body.bp svg.fci [stroke="#1e3a6b"]{stroke:#D9552E}
+html body.bp svg.fci [fill="#1e3a6b"]{fill:#D9552E}
+/* Ô nhập */
+html body.bp :is(.inp,.sinp,select.inp,textarea.inp){border-color:#E8DDD5;color:var(--ink)}
+html body.bp :is(.inp,.sinp):focus{border-color:#D9552E;box-shadow:0 0 0 3px rgba(217,85,46,.16)}
+/* Bảng */
+html body.bp :is(#app .stktable th,#app .rct th,#app .bctbl th,.stktable th,table.rct th,#app .bk-head){background:#FBF3EC;color:#6E5F55}
+html body.bp #app :is(.stktable,.rct) tbody tr:hover td{background:#FFF5EF}
+html body.bp :is(#app .stkwrap,#app .tblwrap){border-color:#F0E6DE}
+/* Nhóm đối chiếu, nhãn xanh */
+html body.bp .rcg{--hc:#D9552E;--hbg:#FFF5EF;--hc-d:#B8431F}
+html body.bp .rcb-blue{background:#EDE9FE;color:#6D44E0}
+/* Thẻ tỷ lệ kiểm kê */
+html body.bp #mcard,html body.bp .fc-row #mcard{--hm-a2:#B8431F;--hm-d2:#FFC9B2;--hm-d3:#E8DDD5;--hm-track:#F0E6DE}
+/* Biểu đồ vẽ bằng SVG */
+html body.bp #app svg [stroke="#1e3a6b"]{stroke:#D9552E}
+html body.bp #app svg rect[fill="#1e3a6b"]{fill:#33271F}
+/* Popup */
+html body.bp .v2sv{background:#33271F;color:#fff}
+/* Thanh điều hướng dưới */
+html body.bp #bnav button.on{color:#B8431F}
+html body.bp #bnav .fab{color:#D9552E}
+html body.bp #bnav .fab i{background:#D9552E!important}
+/* Nút gắn màu trực tiếp trong màn quét / chụp ảnh / thông báo cập nhật */
+html body.bp [style*="background:#14203a"]{background:#33271F!important;border-color:#5A4A40!important;color:#F3E6DC!important}
+html body.bp :is([style*="background:#1e3a6b"],[style*="background: rgb(30, 58, 107)"]){background:#33271F!important;border-color:#33271F!important}
+</style>
 <script id="bp-v11-js">
 (function(){
 var prev=window.renderHome;
@@ -16009,6 +16057,92 @@ window.V11={_F:[],
 window.renderHome=function(){var r=prev.apply(this,arguments);try{v11();}catch(e){try{klog('v11',e);}catch(_){}}setTimeout(fix,120);return r;};
 var oh=window.fcHdr;if(typeof oh==='function')window.fcHdr=function(){try{oh.apply(this,arguments);}catch(e){}fix();};
 try{v11();setTimeout(fix,120);}catch(e){}
+})();
+</script>
+<style id="bp-v13">
+/* v13 — Giao diện Điện thoại + nút chuyển Điện thoại / Máy tính. Máy tính giữ nguyên. Gỡ: xoá khối này và script#vm-js */
+#vmsw{flex:none;width:40px;height:40px;margin-left:auto;border-radius:12px;border:1px solid #F0E6DE;background:#fff;color:#33271F;display:grid;place-items:center;cursor:pointer}
+#vmsw:active{transform:scale(.95)}#vmsw:focus-visible{outline:2px solid #33271F;outline-offset:2px}
+html body #vmsw~#guser{margin-left:10px}
+/* Xem bố cục điện thoại trên màn hình rộng: khung hẹp ở giữa */
+html.sim-mob{background:#EFE6DE}
+html.sim-mob body{max-width:430px;margin:0 auto;min-height:100vh;box-shadow:0 0 0 1px #E8DDD5,0 30px 80px -40px rgba(51,39,31,.45)}
+html.sim-mob body.blk.bp #bnav{left:calc(50% - 203px)!important;right:calc(50% - 203px)!important}
+html.sim-mob body .botbar{left:calc(50% - 215px)!important;right:calc(50% - 215px)!important}
+/* Trang chủ điện thoại: việc cần xử lý → quét QR → chức năng → danh sách */
+html body.mob.bp #app .wrap.bk{padding:10px 14px calc(96px + env(safe-area-inset-bottom,0px))}
+html body.mob.bp .bp-band{display:block;padding:14px 16px;border-radius:24px;margin-bottom:12px}
+html body.mob.bp .bp-band .bk-hi{font-size:20px}
+html body.mob.bp .bp-band .bp-sub{display:block;margin:2px 0 8px;font-size:13px}
+html body.mob.bp .bp-date{font-size:12px;padding:4px 10px}
+html body.mob.bp .bp-sts.bp-kpis{grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:14px}
+html body.mob.bp .bp-st.bp-st{padding:12px 10px;border-radius:18px;flex-direction:column;align-items:flex-start;gap:6px}
+html body.mob.bp .bp-st.bp-st::after,html body.mob.bp .bp-st.bp-st:not(:first-child) em{display:none}
+html body.mob.bp .bp-st.bp-st .kic{width:32px;height:32px}
+html body.mob.bp .bp-st.bp-st .kt span{font-size:12px}
+html body.mob.bp .bp-st.bp-st b{font-size:24px}
+html body.mob.bp .bp-st.bp-st:first-child{grid-column:1/-1;flex-direction:row;align-items:center;gap:14px;padding:16px;border-radius:22px}
+html body.mob.bp .bp-st.bp-st:first-child .kic{width:48px;height:48px}
+html body.mob.bp .bp-st.bp-st:first-child b{font-size:40px}
+html body.mob.bp .bp-body{display:flex;flex-direction:column;gap:14px}
+html body.mob.bp :is(.bp-right,.bp-feat){display:contents}
+html body.mob.bp .bp-feat .fh{order:-2;margin:2px 2px 0}
+html body.mob.bp .bp-feat .fg{order:-1;display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+html body.mob.bp .bp-feat .fi{flex-direction:column;justify-content:center;text-align:center;gap:6px;min-height:88px;padding:10px 4px;border-radius:18px;background:#fff}
+html body.mob.bp .bp-feat .fi small{display:none}
+html body.mob.bp .bp-feat .fi b{font-size:11.5px;line-height:1.25}
+html body.mob.bp .bk-need{padding:14px}
+html body.mob.bp .bk-need .nx-r{min-height:60px}
+/* Các màn khác trên điện thoại: chạm dễ, bảng cuộn ngang, lề gọn */
+html body.mob.bp #app .wrap{padding-left:14px;padding-right:14px}
+html body.mob.bp :is(.chip,.pill){min-height:40px}
+html body.mob.bp :is(.btn,.bcbtn,.inp,.sinp,select.inp){min-height:46px}
+html body.mob.bp .topbar .ttl{font-size:19px}
+html body.mob.bp #app :is(.stkwrap,.tblwrap,.v11-sc){overflow-x:auto;-webkit-overflow-scrolling:touch}
+/* v13.1 — sửa theo ảnh chụp iPhone: icon Trang chủ ở thanh dưới bị chìm vào nền cam; ô chức năng lệch hàng */
+html body.blk.bp #bnav button.on i{color:#fff!important}
+html body.mob.bp .bp-feat .fi{justify-content:flex-start;align-items:center;padding:12px 4px 10px;min-height:96px}
+html body.mob.bp .bp-feat .fi i{margin:0}
+html body.mob.bp .bp-feat .fi b{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+/* v13.2 — nút Quét QR: tròn nhỏ nổi góc phải, phía trên thanh điều hướng (không còn là thanh to chiếm cả hàng) */
+html body.mob.bp .bp-feat .bp-main{position:fixed;z-index:35;right:max(16px,env(safe-area-inset-right,0px));bottom:calc(80px + env(safe-area-inset-bottom,0px));width:56px;height:56px;min-height:56px;margin:0;padding:0;border-radius:50%;font-size:0;gap:0;box-shadow:0 10px 22px -10px rgba(217,85,46,.7)}
+html body.mob.bp .bp-feat .bp-main .pu-k{display:none}
+html.sim-mob body.mob.bp .bp-feat .bp-main{right:calc(50% - 199px)}
+</style>
+<script id="vm-js">
+/* v13: chuyển đổi giao diện Điện thoại / Máy tính. Lựa chọn được nhớ trên từng thiết bị (kk_view: auto | mobile | desktop). */
+var VM=(function(){
+var K='kk_view',W=430,sim=false,mob=false,orig=new WeakMap(),mm=window.matchMedia.bind(window),
+ dsc=Object.getOwnPropertyDescriptor(window,'innerWidth'),
+ iw=function(){return dsc&&dsc.get?dsc.get.call(window):document.documentElement.clientWidth;},
+ VP='width=device-width, initial-scale=1, viewport-fit=cover',
+ SV='<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">',
+ IP=SV+'<rect x="7" y="2.5" width="10" height="19" rx="2.5"/><path d="M11 18.5h2"/></svg>',
+ IM=SV+'<rect x="3" y="4" width="18" height="12" rx="2"/><path d="M8 20h8M12 16v4"/></svg>';
+function mode(){try{var v=localStorage.getItem(K);return v==='mobile'||v==='desktop'?v:'auto';}catch(e){return 'auto';}}
+function ev(q){return String(q).replace(/\(\s*(min|max)-width\s*:\s*([\d.]+)px\s*\)/g,function(_,k,n){return (k==='min'?W>=+n:W<=+n)?'(min-width:0px)':'(max-width:0px)';});}
+window.matchMedia=function(q){return mm(sim&&typeof q==='string'?ev(q):q);};
+try{Object.defineProperty(window,'innerWidth',{configurable:true,get:function(){return sim?W:iw();}});}catch(e){}
+function sheets(on){var i,j,r,x,o,t;for(i=0;i<document.styleSheets.length;i++){try{r=document.styleSheets[i].cssRules;}catch(e){continue;}
+ for(j=0;j<r.length;j++){x=r[j];if(x.type!==4)continue;o=orig.get(x);if(o===undefined){o=x.media.mediaText;orig.set(x,o);}t=on?ev(o):o;if(x.media.mediaText!==t)x.media.mediaText=t;}}}
+function phone(){try{return mm('(pointer:coarse)').matches&&Math.min(screen.width,screen.height)<900;}catch(e){return false;}}
+function btn(){var u=document.getElementById('guser'),b=document.getElementById('vmsw');if(!u)return;
+ if(!b){b=document.createElement('button');b.id='vmsw';b.type='button';b.onclick=function(){set(mob?'desktop':'mobile');};u.parentNode.insertBefore(b,u);}
+ var t=mob?'Chuyển sang giao diện máy tính':'Chuyển sang giao diện điện thoại';b.innerHTML=mob?IM:IP;b.title=t;b.setAttribute('aria-label',t);}
+function apply(){var m=mode(),ph=phone(),cw=document.documentElement.clientWidth,vp=document.querySelector('meta[name=viewport]'),c=(ph&&m==='desktop')?'width=1100':VP,ns=!ph&&m==='mobile'&&cw>=900;
+ if(vp&&vp.getAttribute('content')!==c)vp.setAttribute('content',c);
+ mob=ph?m!=='desktop':(m==='mobile'||(m==='auto'&&cw<900));
+ if(ns!==sim){sim=ns;sheets(sim);}
+ document.documentElement.classList.toggle('sim-mob',sim);document.body.classList.toggle('mob',mob);document.body.classList.toggle('dsk',!mob);btn();}
+function set(v){var was=mob+''+sim;try{localStorage.setItem(K,v);}catch(e){}apply();try{render();}catch(e){}
+ if(was!==mob+''+sim){try{toast(mob?'Đã chuyển sang giao diện điện thoại':'Đã chuyển sang giao diện máy tính');}catch(e){}}}
+var prevS=window.renderSettings;
+window.renderSettings=function(){prevS.apply(this,arguments);var w=document.querySelector('#app .topbar + .wrap');if(!w)return;var m=mode();
+ function o(k,t,d){var a=m===k;return '<button class="bk-opt'+(a?' on':'')+'" onclick="VM.set(\''+k+'\')"><i></i><span><b>'+t+'</b><small>'+d+'</small></span>'+(a?'<em>Đang dùng</em>':'')+'</button>';}
+ w.insertAdjacentHTML('afterbegin','<div class="card" style="margin-bottom:12px"><div style="font-weight:700;margin-bottom:2px">Kiểu hiển thị theo thiết bị</div><div style="font-size:12px;color:var(--mut);margin-bottom:12px">Chọn bố cục điện thoại hoặc máy tính, đổi qua lại bất cứ lúc nào. Lựa chọn được nhớ trên thiết bị này.</div><div class="bk-sw">'+o('auto','Tự động','Theo kích thước màn hình')+o('mobile','Điện thoại','Bố cục gọn, nút lớn, thanh điều hướng phía dưới')+o('desktop','Máy tính','Bố cục rộng, thanh menu bên trái')+'</div></div>');};
+var rt;window.addEventListener('resize',function(){clearTimeout(rt);rt=setTimeout(function(){var was=mob+''+sim;apply();if(was!==mob+''+sim){try{render();}catch(e){}}},250);});
+apply();setTimeout(function(){if(sim)sheets(true);},900);
+return {set:set,mode:mode};
 })();
 </script>
 </body>
