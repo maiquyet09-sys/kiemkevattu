@@ -16043,14 +16043,28 @@ function v11(){var app=document.getElementById('app');if(!app||document.getEleme
   sortLate();expand();scope();
   var f=document.querySelector('#bk-need .pu-f');if(f)f.addEventListener('click',function(){setTimeout(expand,0);});}
 window.V11={_F:[],
-  close:function(){var o=document.getElementById('nmovl');if(o)o.remove();},
-  own:function(i){var f=V11._F[i];if(f==null)return;V11.close();var o=document.createElement('div');o.id='nmovl';
-    var dl=(db.staff||[]).filter(function(s){return s&&s.ten&&s.active!==false;}).map(function(s){return '<option value="'+esc(s.ten)+'">';}).join('');
-    o.innerHTML='<div class="sigcard"><div style="font-weight:800;font-size:16px;margin-bottom:2px">Người phụ trách – '+esc(f)+'</div>'
-      +'<div style="font-size:12.5px;color:var(--mut);margin-bottom:10px">Hiện ở bảng tổng hợp và các dòng việc của cơ sở này. Để trống để lấy theo Thủ kho cơ sở trong Danh bạ nhân sự.</div>'
-      +'<input class="inp" id="v11-own" list="v11-dl" value="'+esc((db.owners&&db.owners[f])||'')+'" placeholder="Nhập tên người phụ trách"><datalist id="v11-dl">'+dl+'</datalist>'
-      +'<div style="display:flex;gap:8px;margin-top:12px"><button class="btn btn-outline" style="flex:1;padding:12px" onclick="V11.close()">Huỷ</button><button class="btn btn-primary" style="flex:1;padding:12px" onclick="V11.save('+i+')">Lưu</button></div></div>';
-    document.body.appendChild(o);setTimeout(function(){var e=document.getElementById('v11-own');if(e)e.focus();},50);},
+  close:function(){var o=document.getElementById('nmovl');if(o)o.remove();var v=V11._ov;V11._ov=null;if(v&&window.MDL){try{MDL.close(v,true);}catch(e){}}},
+  own:function(i){var f=V11._F[i];if(f==null)return;V11.close();
+    var st=(db.staff||[]).filter(function(x){return x&&x.ten&&x.active!==false;}),cur=(db.owners&&db.owners[f])||'',
+      mine=function(x){try{return match(x.chiNhanh)===f;}catch(e){return false;}};
+    st.sort(function(a,b){return (mine(b)-mine(a))||((b.vaiTro==='thuKho')-(a.vaiTro==='thuKho'))||String(a.ten).localeCompare(String(b.ten),'vi');});
+    var hay=function(x){return norm([x.ten,x.chucVu,x.boPhan,x.chiNhanh,x.maNV,x.dienThoai].concat(Object.keys(x.ex||{}).map(function(k){return x.ex[k];})).join(' '));};
+    function rows(q){var t=norm(q||'').split(' ').filter(Boolean),m=st.filter(function(x){var h=hay(x),dg=String(x.dienThoai||'').replace(/\D/g,'');return t.every(function(w){return h.indexOf(w)>=0||(/^\d{3,}$/.test(w)&&dg.indexOf(w)>=0);});});
+      if(!st.length)return '<div class="v17-n">Danh bạ nhân sự đang trống. Hãy thêm nhân sự ở Danh bạ, rồi quay lại để gán.</div>';
+      if(!m.length)return '<div class="v17-n">Không tìm thấy. Thử tên, mã NV, số điện thoại hoặc chức vụ khác.</div>';
+      return m.slice(0,60).map(function(x){var sub=[x.chucVu,x.boPhan,x.chiNhanh].filter(Boolean).join(' · '),ex=[x.maNV,x.dienThoai].filter(Boolean).join(' · ');
+        return '<button type="button" class="v17-r'+(x.ten===cur?' on':'')+'" data-n="'+esc(x.ten)+'"><b>'+esc(x.ten)+(x.ten===cur?'<i class="v17-t cur">Đang gán</i>':(mine(x)?'<i class="v17-t">Cùng cơ sở</i>':''))+'</b>'+(sub?'<span>'+esc(sub)+'</span>':'')+(ex?'<em>'+esc(ex)+'</em>':'')+'</button>';}).join('')
+        +(m.length>60?'<div class="v17-n">Còn '+(m.length-60)+' người nữa. Gõ thêm để lọc.</div>':'');}
+    var body='<div class="v17-cur">'+(cur?'Đang gán: <b>'+esc(cur)+'</b>':'Chưa gán. Mặc định lấy Thủ kho của cơ sở trong Danh bạ.')+'</div><input class="inp v17-q" type="search" data-mdl-nodirty autocomplete="off" placeholder="Tìm tên, mã NV, số điện thoại, chức vụ…"><div class="v17-l"></div>',
+      foot='<div class="v17-f"><button type="button" class="btn btn-outline" data-a="def">Dùng mặc định</button><button type="button" class="btn btn-outline" data-a="man">Nhập tên khác</button><button type="button" class="btn btn-outline v17-full" data-a="dir">Mở Danh bạ nhân sự</button></div>';
+    var ov=MDL.open({title:'Người phụ trách – '+f,html:body,footer:foot,onClose:function(){V11._ov=null;}});V11._ov=ov;
+    var inp=ov.querySelector('.v17-q'),ls=ov.querySelector('.v17-l');function draw(){ls.innerHTML=rows(inp.value);}draw();inp.addEventListener('input',draw);
+    ov.addEventListener('click',function(e){var r=e.target.closest('.v17-r');if(r){V11.set(f,r.getAttribute('data-n'));return;}
+      var a=e.target.closest('[data-a]');if(!a)return;var k=a.getAttribute('data-a');
+      if(k==='def')V11.set(f,'');else if(k==='man'){var v=window.prompt('Nhập tên người phụ trách – '+f,cur);if(v!=null)V11.set(f,v.trim());}else if(k==='dir'){V11.close();try{A.go('staff');}catch(x){}}});
+    try{if(!(window.matchMedia&&matchMedia('(pointer:coarse)').matches))setTimeout(function(){inp.focus();},80);}catch(e){}},
+  set:function(f,v){if(!db.owners||typeof db.owners!=='object')db.owners={};if(v)db.owners[f]=v;else delete db.owners[f];
+    try{saveSoon();}catch(x){}V11.close();try{window.renderHome();}catch(x){try{A.go('home');}catch(y){}}try{toast(v?'Đã gán '+v+' cho '+f:'Đã chuyển về mặc định (Thủ kho)');}catch(x){}},
   save:function(i){var f=V11._F[i];if(f==null)return;var e=document.getElementById('v11-own'),v=e?e.value.trim():'';
     if(!db.owners||typeof db.owners!=='object')db.owners={};if(v)db.owners[f]=v;else delete db.owners[f];
     try{saveSoon();}catch(x){}V11.close();try{window.renderHome();}catch(x){try{A.go('home');}catch(y){}}}};
@@ -16342,6 +16356,20 @@ function run(){try{var f=document.querySelector('#app .bp-sts .bp-st:first-child
 if(typeof prev==='function')window.renderHome=function(){var r=prev.apply(this,arguments);run();setTimeout(run,240);return r;};
 run();setTimeout(run,400);})();
 </script>
+<style id="bp-v17">
+/* v17 — Cửa sổ "Gán người phụ trách": chọn từ Danh bạ nhân sự, có tìm kiếm. Gỡ: xoá bp-v17 và khôi phục V11.own. */
+.v17-cur{font-size:13.5px;color:#4F4037;margin-bottom:10px}
+.v17-q{width:100%}
+.v17-l{display:flex;flex-direction:column;gap:8px;margin-top:10px;max-height:min(46vh,420px);overflow-y:auto;-webkit-overflow-scrolling:touch}
+.v17-r{display:flex;flex-direction:column;align-items:flex-start;gap:2px;width:100%;min-height:56px;padding:10px 12px;text-align:left;border:1px solid #F0E6DE;border-radius:14px;background:#fff;font:inherit;cursor:pointer}
+.v17-r:active,.v17-r.on{background:#FFEDE5;border-color:#FFC9B2}
+.v17-r b{display:flex;align-items:center;flex-wrap:wrap;gap:6px;font-size:15px;color:#33271F}
+.v17-r span{font-size:13px;color:#4F4037}.v17-r em{font-style:normal;font-size:12.5px;color:#6F6055}
+.v17-t{font-style:normal;font-size:11.5px;font-weight:700;padding:1px 8px;border-radius:99px;background:#CCFBF1;color:#0F766E}
+.v17-t.cur{background:#FFEDE5;color:#A8381A}
+.v17-n{padding:14px 4px;font-size:13.5px;color:#6F6055}
+.v17-f{display:flex;gap:8px;flex-wrap:wrap}.v17-f .btn{flex:1;padding:12px}.v17-f .v17-full{flex:1 1 100%}
+</style>
 <script id="vm-js">
 /* v13: chuyển đổi giao diện Điện thoại / Máy tính. Lựa chọn được nhớ trên từng thiết bị (kk_view: auto | mobile | desktop). */
 var VM=(function(){
