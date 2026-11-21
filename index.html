@@ -9454,14 +9454,14 @@ store.boot(function(){
   if(hv0&&hrSafe(hv0)!=='home')hrGo(hv0);else render();
   /* Watermark */
   try{
-    var W=300,H=170;
+    var W=440,H=270;
     var c=document.createElement('canvas');
     c.width=W;c.height=H;
     var ctx=c.getContext('2d');
     ctx.translate(W/2,H/2);
     ctx.rotate(-28*Math.PI/180);
     ctx.font='12.5px Arial,sans-serif';
-    ctx.fillStyle='rgba(0,0,0,0.072)';
+    ctx.fillStyle='rgba(0,0,0,0.03)';
     ctx.textAlign='center';
     ctx.textBaseline='middle';
     ctx.fillText('Mai Văn Quyết quyetmv',0,0);
@@ -16177,6 +16177,151 @@ html body.bp .v11-tb td.z{font-size:14px}
 function mv(){var g=document.querySelector('#app .bp-feat .fg'),m=document.querySelector('#app .bp-feat .bp-main');if(g&&m&&m.parentNode!==g)g.insertBefore(m,g.firstChild);}
 if(typeof prev==='function')window.renderHome=function(){var r=prev.apply(this,arguments);try{mv();}catch(e){}return r;};
 try{mv();}catch(e){}})();
+</script>
+<style id="bp-v15">
+/* v15 — Dọn giao diện trang chủ: chú giải thanh tiến độ, câu chào theo giờ, gộp cảnh báo "chưa có người phụ trách", ẩn ô trống, sửa tiêu đề bị cắt chữ. Chỉ CSS + 1 đoạn JS nhỏ, không đổi dữ liệu. Gỡ: xoá khối bp-v15 và bp-v15-js. */
+html body.bp .bp-legend{display:flex;flex-wrap:wrap;gap:6px 14px;margin-top:10px;flex:1 0 100%}
+html body.bp .bp-legend span{display:inline-flex;align-items:center;gap:6px;font-size:13px;font-weight:600;color:#4F4037}
+html body.bp .bp-legend span i{width:10px;height:10px;border-radius:50%;flex:none}
+html body.bp .bp-legend b{font-weight:800;color:#33271F}
+.v15-ban{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:0 0 12px;padding:10px 12px;border-radius:14px;background:#FFF1D6;color:#4A3200;font-size:14px;font-weight:600}
+.v15-ban span{flex:1 1 170px}
+.v15-ban button{min-height:44px;padding:0 16px;border:0;border-radius:12px;background:#33271F;color:#fff;font:700 14px/1 inherit;font-family:inherit;cursor:pointer}
+.v15-ban button:focus-visible{outline:3px solid #D9552E;outline-offset:2px}
+html body .v11-tb .ow.un{display:inline-flex;align-items:center;flex-wrap:wrap;margin-left:8px}
+@media(max-width:899px){
+html body.bp .v11-tb td.z{display:none}
+html body.bp .v11-tb td:not(:first-child)::before{font-size:12.5px}
+html body.bp .v11-tb td small{font-size:12.5px}
+html body.bp .bk-need .hd{gap:10px}
+html body.bp.bp .bk-need .bk-lb{font-size:15px;white-space:nowrap}
+html body.bp .bk-need .bk-pill{padding:3px 9px;font-size:12px}
+}
+</style>
+<script id="bp-v15-js">
+(function(){var prev=window.renderHome;
+function num(el){return el?(parseInt(el.textContent,10)||0):0;}
+function hi(){var h=new Date().getHours(),g=h<11?'Chào buổi sáng':h<14?'Chào buổi trưa':h<18?'Chào buổi chiều':'Chào buổi tối';
+ var e=document.querySelector('#app .bk-hi'),m=document.querySelector('#app .fc-ban h2');
+ [e,m].forEach(function(x,i){if(!x||x.getAttribute('data-v15'))return;var b=x.querySelector('b'),n=b?b.textContent.trim():'';
+  x.setAttribute('data-v15','1');x.textContent=g+(n&&n.toLowerCase()!=='bạn'?', '+n:'')+(i?' 👋':'');});
+ var s=document.querySelector('#app .bp-sub');
+ if(s&&!s.getAttribute('data-v15')){var t=num(document.querySelector('#app .bk-need .bk-num')),r=num(document.querySelector('#app .bp-st:first-child em'));
+  s.setAttribute('data-v15','1');s.textContent=t?'Hôm nay có '+t+' việc cần xử lý'+(r?', trong đó '+r+' việc đã quá hạn hoặc lỗi.':'.'):'Hôm nay chưa có việc tồn đọng.';}}
+function lg(){var bar=document.querySelector('#app .bp-bar');if(!bar||(bar.nextElementSibling&&bar.nextElementSibling.classList.contains('bp-legend')))return;
+ var h='';[].forEach.call(bar.querySelectorAll('i'),function(i){var m=/^(.*): (\d+)$/.exec(i.title||'');if(m)h+='<span><i style="background:'+i.style.background+'"></i>'+m[1]+' <b>'+m[2]+'</b></span>';});
+ if(h){var d=document.createElement('div');d.className='bp-legend';d.innerHTML=h;bar.parentNode.insertBefore(d,bar.nextSibling);}}
+function tb(){var s=document.getElementById('v11-tb');if(!s)return;
+ [].forEach.call(s.querySelectorAll('tbody td'),function(td){if(td.textContent.trim()==='–')td.classList.add('z');});
+ var un=[].filter.call(s.querySelectorAll('tbody .ow'),function(o){return /^Chưa có người phụ trách/.test(o.textContent.trim());});
+ un.forEach(function(o){o.classList.add('un');var t=o.firstChild;if(t&&t.nodeType===3)t.nodeValue='Chưa gán ';});
+ if(un.length>1&&!s.querySelector('.v15-ban')){var d=document.createElement('div');d.className='v15-ban';
+  d.innerHTML='<span>'+un.length+' cơ sở chưa có người phụ trách</span><button type="button">Gán lần lượt</button>';
+  d.querySelector('button').onclick=function(){var b=un[0].querySelector('button');if(b)b.click();};
+  s.insertBefore(d,s.querySelector('.v11-sc'));}}
+function run(){try{hi();}catch(e){}try{lg();}catch(e){}try{tb();}catch(e){}}
+if(typeof prev==='function')window.renderHome=function(){var r=prev.apply(this,arguments);run();setTimeout(run,160);return r;};
+run();setTimeout(run,300);})();
+</script>
+<style id="bp-v16">
+/* v16 — Làm đẹp trang chủ: hero có ánh sáng, thẻ việc cần xử lý nổi bật, dải màu mức độ ở từng dòng cảnh báo, thẻ cơ sở dạng ô mềm, thanh dưới rõ mục đang chọn, hiệu ứng vào nhẹ. Chỉ CSS, không đổi dữ liệu/chức năng. Gỡ: xoá khối bp-v16. */
+html body.bp ::selection{background:#FFD9C7;color:#33271F}
+html body.bp :is(.bk-hi,.bk-lb,.fh b,.v11-tb .fh b){letter-spacing:-.015em}
+html body.bp :is(button,a,[role=button]):focus-visible{outline:3px solid #D9552E;outline-offset:2px}
+/* Hero */
+html body.bp .bp-band{isolation:isolate;overflow:hidden;border-radius:24px;box-shadow:0 18px 34px -24px rgba(217,85,46,.6)}
+html body.bp .bp-band::before{content:"";position:absolute;z-index:-1;right:-60px;top:-70px;width:220px;height:220px;border-radius:50%;background:radial-gradient(closest-side,rgba(255,255,255,.65),rgba(255,255,255,0));pointer-events:none}
+html body.bp .bp-date{box-shadow:0 1px 0 rgba(51,39,31,.06)}
+/* Thẻ việc cần xử lý + KPI */
+html body.bp .bp-st{transition:transform .15s ease,box-shadow .2s ease,background-color .15s}
+html body.bp .bp-st:active{transform:scale(.985)}
+html body.bp .bp-st:first-child{background:linear-gradient(160deg,#FFEDE4 0%,#FFFBF8 70%);border-radius:22px}
+html body.bp .bp-st:first-child b{font-size:42px;letter-spacing:-.03em}
+html body.bp .bp-bar{height:10px;gap:3px;background:rgba(51,39,31,.08)}
+html body.bp .bp-legend{padding-top:2px}
+/* Dòng cảnh báo: dải màu theo mức độ, nút dạng viên thuốc */
+html body.bp .bk-need{border-radius:22px}
+html body.bp .bk-need .nx-r{border-radius:16px;box-shadow:inset 3px 0 0 var(--lv,#CDBFB5)}
+html body.bp .bk-need .nx-r.red{--lv:#EF4444}
+html body.bp .bk-need .nx-r.org{--lv:#F59E0B}
+html body.bp .bk-need .nx-r.amb{--lv:#A78BFA}
+html body.bp .bk-need .nx-r.blu,html body.bp .bk-need .nx-r.grn{--lv:#2DD4BF}
+html body.bp .nx-r .nx-act{min-height:36px;padding:0 14px;border-radius:99px;font-weight:700}
+html body.bp .pu-gh{font-size:12.5px;letter-spacing:.01em;margin-top:12px}
+/* Thao tác nhanh */
+html body.bp .bp-feat,html body.bp .bp-side{border-radius:22px}
+html body.bp .bp-feat .fi{border-radius:16px;transition:transform .15s,border-color .15s,background-color .15s}
+html body.bp .bp-feat .fi:active{transform:scale(.97)}
+html body.bp .bp-feat .fi i{border-radius:12px}
+/* Thanh điều hướng dưới: mục đang chọn có nền rõ */
+html body.blk.bp #bnav button{border-radius:16px;transition:background-color .15s,color .15s}
+html body.blk.bp #bnav button.on{background:#FFEDE5;font-weight:700}
+/* Bảng cơ sở */
+html body.bp .v11-tb{border-radius:22px}
+@media(max-width:899px){
+html body.bp .v11-tb tbody tr{background:#FFFBF8;border:1px solid #F0E6DE;border-radius:18px;padding:14px;margin-bottom:10px}
+html body.bp .v11-tb tbody tr:last-child{border-bottom:1px solid #F0E6DE}
+html body.bp .v11-tb td:not(:first-child){background:#fff;border:1px solid #F3EAE3;border-radius:12px;padding:8px 10px}
+html body.bp .v11-tb td.r{background:#FDF1F2;border-color:#F8D7DB}
+html body.bp .v11-tb td:not(:first-child) b{font-size:20px;font-weight:800}
+html body.bp .v11-tb .cn{font-size:16px;font-weight:800}
+html body.bp .v11-tb tfoot tr{padding:12px 4px 0}
+}
+@media(min-width:900px) and (hover:hover){
+html body.bp .v11-tb tbody tr:hover td{background:#FFFBF8}
+html body.bp .bp-feat .fi:hover{transform:translateY(-2px)}
+html body{scrollbar-width:thin;scrollbar-color:#E3D3C8 transparent}
+}
+/* Hiệu ứng vào nhẹ, tôn trọng "giảm chuyển động" */
+@keyframes v16in{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+@media(prefers-reduced-motion:no-preference){
+html body.bp #app .wrap.bk>*{animation:v16in .38s cubic-bezier(.2,.7,.2,1) both}
+html body.bp #app .wrap.bk>*:nth-child(2){animation-delay:.04s}
+html body.bp #app .wrap.bk>*:nth-child(3){animation-delay:.08s}
+html body.bp #app .wrap.bk>*:nth-child(4){animation-delay:.12s}
+html body.bp #app .wrap.bk>*:nth-child(n+5){animation-delay:.16s}
+}
+</style>
+<style id="bp-v16b">
+/* v16b — Thẻ cơ sở trên điện thoại thu gọn/mở ra (accordion): mặc định chỉ hiện tên + trạng thái, chạm để xem 6 chỉ số. Cơ sở chậm nhất mở sẵn. Gỡ: xoá bp-v16b và bp-v16b-js. */
+.v16-sum{display:none}
+@media(max-width:899px){
+html body.bp .v11-tb tbody td:first-child{position:relative;padding-right:84px}
+html body.bp .v11-tb tbody tr:not(.open)>td:not(:first-child){display:none}
+html body.bp .v11-tb tbody tr:not(.v16-empty)>td:first-child{cursor:pointer;-webkit-tap-highlight-color:transparent}
+html body.bp .v11-tb .v16-sum{display:inline-block;position:absolute;right:26px;top:-2px;padding:3px 10px;border-radius:99px;font-size:12.5px;font-weight:700;line-height:1.3;white-space:nowrap}
+html body.bp .v11-tb .v16-empty .v16-sum{right:0}
+html body.bp .v11-tb .v16-sum.r{background:#FDECEE;color:#B42333}
+html body.bp .v11-tb .v16-sum.w{background:#FEF3C7;color:#8A5A00}
+html body.bp .v11-tb .v16-sum.ok{background:#CCFBF1;color:#0F766E}
+html body.bp .v11-tb .v16-sum.mu{background:#F3ECE6;color:#5A4A40}
+html body.bp .v11-tb tbody tr:not(.v16-empty)>td:first-child::after{content:"";position:absolute;right:4px;top:2px;width:8px;height:8px;border:solid #6F6055;border-width:0 2px 2px 0;transform:rotate(45deg);transition:transform .2s}
+html body.bp .v11-tb tbody tr.open>td:first-child::after{transform:rotate(-135deg);top:7px}
+}
+</style>
+<script id="bp-v16b-js">
+(function(){var prev=window.renderHome,rt;
+function mob(){try{return window.matchMedia('(max-width:899px)').matches;}catch(e){return false;}}
+function pill(tr){var t=[].slice.call(tr.children),v=function(i){var c=t[i];return c&&!c.classList.contains('z')?c:null;},
+ n=function(c){return parseInt((c.querySelector('b')||c).textContent,10)||0;},r=v(1),o=v(2);
+ if(r)return ['r',n(r)+' quá hạn'];if(o)return ['w',n(o)+' sắp đến hạn'];
+ if(v(3)||v(4)||v(5))return ['ok','Ổn định'];return ['mu','Không có việc'];}
+function acc(){var s=document.getElementById('v11-tb');if(!s)return;var m=mob();
+ [].forEach.call(s.querySelectorAll('tbody tr'),function(tr,i){var h=tr.firstElementChild;if(!h)return;var p=pill(tr),empty=p[0]==='mu';
+  if(!tr.getAttribute('data-v16')){tr.setAttribute('data-v16','1');var sp=document.createElement('span');sp.className='v16-sum '+p[0];sp.textContent=p[1];h.appendChild(sp);
+   if(empty)tr.classList.add('v16-empty');else if(i===0)tr.classList.add('open');}
+  if(m&&!empty){h.setAttribute('role','button');h.setAttribute('tabindex','0');h.setAttribute('aria-expanded',String(tr.classList.contains('open')));}
+  else{h.removeAttribute('role');h.removeAttribute('tabindex');h.removeAttribute('aria-expanded');}});
+ if(!s.getAttribute('data-v16')){s.setAttribute('data-v16','1');
+  var tg=function(e){if(!mob())return;var h=e.target.closest&&e.target.closest('#v11-tb tbody tr>td:first-child');if(!h||e.target.closest('button,a,input'))return;
+   var tr=h.parentNode;if(tr.classList.contains('v16-empty'))return;
+   if(e.type==='keydown'){if(e.key!=='Enter'&&e.key!==' ')return;e.preventDefault();}
+   tr.classList.toggle('open');h.setAttribute('aria-expanded',String(tr.classList.contains('open')));};
+  s.addEventListener('click',tg);s.addEventListener('keydown',tg);}}
+function run(){try{acc();}catch(e){}}
+if(typeof prev==='function')window.renderHome=function(){var r=prev.apply(this,arguments);run();setTimeout(run,220);return r;};
+window.addEventListener('resize',function(){clearTimeout(rt);rt=setTimeout(run,200);});
+run();setTimeout(run,350);})();
 </script>
 <script id="vm-js">
 /* v13: chuyển đổi giao diện Điện thoại / Máy tính. Lựa chọn được nhớ trên từng thiết bị (kk_view: auto | mobile | desktop). */
