@@ -16323,6 +16323,25 @@ if(typeof prev==='function')window.renderHome=function(){var r=prev.apply(this,a
 window.addEventListener('resize',function(){clearTimeout(rt);rt=setTimeout(run,200);});
 run();setTimeout(run,350);})();
 </script>
+<style id="bp-v16c">
+/* v16c — Thanh tiêu đề (topbar) đặc hoàn toàn: nội dung cuộn qua phía sau (nút cam "Cập nhật từ file"...) không còn lộ thành vệt cam mờ. Mục đang chọn của thanh dưới thụt vào, không lấn ra mép. Gỡ: xoá khối bp-v16c. */
+html body.bp .topbar{background:#fff!important;-webkit-backdrop-filter:none!important;backdrop-filter:none!important;border-bottom:1px solid #F0E6DE!important}
+html body.blk.bp #bnav button.on{margin:6px 0 4px}
+</style>
+<style id="bp-v16d">
+/* v16d — Dọn nốt: thẻ navy (Tỷ lệ khớp...) đổi sang nâu espresso cho cùng tông; thẻ "Công việc cần xử lý" chuyển xanh ngọc khi = 0; tiêu đề "Cảnh báo nghiệp vụ" cùng màu chữ chính. Gỡ: xoá bp-v16d và bp-v16d-js. */
+html body.bp .pxh{background:linear-gradient(160deg,#3D2E25 0%,#2A1F1A 100%);border-radius:22px}
+html body.bp .bk-need .bk-lb{color:#33271F}
+html body.bp .bp-st.v16-ok,html body.bp .bp-st.v16-ok:first-child{background:linear-gradient(160deg,#E2F7F0 0%,#FFFBF8 72%);border-color:rgba(15,118,110,.32);box-shadow:var(--sh2),inset 0 0 0 1.5px rgba(15,118,110,.35)}
+html body.bp .bp-st.v16-ok:first-child b{color:#0F766E}
+html body.bp .bp-st.v16-ok:first-child .kic{background:#CCFBF1;color:#0F766E}
+</style>
+<script id="bp-v16d-js">
+(function(){var prev=window.renderHome;
+function run(){try{var f=document.querySelector('#app .bp-sts .bp-st:first-child');if(!f)return;var b=f.querySelector('b'),n=b?parseInt(b.textContent,10):NaN;f.classList.toggle('v16-ok',n===0);}catch(e){}}
+if(typeof prev==='function')window.renderHome=function(){var r=prev.apply(this,arguments);run();setTimeout(run,240);return r;};
+run();setTimeout(run,400);})();
+</script>
 <script id="vm-js">
 /* v13: chuyển đổi giao diện Điện thoại / Máy tính. Lựa chọn được nhớ trên từng thiết bị (kk_view: auto | mobile | desktop). */
 var VM=(function(){
