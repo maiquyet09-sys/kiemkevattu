@@ -2,8 +2,8 @@
 <html lang="vi">
 <head>
 <meta charset="UTF-8">
-<meta name="app-notes" content="v2026112101: sửa lỗi khởi động (Trang chủ vẽ trước khi module Đối chiếu khai báo → dừng script, mất nút Đối chiếu/Thanh toán). Giao diện điện thoại riêng (Trang chủ: việc cần xử lý, quét QR, lưới chức năng) và nút chuyển Điện thoại / Máy tính trên thanh đầu trang + Cài đặt. Đồng nhất giao diện toàn app theo Trang chủ (v12): chip lọc, thanh tiến độ, bảng, ô nhập, biểu tượng, biểu đồ, nút trong màn quét đổi sang tông đào – nâu espresso. Trang chủ tổng hợp 5 cơ sở: thêm bảng xếp hạng cơ sở (quá hạn, sắp đến hạn, cần chú ý, đang xử lý, trễ lâu nhất, người phụ trách, tự kiểm khớp số), mỗi dòng việc hiện cơ sở / số ngày trễ / người phụ trách, việc quá hạn xếp theo mức trễ, bộ lọc hiện Tất cả cơ sở. Danh bạ nhân sự: chọn người là tự điền biên bản bàn giao, giải trình, ô ký; nhập Excel/CSV theo file mẫu. Giao diện đồng bộ 4 màu. Ký số PDF nâng cấp: ký nhiều người (tuần tự / đồng thời), danh sách nhân sự (nhập tay hoặc tải file mẫu), xem văn bản và kéo chữ ký đến đúng chỗ trước khi ký, thông báo Văn bản cần ký ở Trang chủ, biên bản Excel dùng chung thư viện chữ ký., hiện “đang chờ tại ai” và tiến độ 2 số lẻ, thông báo Trang chủ mở thẳng văn bản cần ký. Mở: Quản trị &amp; tiện ích › Ký số PDF. Sửa lỗi nhập / thêm nhân sự vào Danh bạ (lỗi uid). Ô chọn nhân sự trong biên bản: gõ để tìm theo tên, mã NV, số điện thoại, chức vụ. v14: tinh chỉnh giao diện điện thoại (thanh dưới dán đáy + safe-area, lưới Thao tác nhanh 2 cột (Quét QR là 1 ô), nút Gán dạng viên thuốc, menu bên, chữ phụ đậm hơn).">
-<meta name="app-version" content="2026112101">
+<meta name="app-notes" content="v2026112201: mỗi giao diện có bố cục riêng, thêm hình động nhẹ. v2026112101: sửa lỗi khởi động (Trang chủ vẽ trước khi module Đối chiếu khai báo → dừng script, mất nút Đối chiếu/Thanh toán). Giao diện điện thoại riêng (Trang chủ: việc cần xử lý, quét QR, lưới chức năng) và nút chuyển Điện thoại / Máy tính trên thanh đầu trang + Cài đặt. Đồng nhất giao diện toàn app theo Trang chủ (v12): chip lọc, thanh tiến độ, bảng, ô nhập, biểu tượng, biểu đồ, nút trong màn quét đổi sang tông đào – nâu espresso. Trang chủ tổng hợp 5 cơ sở: thêm bảng xếp hạng cơ sở (quá hạn, sắp đến hạn, cần chú ý, đang xử lý, trễ lâu nhất, người phụ trách, tự kiểm khớp số), mỗi dòng việc hiện cơ sở / số ngày trễ / người phụ trách, việc quá hạn xếp theo mức trễ, bộ lọc hiện Tất cả cơ sở. Danh bạ nhân sự: chọn người là tự điền biên bản bàn giao, giải trình, ô ký; nhập Excel/CSV theo file mẫu. Giao diện đồng bộ 4 màu. Ký số PDF nâng cấp: ký nhiều người (tuần tự / đồng thời), danh sách nhân sự (nhập tay hoặc tải file mẫu), xem văn bản và kéo chữ ký đến đúng chỗ trước khi ký, thông báo Văn bản cần ký ở Trang chủ, biên bản Excel dùng chung thư viện chữ ký., hiện “đang chờ tại ai” và tiến độ 2 số lẻ, thông báo Trang chủ mở thẳng văn bản cần ký. Mở: Quản trị &amp; tiện ích › Ký số PDF. Sửa lỗi nhập / thêm nhân sự vào Danh bạ (lỗi uid). Ô chọn nhân sự trong biên bản: gõ để tìm theo tên, mã NV, số điện thoại, chức vụ. v14: tinh chỉnh giao diện điện thoại (thanh dưới dán đáy + safe-area, lưới Thao tác nhanh 2 cột (Quét QR là 1 ô), nút Gán dạng viên thuốc, menu bên, chữ phụ đậm hơn).">
+<meta name="app-version" content="2026112201">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <script id="bp-v21-th">try{var __t=localStorage.getItem("bp-theme");if(/^(toon|ivory|slate|aurora|mint|ocean|rose|mono|sunset|forest|lavender|gold|cyber|sky)$/.test(__t))document.documentElement.setAttribute("data-theme",__t)}catch(e){}</script>
 <script id="sk-early">try{var __s=localStorage.getItem("kk_skin");if(/^(cute|party|pride|kawaii|bear|lavsky|peachy|babyblue|sticker|clay)$/.test(__s)){document.documentElement.setAttribute("data-skin",__s);document.documentElement.removeAttribute("data-theme")}}catch(e){}</script>
@@ -17103,5 +17103,82 @@ html body #gheader #bp-theme:focus-visible,html body #vmsw:focus-visible{outline
 html body .bp-feat .fh button{min-height:40px;padding:0 10px;display:inline-flex;align-items:center}
 @media (prefers-reduced-motion:reduce){html body #gheader #bp-theme{transition:none}}
 </style>
+<style id="ui-layouts">
+/* Bố cục riêng cho từng giao diện (chỉ điện thoại/tablet ≤820px). Giao diện Cam đào giữ nguyên. Gỡ: xoá cả khối này. */
+@media (max-width:820px){
+html[data-theme="toon"] body.bp .bp-band,html[data-theme="mint"] body.bp .bp-band,html[data-theme="rose"] body.bp .bp-band,html[data-theme="lavender"] body.bp .bp-band,html[data-theme="sky"] body.bp .bp-band{text-align:center!important}
+html[data-theme="toon"] body.bp .bp-bh,html[data-theme="mint"] body.bp .bp-bh,html[data-theme="rose"] body.bp .bp-bh,html[data-theme="lavender"] body.bp .bp-bh,html[data-theme="sky"] body.bp .bp-bh{justify-content:center!important;position:relative!important}
+html[data-theme="toon"] body.bp .bk-bell,html[data-theme="mint"] body.bp .bk-bell,html[data-theme="rose"] body.bp .bk-bell,html[data-theme="lavender"] body.bp .bk-bell,html[data-theme="sky"] body.bp .bk-bell{position:absolute!important;right:0!important;top:0!important}
+html[data-theme="ivory"] body.bp .bp-band,html[data-theme="slate"] body.bp .bp-band,html[data-theme="mono"] body.bp .bp-band,html[data-theme="forest"] body.bp .bp-band,html[data-theme="cyber"] body.bp .bp-band{display:grid!important;grid-template-columns:1fr auto!important;column-gap:8px!important;align-items:center!important;padding:10px 14px!important;border-radius:18px!important}
+html[data-theme="ivory"] body.bp .bp-bh,html[data-theme="slate"] body.bp .bp-bh,html[data-theme="mono"] body.bp .bp-bh,html[data-theme="forest"] body.bp .bp-bh,html[data-theme="cyber"] body.bp .bp-bh{display:contents!important}
+html[data-theme="ivory"] body.bp .bp-date,html[data-theme="slate"] body.bp .bp-date,html[data-theme="mono"] body.bp .bp-date,html[data-theme="forest"] body.bp .bp-date,html[data-theme="cyber"] body.bp .bp-date{justify-self:end!important;grid-column:2!important;grid-row:2!important}
+html[data-theme="aurora"] body.bp .bp-band,html[data-theme="ocean"] body.bp .bp-band,html[data-theme="sunset"] body.bp .bp-band,html[data-theme="gold"] body.bp .bp-band{padding:24px 18px 20px!important;border-radius:30px!important}
+html[data-theme="aurora"] body.bp .bp-sub,html[data-theme="ocean"] body.bp .bp-sub,html[data-theme="sunset"] body.bp .bp-sub,html[data-theme="gold"] body.bp .bp-sub{font-size:14.5px!important;margin-top:6px!important}
+html[data-theme="aurora"] body.bp .bp-date,html[data-theme="ocean"] body.bp .bp-date,html[data-theme="sunset"] body.bp .bp-date,html[data-theme="gold"] body.bp .bp-date{margin-top:12px!important}
+html[data-theme="toon"] body.bp .bp-kpis,html[data-theme="slate"] body.bp .bp-kpis,html[data-theme="ocean"] body.bp .bp-kpis,html[data-theme="forest"] body.bp .bp-kpis,html[data-theme="cyber"] body.bp .bp-kpis,html[data-theme="sky"] body.bp .bp-kpis{grid-template-columns:1fr 1fr!important}
+html[data-theme="toon"] body.bp .bp-st.v16-ok,html[data-theme="slate"] body.bp .bp-st.v16-ok,html[data-theme="ocean"] body.bp .bp-st.v16-ok,html[data-theme="forest"] body.bp .bp-st.v16-ok,html[data-theme="cyber"] body.bp .bp-st.v16-ok,html[data-theme="sky"] body.bp .bp-st.v16-ok{grid-column:auto!important}
+html[data-theme="ivory"] body.bp .bp-kpis,html[data-theme="mint"] body.bp .bp-kpis,html[data-theme="mono"] body.bp .bp-kpis,html[data-theme="gold"] body.bp .bp-kpis{grid-template-columns:1fr!important;gap:6px!important}
+html[data-theme="ivory"] body.bp .bp-st:not(.v16-ok),html[data-theme="mint"] body.bp .bp-st:not(.v16-ok),html[data-theme="mono"] body.bp .bp-st:not(.v16-ok),html[data-theme="gold"] body.bp .bp-st:not(.v16-ok){flex-direction:row!important;align-items:center!important;gap:10px!important;min-height:52px!important;padding:8px 12px!important}
+html[data-theme="toon"] body.bp .fg,html[data-theme="slate"] body.bp .fg,html[data-theme="rose"] body.bp .fg,html[data-theme="mono"] body.bp .fg,html[data-theme="lavender"] body.bp .fg,html[data-theme="cyber"] body.bp .fg{grid-template-columns:repeat(3,1fr)!important}
+html[data-theme="toon"] body.bp .fi,html[data-theme="slate"] body.bp .fi,html[data-theme="rose"] body.bp .fi,html[data-theme="mono"] body.bp .fi,html[data-theme="lavender"] body.bp .fi,html[data-theme="cyber"] body.bp .fi{flex-direction:column!important;justify-content:center!important;text-align:center!important;gap:6px!important;min-height:92px!important;padding:10px 6px!important}
+html[data-theme="toon"] body.bp .bp-main,html[data-theme="slate"] body.bp .bp-main,html[data-theme="rose"] body.bp .bp-main,html[data-theme="mono"] body.bp .bp-main,html[data-theme="lavender"] body.bp .bp-main,html[data-theme="cyber"] body.bp .bp-main,html[data-theme="aurora"] body.bp .bp-main,html[data-theme="forest"] body.bp .bp-main,html[data-theme="sky"] body.bp .bp-main{grid-column:1/-1!important}
+html[data-theme="ivory"] body.bp .fg,html[data-theme="ocean"] body.bp .fg,html[data-theme="sunset"] body.bp .fg{grid-template-columns:1fr!important;gap:6px!important}
+html[data-theme="ivory"] body.bp .fi,html[data-theme="ocean"] body.bp .fi,html[data-theme="sunset"] body.bp .fi,html[data-theme="ivory"] body.bp .bp-main,html[data-theme="ocean"] body.bp .bp-main,html[data-theme="sunset"] body.bp .bp-main{min-height:52px!important}
+html[data-theme="ivory"] body.bp .fi::after,html[data-theme="ocean"] body.bp .fi::after,html[data-theme="sunset"] body.bp .fi::after{content:"\203A"!important;margin-left:auto!important;opacity:.45!important;font-size:20px!important}
+html[data-theme="toon"] body.bp #bnav,html[data-theme="aurora"] body.bp #bnav,html[data-theme="rose"] body.bp #bnav,html[data-theme="sunset"] body.bp #bnav,html[data-theme="lavender"] body.bp #bnav,html[data-theme="cyber"] body.bp #bnav{left:12px!important;right:12px!important;bottom:calc(10px + env(safe-area-inset-bottom,0px))!important;height:60px!important;padding-bottom:0!important;border-radius:26px!important;box-shadow:0 10px 28px -10px rgba(20,16,40,.35)!important}
+html[data-theme="ivory"] body.bp #bnav,html[data-theme="slate"] body.bp #bnav,html[data-theme="mono"] body.bp #bnav,html[data-theme="ocean"] body.bp #bnav,html[data-theme="gold"] body.bp #bnav{border-radius:0!important;box-shadow:none!important;border-top:1px solid rgba(120,110,140,.25)!important}
+html[data-theme="toon"] body.bp .bp-st,.fi,.bp-main,.bk-card,html[data-theme="cyber"] body.bp .bp-st,.fi,.bp-main,.bk-card{border:2px solid var(--ink,#222)!important;box-shadow:3px 3px 0 var(--ink,#222)!important;border-radius:14px!important}
+html[data-theme="ivory"] body.bp .bp-st,.fi,.bp-main,.bk-card,html[data-theme="slate"] body.bp .bp-st,.fi,.bp-main,.bk-card,html[data-theme="forest"] body.bp .bp-st,.fi,.bp-main,.bk-card,html[data-theme="gold"] body.bp .bp-st,.fi,.bp-main,.bk-card,html[data-theme="mono"] body.bp .bp-st,.fi,.bp-main,.bk-card{border-radius:10px!important;box-shadow:none!important;border:1px solid var(--line,rgba(120,110,140,.25))!important}
+html[data-theme="aurora"] body.bp .bp-st,.fi,.bp-main,.bk-card,html[data-theme="mint"] body.bp .bp-st,.fi,.bp-main,.bk-card,html[data-theme="rose"] body.bp .bp-st,.fi,.bp-main,.bk-card,html[data-theme="sky"] body.bp .bp-st,.fi,.bp-main,.bk-card{border-radius:26px!important}
+html[data-theme="ivory"] body.bp .bk-hi{font-size:18px!important;white-space:nowrap!important}
+html[data-theme="ivory"] body.bp .bp-date{font-size:12px!important;padding:4px 10px!important;white-space:nowrap!important}
+html[data-theme="slate"] body.bp .bk-hi{font-size:18px!important;white-space:nowrap!important}
+html[data-theme="slate"] body.bp .bp-date{font-size:12px!important;padding:4px 10px!important;white-space:nowrap!important}
+html[data-theme="mono"] body.bp .bk-hi{font-size:18px!important;white-space:nowrap!important}
+html[data-theme="mono"] body.bp .bp-date{font-size:12px!important;padding:4px 10px!important;white-space:nowrap!important}
+html[data-theme="forest"] body.bp .bk-hi{font-size:18px!important;white-space:nowrap!important}
+html[data-theme="forest"] body.bp .bp-date{font-size:12px!important;padding:4px 10px!important;white-space:nowrap!important}
+html[data-theme="cyber"] body.bp .bk-hi{font-size:18px!important;white-space:nowrap!important}
+html[data-theme="cyber"] body.bp .bp-date{font-size:12px!important;padding:4px 10px!important;white-space:nowrap!important}
+html[data-theme="ivory"] body.bp .bp-band{grid-template-columns:minmax(0,1fr) auto!important}
+html[data-theme="ivory"] body.bp .bp-date{font-size:11px!important;padding:3px 8px!important}
+html[data-theme="slate"] body.bp .bp-band{grid-template-columns:minmax(0,1fr) auto!important}
+html[data-theme="slate"] body.bp .bp-date{font-size:11px!important;padding:3px 8px!important}
+html[data-theme="mono"] body.bp .bp-band{grid-template-columns:minmax(0,1fr) auto!important}
+html[data-theme="mono"] body.bp .bp-date{font-size:11px!important;padding:3px 8px!important}
+html[data-theme="forest"] body.bp .bp-band{grid-template-columns:minmax(0,1fr) auto!important}
+html[data-theme="forest"] body.bp .bp-date{font-size:11px!important;padding:3px 8px!important}
+html[data-theme="cyber"] body.bp .bp-band{grid-template-columns:minmax(0,1fr) auto!important}
+html[data-theme="cyber"] body.bp .bp-date{font-size:11px!important;padding:3px 8px!important}
+}
+</style>
+<style id="ui-motion">
+/* Hình động nhẹ (đáp lại thao tác của người dùng). Tự tắt khi điện thoại bật "giảm chuyển động". Gỡ: xoá khối style này và script ui-motion-js. */
+@media (prefers-reduced-motion:no-preference){
+html body .fi,html body .bp-main,html body .bp-st,html body .bk-need .hd,html body .bk-bell,html body #bnav button{transition:transform .12s ease,box-shadow .2s ease,background-color .2s ease,border-color .2s ease}
+html body .fi:active,html body .bp-main:active,html body .bp-st:active,html body .bk-need .hd:active,html body .bk-bell:active,html body #bnav button:active{transform:scale(.97)!important}
+html body .bk-need.open .bk-rows{animation:uiOpen .24s ease-out}
+html body .bk-chev{transition:transform .2s ease}
+html.ui-swap body.bp .bp-band{animation:uiSwap .3s ease-out both!important}
+html.ui-swap body.bp .bp-sts{animation:uiSwap .3s ease-out .05s both!important}
+html.ui-swap body.bp .bp-body{animation:uiSwap .3s ease-out .1s both!important}
+@keyframes uiOpen{from{opacity:0;transform:translateY(-6px)}to{opacity:1;transform:none}}
+@keyframes uiSwap{from{opacity:.3;transform:translateY(8px) scale(.985)}to{opacity:1;transform:none}}
+}
+</style>
+<script id="ui-motion-js">
+(function(){try{
+var rm=matchMedia("(prefers-reduced-motion: reduce)"),t0=Date.now(),done={},de=document.documentElement,tm;
+/* 1) đổi giao diện: các khối trượt vào nhẹ */
+new MutationObserver(function(){if(rm.matches)return;de.classList.add("ui-swap");clearTimeout(tm);tm=setTimeout(function(){de.classList.remove("ui-swap")},520)}).observe(de,{attributes:true,attributeFilter:["data-theme"]});
+/* 2) số liệu đầu trang chạy từ 0 lên số thật, mỗi ô một lần, trong 8 giây đầu */
+function run(){if(rm.matches||Date.now()-t0>8000)return;
+document.querySelectorAll(".bp-kpis .bp-st").forEach(function(st,i){var b=st.querySelector(".kr b");if(!b||done[i])return;
+var t=b.textContent.trim();if(!/^\d{1,6}$/.test(t))return;var n=+t;if(n<=0)return;done[i]=1;var s=null;
+function f(ts){if(s===null)s=ts;var k=Math.min(1,(ts-s)/600),e=1-Math.pow(1-k,3);b.textContent=k<1?Math.round(n*e):n;if(k<1)requestAnimationFrame(f)}
+b.textContent=0;requestAnimationFrame(f)})}
+new MutationObserver(run).observe(document.body,{childList:true,subtree:true,characterData:true});run();
+}catch(e){}})();
+</script>
 </body>
 </html>
