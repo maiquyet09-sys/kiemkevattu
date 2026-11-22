@@ -17094,5 +17094,14 @@ var ap=document.getElementById('app');if(ap)new MutationObserver(em).observe(ap,
 setInterval(all,1200);all();
 }catch(e){}})();
 </script>
+<style id="ui-polish">
+/* ui-polish (22/11/2026): đồng bộ nút trên header, tăng vùng bấm, focus rõ ràng. Gỡ: xoá cả khối style này. */
+html body #gheader #bp-theme{width:40px;height:40px;min-width:40px;padding:0;border:1px solid #F0E6DE!important;border-radius:12px!important;background:#fff!important;color:#33271F;display:inline-flex;align-items:center;justify-content:center;font-size:18px;line-height:1;cursor:pointer;transition:background-color .15s,transform .15s}
+html body #gheader #bp-theme:hover{background:#FFF6F0!important}
+html body #gheader #bp-theme:active{transform:scale(.95)}
+html body #gheader #bp-theme:focus-visible,html body #vmsw:focus-visible{outline:2px solid #6C5CE7;outline-offset:2px}
+html body .bp-feat .fh button{min-height:40px;padding:0 10px;display:inline-flex;align-items:center}
+@media (prefers-reduced-motion:reduce){html body #gheader #bp-theme{transition:none}}
+</style>
 </body>
 </html>
