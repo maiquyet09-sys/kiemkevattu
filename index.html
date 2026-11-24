@@ -2,8 +2,8 @@
 <html lang="vi">
 <head>
 <meta charset="UTF-8">
-<meta name="app-notes" content="v2026112214: tên kỳ chia khối (Biên bản kiểm kê - Cơ sở / Kỳ / Dữ liệu) ở thẻ kỳ và màn hình tạo kỳ mới. v2026112213: tạo kỳ kiểm kê mới: tên tự động Biên bản kiểm kê - Cơ sở - Kỳ MM/YYYY (từ ngày-đến ngày), vẫn sửa được. v2026112212: thiết kế lại thẻ kỳ kiểm kê (gọn hơn, 5 trạng thái, thanh tiến độ mảnh, menu ba chấm: Mở / Đổi tên / Chuyển thư mục / Xóa). v2026112211: Báo lỗi: gỡ chữ phủ lên ô chọn tháng (làm lệch ô), tab Tất cả/Nhập liệu/Labo căn giữa chữ, viền tab rõ hơn. v2026112210: Báo lỗi: giới hạn bề rộng 1080px trên máy tính, 2 nút thêm lỗi thu nhỏ đặt bên phải, nhãn đỏ Quá hạn ở đầu thẻ, ô chọn tháng hiện chữ Chọn kỳ thay vì dấu gạch. v2026112209: sửa lỗi khối Khôi phục bản tạm bị ghim ở đầu trang Cài đặt (xuống cuối trang); gộp Màu sắc và Chủ đề giao diện thành 2 tab, mỗi lưới hiện 6 ô + Xem thêm, Linh vật gập lại, Kiểu hiển thị theo thiết bị đưa xuống dưới Giao diện. v2026112208: sửa lời chào đè lên chuông, số liệu Trang chủ cùng một màu, ô tab đang chọn ở thanh dưới không bị cắt. v2026112207: 5 giao diện Ember đổi bố cục Trang chủ giống ảnh mẫu (chức năng 2 cột thẻ pastel, thẻ số liệu và Cần xử lý tô màu pastel). v2026112206: câu châm ngôn thu gọn trong banner (chữ nhỏ, không đường kẻ, không cần chạm), tự đổi câu mỗi ngày. v2026112205: gộp câu châm ngôn vào banner chào ở Trang chủ (bỏ thẻ ngày riêng). v2026112204: thêm 5 giao diện kiểu Ember (Ember Kem, Sage Xanh Lá, Dawn Hồng Đào, Mist Xanh Sương, Lilac Tím Khói) và thẻ câu châm ngôn mỗi ngày ở Trang chủ. v2026112203: chữ dễ đọc hơn (tab đang chọn, dòng phụ trong banner). v2026112202: mỗi giao diện khác hẳn nhau hơn (kiểu chữ, hoa văn nền, thứ tự các khối, thanh dưới). v2026112201: mỗi giao diện có bố cục riêng, thêm hình động nhẹ. v2026112101: sửa lỗi khởi động (Trang chủ vẽ trước khi module Đối chiếu khai báo → dừng script, mất nút Đối chiếu/Thanh toán). Giao diện điện thoại riêng (Trang chủ: việc cần xử lý, quét QR, lưới chức năng) và nút chuyển Điện thoại / Máy tính trên thanh đầu trang + Cài đặt. Đồng nhất giao diện toàn app theo Trang chủ (v12): chip lọc, thanh tiến độ, bảng, ô nhập, biểu tượng, biểu đồ, nút trong màn quét đổi sang tông đào – nâu espresso. Trang chủ tổng hợp 5 cơ sở: thêm bảng xếp hạng cơ sở (quá hạn, sắp đến hạn, cần chú ý, đang xử lý, trễ lâu nhất, người phụ trách, tự kiểm khớp số), mỗi dòng việc hiện cơ sở / số ngày trễ / người phụ trách, việc quá hạn xếp theo mức trễ, bộ lọc hiện Tất cả cơ sở. Danh bạ nhân sự: chọn người là tự điền biên bản bàn giao, giải trình, ô ký; nhập Excel/CSV theo file mẫu. Giao diện đồng bộ 4 màu. Ký số PDF nâng cấp: ký nhiều người (tuần tự / đồng thời), danh sách nhân sự (nhập tay hoặc tải file mẫu), xem văn bản và kéo chữ ký đến đúng chỗ trước khi ký, thông báo Văn bản cần ký ở Trang chủ, biên bản Excel dùng chung thư viện chữ ký., hiện “đang chờ tại ai” và tiến độ 2 số lẻ, thông báo Trang chủ mở thẳng văn bản cần ký. Mở: Quản trị &amp; tiện ích › Ký số PDF. Sửa lỗi nhập / thêm nhân sự vào Danh bạ (lỗi uid). Ô chọn nhân sự trong biên bản: gõ để tìm theo tên, mã NV, số điện thoại, chức vụ. v14: tinh chỉnh giao diện điện thoại (thanh dưới dán đáy + safe-area, lưới Thao tác nhanh 2 cột (Quét QR là 1 ô), nút Gán dạng viên thuốc, menu bên, chữ phụ đậm hơn).">
-<meta name="app-version" content="2026112214">
+<meta name="app-notes" content="v2026112217: màn hình bên trong kỳ kiểm kê: tên kỳ chia khối (Biên bản kiểm kê - Cơ sở / Kỳ / Dữ liệu) giống thẻ ở thư mục, không còn một dòng dài. v2026112216: Sửa tên kỳ kiểm kê: sửa lỗi hộp không hiện khối Cơ sở / Kỳ / Dữ liệu (bị nút × chèn lên đầu hộp), lấy đúng cơ sở của kỳ đang sửa khi nhiều cơ sở trùng tên kỳ, bỏ nút × bị chồng đôi. v2026112215: Sửa tên kỳ kiểm kê: chỉnh theo khối (cơ sở theo thư mục / kỳ tháng-năm / dữ liệu từ ngày-đến ngày), vẫn có Sửa tay tên. v2026112214: tên kỳ chia khối (Biên bản kiểm kê - Cơ sở / Kỳ / Dữ liệu) ở thẻ kỳ và màn hình tạo kỳ mới. v2026112213: tạo kỳ kiểm kê mới: tên tự động Biên bản kiểm kê - Cơ sở - Kỳ MM/YYYY (từ ngày-đến ngày), vẫn sửa được. v2026112212: thiết kế lại thẻ kỳ kiểm kê (gọn hơn, 5 trạng thái, thanh tiến độ mảnh, menu ba chấm: Mở / Đổi tên / Chuyển thư mục / Xóa). v2026112211: Báo lỗi: gỡ chữ phủ lên ô chọn tháng (làm lệch ô), tab Tất cả/Nhập liệu/Labo căn giữa chữ, viền tab rõ hơn. v2026112210: Báo lỗi: giới hạn bề rộng 1080px trên máy tính, 2 nút thêm lỗi thu nhỏ đặt bên phải, nhãn đỏ Quá hạn ở đầu thẻ, ô chọn tháng hiện chữ Chọn kỳ thay vì dấu gạch. v2026112209: sửa lỗi khối Khôi phục bản tạm bị ghim ở đầu trang Cài đặt (xuống cuối trang); gộp Màu sắc và Chủ đề giao diện thành 2 tab, mỗi lưới hiện 6 ô + Xem thêm, Linh vật gập lại, Kiểu hiển thị theo thiết bị đưa xuống dưới Giao diện. v2026112208: sửa lời chào đè lên chuông, số liệu Trang chủ cùng một màu, ô tab đang chọn ở thanh dưới không bị cắt. v2026112207: 5 giao diện Ember đổi bố cục Trang chủ giống ảnh mẫu (chức năng 2 cột thẻ pastel, thẻ số liệu và Cần xử lý tô màu pastel). v2026112206: câu châm ngôn thu gọn trong banner (chữ nhỏ, không đường kẻ, không cần chạm), tự đổi câu mỗi ngày. v2026112205: gộp câu châm ngôn vào banner chào ở Trang chủ (bỏ thẻ ngày riêng). v2026112204: thêm 5 giao diện kiểu Ember (Ember Kem, Sage Xanh Lá, Dawn Hồng Đào, Mist Xanh Sương, Lilac Tím Khói) và thẻ câu châm ngôn mỗi ngày ở Trang chủ. v2026112203: chữ dễ đọc hơn (tab đang chọn, dòng phụ trong banner). v2026112202: mỗi giao diện khác hẳn nhau hơn (kiểu chữ, hoa văn nền, thứ tự các khối, thanh dưới). v2026112201: mỗi giao diện có bố cục riêng, thêm hình động nhẹ. v2026112101: sửa lỗi khởi động (Trang chủ vẽ trước khi module Đối chiếu khai báo → dừng script, mất nút Đối chiếu/Thanh toán). Giao diện điện thoại riêng (Trang chủ: việc cần xử lý, quét QR, lưới chức năng) và nút chuyển Điện thoại / Máy tính trên thanh đầu trang + Cài đặt. Đồng nhất giao diện toàn app theo Trang chủ (v12): chip lọc, thanh tiến độ, bảng, ô nhập, biểu tượng, biểu đồ, nút trong màn quét đổi sang tông đào – nâu espresso. Trang chủ tổng hợp 5 cơ sở: thêm bảng xếp hạng cơ sở (quá hạn, sắp đến hạn, cần chú ý, đang xử lý, trễ lâu nhất, người phụ trách, tự kiểm khớp số), mỗi dòng việc hiện cơ sở / số ngày trễ / người phụ trách, việc quá hạn xếp theo mức trễ, bộ lọc hiện Tất cả cơ sở. Danh bạ nhân sự: chọn người là tự điền biên bản bàn giao, giải trình, ô ký; nhập Excel/CSV theo file mẫu. Giao diện đồng bộ 4 màu. Ký số PDF nâng cấp: ký nhiều người (tuần tự / đồng thời), danh sách nhân sự (nhập tay hoặc tải file mẫu), xem văn bản và kéo chữ ký đến đúng chỗ trước khi ký, thông báo Văn bản cần ký ở Trang chủ, biên bản Excel dùng chung thư viện chữ ký., hiện “đang chờ tại ai” và tiến độ 2 số lẻ, thông báo Trang chủ mở thẳng văn bản cần ký. Mở: Quản trị &amp; tiện ích › Ký số PDF. Sửa lỗi nhập / thêm nhân sự vào Danh bạ (lỗi uid). Ô chọn nhân sự trong biên bản: gõ để tìm theo tên, mã NV, số điện thoại, chức vụ. v14: tinh chỉnh giao diện điện thoại (thanh dưới dán đáy + safe-area, lưới Thao tác nhanh 2 cột (Quét QR là 1 ô), nút Gán dạng viên thuốc, menu bên, chữ phụ đậm hơn).">
+<meta name="app-version" content="2026112217">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <script id="bp-v21-th">try{var __t=localStorage.getItem("bp-theme");if(/^(toon|ivory|slate|aurora|mint|ocean|rose|mono|sunset|forest|lavender|gold|cyber|sky)$/.test(__t))document.documentElement.setAttribute("data-theme",__t)}catch(e){}</script>
 <script id="sk-early">try{var __s=localStorage.getItem("kk_skin");if(/^(cute|party|pride|kawaii|bear|lavsky|peachy|babyblue|sticker|clay|ember|sage|dawn|mist|lilac)$/.test(__s)){document.documentElement.setAttribute("data-skin",__s);document.documentElement.removeAttribute("data-theme")}}catch(e){}</script>
@@ -5534,12 +5534,17 @@ function filteredList(p){
     return true;
   });
 }
+function periodTitleHtml(p){
+  var mt=/^Biên bản kiểm kê(?: - (.+?))? - Kỳ (\d{2}\/\d{4}) \((.+)\)$/.exec(p.name||'');
+  if(!mt)return esc(p.name);
+  return '<div class="pc-t1">Biên bản kiểm kê'+(mt[1]?' - '+esc(mt[1]):'')+'</div><div class="pc-bl"><span class="pc-b1"><em>Kỳ</em>'+esc(mt[2])+'</span><span class="pc-b2"><em>Dữ liệu</em>'+esc(mt[3].replace('-',' – '))+'</span></div>';
+}
 function renderPeriod(){
   var p=P&&per(P.id);
   if(!p){route={view:"home"};render();return;}
   var h='<div class="topbar"><div class="trow wrap">'+
     '<button class="back" onclick="A.periodBack()">‹</button>'+
-    '<div class="ttl" style="cursor:text" title="Chạm để sửa tên" onclick="A.renamePeriod(\''+p.id+'\')">'+esc(p.name)+'</div>'+
+    '<div class="ttl pt3" style="cursor:text" title="Chạm để sửa tên" onclick="A.renamePeriod(\''+p.id+'\')">'+periodTitleHtml(p)+'</div>'+
     '<div style="display:flex;gap:6px;flex-shrink:0">'+
     '<button class="pill" title="Gửi email kết quả kiểm kê" style="display:inline-flex;align-items:center;gap:5px" onclick="A.kiemKeEmail()">'+icon('mail',15)+'Email</button>'+
     '<button class="pill" style="display:inline-flex;align-items:center;gap:5px" onclick="A.exportCur()">'+icon('download',15)+'Excel</button><button class="pill" style="display:inline-flex;align-items:center" onclick="A.printCur()">In</button></div></div>'+
@@ -8549,6 +8554,7 @@ var A={
   openPeriod:function(id){P={id:id,q:"",flt:"all",br:"all",limit:80};route={view:"period"};render();},
   renamePeriod:function(id){
     var p=per(id);if(!p)return;
+    window.RN_PID=id;
     renameModal('Sửa tên kỳ kiểm kê',p.name,function(v){
       p.name=v;store.save();
       if(route.view==='period')renderPeriod();else render();
@@ -17551,6 +17557,11 @@ D.addEventListener("keydown",function(e){if(e.key==="Escape")closeAll()});
 .pc-bl span{display:inline-flex;align-items:center;gap:6px;min-height:26px;padding:0 10px;border-radius:10px;font:700 12.5px/1.2 inherit}
 .pc-bl em{font-style:normal;font-weight:600;font-size:11.5px;opacity:.72}
 .pc-b1{background:#ECE9FB;color:#3F2F9F}.pc-b2{background:#E4F5F2;color:#0F6E66}
+.ttl.pt3{white-space:normal!important;overflow:visible!important;text-overflow:clip!important}
+.ttl.pt3 .pc-t1{font-size:16px;line-height:1.25}
+.ttl.pt3 .pc-bl{margin-top:5px;flex-wrap:nowrap;gap:5px}
+.ttl.pt3 .pc-bl span{font-size:13px;font-weight:700;line-height:1.2;min-height:24px;padding:0 8px;gap:4px;white-space:nowrap}
+.ttl.pt3 .pc-bl em{font-size:11px}
 #app input.inp.pn-hide{display:none!important}
 .pn-card{position:relative;margin:0 0 4px;padding:12px;border-radius:18px;background:#fff;border:1px solid rgba(30,42,74,.1);box-shadow:0 6px 18px -12px rgba(30,42,74,.3)}
 .pn-k{font:800 11px/1 inherit;letter-spacing:.08em;text-transform:uppercase;color:#6a5bd0}
@@ -17562,6 +17573,17 @@ D.addEventListener("keydown",function(e){if(e.key==="Escape")closeAll()});
 .pn-c b{font-size:14.5px;font-weight:800}
 .pn-c1{background:#ECE9FB;color:#3F2F9F}.pn-c2{background:#E4F5F2;color:#0F6E66}
 .pn-e{position:absolute;top:8px;right:8px;min-height:36px;padding:0 12px;border:0;border-radius:99px;background:#F1EFFC;color:#4B3FB0;font:700 12.5px/1 inherit;cursor:pointer}
+#nmovl .sigcard.rn-on{max-height:calc(100dvh - 32px);overflow:auto;-webkit-overflow-scrolling:touch}
+#nmovl .pu-x{display:none!important}
+.rn-bk{margin-bottom:10px}
+.rn-pv.pn-card{margin:0 0 4px}.rn-pv .pn-v{padding-right:0}
+.rn-f{margin-top:10px}
+.rn-f label{display:block;margin-bottom:5px;font-size:12px;font-weight:700;color:var(--mut,#6b7280)}
+.rn-ro{padding:12px 14px;border-radius:12px;background:#F5F3FE;color:#4B3FB0;font-size:14.5px;font-weight:700}
+.rn-2{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.rn-hint{margin-top:6px;font-size:11.5px;color:var(--mut,#6b7280)}
+.rn-sw{margin-top:10px;min-height:36px;padding:0 14px;border:0;border-radius:99px;background:#F1EFFC;color:#4B3FB0;font:700 12.5px/1 inherit;cursor:pointer}
+.rn-bk[data-m="m"] .rn-blocks{display:none}
 </style>
 <script id="ui-fix-name">
 (function(){try{
@@ -17584,6 +17606,51 @@ D.addEventListener("click",function(e){var t=e.target;if(!t||!t.closest||typeof 
 if(t.closest(".pn-b")){UP.pauto=true;sync()}
 else if(t.closest(".pn-e")){UP.pauto=false;sync();var i=D.querySelector(SEL);if(i){i.focus()}}});
 var t0=0;new MutationObserver(function(){cancelAnimationFrame(t0);t0=requestAnimationFrame(function(){try{sync()}catch(e){}})}).observe(D.getElementById("app")||D.body,{childList:true,subtree:true});
+}catch(e){}})();
+</script>
+<script id="ui-fix-rn">
+(function(){try{
+var D=document;
+function p2(x){return("0"+x).slice(-2)}
+function esc(x){return String(x).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;")}
+function dm(v,y){var m=/^(\d{4})-(\d{2})-(\d{2})$/.exec(v||"");return m?(+m[3])+"/"+(+m[2])+(y?"/"+m[1]:""):""}
+function rg(t){var m=/^\s*(\d{1,2})\/(\d{1,2})(?:\/(\d{4}))?\s*[-–]\s*(\d{1,2})\/(\d{1,2})\/(\d{4})\s*$/.exec(t||"");if(!m)return null;
+var y2=+m[6],y1=m[3]?+m[3]:((+m[2])>(+m[5])?y2-1:y2);return{df:y1+"-"+p2(m[2])+"-"+p2(m[1]),dt:y2+"-"+p2(m[5])+"-"+p2(m[4])}}
+function parse(n){var m=/^Biên bản kiểm kê(?: - (.+?))? - Kỳ (\d{2})\/(\d{4}) \((.+)\)$/.exec(n),mo,yr,r;
+if(m){mo=+m[2];yr=+m[3];r=rg(m[4])}else{m=/Kiểm kê\s*(?:T\s*)?(\d{1,2})(?:\/(\d{4}))?\s*\(([^)]*)\)/i.exec(n);if(m){mo=+m[1];yr=m[2]?+m[2]:0;r=rg(m[3]);if(r&&!yr)yr=+r.dt.slice(0,4)}}
+return(mo>=1&&mo<=12&&yr&&r)?{mo:mo,yr:yr,df:r.df,dt:r.dt}:null}
+function rgTxt(st){var a=dm(st.df,!!(st.df&&st.dt&&st.df.slice(0,4)!==st.dt.slice(0,4))),b=dm(st.dt,true);return(a&&b)?a+" – "+b:""}
+function compose(f,st){var h=["Biên bản kiểm kê"];if(f)h.push(f);h.push("Kỳ "+p2(st.mo)+"/"+st.yr);var r=h.join(" - "),t=rgTxt(st);if(t)r+=" ("+t.replace(" – ","-")+")";return r}
+function enh(){var ov=D.getElementById("nmovl");if(!ov||ov.getAttribute("data-bk"))return;var card=ov.querySelector(".sigcard"),ta=ov.querySelector("#nmin");
+if(!card||!ta||!window.RN_PID)return;
+var pid=window.RN_PID;window.RN_PID=null;
+ov.setAttribute("data-bk","1");card.classList.add("rn-on");
+var orig=ta.value,per=((typeof db!=="undefined"&&db.periods)||[]).filter(function(p){return p.id===pid})[0],
+f=(per&&per.folder)||((typeof FD!=="undefined"&&FD&&FD.name)||""),P=parse(orig),n=new Date(),
+st=P||{mo:n.getMonth()+1,yr:n.getFullYear()};
+function bounds(){st.df=st.yr+"-"+p2(st.mo)+"-01";st.dt=st.yr+"-"+p2(st.mo)+"-"+p2(new Date(st.yr,st.mo,0).getDate())}
+if(!P)bounds();
+var o="";for(var i=1;i<=12;i++)o+='<option value="'+i+'">Tháng '+i+'</option>';
+var bk=D.createElement("div");bk.className="rn-bk";
+bk.innerHTML='<div class="rn-blocks"><div class="pn-card rn-pv"></div>'
++'<div class="rn-f"><label>Cơ sở</label><div class="rn-ro">'+(f?esc(f):"Chưa thuộc cơ sở nào")+'</div><div class="rn-hint">Theo thư mục của kỳ. Muốn đổi cơ sở, dùng “Chuyển thư mục”.</div></div>'
++'<div class="rn-f"><label>Kỳ kiểm kê: tháng · năm</label><div class="rn-2"><select class="inp" data-k="mo">'+o+'</select><input class="inp" type="number" min="2000" max="2100" data-k="yr"></div></div>'
++'<div class="rn-f"><label>Dữ liệu từ ngày – đến ngày</label><div class="rn-2"><input class="inp" type="date" data-k="df"><input class="inp" type="date" data-k="dt"></div></div></div>'
++'<button type="button" class="rn-sw"></button>';
+ta.insertAdjacentElement("beforebegin",bk);
+var q=function(k){return bk.querySelector('[data-k="'+k+'"]')},pv=bk.querySelector(".rn-pv"),sw=bk.querySelector(".rn-sw");
+function fill(){q("mo").value=st.mo;q("yr").value=st.yr;q("df").value=st.df||"";q("dt").value=st.dt||""}
+function view(){pv.innerHTML='<div class="pn-k">Biên bản kiểm kê</div><div class="pn-v'+(f?"":" pn-mu")+'">'+(f?esc(f):"Chưa chọn cơ sở")+'</div><div class="pn-row"><div class="pn-c pn-c1"><em>Kỳ</em><b>'+p2(st.mo)+"/"+st.yr+'</b></div><div class="pn-c pn-c2"><em>Dữ liệu</em><b>'+(rgTxt(st)||"…")+'</b></div></div>'}
+function upd(){ta.value=compose(f,st);view()}
+function mode(m){bk.setAttribute("data-m",m);ta.style.display=(m==="b")?"none":"";sw.textContent=(m==="b")?"Sửa tay tên":"Dùng khối (cơ sở · kỳ · dữ liệu)";if(m==="b"){upd();try{ta.blur()}catch(e){}}else{try{ta.focus()}catch(e){}}}
+fill();view();
+bk.addEventListener("change",function(e){var k=e.target&&e.target.getAttribute&&e.target.getAttribute("data-k");if(!k)return;
+if(k==="mo"||k==="yr"){var mo=+q("mo").value,yr=+q("yr").value;if(mo>=1&&mo<=12&&yr>=2000&&yr<=2100){st.mo=mo;st.yr=yr;bounds();fill()}}
+else{st[k]=e.target.value}
+upd()});
+sw.onclick=function(){mode(bk.getAttribute("data-m")==="b"?"m":"b")};
+mode(P?"b":"m")}
+new MutationObserver(function(){try{enh()}catch(e){}}).observe(D.body,{childList:true});
 }catch(e){}})();
 </script>
 </body>
