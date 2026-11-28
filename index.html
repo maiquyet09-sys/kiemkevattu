@@ -2,8 +2,8 @@
 <html lang="vi">
 <head>
 <meta charset="UTF-8">
-<meta name="app-notes" content="v2026112801: Đề nghị thanh toán NCC — giao diện điện thoại mới: đầu trang gọn (một hàng tiêu đề + thanh 3 bước dính, không còn tiêu đề lặp), thanh đầu trang không bị nội dung đè khi cuộn, linh vật nhỏ hơn không chặn thao tác. Nạp dữ liệu: thống kê lên đầu, 1 nút chính Bổ sung từ file Excel, 2 nút phụ, Nạp theo tháng / Nạp lại toàn bộ thu gọn, nạp lại toàn bộ có hộp xác nhận nêu hậu quả và cách khôi phục. Rà lỗi: tổng số lỗi + 3 mức (nghiêm trọng / cảnh báo / thông tin), tab Lỗi NCC / Lỗi chứng từ, lọc cơ sở + loại lỗi, tìm nhanh, tên lỗi ngắn, mỗi lỗi một nút xử lý, sửa ngay tại danh sách và tự cập nhật số lỗi. Không đổi logic Excel, đối chiếu, chống trùng, hoàn tác, dữ liệu. v2026112746: Đối chiếu thanh toán NCC: làm rõ tháng nào ra tháng nấy — màn Nạp dữ liệu có bảng thống kê theo tháng (số phiếu mua, HĐ MISA, tiền) và cảnh báo dòng chưa có Ngày hạch toán; màn Xuất / In đưa bộ chọn tháng lên đầu, tiêu đề tổng tiền và dòng “Phạm vi” ghi rõ đang xem tháng nào hay tất cả các tháng, số NCC / phiếu / HĐ đếm đúng theo phạm vi đang xem. v2026112745: Đối chiếu thanh toán NCC: tách 2 mức theo dõi Zalo — “Đã nhắn Zalo” (xanh dương: đã gửi số liệu đối chiếu cho NCC, chờ phản hồi) và “Đã chốt” (xanh lá: đã đối chiếu thủ công xong, hai bên thống nhất). Thẻ NCC có 2 nút tích nhanh, chip lọc Đã chốt / Đã nhắn chờ chốt / Chưa nhắn Zalo, đầu trang đếm tiến độ; đã chốt thì mặc định đã nhắn; số liệu NCC đổi sau khi tích thì chuyển vàng. v2026112744: Đối chiếu thanh toán NCC: thêm tích xanh “Đã đối chiếu Zalo” cho từng nhà cung cấp — sau khi tự đối chiếu thủ công với NCC qua Zalo, bấm tích ngay trên thẻ NCC (hoặc trong màn chi tiết); thẻ hiện dấu tích xanh cạnh tên, có chip lọc Đã / Chưa đối chiếu Zalo và đếm tiến độ ở đầu trang. Nếu số phiếu mua / HĐ MISA của NCC đổi sau khi tích thì tích chuyển vàng “Cần đối chiếu lại”. v2026112743: Thanh toán NCC: sửa trực tiếp dữ liệu đầu vào ngay trên app — mỗi dòng trong Bảng kê có nút Sửa phiếu mua / Sửa HĐ MISA (ngày, số chứng từ, số HĐ, nhà cung cấp, cơ sở, số tiền, thuế); bấm vào một lỗi ở màn Lỗi & tin Zalo sẽ chuyển tới đúng phiếu sai, cuộn tới dòng, nháy sáng và ghi rõ lý do sai. Dòng đã sửa tay không bị Bổ sung nhanh thêm lại bản gốc. v2026112742: Đề nghị thanh toán NCC: HĐ MISA thừa do NCC xuất lại hóa đơn (sai thông tin) — bấm Giải trình / tích khớp hợp lệ ở từng hóa đơn thừa, ghi giải trình (có nút điền nhanh); hóa đơn đã tích hợp lệ không còn tính là lệch, không bị giữ lại khi chốt, hiện màu xanh và ghi giải trình trong file Excel đối chiếu MISA. v2026112711: 3 biểu mẫu: đầu phiếu thay tên công ty bằng logo MedDental (hình tròn vàng, chim xanh) bên trái, Quốc hiệu – Tiêu ngữ bên phải. v2026112710: 3 biểu mẫu: mục Người ký / phê duyệt — sửa được chức danh và họ tên từng người ký (chọn từ Danh bạ hoặc gõ tay), thêm / xoá người ký; tên in ở ô ký. v2026112709: Biểu mẫu Giải trình công / Đơn nghỉ phép / Phiếu tăng ca: đầu trang gồm tên công ty (CÔNG TY CỔ PHẦN NỤ CƯỜI MỚI VIỆT NAM) bên trái và Quốc hiệu – Tiêu ngữ bên phải. v2026112708: Giải trình công / Đơn nghỉ phép / Phiếu tăng ca: thêm Quốc hiệu – Tiêu ngữ (CỘNG HÒA XÃ HỘI CHỦ NGHĨA VIỆT NAM – Độc lập – Tự do – Hạnh phúc) ở đầu biên bản khi xem trước, in và tải Word. v2026112707: Phiếu tăng ca: nút Lấy từ Giải trình công — tick các ngày của đúng người đó để đưa ngày, giờ vào/ra, nội dung sang phiếu. v2026112706: Phiếu tăng ca / Giải trình công: ô giờ gõ tay kiểu 24h (07:10, 7h10, 0710, 7:10 PM), tự chuẩn hoá và tự tính tổng giờ ngay, không còn kẹt AM/PM như ô giờ của trình duyệt. v2026112705: Phiếu tăng ca: dòng 'Ký & ghi rõ họ tên' cao 96pt để người đề xuất ký tay; Đơn nghỉ phép: dòng Người lập biểu cao hơn. v2026112704: Đơn nghỉ phép / Phiếu tăng ca: cột ký 'Xét duyệt' rộng gần một nửa bề ngang, cao hơn để ký tay thoải mái. v2026112703: Giải trình công / Phiếu tăng ca: thêm nút Dán từ Excel (dán cả bảng hoặc 1 cột: ngày, giờ, nội dung); ô ký cuối cả 3 phiếu giãn dòng rộng hơn để ký tay. v2026112702: Biểu mẫu thêm 3 mục riêng theo file Excel: Giải trình công, Đơn xin nghỉ phép (tự tính số ngày), Phiếu đề xuất tăng ca (tự tính tổng giờ); chọn người từ Danh bạ nhân sự, xuất Word. v2026112226: Trang chủ Smart Dashboard: khối Tổng quan thông minh 4 nhóm (bấm để lọc Trung tâm công việc), Trung tâm công việc có ô tìm kiếm, bỏ số liệu lặp, thêm Hoạt động gần đây lấy từ nhật ký thay đổi. v2026112225: Trang chủ: đổi tiêu đề bảng “Tổng hợp 5 cơ sở” thành “Việc cần xử lý tại từng cơ sở”. v2026112224: Trang chủ: bỏ nhãn đỏ lặp “N cần xử lý ngay” ở thẻ Công việc cần xử lý (đã có trong chú giải); đổi câu chào, câu ghi chú bảng cơ sở và lời nhắc của chú cún từ “quá hạn” thành “cần xử lý ngay” cho khớp tên nhóm. v2026112223: Trang chủ – Cần xử lý: đổi tên các nhóm cho đúng nội dung (Sắp đến hạn → Vật tư sắp hết hạn; Quá hạn / lỗi → Cần xử lý ngay; Cần chú ý → Lỗi và văn bản chờ ký; Đang xử lý → Kỳ kiểm kê đang dở; Theo dõi → Vật tư hạn dùng 1–6 tháng); các dòng Còn ≤ 1 / 3 / 6 tháng thành Vật tư hạn dùng còn ≤ 1 / 3 / 6 tháng; đổi tương ứng ở bảng tổng hợp cơ sở. v2026112222: Cảnh báo nghiệp vụ: đổi tên Đã hết hạn → Vật tư hết hạn, Lỗi báo đang nhắc chưa xử lý → Lỗi nhập liệu/Labo cần xử lý; số liệu chính thành nhãn màu, cơ sở thành chip, mỗi ý một dòng ngắn. v2026112221: Danh sách kiểm kê: bỏ tam giác đỏ lặp ở mọi thẻ, mỗi cơ sở một icon phòng khám với màu nền nhạt riêng, chip Vật tư / CCDC &amp; TSCĐ luôn nằm 1 hàng, ô báo mã chênh lệch gọn. v2026112220: Danh sách kiểm kê: thêm icon cho các chip lọc, chip Vật tư / CCDC &amp; TSCĐ, nhãn Chưa có kỳ và nút Tạo kỳ đầu tiên. v2026112219: Danh sách kiểm kê: đổi sang cùng kiểu thẻ với thẻ kỳ kiểm kê (cùng nhãn trạng thái Hoàn tất / Đang kiểm kê / Có sai lệch, cùng chip Vật tư – CCDC &amp; TSCĐ, thanh tiến độ), bộ lọc dùng chip như màn thư mục. v2026112218: Danh sách kiểm kê (chọn cơ sở): thiết kế lại – 4 ô tổng quan bấm để lọc (Chênh lệch / Đang kiểm / Hoàn tất / Chưa có kỳ), thẻ mỗi cơ sở có ô chữ cái màu riêng, viền và nhãn màu theo trạng thái, số kỳ Vật tư / CCDC &amp; TSCĐ / mã chênh lệch to rõ, thanh tiến độ. v2026112217: màn hình bên trong kỳ kiểm kê: tên kỳ chia khối (Biên bản kiểm kê - Cơ sở / Kỳ / Dữ liệu) giống thẻ ở thư mục, không còn một dòng dài. v2026112216: Sửa tên kỳ kiểm kê: sửa lỗi hộp không hiện khối Cơ sở / Kỳ / Dữ liệu (bị nút × chèn lên đầu hộp), lấy đúng cơ sở của kỳ đang sửa khi nhiều cơ sở trùng tên kỳ, bỏ nút × bị chồng đôi. v2026112215: Sửa tên kỳ kiểm kê: chỉnh theo khối (cơ sở theo thư mục / kỳ tháng-năm / dữ liệu từ ngày-đến ngày), vẫn có Sửa tay tên. v2026112214: tên kỳ chia khối (Biên bản kiểm kê - Cơ sở / Kỳ / Dữ liệu) ở thẻ kỳ và màn hình tạo kỳ mới. v2026112213: tạo kỳ kiểm kê mới: tên tự động Biên bản kiểm kê - Cơ sở - Kỳ MM/YYYY (từ ngày-đến ngày), vẫn sửa được. v2026112212: thiết kế lại thẻ kỳ kiểm kê (gọn hơn, 5 trạng thái, thanh tiến độ mảnh, menu ba chấm: Mở / Đổi tên / Chuyển thư mục / Xóa). v2026112211: Báo lỗi: gỡ chữ phủ lên ô chọn tháng (làm lệch ô), tab Tất cả/Nhập liệu/Labo căn giữa chữ, viền tab rõ hơn. v2026112210: Báo lỗi: giới hạn bề rộng 1080px trên máy tính, 2 nút thêm lỗi thu nhỏ đặt bên phải, nhãn đỏ Quá hạn ở đầu thẻ, ô chọn tháng hiện chữ Chọn kỳ thay vì dấu gạch. v2026112209: sửa lỗi khối Khôi phục bản tạm bị ghim ở đầu trang Cài đặt (xuống cuối trang); gộp Màu sắc và Chủ đề giao diện thành 2 tab, mỗi lưới hiện 6 ô + Xem thêm, Linh vật gập lại, Kiểu hiển thị theo thiết bị đưa xuống dưới Giao diện. v2026112208: sửa lời chào đè lên chuông, số liệu Trang chủ cùng một màu, ô tab đang chọn ở thanh dưới không bị cắt. v2026112207: 5 giao diện Ember đổi bố cục Trang chủ giống ảnh mẫu (chức năng 2 cột thẻ pastel, thẻ số liệu và Cần xử lý tô màu pastel). v2026112206: câu châm ngôn thu gọn trong banner (chữ nhỏ, không đường kẻ, không cần chạm), tự đổi câu mỗi ngày. v2026112205: gộp câu châm ngôn vào banner chào ở Trang chủ (bỏ thẻ ngày riêng). v2026112204: thêm 5 giao diện kiểu Ember (Ember Kem, Sage Xanh Lá, Dawn Hồng Đào, Mist Xanh Sương, Lilac Tím Khói) và thẻ câu châm ngôn mỗi ngày ở Trang chủ. v2026112203: chữ dễ đọc hơn (tab đang chọn, dòng phụ trong banner). v2026112202: mỗi giao diện khác hẳn nhau hơn (kiểu chữ, hoa văn nền, thứ tự các khối, thanh dưới). v2026112201: mỗi giao diện có bố cục riêng, thêm hình động nhẹ. v2026112101: sửa lỗi khởi động (Trang chủ vẽ trước khi module Đối chiếu khai báo → dừng script, mất nút Đối chiếu/Thanh toán). Giao diện điện thoại riêng (Trang chủ: việc cần xử lý, quét QR, lưới chức năng) và nút chuyển Điện thoại / Máy tính trên thanh đầu trang + Cài đặt. Đồng nhất giao diện toàn app theo Trang chủ (v12): chip lọc, thanh tiến độ, bảng, ô nhập, biểu tượng, biểu đồ, nút trong màn quét đổi sang tông đào – nâu espresso. Trang chủ tổng hợp 5 cơ sở: thêm bảng xếp hạng cơ sở (quá hạn, sắp đến hạn, cần chú ý, đang xử lý, trễ lâu nhất, người phụ trách, tự kiểm khớp số), mỗi dòng việc hiện cơ sở / số ngày trễ / người phụ trách, việc quá hạn xếp theo mức trễ, bộ lọc hiện Tất cả cơ sở. Danh bạ nhân sự: chọn người là tự điền biên bản bàn giao, giải trình, ô ký; nhập Excel/CSV theo file mẫu. Giao diện đồng bộ 4 màu. Ký số PDF nâng cấp: ký nhiều người (tuần tự / đồng thời), danh sách nhân sự (nhập tay hoặc tải file mẫu), xem văn bản và kéo chữ ký đến đúng chỗ trước khi ký, thông báo Văn bản cần ký ở Trang chủ, biên bản Excel dùng chung thư viện chữ ký., hiện “đang chờ tại ai” và tiến độ 2 số lẻ, thông báo Trang chủ mở thẳng văn bản cần ký. Mở: Quản trị &amp; tiện ích › Ký số PDF. Sửa lỗi nhập / thêm nhân sự vào Danh bạ (lỗi uid). Ô chọn nhân sự trong biên bản: gõ để tìm theo tên, mã NV, số điện thoại, chức vụ. v14: tinh chỉnh giao diện điện thoại (thanh dưới dán đáy + safe-area, lưới Thao tác nhanh 2 cột (Quét QR là 1 ô), nút Gán dạng viên thuốc, menu bên, chữ phụ đậm hơn).">
-<meta name="app-version" content="2026112801">
+<meta name="app-notes" content="v2026112802: Đề nghị thanh toán NCC — giao diện điện thoại mới: đầu trang gọn (một hàng tiêu đề + thanh 3 bước dính, không còn tiêu đề lặp), thanh đầu trang không bị nội dung đè khi cuộn, linh vật nhỏ hơn không chặn thao tác. Nạp dữ liệu: thống kê lên đầu, 1 nút chính Bổ sung từ file Excel, 2 nút phụ, Nạp theo tháng / Nạp lại toàn bộ thu gọn, nạp lại toàn bộ có hộp xác nhận nêu hậu quả và cách khôi phục. Rà lỗi: tổng số lỗi + 3 mức (nghiêm trọng / cảnh báo / thông tin), tab Lỗi NCC / Lỗi chứng từ, lọc cơ sở + loại lỗi, tìm nhanh, tên lỗi ngắn, mỗi lỗi một nút xử lý, sửa ngay tại danh sách và tự cập nhật số lỗi. Bộ lọc tháng toàn cục ngay dưới đầu trang (tháng trước / sau, chọn tháng-năm, tất cả các tháng, báo tháng chưa có dữ liệu) áp cho cả 3 bước, báo cáo, xuất Excel và in phiếu. Không đổi logic Excel, đối chiếu, chống trùng, hoàn tác, dữ liệu. v2026112746: Đối chiếu thanh toán NCC: làm rõ tháng nào ra tháng nấy — màn Nạp dữ liệu có bảng thống kê theo tháng (số phiếu mua, HĐ MISA, tiền) và cảnh báo dòng chưa có Ngày hạch toán; màn Xuất / In đưa bộ chọn tháng lên đầu, tiêu đề tổng tiền và dòng “Phạm vi” ghi rõ đang xem tháng nào hay tất cả các tháng, số NCC / phiếu / HĐ đếm đúng theo phạm vi đang xem. v2026112745: Đối chiếu thanh toán NCC: tách 2 mức theo dõi Zalo — “Đã nhắn Zalo” (xanh dương: đã gửi số liệu đối chiếu cho NCC, chờ phản hồi) và “Đã chốt” (xanh lá: đã đối chiếu thủ công xong, hai bên thống nhất). Thẻ NCC có 2 nút tích nhanh, chip lọc Đã chốt / Đã nhắn chờ chốt / Chưa nhắn Zalo, đầu trang đếm tiến độ; đã chốt thì mặc định đã nhắn; số liệu NCC đổi sau khi tích thì chuyển vàng. v2026112744: Đối chiếu thanh toán NCC: thêm tích xanh “Đã đối chiếu Zalo” cho từng nhà cung cấp — sau khi tự đối chiếu thủ công với NCC qua Zalo, bấm tích ngay trên thẻ NCC (hoặc trong màn chi tiết); thẻ hiện dấu tích xanh cạnh tên, có chip lọc Đã / Chưa đối chiếu Zalo và đếm tiến độ ở đầu trang. Nếu số phiếu mua / HĐ MISA của NCC đổi sau khi tích thì tích chuyển vàng “Cần đối chiếu lại”. v2026112743: Thanh toán NCC: sửa trực tiếp dữ liệu đầu vào ngay trên app — mỗi dòng trong Bảng kê có nút Sửa phiếu mua / Sửa HĐ MISA (ngày, số chứng từ, số HĐ, nhà cung cấp, cơ sở, số tiền, thuế); bấm vào một lỗi ở màn Lỗi & tin Zalo sẽ chuyển tới đúng phiếu sai, cuộn tới dòng, nháy sáng và ghi rõ lý do sai. Dòng đã sửa tay không bị Bổ sung nhanh thêm lại bản gốc. v2026112742: Đề nghị thanh toán NCC: HĐ MISA thừa do NCC xuất lại hóa đơn (sai thông tin) — bấm Giải trình / tích khớp hợp lệ ở từng hóa đơn thừa, ghi giải trình (có nút điền nhanh); hóa đơn đã tích hợp lệ không còn tính là lệch, không bị giữ lại khi chốt, hiện màu xanh và ghi giải trình trong file Excel đối chiếu MISA. v2026112711: 3 biểu mẫu: đầu phiếu thay tên công ty bằng logo MedDental (hình tròn vàng, chim xanh) bên trái, Quốc hiệu – Tiêu ngữ bên phải. v2026112710: 3 biểu mẫu: mục Người ký / phê duyệt — sửa được chức danh và họ tên từng người ký (chọn từ Danh bạ hoặc gõ tay), thêm / xoá người ký; tên in ở ô ký. v2026112709: Biểu mẫu Giải trình công / Đơn nghỉ phép / Phiếu tăng ca: đầu trang gồm tên công ty (CÔNG TY CỔ PHẦN NỤ CƯỜI MỚI VIỆT NAM) bên trái và Quốc hiệu – Tiêu ngữ bên phải. v2026112708: Giải trình công / Đơn nghỉ phép / Phiếu tăng ca: thêm Quốc hiệu – Tiêu ngữ (CỘNG HÒA XÃ HỘI CHỦ NGHĨA VIỆT NAM – Độc lập – Tự do – Hạnh phúc) ở đầu biên bản khi xem trước, in và tải Word. v2026112707: Phiếu tăng ca: nút Lấy từ Giải trình công — tick các ngày của đúng người đó để đưa ngày, giờ vào/ra, nội dung sang phiếu. v2026112706: Phiếu tăng ca / Giải trình công: ô giờ gõ tay kiểu 24h (07:10, 7h10, 0710, 7:10 PM), tự chuẩn hoá và tự tính tổng giờ ngay, không còn kẹt AM/PM như ô giờ của trình duyệt. v2026112705: Phiếu tăng ca: dòng 'Ký & ghi rõ họ tên' cao 96pt để người đề xuất ký tay; Đơn nghỉ phép: dòng Người lập biểu cao hơn. v2026112704: Đơn nghỉ phép / Phiếu tăng ca: cột ký 'Xét duyệt' rộng gần một nửa bề ngang, cao hơn để ký tay thoải mái. v2026112703: Giải trình công / Phiếu tăng ca: thêm nút Dán từ Excel (dán cả bảng hoặc 1 cột: ngày, giờ, nội dung); ô ký cuối cả 3 phiếu giãn dòng rộng hơn để ký tay. v2026112702: Biểu mẫu thêm 3 mục riêng theo file Excel: Giải trình công, Đơn xin nghỉ phép (tự tính số ngày), Phiếu đề xuất tăng ca (tự tính tổng giờ); chọn người từ Danh bạ nhân sự, xuất Word. v2026112226: Trang chủ Smart Dashboard: khối Tổng quan thông minh 4 nhóm (bấm để lọc Trung tâm công việc), Trung tâm công việc có ô tìm kiếm, bỏ số liệu lặp, thêm Hoạt động gần đây lấy từ nhật ký thay đổi. v2026112225: Trang chủ: đổi tiêu đề bảng “Tổng hợp 5 cơ sở” thành “Việc cần xử lý tại từng cơ sở”. v2026112224: Trang chủ: bỏ nhãn đỏ lặp “N cần xử lý ngay” ở thẻ Công việc cần xử lý (đã có trong chú giải); đổi câu chào, câu ghi chú bảng cơ sở và lời nhắc của chú cún từ “quá hạn” thành “cần xử lý ngay” cho khớp tên nhóm. v2026112223: Trang chủ – Cần xử lý: đổi tên các nhóm cho đúng nội dung (Sắp đến hạn → Vật tư sắp hết hạn; Quá hạn / lỗi → Cần xử lý ngay; Cần chú ý → Lỗi và văn bản chờ ký; Đang xử lý → Kỳ kiểm kê đang dở; Theo dõi → Vật tư hạn dùng 1–6 tháng); các dòng Còn ≤ 1 / 3 / 6 tháng thành Vật tư hạn dùng còn ≤ 1 / 3 / 6 tháng; đổi tương ứng ở bảng tổng hợp cơ sở. v2026112222: Cảnh báo nghiệp vụ: đổi tên Đã hết hạn → Vật tư hết hạn, Lỗi báo đang nhắc chưa xử lý → Lỗi nhập liệu/Labo cần xử lý; số liệu chính thành nhãn màu, cơ sở thành chip, mỗi ý một dòng ngắn. v2026112221: Danh sách kiểm kê: bỏ tam giác đỏ lặp ở mọi thẻ, mỗi cơ sở một icon phòng khám với màu nền nhạt riêng, chip Vật tư / CCDC &amp; TSCĐ luôn nằm 1 hàng, ô báo mã chênh lệch gọn. v2026112220: Danh sách kiểm kê: thêm icon cho các chip lọc, chip Vật tư / CCDC &amp; TSCĐ, nhãn Chưa có kỳ và nút Tạo kỳ đầu tiên. v2026112219: Danh sách kiểm kê: đổi sang cùng kiểu thẻ với thẻ kỳ kiểm kê (cùng nhãn trạng thái Hoàn tất / Đang kiểm kê / Có sai lệch, cùng chip Vật tư – CCDC &amp; TSCĐ, thanh tiến độ), bộ lọc dùng chip như màn thư mục. v2026112218: Danh sách kiểm kê (chọn cơ sở): thiết kế lại – 4 ô tổng quan bấm để lọc (Chênh lệch / Đang kiểm / Hoàn tất / Chưa có kỳ), thẻ mỗi cơ sở có ô chữ cái màu riêng, viền và nhãn màu theo trạng thái, số kỳ Vật tư / CCDC &amp; TSCĐ / mã chênh lệch to rõ, thanh tiến độ. v2026112217: màn hình bên trong kỳ kiểm kê: tên kỳ chia khối (Biên bản kiểm kê - Cơ sở / Kỳ / Dữ liệu) giống thẻ ở thư mục, không còn một dòng dài. v2026112216: Sửa tên kỳ kiểm kê: sửa lỗi hộp không hiện khối Cơ sở / Kỳ / Dữ liệu (bị nút × chèn lên đầu hộp), lấy đúng cơ sở của kỳ đang sửa khi nhiều cơ sở trùng tên kỳ, bỏ nút × bị chồng đôi. v2026112215: Sửa tên kỳ kiểm kê: chỉnh theo khối (cơ sở theo thư mục / kỳ tháng-năm / dữ liệu từ ngày-đến ngày), vẫn có Sửa tay tên. v2026112214: tên kỳ chia khối (Biên bản kiểm kê - Cơ sở / Kỳ / Dữ liệu) ở thẻ kỳ và màn hình tạo kỳ mới. v2026112213: tạo kỳ kiểm kê mới: tên tự động Biên bản kiểm kê - Cơ sở - Kỳ MM/YYYY (từ ngày-đến ngày), vẫn sửa được. v2026112212: thiết kế lại thẻ kỳ kiểm kê (gọn hơn, 5 trạng thái, thanh tiến độ mảnh, menu ba chấm: Mở / Đổi tên / Chuyển thư mục / Xóa). v2026112211: Báo lỗi: gỡ chữ phủ lên ô chọn tháng (làm lệch ô), tab Tất cả/Nhập liệu/Labo căn giữa chữ, viền tab rõ hơn. v2026112210: Báo lỗi: giới hạn bề rộng 1080px trên máy tính, 2 nút thêm lỗi thu nhỏ đặt bên phải, nhãn đỏ Quá hạn ở đầu thẻ, ô chọn tháng hiện chữ Chọn kỳ thay vì dấu gạch. v2026112209: sửa lỗi khối Khôi phục bản tạm bị ghim ở đầu trang Cài đặt (xuống cuối trang); gộp Màu sắc và Chủ đề giao diện thành 2 tab, mỗi lưới hiện 6 ô + Xem thêm, Linh vật gập lại, Kiểu hiển thị theo thiết bị đưa xuống dưới Giao diện. v2026112208: sửa lời chào đè lên chuông, số liệu Trang chủ cùng một màu, ô tab đang chọn ở thanh dưới không bị cắt. v2026112207: 5 giao diện Ember đổi bố cục Trang chủ giống ảnh mẫu (chức năng 2 cột thẻ pastel, thẻ số liệu và Cần xử lý tô màu pastel). v2026112206: câu châm ngôn thu gọn trong banner (chữ nhỏ, không đường kẻ, không cần chạm), tự đổi câu mỗi ngày. v2026112205: gộp câu châm ngôn vào banner chào ở Trang chủ (bỏ thẻ ngày riêng). v2026112204: thêm 5 giao diện kiểu Ember (Ember Kem, Sage Xanh Lá, Dawn Hồng Đào, Mist Xanh Sương, Lilac Tím Khói) và thẻ câu châm ngôn mỗi ngày ở Trang chủ. v2026112203: chữ dễ đọc hơn (tab đang chọn, dòng phụ trong banner). v2026112202: mỗi giao diện khác hẳn nhau hơn (kiểu chữ, hoa văn nền, thứ tự các khối, thanh dưới). v2026112201: mỗi giao diện có bố cục riêng, thêm hình động nhẹ. v2026112101: sửa lỗi khởi động (Trang chủ vẽ trước khi module Đối chiếu khai báo → dừng script, mất nút Đối chiếu/Thanh toán). Giao diện điện thoại riêng (Trang chủ: việc cần xử lý, quét QR, lưới chức năng) và nút chuyển Điện thoại / Máy tính trên thanh đầu trang + Cài đặt. Đồng nhất giao diện toàn app theo Trang chủ (v12): chip lọc, thanh tiến độ, bảng, ô nhập, biểu tượng, biểu đồ, nút trong màn quét đổi sang tông đào – nâu espresso. Trang chủ tổng hợp 5 cơ sở: thêm bảng xếp hạng cơ sở (quá hạn, sắp đến hạn, cần chú ý, đang xử lý, trễ lâu nhất, người phụ trách, tự kiểm khớp số), mỗi dòng việc hiện cơ sở / số ngày trễ / người phụ trách, việc quá hạn xếp theo mức trễ, bộ lọc hiện Tất cả cơ sở. Danh bạ nhân sự: chọn người là tự điền biên bản bàn giao, giải trình, ô ký; nhập Excel/CSV theo file mẫu. Giao diện đồng bộ 4 màu. Ký số PDF nâng cấp: ký nhiều người (tuần tự / đồng thời), danh sách nhân sự (nhập tay hoặc tải file mẫu), xem văn bản và kéo chữ ký đến đúng chỗ trước khi ký, thông báo Văn bản cần ký ở Trang chủ, biên bản Excel dùng chung thư viện chữ ký., hiện “đang chờ tại ai” và tiến độ 2 số lẻ, thông báo Trang chủ mở thẳng văn bản cần ký. Mở: Quản trị &amp; tiện ích › Ký số PDF. Sửa lỗi nhập / thêm nhân sự vào Danh bạ (lỗi uid). Ô chọn nhân sự trong biên bản: gõ để tìm theo tên, mã NV, số điện thoại, chức vụ. v14: tinh chỉnh giao diện điện thoại (thanh dưới dán đáy + safe-area, lưới Thao tác nhanh 2 cột (Quét QR là 1 ô), nút Gán dạng viên thuốc, menu bên, chữ phụ đậm hơn).">
+<meta name="app-version" content="2026112802">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <script id="bp-v21-th">try{var __t=localStorage.getItem("bp-theme");if(/^(toon|ivory|slate|aurora|mint|ocean|rose|mono|sunset|forest|lavender|gold|cyber|sky)$/.test(__t))document.documentElement.setAttribute("data-theme",__t)}catch(e){}</script>
 <script id="sk-early">try{var __s=localStorage.getItem("kk_skin");if(/^(cute|party|pride|kawaii|bear|lavsky|peachy|babyblue|sticker|clay|ember|sage|dawn|mist|lilac)$/.test(__s)){document.documentElement.setAttribute("data-skin",__s);document.documentElement.removeAttribute("data-theme")}}catch(e){}</script>
@@ -18510,19 +18510,71 @@ if(typeof route!=='undefined'&&route&&/^att/.test(route.view||''))try{render();}
 .pz-root :focus-visible{outline:2px solid var(--pz-info);outline-offset:2px}
 
 /* --- đầu trang: 1 hàng gọn, cuộn đi; chỉ thanh bước dính lại --- */
-.pz-head{display:flex;align-items:center;gap:10px;padding:8px 0 6px}
-.pz-back{flex:none;width:44px;height:44px;border-radius:14px;border:1px solid var(--line);background:var(--card,#fff);color:var(--ink);font-size:24px;line-height:1;display:grid;place-items:center;cursor:pointer;padding:0}
+.pz-head{display:flex;align-items:center;gap:10px;padding:6px 0 4px}
+.pz-back{flex:none;width:42px;height:42px;border-radius:14px;border:1px solid var(--line);background:var(--card,#fff);color:var(--ink);font-size:24px;line-height:1;display:grid;place-items:center;cursor:pointer;padding:0}
 .pz-ttl{flex:1;min-width:0;margin:0;font-size:19px;font-weight:800;line-height:1.2;color:var(--ink);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.pz-rep{flex:none;height:44px;padding:0 14px;border-radius:14px;border:1px solid var(--line);background:var(--card,#fff);color:var(--ink);font:inherit;font-size:14px;font-weight:700;display:inline-flex;align-items:center;gap:6px;cursor:pointer}
-.pz-steps{position:sticky;top:var(--pz-top,60px);z-index:30;display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin:0 -14px 12px;padding:6px 14px 8px;background:var(--bg,#f4f6fa);border-bottom:1px solid var(--line)}
+.pz-rep{flex:none;height:42px;padding:0 14px;border-radius:14px;border:1px solid var(--line);background:var(--card,#fff);color:var(--ink);font:inherit;font-size:14px;font-weight:700;display:inline-flex;align-items:center;gap:6px;cursor:pointer}
+.pz-steps{position:sticky;top:calc(var(--pz-top,60px) + var(--pz-mb,0px));z-index:31;display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin:0 -14px 12px;padding:4px 14px 6px;background:var(--bg,#f4f6fa);border-bottom:1px solid var(--line)}
 @supports((backdrop-filter:blur(1px)) or (-webkit-backdrop-filter:blur(1px))){.pz-steps{background:color-mix(in srgb,var(--bg,#f4f6fa) 86%,transparent);-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px)}}
-.pz-steps button{position:relative;min-height:44px;border:1px solid var(--line);border-radius:14px;background:var(--card,#fff);color:var(--mut);font:inherit;font-size:13px;font-weight:700;display:flex;align-items:center;justify-content:center;gap:7px;padding:0 6px;cursor:pointer}
+.pz-steps button{position:relative;min-height:42px;border:1px solid var(--line);border-radius:14px;background:var(--card,#fff);color:var(--mut);font:inherit;font-size:13px;font-weight:700;display:flex;align-items:center;justify-content:center;gap:7px;padding:0 6px;cursor:pointer}
 .pz-steps button:disabled{opacity:.45;cursor:default}
 .pz-steps i{flex:none;width:22px;height:22px;border-radius:50%;display:grid;place-items:center;font-style:normal;font-size:12px;font-weight:800;background:var(--card2,#f4f6fa);color:var(--mut)}
 .pz-steps .on{background:var(--teal);border-color:var(--teal);color:#fff}
 .pz-steps .on i{background:rgba(255,255,255,.26);color:#fff}
 .pz-steps .done i{background:var(--pz-ok);color:#fff}
 .pz-steps em{font-style:normal;font-size:11px;font-weight:800;min-width:18px;height:18px;padding:0 5px;border-radius:9px;background:var(--pz-crit);color:#fff;display:inline-grid;place-items:center}
+
+/* --- bộ lọc tháng toàn cục: dính ngay dưới đầu trang, trên thanh 3 bước --- */
+.pz-mbar{position:sticky;top:var(--pz-top,60px);z-index:32;display:flex;align-items:center;gap:6px;margin:0 -14px;padding:6px 14px 4px;background:var(--bg,#f4f6fa)}
+@supports((backdrop-filter:blur(1px)) or (-webkit-backdrop-filter:blur(1px))){.pz-mbar{background:color-mix(in srgb,var(--bg,#f4f6fa) 86%,transparent);-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px)}}
+.pz-mn{flex:none;width:42px;height:42px;border-radius:12px;border:1px solid var(--line);background:var(--card,#fff);color:var(--ink);font-size:24px;line-height:1;display:grid;place-items:center;cursor:pointer;padding:0}
+.pz-mn:disabled{opacity:.32;cursor:default}
+.pz-mn:active:not(:disabled){background:var(--card2,#f4f6fa)}
+.pz-mc{flex:1;min-width:0;height:42px;border-radius:12px;border:1.5px solid var(--teal);background:var(--teal-bg);color:var(--ink);display:flex;align-items:center;gap:8px;padding:0 10px;font:inherit;cursor:pointer;text-align:left}
+.pz-mc>svg:first-child{flex:none;color:var(--teal)}
+.pz-mc>svg:last-child{flex:none;color:var(--mut)}
+.pz-mc .tx{flex:1;min-width:0;display:flex;flex-direction:column}
+.pz-mc b{font-size:14.5px;font-weight:800;line-height:1.15;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pz-mc small{font-size:11.5px;line-height:1.2;color:var(--mut);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.pz-mc.all{border-color:var(--line);background:var(--card,#fff)}
+.pz-mc.emp{border-color:var(--pz-warn);background:var(--pz-warn-bg)}
+.pz-mc.emp small{color:var(--pz-warn);font-weight:800}
+.pz-ma{flex:none;height:42px;padding:0 12px;border-radius:12px;border:1px solid var(--line);background:var(--card,#fff);color:var(--ink);font:inherit;font-size:13px;font-weight:800;cursor:pointer}
+.pz-ma.on{background:var(--teal);border-color:var(--teal);color:#fff}
+.pz-kp{display:flex;align-items:center;gap:6px;margin:0 0 10px;font-size:14px;font-weight:800;color:var(--teal)}
+.pz-sum{display:flex;justify-content:space-between;align-items:baseline;gap:8px;margin:10px 0 0;padding:10px 12px;border-radius:12px;background:var(--card2,#f4f6fa);font-size:13px;color:var(--mut);font-weight:600}
+.pz-sum b{font-size:16px;color:var(--ink);font-weight:800}
+.pz-hsub{margin:8px 0 0;font-size:13px;color:var(--mut);font-weight:600}
+.pz-hsub b.g{color:var(--pz-ok)}.pz-hsub b.r{color:var(--pz-crit)}
+.pz-mr.tap{cursor:pointer;margin:0 -8px;padding:8px;border-radius:10px}
+.pz-mr.tap:active{background:var(--card2,#f4f6fa)}
+.pz-mr.cur{background:var(--teal-bg);font-weight:800}
+.pz-emp{text-align:center;padding:22px 16px}
+.pz-emp .ic{width:56px;height:56px;margin:0 auto 10px;border-radius:18px;background:var(--pz-warn-bg);color:var(--pz-warn);display:grid;place-items:center}
+.pz-emp h2{margin:0 0 6px;font-size:18px;font-weight:800;color:var(--ink)}
+.pz-emp p{margin:0 0 14px;font-size:13.5px;line-height:1.5;color:var(--mut)}
+/* hộp chọn kỳ */
+#pzov .pz-ph{display:flex;align-items:center;justify-content:space-between;margin:0 0 10px}
+#pzov .pz-ph h3{margin:0}
+#pzov .pz-x{width:44px;height:44px;border-radius:12px;border:1px solid var(--line);background:var(--card,#fff);color:var(--ink);font-size:16px;cursor:pointer}
+#pzov .pz-all{display:flex;align-items:center;gap:12px;width:100%;min-height:56px;padding:8px 14px;border:1.5px solid var(--line);border-radius:14px;background:var(--card,#fff);color:var(--ink);font:inherit;text-align:left;cursor:pointer}
+#pzov .pz-all span{display:flex;flex-direction:column;gap:1px}
+#pzov .pz-all b{font-size:15px;font-weight:800}
+#pzov .pz-all small{font-size:12.5px;color:var(--mut)}
+#pzov .pz-all.on{border-color:var(--teal);background:var(--teal-bg)}
+#pzov .pz-yr{display:flex;align-items:center;justify-content:space-between;margin:12px 0 8px}
+#pzov .pz-yr b{font-size:20px;font-weight:800}
+#pzov .pz-yr button{width:48px;height:44px;border-radius:12px;border:1px solid var(--line);background:var(--card,#fff);color:var(--ink);font-size:22px;cursor:pointer}
+#pzov .pz-yr button:disabled{opacity:.3}
+#pzov .pz-mg{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+#pzov .pz-mo{min-height:60px;border:1px solid var(--line);border-radius:14px;background:var(--card,#fff);color:var(--mut);font:inherit;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;cursor:pointer}
+#pzov .pz-mo b{font-size:16px;font-weight:800;color:var(--ink)}
+#pzov .pz-mo small{font-size:11.5px;font-weight:600}
+#pzov .pz-mo.has{background:var(--teal-bg);border-color:transparent;color:var(--teal)}
+#pzov .pz-mo.on{background:var(--teal);border-color:var(--teal);color:#fff}
+#pzov .pz-mo.on b,#pzov .pz-mo.on small{color:#fff}
+#pzov .pz-mo:disabled{opacity:.28;cursor:default}
+#pzov .pz-pq{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
 
 /* --- thẻ & ô số --- */
 .pz-card{background:var(--card,#fff);border:1px solid var(--line);border-radius:var(--pz-r);padding:14px;margin:0 0 12px}
@@ -18675,12 +18727,15 @@ html body:has(.pz-root) #gheader{z-index:60}
   html body:has(.pz-root) #kk-pet .pd-b{display:none!important}
 }
 @media (min-width:768px){
+  .pz-mc{flex:0 1 380px}.pz-mbar{justify-content:flex-start}
   html body .wrap.pz-root{max-width:880px;margin-left:auto;margin-right:auto}
   .pz-two{max-width:520px}
 }
-@media (min-width:900px){.pz-root{padding-bottom:40px}.pz-steps{margin:0 0 12px;padding:6px 0 8px;top:var(--pz-top,64px)}.pz-fl{margin:0 0 8px;padding:2px 0 6px;flex-wrap:wrap;overflow:visible}}
+@media (max-width:360px){.pz-ma{padding:0 9px;font-size:12px}.pz-mc b{font-size:13.5px}.pz-mn{width:38px}}
+@media (min-width:900px){.pz-root{padding-bottom:40px}.pz-steps{margin:0 0 12px;padding:6px 0 8px}.pz-mbar{margin:0;padding:8px 0 4px}.pz-fl{margin:0 0 8px;padding:2px 0 6px;flex-wrap:wrap;overflow:visible}}
 @media (max-width:360px){.pz-st3 b{font-size:20px}.pz-steps button{font-size:12px;gap:4px}.pz-steps i{display:none}.pz-rep span{display:none}.pz-mr{font-size:12px}}
 @media (prefers-reduced-motion:reduce){.pz-root *{transition:none!important}.pz-main:active,.pz-act:active{transform:none}}
+@media (max-height:700px){.pz-steps{position:static}}
 @media print{.pz-steps,.pz-head,#pzov{display:none!important}}
 </style>
 <script id="pz-js">
@@ -18690,7 +18745,7 @@ html body:has(.pz-root) #gheader{z-index:60}
 (function(){
 "use strict";
 if(typeof renderPay!=="function"||typeof payDb!=="function"||typeof payErrAll!=="function")return;
-var PZ=window.PZ={fo:0,sev:"",tab:"all",type:"",q:"",lim:50,fromErr:0,y:0};
+var PZ=window.PZ={py:0,dirty:0,openMon:0,lastFile:"",fo:0,sev:"",tab:"all",type:"",q:"",lim:50,fromErr:0,y:0};
 
 /* ---------- biểu tượng thống nhất ---------- */
 var IC={
@@ -18706,7 +18761,8 @@ var IC={
   chart:'<path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/>',
   trash:'<path d="M3 6h18M8 6V4h8v2M6 6l1 14h10l1-14"/>',
   gear:'<circle cx="12" cy="12" r="3"/><path d="M19 12a7 7 0 0 0-.1-1.2l2-1.5-2-3.4-2.3 1a7 7 0 0 0-2-1.2L14 3h-4l-.6 2.7a7 7 0 0 0-2 1.2l-2.3-1-2 3.4 2 1.5a7 7 0 0 0 0 2.4l-2 1.5 2 3.4 2.3-1a7 7 0 0 0 2 1.2L10 21h4l.6-2.7a7 7 0 0 0 2-1.2l2.3 1 2-3.4-2-1.5c.1-.4.1-.8.1-1.2z"/>',
-  next:'<path d="M5 12h14m-6-6 6 6-6 6"/>'
+  next:'<path d="M5 12h14m-6-6 6 6-6 6"/>',
+  back:'<path d="M19 12H5m6-6-6 6 6 6"/>'
 };
 function I(n,s){return '<svg width="'+(s||20)+'" height="'+(s||20)+'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">'+IC[n]+'</svg>';}
 function X(v){return (typeof esc==="function")?esc(v):String(v==null?"":v).replace(/[&<>"']/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c];});}
@@ -18813,13 +18869,16 @@ function errScreen(){
   var cnt={crit:0,warn:0,info:0},nN=0,nD=0;
   all.forEach(function(r){cnt[r.sev]++;if(r.kind==="ncc")nN++;else nD++;});
   if(n===0){PZ.sev="";PZ.type="";PZ.tab="all";}
+  if(PZ.sev&&!cnt[PZ.sev])PZ.sev="";
+  var kp=isAll()?"tất cả các tháng":"tháng "+payMLab(PAY.m),sc=scope();
   var h='';
   if(n===0){
-    return '<section class="pz-hero ok"><div class="pz-hn">✓ Không còn lỗi cần xử lý</div><div class="pz-e2" style="margin-top:6px">Dữ liệu từ file '+X(P.file||"Excel")+' đã khớp. Có thể sang bước Xuất / In.</div></section>'
+    return '<section class="pz-hero ok"><div class="pz-hn">✓ Không còn lỗi cần xử lý</div><div class="pz-e2" style="margin-top:6px">Dữ liệu '+kp+' đã khớp. Có thể sang bước Xuất / In.</div><div class="pz-hsub">'+X(kp.charAt(0).toUpperCase()+kp.slice(1))+' · '+sc.mua+' phiếu: <b class="g">'+sc.ok+' khớp</b> · <b class="r">'+sc.bad+' lệch</b></div></section>'
       +'<button class="pz-tonal" onclick="A.payStep(3)">Tiếp: Xuất / In '+I("next",18)+'</button>';
   }
   h+='<section class="pz-hero"><div class="pz-hrow"><div class="pz-hn"><b>'+n+'</b>lỗi cần xử lý</div>'
     +'<button class="pz-btn" onclick="A.payXlsxErr()" aria-label="Xuất Excel báo lỗi">'+I("down",17)+'Excel</button></div>'
+    +'<div class="pz-hsub">'+X(kp.charAt(0).toUpperCase()+kp.slice(1))+' · '+sc.mua+' phiếu: <b class="g">'+sc.ok+' khớp</b> · <b class="r">'+sc.bad+' lệch</b></div>'
     +'<div class="pz-hsev">'+["crit","warn","info"].map(function(s){return '<button class="pz-sv '+s+(PZ.sev===s?' on':'')+'"'+(cnt[s]?'':' disabled')+' onclick="A.pzSev(\''+s+'\')" aria-pressed="'+(PZ.sev===s)+'"><b>'+cnt[s]+'</b><span>'+SEVN[s]+'</span></button>';}).join("")+'</div></section>';
   h+='<div class="pz-tabs" role="tablist">'+[["all","Tất cả",n],["ncc","NCC",nN],["doc","Chứng từ",nD]].map(function(t){return '<button role="tab" aria-selected="'+(PZ.tab===t[0])+'" class="'+(PZ.tab===t[0]?'on':'')+'" onclick="A.pzTab(\''+t[0]+'\')">'+t[1]+'<b>'+t[2]+'</b></button>';}).join("")+'</div>';
   var nf=(PAY.ec!=="all"&&PZ.tab!=="ncc"?1:0)+(PZ.type?1:0);
@@ -18872,24 +18931,28 @@ function loadScreen(){
   st.forEach(function(b){if(!b.ym)un=b;});
   var F=function(k){return 'type="file" accept=".xlsx,.xlsm,.xls" style="display:none" onchange="A.payAdd(this,'+k+')"';};
   h+='<input type="file" id="payin" accept=".xlsx,.xlsm,.xls" style="display:none" onchange="A.payFile(this)">';
-  /* 1. Thống kê dữ liệu hiện có */
-  h+='<section class="pz-card"><div class="pz-st3"><div><b>'+L.length+'</b><span>NCC</span></div><div><b>'+P.mua.length+'</b><span>Phiếu mua</span></div><div><b>'+P.hd.length+'</b><span>HĐ MISA</span></div></div>'
+  /* 1. Thống kê dữ liệu hiện có — theo kỳ đang chọn ở bộ lọc tháng */
+  var sc=scope(),all=isAll(),emp=isEmptyMonth(),openMon=PZ.openMon||emp;PZ.openMon=0;
+  h+='<section class="pz-card"><div class="pz-kp">'+I("cal",15)+(all?"Tất cả các tháng":mLab(PAY.m))+'</div><div class="pz-st3"><div><b>'+sc.ncc+'</b><span>NCC</span></div><div><b>'+sc.mua+'</b><span>Phiếu mua</span></div><div><b>'+sc.hd+'</b><span>HĐ MISA</span></div></div>'
+    +(emp?'':'<div class="pz-sum"><span>Tổng tiền phiếu mua</span><b>'+payF(sc.tong)+' đ</b></div>')
+    +(all?'':'<div class="pz-file">Toàn bộ dữ liệu đã nạp: '+L.length+' NCC · '+P.mua.length+' phiếu mua · '+P.hd.length+' HĐ MISA</div>')
     +'<div class="pz-file">File gốc: '+X(P.file||"File Excel")+'</div>';
+  if(emp)h+='<div class="pz-note warn">'+I("warn",18)+'<span>'+mLab(PAY.m)+' chưa có dữ liệu. Mở mục “Nạp theo tháng” bên dưới để nạp dữ liệu cho tháng này.</span></div>';
   if(un)h+='<div class="pz-note warn">'+I("warn",18)+'<span>'+(un.m?un.m+' phiếu mua':'')+(un.m&&un.h?' và ':'')+(un.h?un.h+' HĐ MISA':'')+' chưa có Ngày hạch toán nên không thuộc tháng nào. Điền ngày ở cột A trong file Excel rồi nạp lại.</span></div>';
   if(st.length)h+='<details class="pz-mt"><summary>'+I("chv",16)+'Thống kê theo tháng</summary><div class="pz-mr h"><span>Tháng</span><span class="n">Phiếu</span><span class="n">HĐ</span><span class="n">Tiền phiếu mua</span></div>'
-    +st.map(function(b){return '<div class="pz-mr'+(b.ym?'':' un')+'"><span><b>'+(b.ym?payMLab(b.ym):'Chưa có ngày')+'</b></span><span class="n">'+b.m+'</span><span class="n">'+b.h+'</span><span class="n">'+payF(b.mt)+'</span></div>';}).join("")
+    +st.map(function(b){return '<div class="pz-mr'+(b.ym?' tap':'')+(b.ym&&String(b.ym)===String(PAY.m)?' cur':'')+(b.ym?'':' un')+'"'+(b.ym?' role="button" tabindex="0" onclick="A.payMonth(\''+b.ym+'\')" onkeydown="if(event.key===\'Enter\')this.click()"':'')+'><span><b>'+(b.ym?payMLab(b.ym):'Chưa có ngày')+'</b></span><span class="n">'+b.m+'</span><span class="n">'+b.h+'</span><span class="n">'+payF(b.mt)+'</span></div>';}).join("")
     +'<div class="pz-hint" style="margin:6px 0 0">Tính theo Ngày hạch toán; phiếu đã khớp HĐ MISA tính vào tháng của HĐ.</div></details>';
   h+='</section>';
   /* 2. Nút chính */
   h+='<label class="pz-main">'+I("up",26)+'<span><b>Bổ sung từ file Excel</b><small>Chỉ thêm dòng mới, dòng trùng tự bỏ qua</small></span><input '+F(0)+'></label>';
   /* 3. Hai chức năng phụ */
   h+='<div class="pz-two"><label class="pz-sec">Chỉ mua hàng<input '+F(1)+'></label><label class="pz-sec">Chỉ HĐ MISA<input '+F(2)+'></label></div>'
-    +'<p class="pz-hint">File cần có sheet <b>MUA_HANG</b> và/hoặc <b>HOA_DON_MISA</b>. Xong app tự đối chiếu lại.</p>';
+    +'<p class="pz-hint">File cần có sheet <b>MUA_HANG</b> và/hoặc <b>HOA_DON_MISA</b>. Xong app tự đối chiếu lại.'+(all?'':' <b>Nạp file luôn xử lý toàn bộ file, không theo bộ lọc tháng.</b>')+'</p>';
   /* 4. Nạp theo tháng */
-  var mset={},ml=[],cur=new Date(),mdef=PAY.mon||(cur.getFullYear()+"-"+("0"+(cur.getMonth()+1)).slice(-2));
+  var mset={},ml=[],cur=new Date(),mdef=PAY.mon||(!all?String(PAY.m).slice(0,4)+"-"+String(PAY.m).slice(4):cur.getFullYear()+"-"+("0"+(cur.getMonth()+1)).slice(-2));
   P.mua.concat(P.hd).forEach(function(r){if(r[0])mset[payMonthOf(r[0])]=1;});
   Object.keys(mset).map(Number).sort().forEach(function(m){ml.push(("0"+m%100).slice(-2)+"/"+Math.floor(m/100));});
-  h+='<details class="pz-acc"><summary><span class="ic">'+I("cal",19)+'</span><span class="tx"><b>Nạp theo tháng</b><small>Thay hoặc cập nhật dữ liệu của một tháng</small></span><span class="chv">'+I("chv",18)+'</span></summary><div class="bd">'
+  h+='<details class="pz-acc"'+(openMon?' open':'')+'><summary><span class="ic">'+I("cal",19)+'</span><span class="tx"><b>Nạp theo tháng</b><small>Thay hoặc cập nhật dữ liệu của một tháng</small></span><span class="chv">'+I("chv",18)+'</span></summary><div class="bd">'
     +'<label class="lbl" for="paymon">Tháng cần nạp</label><input type="month" id="paymon" value="'+X(mdef)+'" onchange="PAY.mon=this.value">'
     +'<div class="pz-hint" style="margin:6px 0 0">'+(ml.length?'Đã có dữ liệu: '+ml.join(', '):'Chưa có dữ liệu tháng nào')+'</div>'
     +'<label class="pz-chk"><input type="checkbox" id="paymodeall"><span>Thay <b>cả tháng</b>: gỡ các dòng của tháng này không còn trong file (chỉ tích khi file là bản xuất đủ cả tháng).</span></label>'
@@ -18912,33 +18975,142 @@ function loadScreen(){
   return h+'<button class="pz-tonal" onclick="A.payStep(2)">Tiếp: Rà lỗi'+(total()?' ('+total()+')':'')+' '+I("next",18)+'</button>';
 }
 
+
+/* ================= Bộ lọc tháng TOÀN CỤC =================
+   Dùng đúng biến lọc có sẵn PAY.m ("all" hoặc "yyyymm"): payCompute() / payErrAll() / xuất Excel / in phiếu
+   đều đã lọc theo PAY.m nên không có luồng dữ liệu thứ hai, không trộn tháng, không ghi gì vào dữ liệu. */
+var MM=null,SC=null;
+function months(){if(!MM)MM=payMonths();return MM;}                 /* [[yyyymm, số dòng]], mới → cũ */
+function ymAdd(ym,k){var y=Math.floor(ym/100),m=ym%100,t=y*12+(m-1)+k;return Math.floor(t/12)*100+(t%12)+1;}
+function curYm(){var d=new Date();return d.getFullYear()*100+d.getMonth()+1;}
+function mLab(ym){ym=String(ym);return "Tháng "+ym.slice(4)+"/"+ym.slice(0,4);}
+function dataCount(ym){var f=months().filter(function(m){return m[0]===String(ym);})[0];return f?f[1]:0;}
+function isAll(){return !PAY.m||PAY.m==="all";}
+function isEmptyMonth(){return !isAll()&&!dataCount(PAY.m);}
+function bounds(){var ms=months().map(function(m){return +m[0];}),c=curYm();
+  return {lo:ymAdd(Math.min.apply(null,ms.concat([c])),-12),hi:ymAdd(Math.max.apply(null,ms.concat([c])),1)};}
+function scope(){
+  if(SC)return SC;
+  var P=payDb(),L=payCompute(),s={ncc:L.length,mua:0,hd:0,tong:0,ok:0,bad:0};
+  L.forEach(function(g){g.rows.forEach(function(x){s.mua++;s.tong+=+x.tong||0;if(x.h)s.hd++;if(x.st==="ok")s.ok++;else s.bad++;});s.hd+=g.exAll.length;});
+  if(isAll()){s.mua=P.mua.length;s.hd=P.hd.length;}                /* xem tất cả: đúng số dòng trong file */
+  return (SC=s);
+}
+function undated(){var n=0;payAllL().forEach(function(g){g.rows.forEach(function(x){if(!x.d)n++;});g.exAll.forEach(function(h){if(!h[0])n++;});});return n;}
+
+function mbar(){
+  var ms=months(),b=bounds(),sc=scope(),all=isAll(),emp=isEmptyMonth(),m=+PAY.m;
+  var prevOff=all?!ms.length:ymAdd(m,-1)<b.lo,nextOff=all?true:ymAdd(m,1)>b.hi;
+  var sub=all?(ms.length?ms.length+" tháng · "+sc.mua+" phiếu":"Chưa có dòng nào có ngày")
+            :(emp?"Chưa có dữ liệu":sc.mua+" phiếu · "+sc.hd+" HĐ");
+  return '<div class="pz-mbar" role="group" aria-label="Kỳ dữ liệu">'
+    +'<button class="pz-mn" aria-label="'+(all?"Về tháng mới nhất có dữ liệu":"Tháng trước")+'"'+(prevOff?' disabled':'')+' onclick="A.pzMonthStep(-1)">‹</button>'
+    +'<button class="pz-mc'+(all?' all':'')+(emp?' emp':'')+'" onclick="A.pzMonthOpen()" aria-haspopup="dialog" aria-label="Chọn kỳ dữ liệu">'+I("cal",20)
+      +'<span class="tx"><b>'+(all?"Tất cả các tháng":mLab(PAY.m))+'</b><small>'+X(sub)+'</small></span>'+'<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></button>'
+    +'<button class="pz-mn" aria-label="Tháng sau"'+(nextOff?' disabled':'')+' onclick="A.pzMonthStep(1)">›</button>'
+    +'<button class="pz-ma'+(all?' on':'')+'" aria-pressed="'+all+'" onclick="A.payMonth(\'all\')">Tất cả</button></div>';
+}
+function picker(){
+  var ms=months(),b=bounds(),y=PZ.py,cur=curYm(),all=isAll(),yLo=Math.floor(b.lo/100),yHi=Math.floor(b.hi/100),h,mo,g="";
+  for(mo=1;mo<=12;mo++){
+    var ym=y*100+mo,n=dataCount(ym),dis=ym<b.lo||ym>b.hi,on=String(ym)===String(PAY.m);
+    g+='<button class="pz-mo'+(on?' on':'')+(n?' has':'')+'"'+(dis?' disabled':'')+' onclick="A.payMonth(\''+ym+'\')" aria-pressed="'+on+'"><b>T'+mo+'</b><small>'+(n?n+" dòng":(ym===cur?"tháng này":"trống"))+'</small></button>';
+  }
+  var un=undated();
+  h='<div class="pz-ph"><h3>Chọn kỳ dữ liệu</h3><button class="pz-x" onclick="A.pzClose()" aria-label="Đóng">✕</button></div>'
+   +'<button class="pz-all'+(all?' on':'')+'" onclick="A.payMonth(\'all\')">'+I("cal",20)+'<span><b>Tất cả các tháng</b><small>'+(ms.length?ms.length+" tháng có dữ liệu":"Chưa có tháng nào có dữ liệu")+'</small></span></button>'
+   +'<div class="pz-yr"><button aria-label="Năm trước"'+(y<=yLo?' disabled':'')+' onclick="A.pzYear(-1)">‹</button><b>'+y+'</b><button aria-label="Năm sau"'+(y>=yHi?' disabled':'')+' onclick="A.pzYear(1)">›</button></div>'
+   +'<div class="pz-mg">'+g+'</div>'
+   +'<div class="pz-pq"><button class="pz-ch" onclick="A.payMonth(\''+cur+'\')">Tháng này</button>'+(ms.length?'<button class="pz-ch" onclick="A.payMonth(\''+ms[0][0]+'\')">Mới nhất: '+payMLab(ms[0][0])+'</button>':'')+'</div>'
+   +'<p class="pz-hint" style="margin:12px 0 0">Số dưới tên tháng = số dòng dữ liệu (phiếu mua + HĐ MISA thừa).'+(un?' Có <b>'+un+' dòng chưa có ngày hạch toán</b> — chỉ hiện ở “Tất cả các tháng”.':'')+' Đổi tháng chỉ đổi cách xem, không sửa hay xóa dữ liệu.</p>';
+  return h;
+}
+function emptyMonth(){
+  var m=+PAY.m,near=months().slice().sort(function(a,b){return Math.abs(a[0]-m)-Math.abs(b[0]-m);}).slice(0,4);
+  return '<section class="pz-card pz-emp"><div class="ic">'+I("cal",30)+'</div><h2>'+mLab(PAY.m)+' chưa có dữ liệu</h2>'
+    +'<p>File đã nạp chưa có phiếu mua hay hóa đơn MISA nào thuộc tháng này. Dữ liệu các tháng khác vẫn được giữ nguyên.</p>'
+    +(near.length?'<div class="pz-fk" style="text-align:left">Các tháng đang có dữ liệu</div><div class="pz-fl" style="flex-wrap:wrap;overflow:visible;margin:0 0 10px;padding:0">'+near.map(function(n){return '<button class="pz-ch" onclick="A.payMonth(\''+n[0]+'\')">'+X(payMLab(n[0]))+'<b>'+n[1]+'</b></button>';}).join("")+'</div>':'')
+    +'<button class="pz-main" style="margin:0 0 8px;min-height:56px;justify-content:center" onclick="A.pzLoadMonth()">'+I("up",22)+'<span><b>Nạp dữ liệu tháng này</b></span></button>'
+    +'<button class="pz-btn" style="width:100%" onclick="A.payMonth(\'all\')">Xem tất cả các tháng</button></section>';
+}
+
+/* Báo cáo: theo kỳ đang chọn (khối “Theo tháng” vẫn liệt kê mọi tháng để so sánh, tháng đang xem được tô đậm) */
+payRepHtml=function(){
+  var all=isAll(),Lm=payCompute(),La=payAllL();
+  var T=0,TOK=0,N=0,M={},C={},V=[],moAll={};
+  La.forEach(function(g){var o=moAll[g.key]={};g.rows.forEach(function(x){var ym=x.d?Math.floor(x.d/100):0;M[ym]=(M[ym]||0)+(+x.tong||0);o[ym]=(o[ym]||0)+(+x.tong||0);});});
+  Lm.forEach(function(g){var v={key:g.key,n:g.short||g.full,t:0,k:0,r:0,bad:0};
+    g.rows.forEach(function(x){var t=+x.tong||0,cs=x.r[7]||"",bad=x.st!=="ok"||!!x.note;
+      T+=t;N++;if(x.st==="ok")TOK+=t;C[cs]=(C[cs]||0)+t;v.t+=t;v.r++;if(bad)v.bad++;});
+    v.bad+=g.extra.length;v.k=g.extra.length;V.push(v);});
+  var bar=function(p,c){return '<div style="height:6px;border-radius:3px;background:var(--line);margin-top:4px"><div style="height:6px;border-radius:3px;width:'+Math.max(2,Math.min(100,p))+'%;background:'+(c||'var(--teal)')+'"></div></div>';},
+  pc=function(a,b){return b?Math.round(100*a/b)+'%':'–';},
+  row=function(l,r,p,sub,hi){return '<div style="padding:9px 0;border-bottom:1px solid var(--line)'+(hi?';background:var(--teal-bg);margin:0 -8px;padding-left:8px;padding-right:8px;border-radius:8px':'')+'"><div style="display:flex;justify-content:space-between;gap:10px;font-size:14px"><span>'+l+'</span><b style="white-space:nowrap">'+r+'</b></div>'+(sub?'<div style="font-size:12px;color:var(--mut);margin-top:2px">'+sub+'</div>':'')+(p!=null?bar(p):'')+'</div>';},
+  card=function(t,b){return '<div class="card" style="margin-bottom:12px"><div style="font-weight:700;margin-bottom:4px">'+t+'</div>'+b+'</div>';};
+  var ms=Object.keys(M).map(Number).sort(function(a,b){return b-a;}),mx=Math.max.apply(null,ms.map(function(k){return M[k];}).concat([1]));
+  var h='<div class="card" style="margin-bottom:12px"><div style="font-size:13px;color:var(--mut)">Tổng chi theo phiếu mua ('+(all?'mọi tháng':'tháng '+payMLab(PAY.m))+')</div><div style="font-size:24px;font-weight:800">'+payF(T)+' đ</div><div style="font-size:13px;color:var(--mut)">'+Lm.length+' NCC · '+N+' phiếu · đã khớp HĐ '+pc(TOK,T)+'</div></div>';
+  h+=card('Theo tháng',ms.map(function(k,i){var pv=M[ms[i+1]],d=pv?Math.round(100*(M[k]-pv)/pv):null,sel=!all&&String(k)===String(PAY.m);
+    return row((k?payMLab(k):'Chưa rõ ngày')+(sel?' <span style="font-size:11px;font-weight:800;color:var(--teal)">● đang xem</span>':''),payF(M[k]),100*M[k]/mx,d===null?'':(d>=0?'▲ +':'▼ ')+d+'% so với '+payMLab(ms[i+1]),sel);}).join('')||'<div style="color:var(--mut)">Chưa có dữ liệu</div>');
+  var cs=Object.keys(C).sort(function(a,b){return C[b]-C[a];});
+  h+=card('Theo cơ sở',cs.map(function(k){return row(esc(payCsLabel(k)),payF(C[k]),100*C[k]/(T||1),pc(C[k],T)+' tổng chi');}).join(''));
+  var top=V.slice().sort(function(a,b){return b.t-a.t;}).slice(0,15),dm=ms.filter(Boolean),cur=all?dm[0]:+PAY.m,prv=all?dm[1]:dm.filter(function(k){return k<+PAY.m;})[0];
+  h+=card('Top NCC theo chi tiêu',top.map(function(v){var sub=pc(v.t,T)+' tổng chi',mo=moAll[v.key]||{};if(cur&&prv)sub+=' · '+payMLab(cur)+': '+payF(mo[cur]||0)+' / '+payMLab(prv)+': '+payF(mo[prv]||0);return row(esc(v.n),payF(v.t),100*v.t/(top[0].t||1),sub);}).join('')+(V.length>15?'<div style="font-size:12px;color:var(--mut);padding-top:6px">Hiện 15/'+V.length+' NCC.</div>':''));
+  var er=V.filter(function(v){return v.bad>0;}).sort(function(a,b){return b.bad/(b.r+b.k||1)-a.bad/(a.r+a.k||1)||b.bad-a.bad;}).slice(0,10);
+  h+=card('NCC hay sai chứng từ',er.length?er.map(function(v){var tl=Math.round(100*v.bad/(v.r+v.k||1));return row(esc(v.n),v.bad+' lỗi',tl,tl+'% trên '+(v.r+v.k)+' dòng · lỗi gồm lệch/thiếu HĐ, trùng, ghi chú chứng từ');}).join(''):'<div style="color:var(--mut)">Chưa phát hiện NCC nào có lỗi.</div>');
+  return h;
+};
+
+/* Tên file xuất ra có kèm tháng đang lọc (nội dung file đã lọc sẵn theo payCompute) */
+var _po=payOut;
+payOut=function(wb,f){
+  var m=PAY.m;
+  if(m&&m!=="all"&&!/^Mau_/.test(f)&&!/_T\d{1,2}-\d{4}|_T\d{6}_/.test(f))f=f.replace(/\.xlsx$/i,"_T"+m.slice(4)+"-"+m.slice(0,4)+".xlsx");
+  PZ.lastFile=f;return _po(wb,f);
+};
+
+/* Hộp sửa phiếu / sửa NCC đang mở và đã gõ nhưng chưa bấm Lưu → phải cảnh báo trước khi đổi tháng.
+   (Ghi chú / giải trình tự lưu ngay khi gõ nên không mất khi đổi tháng.) */
+function pendingEdits(){
+  var els=document.querySelectorAll("#pedov input,#pedov select,#pedov textarea,#pfxov input,#pfxov select,#pfxov textarea"),i,e;
+  for(i=0;i<els.length;i++){e=els[i];
+    if(e.type==="checkbox"||e.type==="radio"){if(e.checked!==e.defaultChecked)return true;}
+    else if(e.tagName==="SELECT"){var di=0,j;for(j=0;j<e.options.length;j++)if(e.options[j].defaultSelected){di=j;break;}if(e.selectedIndex!==di)return true;}
+    else if(e.value!==e.defaultValue)return true;}
+  return false;
+}
+
 /* ---------- renderPay mới: đầu trang gọn, thanh bước dính ---------- */
 function measure(){
   try{
     var hd=document.getElementById("gheader"),bn=document.getElementById("bnav"),r=document.documentElement.style;
     if(hd)r.setProperty("--pz-top",Math.round(hd.getBoundingClientRect().height)+"px");
+    var mb=document.querySelector(".pz-mbar");r.setProperty("--pz-mb",mb?Math.round(mb.getBoundingClientRect().height)+"px":"0px");
     if(bn&&getComputedStyle(bn).display!=="none")r.setProperty("--pz-bn",Math.round(bn.getBoundingClientRect().height)+"px");
   }catch(e){}
 }
 window.addEventListener("resize",function(){if(document.querySelector(".pz-root"))measure();});
 var _render=function(){
-  MEMO=null;
+  MEMO=null;MM=null;SC=null;
   var P=payDb(),has=P.mua.length>0;
   if(PAY.v==="err"&&has){PAY.step=2;PAY.v="";}
-  var nErr=has?total():0;
+  var emp=has&&isEmptyMonth();
+  var nErr=has&&!emp?total():0;
   var step=!has?1:(PAY.sel?3:(PAY.step||3));
   var rep=PAY.v==="rep"&&has&&!PAY.sel,det=!!PAY.sel;
   var back=det?"A.paySel('')":rep?"A.payView('')":"A.go('dchub')";
-  var body=rep?payRepHtml():det?payDetailHtml(PAY.sel):step===1?(has?loadScreen():payHomeHtml()):step===2?errScreen():payHomeHtml();
+  var body=rep?(emp?emptyMonth():payRepHtml()):det?payDetailHtml(PAY.sel):step===1?(has?loadScreen():payHomeHtml()):step===2?(emp?emptyMonth():errScreen()):(emp?emptyMonth():payHomeHtml());
   var title=det?"Chi tiết nhà cung cấp":rep?"Báo cáo chi tiêu":"Đề nghị thanh toán";
-  var d=[has,has&&nErr===0,false],lb=["Nạp dữ liệu","Rà lỗi","Xuất / In"];
+  var d=[has,has&&!emp&&nErr===0,false],lb=["Nạp dữ liệu","Rà lỗi","Xuất / In"];
   var steps=(det||rep)?'':'<nav class="pz-steps" aria-label="Các bước">'+lb.map(function(t,i){
     var on=step===i+1,dis=!has&&i>0,dn=d[i]&&!on;
     return '<button class="'+(on?'on ':'')+(dn?'done':'')+'"'+(dis?' disabled':' onclick="A.payStep('+(i+1)+')"')+(on?' aria-current="step"':'')+'><i>'+(dn?'✓':(i+1))+'</i>'+t+(i===1&&nErr&&has?'<em>'+nErr+'</em>':'')+'</button>';
   }).join("")+'</nav>';
   var repBtn=(has&&!det&&!rep)?'<button class="pz-rep" onclick="A.payView(\'rep\')" aria-label="Báo cáo chi tiêu">'+I("chart",18)+'<span>Báo cáo</span></button>':'';
-  var h='<div class="wrap pz-root"><div class="pz-head"><button class="pz-back" onclick="'+back+'" aria-label="Quay lại">‹</button><h1 class="pz-ttl">'+title+'</h1>'+repBtn+'</div>'+steps+body+'</div>';
+  var h='<div class="wrap pz-root">'+(has?mbar():'')+'<div class="pz-head"><button class="pz-back" onclick="'+back+'" aria-label="Quay lại">'+I("back",20)+'</button><h1 class="pz-ttl">'+title+'</h1>'+repBtn+'</div>'+steps+body+'</div>';
   document.getElementById("app").innerHTML=h;
+  /* màn Xuất / In cũ có hàng chip chọn tháng riêng → bỏ, vì đã có bộ lọc tháng chung ở đầu trang */
+  if(step===3&&!det&&!rep&&!emp){var fk=[].filter.call(document.querySelectorAll("#app .pxfk"),function(e){return /^Xem theo tháng/.test(e.textContent);})[0];
+    if(fk){var nx=fk.nextElementSibling;fk.remove();if(nx&&nx.classList.contains("pxrow"))nx.remove();}}
   measure();
 };
 window.renderPay=renderPay=_render;
@@ -18954,6 +19126,14 @@ Object.assign(A,{
   pzTab:function(t){PZ.tab=t;PZ.lim=50;PZ.type="";payKeep();},
   pzSev:function(s){PZ.sev=PZ.sev===s?"":s;PZ.lim=50;payKeep();},
   pzType:function(t){PZ.type=t||"";PZ.lim=50;payKeep();},
+  pzMonthStep:function(d){
+    var ms=months(),b=bounds();
+    if(isAll()){if(d<0&&ms.length)A.payMonth(ms[0][0]);return;}
+    var n=ymAdd(+PAY.m,d);if(n<b.lo||n>b.hi)return;A.payMonth(String(n));
+  },
+  pzMonthOpen:function(){var ms=months();PZ.py=Math.floor((isAll()?(ms.length?+ms[0][0]:curYm()):+PAY.m)/100);sheet(picker());},
+  pzYear:function(d){PZ.py+=d;sheet(picker());},
+  pzLoadMonth:function(){var m=String(PAY.m);PAY.mon=m.slice(0,4)+"-"+m.slice(4);PZ.openMon=1;PAY.step=1;PAY.sel="";PAY.v="";renderPay();window.scrollTo(0,0);},
   pzFo:function(){PZ.fo=PZ.fo?0:1;payKeep();},
   pzMore:function(){PZ.lim+=50;var e=document.getElementById("pzlist");if(e)e.innerHTML=listHtml();},
   pzClr:function(){PZ.fo=0;PZ.sev="";PZ.type="";PZ.q="";PZ.tab="all";PAY.ec="all";PZ.lim=50;payKeep();},
@@ -18987,6 +19167,17 @@ Object.assign(A,{
     A.pzClose();var f=document.getElementById("payin");if(f)f.click();
   }
 });
+
+/* ---------- đổi tháng: giữ nguyên dữ liệu, cảnh báo nếu đang sửa dở ---------- */
+var _pm=A.payMonth;
+A.payMonth=function(m){
+  m=m||"all";
+  if(String(m)===String(PAY.m)){A.pzClose();return;}
+  if(pendingEdits()&&!confirm("Bạn đang sửa dở một phiếu / nhà cung cấp và CHƯA bấm Lưu.\nĐổi tháng sẽ bỏ phần vừa gõ (dữ liệu đã lưu vẫn giữ nguyên). Vẫn đổi tháng?"))return;
+  A.pzClose();try{A.payEdClose();}catch(e){}try{A.payFixClose();}catch(e){}
+  PAY.ed="";PAY.mon="";PAY.ec="all";PZ.type="";PZ.lim=50;
+  _pm(m);
+};
 
 /* ---------- lưu từ hộp sửa mở ở màn Rà lỗi → ở lại danh sách lỗi ---------- */
 var _save=payEdSave,_close=payEdClose;
